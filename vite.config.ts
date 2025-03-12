@@ -1,13 +1,17 @@
 import { defineConfig, loadEnv } from 'vite'
 import { resolve } from 'node:path'
-import { readFileSync } from 'node:fs'
+import { readFile, writeFile } from 'node:fs'
+import { version } from './package.json'
+
+const OUT_DIR = "dist"
 
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd())
 
+	console.log(version)
+
 	// Set constants to be baked into the module
-	const moduleJson = JSON.parse(readFileSync('./public/module.json', 'utf8'))
-	process.env.RPGM_VERSION = moduleJson.version
+	process.env.RPGM_VERSION = version
 	process.env.RPGM_DEBUG = process.env.DEV
 
 	return defineConfig({
@@ -32,7 +36,7 @@ export default defineConfig(({ mode }) => {
 		},
 		envPrefix: "RPGM_",
 		build: {
-			outDir: resolve(__dirname, 'dist'),
+			outDir: resolve(__dirname, OUT_DIR),
 			emptyOutDir: true,
 			lib: {
 				name: "rpgm-tools",
@@ -41,5 +45,21 @@ export default defineConfig(({ mode }) => {
 				fileName: "index"
 			},
 		},
+		plugins: [
+			// Set version number in module.json
+			{
+				name: "versioning",
+				closeBundle() {
+					const moduleFile = `./${OUT_DIR}/module.json`
+					readFile(moduleFile, "utf8", function(err, data) {
+						if (err) return console.error(err)
+						const result = data.replaceAll(/{{RPGM_VERSION}}/g, version)
+						writeFile(moduleFile, result, function(err) {
+							if (err) return console.error(err)
+						})
+					})
+				}
+			}
+		]
 	})
 })

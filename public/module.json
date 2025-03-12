@@ -1,10 +1,10 @@
 {
 	"title": "RPGM.tools - AI Tools for GMs and Players",
 	"description": "Enhance your Foundry VTT experience with an AI-assisted toolkit designed for GMs and players. Generate immersive descriptions, organize campaign assets, and receive real-time guidance to streamline storytelling and gameplay.",
-	"version": "0.1.2",
+	"version": "{{RPGM_VERSION}}",
 	"url": "https://rpgm.tools",
-	"manifest": "https://raw.githubusercontent.com/RPGM-Tools/rpgm-tools/main/public/module.json",
-	"download": "https://github.com/RPGM-Tools/rpgm-tools/releases/download/0.1.2/rpgm-tools-0.1.2.zip",
+	"manifest": "https://github.com/RPGM-Tools/rpgm-tools/releases/download/v{{RPGM_VERSION}}/module.json",
+	"download": "https://github.com/RPGM-Tools/rpgm-tools/releases/download/v{{RPGM_VERSION}}/rpgm-tools-v{{RPGM_VERSION}}.zip",
 	"esmodules": [
 		"index.js"
 	],
