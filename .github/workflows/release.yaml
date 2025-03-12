@@ -1,11 +1,15 @@
 name: Release Process
 
 on:
-  workflow_dispatch:  # Allows admins to trigger the release manually
+  push:
+    branches:
+      - main
+    tags:
+      - 'v**'
 
 jobs:
   release:
-    name: Squash Merge Dev → Main & Release
+    name: Release-o-matic
     runs-on: ubuntu-latest
 
     steps:
@@ -28,33 +32,13 @@ jobs:
         run: npm install
 
       - name: Build Project
-        run: npm run build  # Adjust based on your Vite setup
+        run: npm run build
 
       - name: Zip dist/ folder
         run: |
           cd dist
-          zip -r ../release-v${{ env.VERSION }}.zip *
+          zip -r ../rpgm-tools-v${{ env.VERSION }}.zip *
           cd ..
-
-      - name: Configure Git
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
-      - name: Fetch all branches
-        run: git fetch --all
-
-      - name: Squash Merge Dev into Main
-        run: |
-          git switch main
-          git merge --squash origin/dev
-          git commit -m "Release: Squashed merge from dev"
-          git push origin main
-
-      - name: Tag Release
-        run: |
-          git tag v${{ env.VERSION }}
-          git push origin v${{ env.VERSION }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -64,4 +48,4 @@ jobs:
           body: "Automated release for v${{ env.VERSION }}"
           draft: true
           files: |
-            release-v${{ env.VERSION }}.zip
+            rpgm-tools-v${{ env.VERSION }}.zip
