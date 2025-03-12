@@ -1,0 +1,59 @@
+{
+	"title": "RPGM.tools - AI Tools for GMs and Players",
+	"description": "Enhance your Foundry VTT experience with an AI-assisted toolkit designed for GMs and players. Generate immersive descriptions, organize campaign assets, and receive real-time guidance to streamline storytelling and gameplay.",
+	"version": "0.1.0",
+	"url": "https://rpgm.tools",
+	"manifest": "https://raw.githubusercontent.com/RPGM-Tools/rpgm-tools/main/module.json",
+	"download": "https://github.com/RPGM-Tools/rpgm-tools/releases/download/0.1.0/rpgm-tools-0.1.0.zip",
+	"esmodules": [
+		"index.js"
+	],
+	"socket": true,
+	"id": "rpgm-tools",
+	"authors": [
+		{
+			"name": "Aragorn",
+			"email": "aragorn@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		},
+		{
+			"name": "jack_indaboks",
+			"email": "jack_indaboks@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		},
+		{
+			"name": "dallenb4",
+			"email": "dallenb4@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		}
+	],
+	"persistentStorage": true,
+	"compatibility": {
+		"minimum": "12",
+		"verified": "13"
+	},
+	"media": [],
+	"flags": {
+		"hotReload": {
+			"extensions": [
+				"css",
+				"html",
+				"hbs",
+				"json"
+			],
+			"paths": [
+				"esmodules"
+			]
+		}
+	},
+	"languages": [
+		{
+			"lang": "en",
+			"name": "English",
+			"path": "lang/en.json"
+		}
+	]
+}
