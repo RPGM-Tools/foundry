@@ -1,14 +1,12 @@
 import { defineConfig, loadEnv } from 'vite'
 import { resolve } from 'node:path'
-import { readFile, writeFile } from 'node:fs'
-import { version } from './package.json'
+import { version } from '#/package.json'
+import { Versioning } from '#/versioning'
 
 const OUT_DIR = "dist"
 
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd())
-
-	console.log(version)
 
 	// Set constants to be baked into the module
 	process.env.RPGM_VERSION = version
@@ -46,20 +44,7 @@ export default defineConfig(({ mode }) => {
 			},
 		},
 		plugins: [
-			// Set version number in module.json
-			{
-				name: "versioning",
-				closeBundle() {
-					const moduleFile = `./${OUT_DIR}/module.json`
-					readFile(moduleFile, "utf8", function(err, data) {
-						if (err) return console.error(err)
-						const result = data.replaceAll(/{{RPGM_VERSION}}/g, version)
-						writeFile(moduleFile, result, function(err) {
-							if (err) return console.error(err)
-						})
-					})
-				}
-			}
+			Versioning()
 		]
 	})
 })

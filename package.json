@@ -1,11 +1,11 @@
 {
 	"name": "rpgm-tools",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"private": true,
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"preview": "vite preview",
+		"preview": "vite build && vite preview",
 		"build": "vite build"
 	},
 	"devDependencies": {
