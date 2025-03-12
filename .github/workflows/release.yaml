@@ -23,7 +23,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Project
         run: npm run build
@@ -31,15 +31,15 @@ jobs:
       - name: Zip dist/ folder
         run: |
           cd dist
-          zip -r ../rpgm-tools-v${{ github.ref_name }}.zip *
+          zip -r ../rpgm-tools-${{ github.ref_name }}.zip *
           cd ..
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.ref_name }}
-          name: "Release v${{ github.ref_name }}"
-          body: "Automated release for v${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          body: "Automated release for ${{ github.ref_name }}"
           draft: true
           files: |
-            rpgm-tools-v${{ github.ref_name }}.zip
+            rpgm-tools-${{ github.ref_name }}.zip
