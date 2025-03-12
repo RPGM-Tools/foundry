@@ -22,10 +22,6 @@ jobs:
           node-version: 18  # Ensure the correct version
           cache: 'npm'
 
-      - name: Get Version from package.json
-        id: package_version
-        run: echo "VERSION=$(node -p 'require("./package.json").version')" >> $GITHUB_ENV
-
       - name: Install Dependencies
         run: npm install
 
@@ -35,15 +31,15 @@ jobs:
       - name: Zip dist/ folder
         run: |
           cd dist
-          zip -r ../rpgm-tools-v${{ env.VERSION }}.zip *
+          zip -r ../rpgm-tools-v${{ github.ref_name }}.zip *
           cd ..
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.VERSION }}
-          name: "Release v${{ env.VERSION }}"
-          body: "Automated release for v${{ env.VERSION }}"
+          tag_name: v${{ github.ref_name }}
+          name: "Release v${{ github.ref_name }}"
+          body: "Automated release for v${{ github.ref_name }}"
           draft: true
           files: |
-            rpgm-tools-v${{ env.VERSION }}.zip
+            rpgm-tools-v${{ github.ref_name }}.zip
