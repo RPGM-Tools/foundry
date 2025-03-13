@@ -72,7 +72,7 @@ function _sendMessage(method: "log" | "warn" | "error", style: string, ...messag
 		},
 		{ strings: [], objects: [] }
 	);
-	const formattedMessage = `%c[${timestamp}] ${strings.join(" ")}`;
+	const formattedMessage = `%c🎲📚 [${timestamp}] ${strings.join(" ")}`;
 	console[method](formattedMessage, style, ...objects);
 	_recordMessage(strings.join(" "));
 }

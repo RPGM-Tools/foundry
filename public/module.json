@@ -8,6 +8,9 @@
 	"esmodules": [
 		"init.js"
 	],
+	"styles": [
+		"init.css"
+	],
 	"socket": true,
 	"id": "rpgm-tools",
 	"authors": [

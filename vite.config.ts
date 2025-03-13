@@ -2,8 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import { resolve } from 'node:path'
 import { version } from '#/package.json'
 import { Versioning } from '#/versioning'
-
-const OUT_DIR = "dist"
+import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd())
@@ -32,19 +31,23 @@ export default defineConfig(({ mode }) => {
 				'#': resolve(__dirname),
 			},
 		},
+		define: {
+			"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+		},
 		envPrefix: "RPGM_",
 		build: {
-			outDir: resolve(__dirname, OUT_DIR),
+			outDir: resolve(__dirname, "dist"),
 			emptyOutDir: true,
 			lib: {
 				name: "rpgm-tools",
-				entry: resolve(__dirname, "./src/index.ts"),
+				entry: resolve(__dirname, "./src/init.ts"),
 				formats: ["es"],
-				fileName: "index"
+				fileName: "init"
 			},
 		},
 		plugins: [
-			Versioning()
+			vue(),
+			Versioning(),
 		]
 	})
 })

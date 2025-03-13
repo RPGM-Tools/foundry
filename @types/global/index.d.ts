@@ -29,6 +29,13 @@ interface RPGM {
 
 declare global {
 	var RPGM: RPGM
+	var myvar: string
+}
+
+declare global {
+	interface SettingConfig {
+		'rpgm-tools.api_key': string
+	}
 }
 
 export { }

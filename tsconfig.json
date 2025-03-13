@@ -2,22 +2,46 @@
 	"$schema": "https://json.schemastore.org/tsconfig.json",
 	"compilerOptions": {
 		"paths": {
-			"@/*": ["./src/*"],
-			"#/*": ["./*"]
+			"@/*": [
+				"./src/*"
+			],
+			"#/*": [
+				"./*"
+			]
 		},
 		"target": "esnext",
 		"module": "esnext",
 		"noEmit": true,
 		"moduleResolution": "bundler",
 		"esModuleInterop": true,
-		"allowImportingTsExtensions": true,
+		"isolatedModules": true,
+		"allowImportingTsExtensions": false,
 		"verbatimModuleSyntax": true,
 		"noImplicitOverride": true,
 		"skipLibCheck": false,
 		"resolveJsonModule": true,
 		"strict": true,
-		"types": ["vite/client", "fvtt-types/lenient"],
+		"types": [
+			"vite/client",
+			"fvtt-types/lenient"
+		],
+		"lib": [
+			"ES2020",
+			"DOM",
+			"DOM.Iterable"
+		],
+		"plugins": [
+			{
+				"name": "typescript-vue-plugin",
+			}
+		],
 	},
-	"include": ["./**/*.ts"],
-	"exclude": ["node_modules", "dist"]
+	"include": [
+		"./**/*.ts",
+		"./**/*.vue",
+	],
+	"exclude": [
+		"node_modules",
+		"dist"
+	]
 }

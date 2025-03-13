@@ -1,7 +1,14 @@
 {
-	"rpgm": {
-		"logging": {
-			"ready": "RPGM Tools has finished loading!"
+	"RPGM": {
+		"LOGGING": {
+			"READY": "RPGM Tools has finished loading!"
+		},
+		"CONFIG": {
+			"API_KEY": "Api Key",
+			"API_KEY_HINT": "Enter your key here to sign in to RPGM Tools and unlock full functionality.",
+			"SECRETS_MENU": "Secrets",
+			"SECRETS_MENU_SUBTITLE": "\"All right then, configure your secrets.\"",
+			"SECRETS_MENU_HINT": "View and manage api keys, and logins for AI services."
 		}
 	}
 }

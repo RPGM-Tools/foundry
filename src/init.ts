@@ -1,5 +1,6 @@
 import * as logging from "@/util/logging"
-import { GenerateMuseObject, MuseObject, NamesOptions } from '@rpgm/muse'
+import { MuseNames, MuseObject, NamesOptions } from '@rpgm/muse'
+import { RegisterSettings } from "@/util/settings"
 
 Hooks.once("init", async () => {
 	// Ensure the bare RPGM namespace exists on game and globally.
@@ -29,6 +30,8 @@ Hooks.once("init", async () => {
 		logging.log("RPGM Tools is loading...")
 	else
 		logging.debug("RPGM Tools is loading in debug mode...")
+
+	RegisterSettings()
 })
 
 Hooks.once("ready", async () => {
@@ -42,14 +45,14 @@ ________________________________________________
 ________________________________________________`
 
 	logging.logF("color: #d44e7b; font-weight: bold;", asciiArt)
-	logging.log(game.i18n.localize("rpgm.logging.ready"))
+	logging.log(game.i18n.localize("RPGM.LOGGING.READY"))
 	logging.log("This is your current world: " + RPGM.defaults.worldName)
 
-	const options = new NamesOptions({ quantity: 5, method: "ai", type: "Goblin", genre: "Fantasy", gender: "Random" })
-	const result = await GenerateMuseObject(options)
-	if (result instanceof MuseObject) {
-		logging.log(result.output)
-	} else {
-		logging.error(result)
-	}
+	// const options = new NamesOptions({ quantity: 5, method: "ai", type: "Goblin", genre: "Fantasy", gender: "Random" })
+	// const result = await MuseNames.fromOptions(options).generate()
+	// if (result instanceof MuseObject) {
+	// 	logging.log(result.output)
+	// } else {
+	// 	logging.error(result)
+	// }
 })

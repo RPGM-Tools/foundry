@@ -1,17 +1,23 @@
 {
 	"name": "rpgm-tools",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
-		"preview": "vite build && vite preview",
+		"dev": "vite build --watch & vite",
+		"preview": "vite build --watch & vite preview",
 		"build": "vite build"
 	},
 	"devDependencies": {
-		"@types/node": "^22.13.10",
 		"@rpgm/muse": "github:RPGM-Tools/Muse",
+		"@types/node": "^22.13.10",
+		"@vitejs/plugin-vue": "^5.2.1",
 		"fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#documents-v2",
+		"typescript-vue-plugin": "^1.8.27",
 		"vite": "^6.2.1"
+	},
+	"dependencies": {
+		"vue": "^3.5.13",
+		"vue-tsc": "^2.2.8"
 	}
 }
