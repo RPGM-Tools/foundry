@@ -31,31 +31,3 @@ const submit = () => {
 		</footer>
 	</form>
 </template>
-
-<style>
-section:has(.rpgm-app) {
-	filter: invert();
-}
-
-.rpgm-app {
-	filter: hue-rotate(180deg);
-	min-height: 400px;
-
-	button:hover,
-	button:focus {
-		box-shadow: 0 0 5px #6633cc !important;
-	}
-
-	input:focus {
-		box-shadow: 0 0 5px #6633cc !important;
-	}
-
-	.scrollable {
-		flex-grow: 1;
-	}
-
-	footer {
-		flex-grow: 0;
-	}
-}
-</style>
