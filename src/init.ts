@@ -1,6 +1,8 @@
 import * as logging from "@/util/logging"
-import { MuseNames, MuseObject, NamesOptions } from '@rpgm/muse'
 import { RegisterSettings } from "@/util/settings"
+import { registerTokenCreate } from "@/util/token"
+import '@/style.css'
+// import { MuseNames, MuseObject, NamesOptions } from '@rpgm/muse'
 
 Hooks.once("init", async () => {
 	// Ensure the bare RPGM namespace exists on game and globally.
@@ -56,3 +58,5 @@ ________________________________________________`
 	// 	logging.error(result)
 	// }
 })
+
+registerTokenCreate()

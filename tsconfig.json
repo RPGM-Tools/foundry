@@ -16,9 +16,8 @@
 		"esModuleInterop": true,
 		"isolatedModules": true,
 		"allowImportingTsExtensions": false,
-		"verbatimModuleSyntax": true,
 		"noImplicitOverride": true,
-		"skipLibCheck": false,
+		"skipLibCheck": true,
 		"resolveJsonModule": true,
 		"strict": true,
 		"types": [
@@ -26,7 +25,7 @@
 			"fvtt-types/lenient"
 		],
 		"lib": [
-			"ES2020",
+			"ES2021",
 			"DOM",
 			"DOM.Iterable"
 		],

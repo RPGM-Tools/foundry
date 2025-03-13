@@ -91,7 +91,7 @@ function _showNotification(method: "log" | "warn" | "error", formattedMessage: s
 		uiMessage = uiMessage.slice(0, globalThis.RPGM.config.maxUIMessageLength) + '...';
 	}
 	const notificationMethod = method === "log" ? "info" : method;
-	ui.notifications[notificationMethod](uiMessage);
+	ui.notifications[notificationMethod](uiMessage, { console: false });
 }
 
 // Private message history for rate limiting.
@@ -103,7 +103,7 @@ const messageHistory: { message: string, time: number }[] = [];
  * @param {string} message - The message to record.
  * @private
  */
-function _recordMessage(message: string) {
+export function _recordMessage(message: string) {
 	const now = Date.now();
 	messageHistory.push({ message, time: now });
 	if (messageHistory.length > globalThis.RPGM.config.maxMessageHistory) {

@@ -1,7 +1,6 @@
-import * as logging from './logging'
-import { createApp, type App, type ComponentPublicInstance } from 'vue'
+import * as logging from '@/util/logging'
+import { createApp, type App } from 'vue'
 import Secrets from '@/forms/Secrets.vue'
-import type { AnyObject } from 'fvtt-types/utils'
 
 export function RegisterSettings() {
 	game.settings.registerMenu("rpgm-tools", "secrets", {
@@ -22,7 +21,7 @@ export function RegisterSettings() {
 }
 
 class SecretsMenu extends FormApplication {
-	app!: ComponentPublicInstance
+	app!: App
 
 	constructor(object = {}, options = {}) {
 		super(object, options)
@@ -32,7 +31,8 @@ class SecretsMenu extends FormApplication {
 
 	protected override async _renderInner(): Promise<JQuery> {
 		const div = document.createElement("div")
-		const app = createApp(Secrets).mount(div)
+		this.app = createApp(Secrets)
+		this.app.mount(div)
 
 		if (div.firstElementChild)
 			this.form = div.firstElementChild as HTMLElement
@@ -46,5 +46,10 @@ class SecretsMenu extends FormApplication {
 			height: "500px",
 			width: "auto",
 		})
+	}
+
+	override async close(options?: FormApplication.CloseOptions): Promise<void> {
+		await super.close(options)
+		this.app.unmount()
 	}
 }
