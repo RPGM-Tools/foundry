@@ -1,4 +1,4 @@
-import { MuseNames, NamesOptions } from '@rpgm/muse'
+import { ForgeNames } from '@rpgm/forge'
 import * as logging from '@/util/logging'
 
 export function registerTokenCreate() {
@@ -10,10 +10,13 @@ export function registerTokenCreate() {
 			method: "ai",
 			type: tokenDocument.name
 		}
-		const result = await MuseNames.fromOptions(options).generate()
+		const result = await ForgeNames.fromOptions(options).generate({
+			auth_token: game.settings.get("rpgm-tools", "api_key")
+		})
 		if (!result.success)
 			logging.errorU(result.error)
 		else {
+			console.log(result.output)
 			tokenDocument.update({ name: result.output.names[0] }, {})
 		}
 	})

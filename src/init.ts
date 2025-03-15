@@ -2,7 +2,6 @@ import * as logging from "@/util/logging"
 import { RegisterSettings } from "@/util/settings"
 import { registerTokenCreate } from "@/util/token"
 import '@/style.css'
-// import { MuseNames, MuseObject, NamesOptions } from '@rpgm/muse'
 
 Hooks.once("init", async () => {
 	// Ensure the bare RPGM namespace exists on game and globally.
@@ -49,14 +48,6 @@ ________________________________________________`
 	logging.logF("color: #d44e7b; font-weight: bold;", asciiArt)
 	logging.log(game.i18n.localize("RPGM.LOGGING.READY"))
 	logging.log("This is your current world: " + RPGM.defaults.worldName)
-
-	// const options = new NamesOptions({ quantity: 5, method: "ai", type: "Goblin", genre: "Fantasy", gender: "Random" })
-	// const result = await MuseNames.fromOptions(options).generate()
-	// if (result instanceof MuseObject) {
-	// 	logging.log(result.output)
-	// } else {
-	// 	logging.error(result)
-	// }
 })
 
 registerTokenCreate()

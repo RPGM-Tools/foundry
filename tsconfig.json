@@ -19,10 +19,10 @@
 		"noImplicitOverride": true,
 		"skipLibCheck": true,
 		"resolveJsonModule": true,
-		"strict": true,
 		"types": [
 			"vite/client",
-			"fvtt-types/lenient"
+			"fvtt-types/lenient",
+			"@rpgm/forge/types"
 		],
 		"lib": [
 			"ES2021",
@@ -34,6 +34,11 @@
 				"name": "typescript-vue-plugin",
 			}
 		],
+		/* Linting */
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true
 	},
 	"include": [
 		"./**/*.ts",
