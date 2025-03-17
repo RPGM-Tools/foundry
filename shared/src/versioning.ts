@@ -4,11 +4,10 @@
  * during development and in the build
  */
 import type { PluginOption, ResolvedConfig } from "vite"
-import { version } from '#/package.json'
 import { existsSync, readFile, writeFile } from 'node:fs'
 
 /** Set version number in module.json */
-export function Versioning(): PluginOption {
+export function Versioning(version: string): PluginOption {
 	let config: ResolvedConfig
 	const moduleFile = () => `${config.build.outDir}/module.json`
 	return {

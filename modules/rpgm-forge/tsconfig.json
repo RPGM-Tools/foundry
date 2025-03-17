@@ -1,0 +1,32 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig.json",
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"paths": {
+			"@/*": [
+				"./src/*"
+			],
+			"#/*": [
+				"../../shared/src/*"
+			]
+		},
+		"types": [
+			"vite/client",
+			"fvtt-types/lenient",
+			"@rpgm/forge/types"
+		],
+		"plugins": [
+			{
+				"name": "typescript-vue-plugin",
+			}
+		],
+	},
+	"include": [
+		"./**/*.ts",
+		"./**/*.vue",
+		"../../shared/types/*.d.ts"
+	],
+	"exclude": [
+		"./dist"
+	]
+}

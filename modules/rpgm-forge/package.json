@@ -1,0 +1,20 @@
+{
+	"name": "rpgm-forge",
+	"version": "0.1.7",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite build --watch & vite",
+		"preview": "vite build --watch & vite preview",
+		"build": "vite build"
+	},
+	"devDependencies": {
+		"@types/node": "^22.13.10",
+		"fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#documents-v2",
+		"typescript-vue-plugin": "^1.8.27"
+	},
+	"dependencies": {
+		"@rpgm/forge": "github:RPGM-Tools/forge",
+		"vue": "^3.5.13"
+	}
+}

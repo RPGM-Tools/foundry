@@ -3,7 +3,7 @@ name: Release Process
 on:
   push:
     tags:
-      - 'v**'
+      - '*-v**'
 
 jobs:
   release:
@@ -13,32 +13,53 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch depth is required for tag operations
+
+      - name: Extract Module Info from Tag
+        id: module_info
+        run: |
+          TAG_NAME=${{ github.ref_name }}
+          MODULE_NAME=$(echo "$TAG_NAME" | cut -d'-' -f1)  # Extract 'forge', 'vault', or 'tome'
+          VERSION_NAME=$(echo "$TAG_NAME" | cut -d'v' -f2)  # Extract '1.2.3'
+          ZIP_FILE="rpgm-${MODULE_NAME}-v${VERSION}.zip"
+          
+          echo "MODULE_NAME=$MODULE_NAME" >> $GITHUB_ENV
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "ZIP_FILE=$ZIP_FILE" >> $GITHUB_ENV
+
+          if ! test -d ./modules/$MODULE_NAME; then
+            echo "Module does not exist!"
+            exit 1
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18  # Ensure the correct version
+          node-version: 18
           cache: 'npm'
+
+      - name: Get Version from package.json
+        run: | 
+          "VERSION=$(node -p 'require("./modules/$MODULE_NAME/package.json").version')" >> $GITHUB_ENV
+          if ! test "$VERSION" == "$VERSION_NAME"; then
+            echo "Version name is incorrect! Should be ${{env.VERSION}}, is ${{env.VERSION_NAME}}";
+            exit 1
+          fi
 
       - name: Install Dependencies
         run: npm install
 
       - name: Build Project
-        run: npm run build
-
-      - name: Get Version from package.json
-        run: echo "VERSION=$(node -p 'require("./package.json").version')" >> $GITHUB_ENV
+        run: npm run build --workspace modules/${{env.MODULE_NAME}}
 
       - name: Zip dist/ folder
-        run: |
-          cd dist
-          zip -r ../rpgm-tools-v${{ env.VERSION }}.zip *
-          cd ..
+        run: zip -r $ZIP_FILE ./modules/${{env.MODULE_NAME}}/dist/*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.VERSION }}
+          tag_name: ${{env.MODULE_NAME}}-v${{ env.VERSION }}
           name: "Release v${{ env.VERSION }}"
           body: "Automated release for v${{ env.VERSION }}"
           draft: true

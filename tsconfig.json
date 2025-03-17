@@ -1,51 +1,24 @@
 {
-	"$schema": "https://json.schemastore.org/tsconfig.json",
 	"compilerOptions": {
-		"paths": {
-			"@/*": [
-				"./src/*"
-			],
-			"#/*": [
-				"./*"
-			]
-		},
+		"lib": [
+			"ES2021",
+			"DOM",
+			"DOM.Iterable"
+		],
 		"target": "esnext",
 		"module": "esnext",
 		"noEmit": true,
 		"moduleResolution": "bundler",
 		"esModuleInterop": true,
 		"isolatedModules": true,
-		"allowImportingTsExtensions": false,
+		// "allowImportingTsExtensions": false,
 		"noImplicitOverride": true,
 		"skipLibCheck": true,
 		"resolveJsonModule": true,
-		"types": [
-			"vite/client",
-			"fvtt-types/lenient",
-			"@rpgm/forge/types"
-		],
-		"lib": [
-			"ES2021",
-			"DOM",
-			"DOM.Iterable"
-		],
-		"plugins": [
-			{
-				"name": "typescript-vue-plugin",
-			}
-		],
 		/* Linting */
 		"strict": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true
-	},
-	"include": [
-		"./**/*.ts",
-		"./**/*.vue",
-	],
-	"exclude": [
-		"node_modules",
-		"dist"
-	]
+	}
 }

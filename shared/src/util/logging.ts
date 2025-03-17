@@ -13,12 +13,6 @@ export function error(...args: any) {
 	_sendMessage("error", "color: #f46464; font-weight: bold;", ...args);
 };
 
-/** Logs a debug message to the console */
-export function debug(...args: any) {
-	if (!globalThis.RPGM.debug) return;
-	_sendMessage("log", "color: #ff0088; font-weight: bold;", ...args);
-};
-
 /** Shows information in Foundry and logs to the console */
 export function logU(...msgs: any[]) {
 	_showNotification("log", msgs.join(' '))
@@ -49,11 +43,6 @@ export function errorF(style: string, ...msgs: any[]) {
 	_sendMessage("error", style, ...msgs)
 }
 
-export function debugF(style: string, ...msgs: any[]) {
-	if (!globalThis.RPGM.debug) return
-	_sendMessage("log", style, ...msgs)
-}
-
 /**
  * Sends a formatted log message to the console.
  *
@@ -74,7 +63,6 @@ function _sendMessage(method: "log" | "warn" | "error", style: string, ...messag
 	);
 	const formattedMessage = `%c🎲📚 [${timestamp}] ${strings.join(" ")}`;
 	console[method](formattedMessage, style, ...objects);
-	_recordMessage(strings.join(" "));
 }
 
 /**
@@ -87,26 +75,6 @@ function _sendMessage(method: "log" | "warn" | "error", style: string, ...messag
 function _showNotification(method: "log" | "warn" | "error", formattedMessage: string) {
 	if (!game.user.isGM) return;
 	let uiMessage = formattedMessage.replace(/%c/g, "");
-	if (uiMessage.length > globalThis.RPGM.config.maxUIMessageLength) {
-		uiMessage = uiMessage.slice(0, globalThis.RPGM.config.maxUIMessageLength) + '...';
-	}
 	const notificationMethod = method === "log" ? "info" : method;
 	ui.notifications[notificationMethod](uiMessage, { console: false });
-}
-
-// Private message history for rate limiting.
-const messageHistory: { message: string, time: number }[] = [];
-
-/**
- * Records a log message with a timestamp.
- *
- * @param {string} message - The message to record.
- * @private
- */
-export function _recordMessage(message: string) {
-	const now = Date.now();
-	messageHistory.push({ message, time: now });
-	if (messageHistory.length > globalThis.RPGM.config.maxMessageHistory) {
-		messageHistory.shift();
-	}
 }

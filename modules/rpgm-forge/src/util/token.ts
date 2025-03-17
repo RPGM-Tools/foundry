@@ -1,5 +1,5 @@
 import { ForgeNames } from '@rpgm/forge'
-import * as logging from '@/util/logging'
+import * as logging from '#/util/logging'
 
 export function registerTokenCreate() {
 	Hooks.on("createToken", async (tokenDocument: TokenDocument) => {

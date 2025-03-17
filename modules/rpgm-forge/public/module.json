@@ -1,0 +1,48 @@
+{
+	"title": "RPGM Forge",
+	"description": "Enhance your Foundry VTT experience with an AI-assisted toolkit designed for GMs and players. Generate immersive descriptions, organize campaign assets, and receive real-time guidance to streamline storytelling and gameplay.",
+	"version": "{{RPGM_VERSION}}",
+	"url": "https://rpgm.tools",
+	"manifest": "https://raw.githubusercontent.com/RPGM-Tools/foundry/refs/heads/latest/rpgm-forge.json",
+	"download": "https://github.com/RPGM-Tools/foundry/releases/download/v{{RPGM_VERSION}}/rpgm-tools-v{{RPGM_VERSION}}.zip",
+	"esmodules": [
+		"init.js"
+	],
+	"styles": [
+		"init.css"
+	],
+	"id": "rpgm-forge",
+	"authors": [
+		{
+			"name": "Aragorn",
+			"email": "aragorn@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		},
+		{
+			"name": "jack_indaboks",
+			"email": "jack_indaboks@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		},
+		{
+			"name": "dallenb4",
+			"email": "dallenb4@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		}
+	],
+	"persistentStorage": true,
+	"compatibility": {
+		"minimum": "12",
+		"verified": "13"
+	},
+	"media": [],
+	"languages": [
+		{
+			"lang": "en",
+			"name": "English",
+			"path": "lang/en.json"
+		}
+	]
+}

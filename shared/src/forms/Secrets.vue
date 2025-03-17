@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGame, localize } from '@/util/util'
+import { useGame, localize } from '#/util/util'
 import { ref } from 'vue';
 
 const game = useGame()

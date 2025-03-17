@@ -1,9 +1,9 @@
-import * as logging from '@/util/logging'
-import { createApp, type App } from 'vue'
-import Secrets from '@/forms/Secrets.vue'
+import Secrets from './forms/Secrets.vue'
+import * as logging from '#/util/logging'
+import { type App, createApp } from 'vue'
 
-export function RegisterSettings() {
-	game.settings.registerMenu("rpgm-tools", "secrets", {
+export function GlobalSettings(id: string) {
+	game.settings.registerMenu(id, "secrets", {
 		name: game.i18n.localize("RPGM.CONFIG.SECRETS_MENU"),
 		hint: game.i18n.localize("RPGM.CONFIG.SECRETS_MENU_HINT"),
 		label: game.i18n.localize("RPGM.CONFIG.SECRETS_MENU"),
@@ -12,12 +12,17 @@ export function RegisterSettings() {
 		restricted: true,
 	})
 
+	rpgm.majorGameVersion
 	game.settings.register("rpgm-tools", "api_key", {
 		name: game.i18n.localize("RPGM.CONFIG.API_KEY"),
 		hint: game.i18n.localize("RPGM.CONFIG.API_KEY_HINT"),
 		type: String,
 	})
 	logging.log("Registered RPGM-Tools settings")
+
+}
+
+export function RegisterSettings() {
 }
 
 class SecretsMenu extends FormApplication {

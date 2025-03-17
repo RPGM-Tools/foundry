@@ -1,15 +1,11 @@
 import { defineConfig, loadEnv } from 'vite'
 import { resolve } from 'node:path'
-import { version } from '#/package.json'
+import { version } from './package.json'
 import { Versioning } from '#/versioning'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd())
-
-	// Set constants to be baked into the module
-	process.env.RPGM_VERSION = version
-	process.env.RPGM_DEBUG = process.env.DEV
 
 	return defineConfig({
 		root: "src/",
@@ -28,7 +24,7 @@ export default defineConfig(({ mode }) => {
 		resolve: {
 			alias: {
 				'@': resolve(__dirname, 'src'),
-				'#': resolve(__dirname),
+				'#': resolve(__dirname, "../../shared/src"),
 			},
 		},
 		define: {
@@ -60,7 +56,7 @@ export default defineConfig(({ mode }) => {
 		},
 		plugins: [
 			vue(),
-			Versioning(),
+			Versioning(version),
 		]
 	})
 })
