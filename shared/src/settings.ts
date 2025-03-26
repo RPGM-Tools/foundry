@@ -1,8 +1,17 @@
 import Secrets from './forms/Secrets.vue'
-import * as logging from '#/util/logging'
 import { type App, createApp } from 'vue'
 
-export function GlobalSettings(id: string) {
+/** Register shared settings once */
+export function GlobalSettings() {
+	game.settings.register("rpgm-tools", "api_key", {
+		name: game.i18n.localize("RPGM.CONFIG.API_KEY"),
+		hint: game.i18n.localize("RPGM.CONFIG.API_KEY_HINT"),
+		type: String,
+	})
+}
+
+/** Register shared settings menus on each module's settings page */
+export function GlobalMenus(id: string) {
 	game.settings.registerMenu(id, "secrets", {
 		name: game.i18n.localize("RPGM.CONFIG.SECRETS_MENU"),
 		hint: game.i18n.localize("RPGM.CONFIG.SECRETS_MENU_HINT"),
@@ -11,18 +20,6 @@ export function GlobalSettings(id: string) {
 		type: SecretsMenu,
 		restricted: true,
 	})
-
-	rpgm.majorGameVersion
-	game.settings.register("rpgm-tools", "api_key", {
-		name: game.i18n.localize("RPGM.CONFIG.API_KEY"),
-		hint: game.i18n.localize("RPGM.CONFIG.API_KEY_HINT"),
-		type: String,
-	})
-	logging.log("Registered RPGM-Tools settings")
-
-}
-
-export function RegisterSettings() {
 }
 
 class SecretsMenu extends FormApplication {

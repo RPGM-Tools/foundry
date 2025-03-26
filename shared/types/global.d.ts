@@ -9,11 +9,15 @@ interface RPGM {
 
 declare global {
 	var rpgm: RPGM
-}
 
-declare global {
 	interface SettingConfig {
 		'rpgm-tools.api_key': string
+	}
+
+	namespace Hooks {
+		interface StaticCallbacks {
+			renderTokenHUD: (tokenHud: TokenHUD, html: HTMLElement, app: Application) => void
+		}
 	}
 }
 

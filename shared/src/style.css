@@ -1,19 +1,5 @@
-section:has(.rpgm-app) {
-	filter: invert();
-}
-
 .rpgm-app {
-	filter: hue-rotate(180deg);
 	min-height: 400px;
-
-	button:hover,
-	button:focus {
-		box-shadow: 0 0 5px #6633cc !important;
-	}
-
-	input:focus {
-		box-shadow: 0 0 5px #6633cc !important;
-	}
 
 	.scrollable {
 		flex-grow: 1;
@@ -21,5 +7,39 @@ section:has(.rpgm-app) {
 
 	footer {
 		flex-grow: 0;
+	}
+}
+
+.rpgm-active {
+	/* Two gradient layers with default centering */
+	box-shadow: #6633cc 0 0 4px !important;
+	background-image:
+		radial-gradient(circle, rgba(255, 0, 200, 0.5), transparent 70%),
+		radial-gradient(circle, rgba(200, 0, 200, 0.5), transparent 70%),
+		radial-gradient(circle, rgba(200, 0, 255, 0.5), transparent 70%),
+		radial-gradient(circle, #6633cc, transparent 70%) !important;
+	/* Make the gradients larger than the textarea so that shifting shows movement */
+	background-size: 250% 250% !important;
+	/* Animate both layers’ positions */
+	animation: moveBackground 4s ease infinite !important;
+}
+
+@keyframes moveBackground {
+
+	0%,
+	100% {
+		background-position: 0% 0%, 0% 100%, 100% 100%, 100% 0%;
+	}
+
+	25% {
+		background-position: 0% 100%, 100% 100%, 100% 0%, 0% 0%;
+	}
+
+	50% {
+		background-position: 100% 100%, 100% 0%, 0% 0%, 0% 100%;
+	}
+
+	75% {
+		background-position: 100% 0%, 0% 0%, 0% 100%, 100% 100%;
 	}
 }

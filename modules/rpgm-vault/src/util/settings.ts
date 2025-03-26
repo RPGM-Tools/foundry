@@ -1,5 +1,5 @@
-import { GlobalSettings } from "#/settings";
+import { GlobalMenus } from "#/settings";
 
 export function RegisterSettings() {
-	GlobalSettings("rpgm-vault")
+	GlobalMenus("rpgm-vault")
 }

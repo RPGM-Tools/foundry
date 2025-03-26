@@ -9,12 +9,12 @@ export default defineConfig(({ mode }) => {
 
 	return defineConfig({
 		root: "src/",
-		base: "/modules/rpgm-tools/",
+		base: "/modules/rpgm-forge/",
 		publicDir: resolve(__dirname, "public"),
 		server: {
 			port: 30001,
 			proxy: {
-				"^(?!/modules/rpgm-tools)": `http://${env.VITE_FOUNDRY_URL}`,
+				"^(?!/modules/rpgm-forge)": `http://${env.VITE_FOUNDRY_URL}`,
 				"/socket.io": {
 					"target": `ws://${env.VITE_FOUNDRY_URL}`,
 					ws: true,

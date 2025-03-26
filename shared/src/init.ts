@@ -1,4 +1,4 @@
-import { RegisterSettings } from './settings'
+import { GlobalSettings } from './settings'
 import * as logging from './util/logging'
 
 export function initRpgm(source: string) {
@@ -9,8 +9,8 @@ export function initRpgm(source: string) {
 		settings: {}
 	}
 
+	GlobalSettings()
 	readyRpgm()
-	RegisterSettings()
 	logging.log(`This RPGM Tools experience was brought to you by: '${source}'`)
 }
 
@@ -18,7 +18,7 @@ function readyRpgm() {
 	Hooks.once("ready", () => {
 		const asciiArt = String.raw`
 ________________________________________________
-____  ____   ____ __  __  _              _     
+_____  ____   ____ __  __  _              _     
 |  _ \|  _ \ / ___|  \/  || |_ ___   ___ | |___ 
 | |_) | |_) | |  _| |\/| || __/ _ \ / _ \| / __|
 |  _ <|  __/| |_| | |  | || || (_) | (_) | \__ \

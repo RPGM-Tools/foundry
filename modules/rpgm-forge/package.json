@@ -8,13 +8,8 @@
 		"preview": "vite build --watch & vite preview",
 		"build": "vite build"
 	},
-	"devDependencies": {
-		"@types/node": "^22.13.10",
-		"fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#documents-v2",
-		"typescript-vue-plugin": "^1.8.27"
-	},
 	"dependencies": {
-		"@rpgm/forge": "github:RPGM-Tools/forge",
-		"vue": "^3.5.13"
+		"@rpgm/utils": "github:RPGM-Tools/utils",
+		"@rpgm/forge": "github:RPGM-Tools/forge"
 	}
 }
