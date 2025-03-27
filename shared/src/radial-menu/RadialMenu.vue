@@ -8,11 +8,12 @@
 
 		<div class="submenu-group">
 			<div v-for="(item, index) in items" ref="tooltip" :key="index" class="submenu-button-container"
-				:style="getSubButtonStyle(index)">
+				:style="buttonStyle[index]">
 				<button :tabindex="isOpen ? 0 : -1" @focusin="focusIn" class="submenu-button"
 					@keydown.space="buttonPressed = true" @keyup.space="buttonPressed = false"
 					@click.prevent="onSubButtonClick(index, item.callback)">
-					<img :src="buttonImage" :style="{ filter: `hue-rotate(${item.color}) saturate(1.5) brightness(1.5)` }"
+					<img :src="buttonImage"
+						:style="{ filter: `hue-rotate(${item.color}) saturate(1.5) brightness(1.5)`, rotate: `${index % 3 * 120}deg` }"
 						class="button-image">
 					<i class="button-icon" :class="item.icon"></i>
 					<!--Tooltip-->
@@ -136,24 +137,23 @@ function focusOut(event: FocusEvent) {
  * - The radial animation transform
  * - A stagger delay based on the button index
  */
+
+
+// DOING_THIS: Make this a computed property
+const buttonStyle = computed(() => {
+	return items.map((_, index) => getSubButtonStyle(index))
+})
+
+
 function getSubButtonStyle(index: number) {
 	const itemCount = items.length
-	if (itemCount === 0) {
-		return {}
-	}
-
 	const anglePerItem = 360 / itemCount
-
-	// actual angle for this button
-	const angle = -45 + index * anglePerItem
-
-	const rad = (Math.PI / 180) * angle
-
-	// TODO: Determine the size of the button and overflow if needed to new rings
+	const angle = index * anglePerItem - 45
+	const radians = (Math.PI / 180) * angle
 
 	// Final X, Y offset if open
-	const finalX = Math.cos(rad) * RADIUS
-	const finalY = Math.sin(rad) * RADIUS
+	const finalX = Math.cos(radians) * RADIUS
+	const finalY = Math.sin(radians) * RADIUS
 
 	/** Stagger delay to collectively take {@link ANIMATION_DURATION}
 	Reverse the delay if closing */
@@ -287,6 +287,11 @@ function getSubButtonStyle(index: number) {
 		opacity: 1;
 		z-index: 9;
 
+		.button-icon {
+
+			opacity: 0.75;
+		}
+
 		.button-icon,
 		.button-image {
 			scale: 1.2;
@@ -324,21 +329,17 @@ function getSubButtonStyle(index: number) {
 		transform: rotate(0deg);
 	}
 
-	25% {
-		transform: rotate(5deg);
+	33% {
+		transform: rotate(4deg);
 	}
 
-	75% {
-		transform: rotate(-5deg);
+	66% {
+		transform: rotate(-6deg);
 	}
 
 	100% {
 		transform: rotate(0deg);
 	}
-}
-
-.submenu-button:hover>.button-icon {
-	opacity: 0.75;
 }
 
 .button-image {
