@@ -1,36 +1,40 @@
 <template>
-	<div class="radial-menu-container" ref="root" :open="isOpen" @focusout="focusOut"
+	<div :class="{ pressed: buttonPressed }" @focusout="focusOut" class="radial-menu-container" ref="root" :open="isOpen"
 		:style="[rootStyle, floatingStyles]">
-		<button class="radial-menu-center" ref="center" :class="{ pressed }" @keydown.space="pressed = true"
-			@keyup.space="pressed = false" @click.prevent="toggleOpen">
+		<button class="radial-menu-center" ref="center" :class="{ pressed: centerPressed }"
+			@keydown.space="centerPressed = true" @keyup.space="centerPressed = false" @click.prevent="toggleOpen">
 			<img :src="diceImage" class="center-image">
 		</button>
-		<!-- <TransitionGroup name="radial-submenu" tag="div" :style="{ zIndex: isOpen ? 199 : 99 }" class="submenu-group"> -->
+
 		<div class="submenu-group">
-			<div v-for="(item, index) in items" :key="index" class="submenu-button-container"
+			<div v-for="(item, index) in items" ref="tooltip" :key="index" class="submenu-button-container"
 				:style="getSubButtonStyle(index)">
 				<button :tabindex="isOpen ? 0 : -1" @focusin="focusIn" class="submenu-button"
-					:style="{ background: item.color }" @click.prevent="onSubButtonClick(index, item.callback)"
-					@mousedown.prevent="onSubButtonClick(index, item.callback)">
-					<img v-if="item.image" :src="item.image" class="menu-image" />
-					<i v-else-if="item.icon" class="menu-icon" :class="item.icon"></i>
+					@keydown.space="buttonPressed = true" @keyup.space="buttonPressed = false"
+					@click.prevent="onSubButtonClick(index, item.callback)">
+					<img :src="buttonImage" :style="{ filter: `hue-rotate(${item.color}) saturate(1.5) brightness(1.5)` }"
+						class="button-image">
+					<i class="button-icon" :class="item.icon"></i>
+					<!--Tooltip-->
+					<span :v-show="isOpen" class="radial-menu-tooltip">{{ item.tooltip }}</span>
 				</button>
 			</div>
 		</div>
-		<!-- </TransitionGroup> -->
 	</div>
 </template>
 
 <script setup lang="ts">
 import { ref, useTemplateRef, toRef, inject, computed } from 'vue'
 import { autoUpdate, offset, useFloating } from '@floating-ui/vue'
-import diceImage from '../assets/d20-128x128.png'
+import diceImage from '../../assets/d20-128x128.png'
+import buttonImage from '../../assets/d20.png'
+import { shift } from '@floating-ui/vue'
 
 const ANIMATION_DURATION = 0.15
 const RADIUS = 45
 
 export interface InjectedElement {
-	element: HTMLElement | null
+	element: HTMLElement
 	get value(): string
 	set value(value: string)
 }
@@ -45,6 +49,7 @@ export interface RadialMenuItem {
 	image?: string
 	icon?: string
 	callback: (params: CallbackParams) => void
+	tooltip: string
 }
 
 const element = inject<InjectedElement>('element') as InjectedElement
@@ -52,7 +57,8 @@ const items = inject<RadialMenuItem[]>('items', [])
 
 // States for menu open/close and hover
 const isOpen = ref(false)
-const pressed = ref(false)
+const centerPressed = ref(false)
+const buttonPressed = ref(false)
 const root = useTemplateRef('root')
 const center = useTemplateRef('center')
 
@@ -68,14 +74,25 @@ const anchor = computed((): 'right' | 'right-start' => {
 
 /** Slide radial menu if anchored to top-end */
 const rootStyle = computed(() => ({
-	width: `${isOpen.value && anchor.value === 'right-start' ? RADIUS * 2.3 : 30}px`,
+	width: `${isOpen.value && anchor.value === 'right-start' ? RADIUS * 2.5 : 30}px`,
 	height: `${30}px`,
 }))
 
 const padding = () =>
-	offset(({ rects }) => {
+	offset(() => {
+		const padding = parseInt(document.defaultView?.getComputedStyle(element.element).padding || '0')
 		return {
-			mainAxis: -rects.floating.width,
+			mainAxis: -padding / 2,
+			crossAxis: anchor.value === 'right-start' ? padding / 2 : 0,
+		}
+	})
+
+const widthOffset = () =>
+	offset(({ rects }) => {
+		const centerWidth = center.value?.offsetWidth || 0
+		return {
+			// Keep the menu in the top right
+			mainAxis: anchor.value === 'right-start' ? -rects.floating.width / 2 - centerWidth / 2 : -rects.floating.width,
 		}
 	})
 
@@ -83,6 +100,8 @@ const { floatingStyles } = useFloating(toRef(element.element), root, {
 	placement: anchor.value,
 	middleware: [
 		padding(),
+		widthOffset(),
+		shift({ crossAxis: true, padding: 5, rootBoundary: 'viewport' }),
 	],
 	whileElementsMounted(reference, floating, update) {
 		return autoUpdate(reference, floating, update)
@@ -143,13 +162,13 @@ function getSubButtonStyle(index: number) {
 	// If open => transform to final position with scale(1)
 	// If not => scale(0) at the center
 	const transform = isOpen.value
-		? `rotate(0deg) translate(${finalX}px, ${finalY}px) scale(1)`
-		: `rotate(-90deg) translate(0, 0) scale(0)`
+		? `rotate(0deg) translate(${finalX}px, ${finalY}px) rotate(0deg) scale(1)`
+		: `rotate(-90deg) translate(0, 0) rotate(-360deg) scale(0)`
 
 	return {
 		transform,
 		opacity: isOpen.value ? 1 : 0,
-		transitionDelay: `${staggerDelay}s, ${staggerDelay}s, 0s, 0s`,
+		transitionDelay: `${staggerDelay}s, ${staggerDelay}s, 20s, ${0}s`,
 	}
 }
 
@@ -157,8 +176,7 @@ function getSubButtonStyle(index: number) {
 
 <style scoped>
 .radial-menu-container {
-	transition: width 0.2s ease, height 0.2s ease;
-	z-index: 9999999;
+	transition: width 0.2s;
 }
 
 .radial-menu-container[open="false"] {
@@ -180,10 +198,14 @@ function getSubButtonStyle(index: number) {
 	left: 50%;
 	transform: translate(-50%, -50%);
 	transform-origin: top left;
-	z-index: 9999999;
+	z-index: 1;
 	animation: fade-in 0.2s ease;
 	transition: scale 0.05s ease, opacity 0.05s ease;
 	opacity: 0.5;
+}
+
+.radial-menu-container[open="false"]>.radial-menu-center {
+	z-index: 5;
 }
 
 .pressed,
@@ -232,6 +254,7 @@ function getSubButtonStyle(index: number) {
 	transform: translate(-50%, -50%);
 	pointer-events: none;
 	overflow: visible;
+	z-index: 2;
 }
 
 .submenu-button-container {
@@ -242,33 +265,108 @@ function getSubButtonStyle(index: number) {
 }
 
 .submenu-button {
+	position: relative;
 	display: block;
 	width: 100%;
 	height: 100%;
+	background: none !important;
 	border: none !important;
 	box-shadow: none !important;
+	margin: 0;
 	padding: 0;
 	border-radius: 50%;
-	position: absolute;
-	overflow: hidden;
-	transition: box-shadow 0.1s ease, scale 0.1s ease;
 	cursor: pointer;
 	pointer-events: all;
+	opacity: 0.9;
 }
 
-.submenu-group:not(:focus-within) .submenu-button:hover,
-.submenu-button:focus:not(:active) {
-	scale: 1.2;
-	box-shadow: 0px 0px 4px #6633cc !important;
-	z-index: 2;
+.radial-menu-container:not(.pressed)[open="true"] {
+
+	.submenu-group:not(:focus-within) .submenu-button:hover,
+	.submenu-button:focus:not(:active) {
+		opacity: 1;
+		z-index: 9;
+
+		.button-icon,
+		.button-image {
+			scale: 1.2;
+			animation: jiggle 0.15s ease;
+		}
+
+		.radial-menu-tooltip {
+
+			opacity: 1;
+		}
+	}
 }
 
-.menu-image,
-.menu-icon {
+.submenu-group:not(:focus-within) .submenu-button-container:has(.submenu-button:hover),
+.submenu-button-container:has(.submenu-button:focus) {
+	z-index: 9;
+}
+
+.button-icon,
+.button-image {
+	transition: opacity 0.1s ease, scale 0.1s ease;
+}
+
+.button-icon {
+	color: white;
+	position: absolute;
+	opacity: 0.6;
+	left: 50%;
+	top: 50%;
+	translate: -50% -50%;
+}
+
+@keyframes jiggle {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	25% {
+		transform: rotate(5deg);
+	}
+
+	75% {
+		transform: rotate(-5deg);
+	}
+
+	100% {
+		transform: rotate(0deg);
+	}
+}
+
+.submenu-button:hover>.button-icon {
+	opacity: 0.75;
+}
+
+.button-image {
+	position: absolute;
 	margin: 0;
+	top: 0;
+	left: 0;
 	object-fit: cover;
 	pointer-events: none;
+	border: none !important;
 	width: 100% !important;
 	height: 100% !important;
+}
+
+.radial-menu-tooltip {
+	position: absolute;
+	bottom: 30px;
+	left: 50%;
+	padding: 2px;
+	line-height: 1.2;
+	translate: -50% 0;
+	/* No word wrapping */
+	white-space: nowrap;
+	pointer-events: none;
+	background: #6633cc;
+	color: #fff;
+	border-radius: 4px;
+	z-index: 7;
+	opacity: 0;
 }
 </style>

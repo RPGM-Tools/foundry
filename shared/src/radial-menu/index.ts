@@ -1,3 +1,4 @@
+import * as logging from "#/util/logging"
 import { createApp, App } from 'vue'
 // Import your Vue component for the magic button/menu
 import RadialMenu, { InjectedElement, RadialMenuItem } from './RadialMenu.vue'
@@ -35,44 +36,52 @@ function createRadialMenu(el: HTMLElement): void {
 	vueApp.provide<InjectedElement>('element', injectedElement)
 	vueApp.provide<RadialMenuItem[]>('items', [
 		{
-			color: "#00ff80",
+			color: "90deg",
 			callback: ({ element }) => { element.value = "You clicked the D4!" },
-			icon: 'fa fa-dice-d4'
+			icon: 'fa fa-dice-d4',
+			tooltip: "Roll a D4"
 		},
 		{
-			color: "#ff0080",
+			color: "180deg",
 			callback: ({ element }) => { element.value = "You clicked the D6!" },
-			icon: 'fa fa-dice-d6'
+			icon: 'fa fa-dice-d6',
+			tooltip: "Roll a D6"
 		},
 		{
-			color: "#8000ff",
+			color: "270deg",
 			callback: ({ element }) => { element.value = "You clicked the D8!" },
-			icon: 'fa fa-dice-d8'
+			icon: 'fa fa-dice-d8',
+			tooltip: "Roll a D8"
 		},
 		{
-			color: "#ff8000",
+			color: "0deg",
 			callback: ({ element }) => { element.value = "You clicked the D10!" },
-			icon: 'fa fa-dice-d10'
+			icon: 'fa fa-dice-d10',
+			tooltip: "Roll a D10"
 		},
 		{
-			color: "#00ff80",
+			color: "90deg",
 			callback: ({ element }) => { element.value = "You clicked the D12!" },
-			icon: 'fa fa-dice-d12'
+			icon: 'fa fa-dice-d12',
+			tooltip: "Roll a D12"
 		},
 		{
-			color: "#ff0080",
+			color: "180deg",
 			callback: ({ element }) => { element.value = "You clicked the D20!" },
-			icon: 'fa fa-dice-d20'
+			icon: 'fa fa-dice-d20',
+			tooltip: "Roll a D20"
 		},
 		{
-			color: "#8000ff",
+			color: "270deg",
 			callback: ({ element }) => { element.value = "Searching..." },
-			icon: 'fa fa-magnifying-glass'
+			icon: 'fa fa-magnifying-glass',
+			tooltip: "Search"
 		},
 		{
-			color: "#ff8000",
+			color: "0deg",
 			callback: ({ element }) => { element.value = "Use your imagination ;)" },
-			icon: 'fa fa-wand-magic-sparkles'
+			icon: 'fa fa-wand-magic-sparkles',
+			tooltip: "Magic"
 		},
 	])
 	elements.set(el, { vueApp, injectedEl: appContainer })
@@ -83,7 +92,7 @@ function createRadialMenu(el: HTMLElement): void {
 
 function deleteRadialMenu(el: HTMLElement): void {
 	if (!elements.has(el)) return
-	const { vueApp, injectedEl } = elements.get(el)
+	const { vueApp, injectedEl } = elements.get(el) as { vueApp: App, injectedEl: HTMLElement }
 	injectedEl.remove()
 	vueApp.unmount()
 }
@@ -102,6 +111,7 @@ function recursivelyWatch(root: ParentNode): void {
 
 export function watchInputs(): void {
 	// Scan for existing elements that should be watched
+	logging.log("Watching inputs")
 	recursivelyWatch(document.body)
 
 	// Watch for new elements
