@@ -14,5 +14,5 @@
 			"vite/client",
 			"fvtt-types/lenient"
 		]
-	}
+	},
 }

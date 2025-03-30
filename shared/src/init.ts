@@ -1,15 +1,17 @@
+import { RadialMenuRegister } from './radial-menu'
 import { GlobalSettings } from './settings'
 import * as logging from './util/logging'
 
 export function initRpgm(source: string) {
 	if (globalThis.rpgm) return
+	GlobalSettings()
+
 	globalThis.rpgm = {
 		gameVersion: game.version,
 		majorGameVersion: game.data.release.generation,
+		radialMenu: new RadialMenuRegister(),
 		settings: {}
 	}
-
-	GlobalSettings()
 	readyRpgm()
 	logging.log(`This RPGM Tools experience was brought to you by: '${source}'`)
 }

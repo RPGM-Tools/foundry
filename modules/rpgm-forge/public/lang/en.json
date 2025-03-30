@@ -4,11 +4,20 @@
 			"READY": "RPGM Tools has finished loading!"
 		},
 		"CONFIG": {
+			"SECRETS_SETTINGS": "Secrets",
+			"SECRETS_SETTINGS_HINT": "View and manage api keys, and logins for AI services.",
+			"SECRETS_SETTINGS_SUBTITLE": "\"All right then, configure your secrets.\"",
 			"API_KEY": "Api Key",
 			"API_KEY_HINT": "Enter your key here to sign in to RPGM Tools and unlock full functionality.",
-			"SECRETS_MENU": "Secrets",
-			"SECRETS_MENU_SUBTITLE": "\"All right then, configure your secrets.\"",
-			"SECRETS_MENU_HINT": "View and manage api keys, and logins for AI services."
+			"RADIAL_MENU_SETTINGS": "Radial Menu",
+			"RADIAL_MENU_SETTINGS_HINT": "Configure settings related to the RPGM radial menu.",
+			"RADIAL_MENU_SETTINGS_SUBTITLE": "\"Looks like dices are back on the menu, boys!\"",
+			"RADIAL_MENU_ENABLED": "Enable",
+			"RADIAL_MENU_ENABLED_HINT": "Whether or not to enable the radial menu throughout Foundry VTT."
+		},
+		"RADIAL_MENU": {
+			"D4": "Roll a D4",
+			"D6": "Roll a D6"
 		}
 	}
 }

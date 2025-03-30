@@ -1,11 +1,12 @@
-import { RadialMenuSettings } from "./settings/radial_menu"
-import { SecretsSettings } from "./settings/secrets"
+import { SecretsSettings } from "./secrets"
+import { RadialMenuSettings } from "./radial_menu"
 
 /** Register shared settings once */
 export function GlobalSettings() {
 	game.settings.register("rpgm-tools", "api_key", {
 		name: game.i18n.localize("RPGM.CONFIG.API_KEY"),
 		hint: game.i18n.localize("RPGM.CONFIG.API_KEY_HINT"),
+		requiresReload: true,
 		type: String,
 	})
 	game.settings.register("rpgm-tools", "verbosity", {
@@ -20,7 +21,8 @@ export function GlobalSettings() {
 	})
 }
 
-/** Register shared settings menus on each module's settings page */
+/** Register shared settings menus on each module's settings page,
+ * should be called after registering your own settings */
 export function GlobalMenus(id: string) {
 	game.settings.registerMenu(id, "secrets", {
 		name: game.i18n.localize("RPGM.CONFIG.SECRETS_SETTINGS"),
@@ -34,7 +36,7 @@ export function GlobalMenus(id: string) {
 		name: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS"),
 		hint: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS_HINT"),
 		label: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS"),
-		icon: "fas fa-dice-d20",
+		icon: "fas dice-d20",
 		type: RadialMenuSettings,
 		restricted: true,
 	})

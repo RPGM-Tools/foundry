@@ -24,6 +24,15 @@
 	animation: moveBackground 4s ease infinite !important;
 }
 
+/* Prevent clipping on foundry AppV2 pages */
+.application {
+	overflow: visible !important;
+}
+
+.window-content {
+	overflow: visible !important;
+}
+
 @keyframes moveBackground {
 
 	0%,

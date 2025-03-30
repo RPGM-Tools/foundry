@@ -44,8 +44,8 @@ const apply = (html: HTMLElement) => {
 <template>
 	<form @submit.prevent="submit" class="rpgm-app flexcol">
 		<div class="scrollable">
-			<h2>{{ localize("RPGM.CONFIG.SECRETS_MENU") }}</h2>
-			<i>{{ localize("RPGM.CONFIG.SECRETS_MENU_SUBTITLE") }}</i>
+			<h2>{{ localize("RPGM.CONFIG.SECRETS_SETTINGS") }}</h2>
+			<i>{{ localize("RPGM.CONFIG.SECRETS_SETTINGS_SUBTITLE") }}</i>
 			<div class="form-group" data-setting-id="rpgm-tools.api_key">
 				<label>{{ localize("RPGM.CONFIG.API_KEY") }}</label>
 				<div class="form-fields">
