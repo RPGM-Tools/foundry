@@ -1,18 +1,19 @@
 <template>
-	<div v-if="Items.length > 0" :class="{ pressed: buttonPressed }" @focusout="focusOut" class="radial-menu-container"
-		ref="root" :open="isOpen" :style="[rootStyle, radialFloater.floatingStyles.value]">
+	<div v-if="Items.length > 0" @mouseenter="hoverIn" @mouseout="focusOut" :class="{ pressed: buttonPressed }"
+		@focusout="focusOut" class="radial-menu-container" ref="root" :open="isOpen"
+		:style="[rootStyle, radialFloater.floatingStyles.value]">
 		<button class="radial-menu-center" ref="center" :style="{ width: `${centerSize}px`, height: `${centerSize}px` }"
 			:class="{ pressed: centerPressed }" @keydown.space="centerPressed = true" @keyup.space="centerPressed = false"
 			@click.prevent="toggleOpen">
-			<img :src="diceImage" class="center-image">
+			<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
 		</button>
 
 		<div class="submenu-group">
-			<button v-for="(item, index) in Items" :key="index" ref="tooltip" :tabindex="isOpen ? 0 : -1"
-				:style="buttonStyle[index]" class="submenu-button" @keydown.space="buttonPressed = true"
-				@keyup.space="buttonPressed = false" @click.prevent="onSubButtonClick(index, item.callback)">
+			<button v-for="(item, index) in Items" :key="index" :tabindex="isOpen ? 0 : -1" :style="buttonStyle[index]"
+				class="submenu-button" @keydown.space="buttonPressed = true" @keyup.space="buttonPressed = false"
+				@click.prevent="onSubButtonClick(index, item.callback)">
 				<img :src="buttonImage"
-					:style="{ filter: `hue-rotate(${getCategory(item)?.color ?? 0}) saturate(1.25) brightness(1.5)`, rotate: `${randRotation[index]}deg` }"
+					:style="{ filter: `hue-rotate(${getCategory(item)?.color ?? 0}) saturate(1.25) brightness(1.5)`, rotate: `${randomRotations[index]}deg` }"
 					class="button-image">
 				<i class="button-icon" :class="item.icon"></i>
 				<span v-if="item.tooltip" class="radial-menu-tooltip">{{ localize(item.tooltip) }}</span>
@@ -21,8 +22,8 @@
 	</div>
 </template>
 
-<script setup lang="ts">
-import { ref, useTemplateRef, toRef, inject, computed, onMounted, onUnmounted } from 'vue'
+<script setup lang="ts" generic="Context extends ButtonContext">
+import { ref, useTemplateRef, toRef, inject, computed, onMounted } from 'vue'
 import { autoUpdate, offset, useFloating } from '@floating-ui/vue'
 import diceImage from '../../assets/d20-128x128.png'
 import buttonImage from '../../assets/d20.png'
@@ -32,15 +33,11 @@ import { localize } from '#/util/util'
 const ANIMATION_DURATION = 0.15
 const MAX_CENTER_SIZE = 35
 
-export interface InjectedElement {
-	element: HTMLElement
-	get value(): string
-	set value(value: string)
-}
-const randRotation = computed(() => Items.value.map(() => Math.random() * 360))
-const element = inject<InjectedElement>('element') as InjectedElement
-const items = inject<MenuButton[]>('items', [])
-const getCategory = (item: MenuButton) => rpgm.radialMenu.categories.get(item.category)
+const randomRotations = computed(() => items.map(() => Math.random() * 360))
+const getCategory = (item: RadialButton<Context>) => rpgm.radialMenu.categories.get(item.category)
+const element = inject<HTMLElement>('element') as HTMLElement
+const items = inject<RadialButton<Context>[]>('items', [])
+const menuContext = inject<Context>('context') as Context
 
 // States for menu open/close and hover
 const isOpen = ref(false)
@@ -50,15 +47,15 @@ const root = useTemplateRef('root')
 const center = useTemplateRef('center')
 
 const Items = computed(() => {
-	return items.filter(value => value.detective({ element: element.element }))
+	return items.filter(value => value.detective(menuContext))
 })
 
 const anchor = computed((): 'right' | 'right-start' => {
 	// If element has multiple lines, anchor to right-start
-	if (element.element instanceof HTMLInputElement) {
+	if (element instanceof HTMLInputElement) {
 		return 'right'
-	} else if (element.element instanceof HTMLTextAreaElement) {
-		return element.element.rows > 1 ? 'right-start' : 'right'
+	} else if (element instanceof HTMLTextAreaElement) {
+		return element.rows > 1 ? 'right-start' : 'right'
 	}
 	return 'right-start'
 })
@@ -75,19 +72,17 @@ its dimensions when its parent input element becomes visible
 */
 let _updateSize = ref(0)
 onMounted(() => {
-	new ResizeObserver(() => setTimeout(() => { _updateSize.value++; radialFloater.update() }, 1)).observe(element.element)
+	new ResizeObserver(() => setTimeout(() => { _updateSize.value++; radialFloater.update() }, 1)).observe(element)
 })
 
 const centerSize = computed(() => {
 	_updateSize.value
-	return Math.min(element.element.scrollHeight, MAX_CENTER_SIZE)
+	return Math.min(element.scrollHeight, MAX_CENTER_SIZE)
 })
-
-onUnmounted(() => console.log("Unmounted"))
 
 const padding = () =>
 	offset(() => {
-		const padding = parseInt(document.defaultView?.getComputedStyle(element.element).padding || '0')
+		const padding = parseInt(document.defaultView?.getComputedStyle(element).padding || '0')
 		return {
 			mainAxis: -padding / 2,
 			crossAxis: anchor.value === 'right-start' ? padding / 2 : 0,
@@ -103,27 +98,38 @@ const widthOffset = () =>
 		}
 	})
 
-const radialFloater = useFloating(toRef(element.element), root, {
+const radialFloater = useFloating(toRef(element), root, {
 	placement: anchor.value,
 	middleware: [
 		padding(),
 		widthOffset(),
-		shift({ crossAxis: true, padding: 5, boundary: document.body, altBoundary: true, rootBoundary: 'document' }),
+		shift({ crossAxis: true, boundary: document.body, altBoundary: true, rootBoundary: 'document' }),
 	],
 	whileElementsMounted(reference, floating, update) {
 		return autoUpdate(reference, floating, update, { animationFrame: true })
 	},
 })
 
-function onSubButtonClick(_: number, callback: (params: MenuContext) => void) {
+async function onSubButtonClick(_: number, callback: (params: Context) => Promise<void>) {
 	// Then close the menu
 	isOpen.value = false
-	center.value?.blur()
+	center.value?.focus
+
 	// Invoke the submenu callback
-	callback({ element: element.element })
+	menuContext.loading = true
+	await callback(menuContext)
+	menuContext.loading = false
+	center.value?.blur()
+}
+
+function hoverIn() {
+	if (!isOpen.value) {
+		toggleOpen()
+	}
 }
 
 function toggleOpen() {
+	if (menuContext.loading) return
 	isOpen.value = !isOpen.value;
 	// Fix overlap of subsequent radial menus
 	if (root.value?.parentElement)
@@ -132,6 +138,7 @@ function toggleOpen() {
 
 function focusOut(event: FocusEvent) {
 	if (root.value?.contains(event.relatedTarget as HTMLElement)) return
+	center.value?.blur()
 	isOpen.value = false
 }
 
@@ -169,7 +176,7 @@ function getSubButtonStyle(index: number) {
 	// If not => scale(0) at the center
 	const transform = isOpen.value
 		? `rotate(0deg) translate(${finalX}px, ${finalY}px) rotate(0deg) scale(1)`
-		: `rotate(-90deg) translate(0px, 0px) rotate(-360deg) scale(0)`
+		: `rotate(-90deg) translate(0px, 0px) rotate(-90deg) scale(0)`
 
 	return {
 		scale: Number(isOpen.value),
@@ -182,9 +189,13 @@ function getSubButtonStyle(index: number) {
 </script>
 
 <style scoped>
+* {
+	outline: none !important;
+}
+
 .radial-menu-container {
 	transition: width 0.2s ease, height 0.2s ease !important;
-	pointer-events: none;
+	pointer-events: all;
 	overflow: visible;
 	margin: 0;
 	padding: 0;
@@ -206,7 +217,6 @@ function getSubButtonStyle(index: number) {
 	left: 50%;
 	transform: translate(-50%, -50%);
 	transform-origin: top left;
-	animation: fade-in 0.2s ease;
 	transition: opacity 0.05s ease;
 	opacity: 0.5;
 	margin: 0;
@@ -232,25 +242,15 @@ function getSubButtonStyle(index: number) {
 	pointer-events: none;
 	height: 100% !important;
 	width: 100% !important;
-	position: absolute;
-	top: -50%;
-	left: -50%;
-	transform: translate(50%, 50%);
 	border: none !important;
 	transition: filter 0.05s, scale 0.05s ease;
-	transform-origin: bottom right;
+	/* transform-origin: bottom right; */
 	filter: drop-shadow(2px 2px 2px #00000044);
 }
 
 .radial-menu-center:hover>.center-image,
 .radial-menu-center:focus>.center-image {
 	filter: drop-shadow(2px 2px 2px #6633ccaa);
-}
-
-@keyframes fade-in {
-	from {
-		opacity: 0;
-	}
 }
 
 .submenu-group {
@@ -321,6 +321,57 @@ function getSubButtonStyle(index: number) {
 	left: 50%;
 	top: 50%;
 	translate: -50% -50%;
+}
+
+.loading {
+	animation: jitter 0.5s infinite;
+	animation-delay: v-bind('`${ANIMATION_DURATION}s`');
+}
+
+@keyframes jitter {
+	0% {
+		transform: translate(1px, 1px) rotate(0deg);
+	}
+
+	10% {
+		transform: translate(-1px, -2px) rotate(-3deg);
+	}
+
+	20% {
+		transform: translate(-3px, 0px) rotate(3deg);
+	}
+
+	30% {
+		transform: translate(3px, 2px) rotate(0deg);
+	}
+
+	40% {
+		transform: translate(1px, -1px) rotate(3deg);
+	}
+
+	50% {
+		transform: translate(-1px, 2px) rotate(-3deg);
+	}
+
+	60% {
+		transform: translate(-3px, 1px) rotate(0deg);
+	}
+
+	70% {
+		transform: translate(3px, 1px) rotate(-3deg);
+	}
+
+	80% {
+		transform: translate(-1px, -1px) rotate(3deg);
+	}
+
+	90% {
+		transform: translate(1px, 2px) rotate(0deg);
+	}
+
+	100% {
+		transform: translate(1px, -2px) rotate(-3deg);
+	}
 }
 
 @keyframes jiggle {

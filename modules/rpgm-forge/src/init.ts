@@ -1,8 +1,9 @@
 import * as logging from "#/util/logging"
 import { RegisterSettings } from "./settings"
-import { registerTokenCreate } from "./util/token"
+import { generateTokenNames, registerTokenCreate } from "./util/token"
 import { initRpgm } from "#/init"
 import '#/style.css'
+import { contextHeuristics, writeOn } from "#/radial-menu"
 
 Hooks.once("init", () => {
 	initRpgm("rpgm-forge")
@@ -14,18 +15,32 @@ registerTokenCreate()
 
 function registerRadialMenu() {
 	rpgm.radialMenu.registerCategory("rpgm-forge", { color: "276deg" })
-	rpgm.radialMenu.registerButton({
+	rpgm.radialMenu.registerInputButton({
 		category: 'rpgm-forge',
 		icon: 'fa fa-dice-d4',
 		tooltip: "RPGM.RADIAL_MENU.D4",
-		detective: () => true,
-		callback: () => logging.logU("Rolled a", Math.floor(Math.random() * 4) + 1)
+		detective: (context) => contextHeuristics(context).noNumber().value,
+		callback: (context) => writeOn(context, `Rolled a ${Math.floor(Math.random() * 4) + 1}`, 250)
 	})
-	rpgm.radialMenu.registerButton({
+	rpgm.radialMenu.registerInputButton({
 		category: 'rpgm-forge',
 		icon: 'fa fa-dice-d6',
 		tooltip: "RPGM.RADIAL_MENU.D6",
+		detective: (context) => contextHeuristics(context).noNumber().value,
+		callback: (context) => writeOn(context, `Rolled a ${Math.floor(Math.random() * 6) + 1}`, 250)
+	})
+	rpgm.radialMenu.registerInputButton({
+		category: 'rpgm-forge',
+		icon: 'fa fa-comment',
+		tooltip: "",
+		detective: (context) => contextHeuristics(context).isChat().noNumber().value,
+		callback: (context) => writeOn(context, "Hello, World! Here is some lorem ipsum for you to consider.", 500)
+	})
+	rpgm.radialMenu.registerTokenHudButton({
+		category: 'rpgm-forge',
+		icon: 'fa fa-input-text',
+		tooltip: "RPGM.RADIAL_MENU.NAMES",
 		detective: () => true,
-		callback: () => logging.logU("Rolled a", Math.floor(Math.random() * 6) + 1)
+		callback: (context) => generateTokenNames(context.token.document)
 	})
 }

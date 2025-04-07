@@ -11,6 +11,11 @@ interface RPGM {
 }
 
 declare global {
+	interface DRef<T> {
+		get value(): T
+		set value(value: T)
+	}
+
 	var rpgm: RPGM
 
 	interface globalThis {
@@ -25,7 +30,7 @@ declare global {
 
 	namespace Hooks {
 		interface StaticCallbacks {
-			renderTokenHUD: (tokenHud: TokenHUD, html: HTMLElement, app: Application) => void
+			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement>, app: Application) => void
 		}
 	}
 }

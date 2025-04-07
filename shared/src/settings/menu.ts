@@ -13,7 +13,7 @@ export abstract class RPGMSettingsMenu extends FormApplication {
 	protected override async _renderInner(): Promise<JQuery> {
 		const div = document.createElement("div")
 		this.app = createApp(this.type)
-		this.app.mount(div)
+		this.app.mount(div, true)
 
 		if (div.firstElementChild)
 			this.form = div.firstElementChild as HTMLElement

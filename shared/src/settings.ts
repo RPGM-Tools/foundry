@@ -16,26 +16,27 @@ export function GlobalSettings() {
 	game.settings.register("rpgm-tools", "radial_menu_enabled", {
 		name: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED"),
 		hint: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED_HINT"),
+		default: "true",
 		type: String,
 	})
 }
 
 /** Register shared settings menus on each module's settings page */
 export function GlobalMenus(id: string) {
-	game.settings.registerMenu(id, "secrets", {
-		name: game.i18n.localize("RPGM.CONFIG.SECRETS_SETTINGS"),
-		hint: game.i18n.localize("RPGM.CONFIG.SECRETS_SETTINGS_HINT"),
-		label: game.i18n.localize("RPGM.CONFIG.SECRETS_SETTINGS"),
-		icon: "fas fa-key",
-		type: SecretsSettings,
-		restricted: true,
-	})
 	game.settings.registerMenu(id, "radial-menu", {
 		name: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS"),
 		hint: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS_HINT"),
 		label: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS"),
 		icon: "fas fa-dice-d20",
 		type: RadialMenuSettings,
+		restricted: true,
+	})
+	game.settings.registerMenu(id, "secrets", {
+		name: game.i18n.localize("RPGM.CONFIG.SECRETS_SETTINGS"),
+		hint: game.i18n.localize("RPGM.CONFIG.SECRETS_SETTINGS_HINT"),
+		label: game.i18n.localize("RPGM.CONFIG.SECRETS_SETTINGS"),
+		icon: "fas fa-key",
+		type: SecretsSettings,
 		restricted: true,
 	})
 }

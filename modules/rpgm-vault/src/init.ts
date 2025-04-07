@@ -2,6 +2,7 @@ import * as logging from "#/util/logging"
 import { RegisterSettings } from "./util/settings"
 import { initRpgm } from "#/init"
 import '#/style.css'
+import { contextHeuristics } from '#/radial-menu'
 
 Hooks.once("init", () => {
 	initRpgm("rpgm-vault")
@@ -12,18 +13,20 @@ Hooks.once("init", () => {
 
 function registerRadialMenu() {
 	rpgm.radialMenu.registerCategory("rpgm-vault", { color: "240deg" })
-	rpgm.radialMenu.registerButton({
+	rpgm.radialMenu.registerInputButton({
 		category: 'rpgm-vault',
 		icon: 'fa fa-file-export',
 		tooltip: "",
-		detective: () => true,
-		callback: () => logging.logU("Saving this value...")
+		detective: (context) => contextHeuristics(context).noNumber().value,
+		callback: async () => {
+			logging.logU("Saving this value...")
+		}
 	})
-	rpgm.radialMenu.registerButton({
+	rpgm.radialMenu.registerInputButton({
 		category: 'rpgm-vault',
 		icon: 'fa fa-crosshairs-simple',
 		tooltip: "",
-		detective: () => true,
-		callback: () => logging.logU("Analyzing this value...")
+		detective: (context) => contextHeuristics(context).noNumber().value,
+		callback: async () => logging.logU("Analyzing this value...")
 	})
 }

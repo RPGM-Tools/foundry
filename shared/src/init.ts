@@ -18,6 +18,7 @@ export function initRpgm(source: string) {
 
 function readyRpgm() {
 	Hooks.once("ready", () => {
+		rpgm.radialMenu.update()
 		const asciiArt = String.raw`
 ________________________________________________
 _____  ____   ____ __  __  _              _     
