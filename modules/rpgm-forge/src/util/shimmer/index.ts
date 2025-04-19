@@ -1,18 +1,22 @@
 import frag from './shimmer2.glsl?raw'
 import vertex from './vertex.glsl?raw'
 
-export function shimmer(token: Token): Shimmer {
-	return new ShimmerFilter(token)
+export function shimmerToken(token: Token): Shimmer {
+	/** Ensure only one shimmer filter per token */
+	return ShimmerFilter.shimmering.get(token) ??
+		new ShimmerFilter(token)
 }
 
-export interface Shimmer {
+interface Shimmer {
 	fadeIn(duration: number): Promise<void>
 	fadeOut(duration: number): Promise<void>
 }
 
 class ShimmerFilter extends PIXI.Filter implements Shimmer {
+	static shimmering: WeakMap<Token, ShimmerFilter> = new WeakMap()
 	token: Token
 	startTime: number
+	active: boolean = false
 	fadingOut: boolean
 
 	constructor(token: Token) {
@@ -29,6 +33,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 				t.mesh.filters.push(this)
 			else
 				t.mesh.filters = [this]
+			ShimmerFilter.shimmering.set(token, this)
 			canvas.app?.ticker.add(this.updateFn, this)
 		})
 		this.startTime = performance.now()
@@ -41,6 +46,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 
 	async fadeIn(duration: number = 1000): Promise<void> {
 		return new Promise((resolve) => {
+			this.active = true
 			const start = performance.now();
 			const animate = () => {
 				const now = performance.now();
@@ -57,6 +63,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 	}
 
 	async fadeOut(duration: number = 1000): Promise<void> {
+		if (!this.active) return
 		this.fadingOut = true
 		return new Promise((resolve) => {
 			const start = performance.now();
@@ -70,6 +77,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 					canvas.app?.ticker.remove(animate, this);
 					const i = this.token.mesh.filters?.indexOf(this) ?? -1
 					this.token.mesh.filters?.splice(i, 1)
+					ShimmerFilter.shimmering.delete(this.token)
 					resolve();
 				}
 			};

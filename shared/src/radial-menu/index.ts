@@ -4,7 +4,7 @@ import RadialMenu from './RadialMenu.vue'
 import { RPGMTokenHUD } from './hud'
 
 export { contextHeuristics } from './heuristics'
-export { writeOn } from './funcs'
+export * from './funcs'
 
 export class RadialMenuRegister {
 	elements = new Map<HTMLElement, { vueApp: App, injectedEl: HTMLElement }>()
@@ -18,14 +18,12 @@ export class RadialMenuRegister {
 		this.inputObserver = new MutationObserver(mutations => {
 			mutations.forEach(mutation => {
 				mutation.removedNodes.forEach(node => {
-					console.log("Removed:", node)
 					if (node.nodeType === Node.ELEMENT_NODE) {
 						const el = node as HTMLElement
 						this.deleteRadialMenu(el)
 					}
 				})
 				mutation.addedNodes.forEach(node => {
-					console.log("Added:", node)
 					if (node.nodeType === Node.ELEMENT_NODE) {
 						const el = node as HTMLElement
 						this.recursivelyWatch(el)

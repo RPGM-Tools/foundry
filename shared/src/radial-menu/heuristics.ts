@@ -23,6 +23,10 @@ export function contextHeuristics(context: InputContext) {
 			flag ||= /^\d+$/.test(context.getValue())
 			return api
 		},
+		isGM() {
+			flag ||= !game.user.isGM
+			return api
+		},
 		/** Attach button to the main chat interface */
 		isChat() {
 			chatAllowed = true

@@ -1,6 +1,6 @@
 import { ForgeNames } from '@rpgm/forge'
 import * as logging from '#/util/logging'
-import { shimmer, Shimmer } from './shimmer'
+import { shimmerToken } from './shimmer'
 
 export async function generateTokenNames(tokenDocument: TokenDocument) {
 	const actor = tokenDocument.actor
@@ -13,9 +13,9 @@ export async function generateTokenNames(tokenDocument: TokenDocument) {
 		type: actor.name
 	}
 	const token = canvas.tokens?.get(tokenDocument._id ?? "")
-	let shimmerFilter: Shimmer | null = null
+	let shimmerFilter
 	if (token) {
-		shimmerFilter = shimmer(token)
+		shimmerFilter = shimmerToken(token)
 		shimmerFilter.fadeIn(500)
 	}
 	const result = await ForgeNames.fromOptions(options).generate({
@@ -24,7 +24,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument) {
 	if (!result.success)
 		logging.errorU(result.error)
 	else {
-		//@ts-ignore
+		//@ts-ignore 
 		tokenDocument.update({ name: result.output.names[0] }, {})
 	}
 	if (shimmerFilter)

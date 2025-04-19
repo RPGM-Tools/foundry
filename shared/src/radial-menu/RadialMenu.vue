@@ -1,7 +1,6 @@
 <template>
-	<div v-if="Items.length > 0" @mouseenter="hoverIn" @mouseout="focusOut" :class="{ pressed: buttonPressed }"
-		@focusout="focusOut" class="radial-menu-container" ref="root" :open="isOpen"
-		:style="[rootStyle, radialFloater.floatingStyles.value]">
+	<div v-if="Items.length > 0" :class="{ pressed: buttonPressed }" @focusout="focusOut" class="radial-menu-container"
+		ref="root" :open="isOpen" :style="[rootStyle, radialFloater.floatingStyles.value]">
 		<button class="radial-menu-center" ref="center" :style="{ width: `${centerSize}px`, height: `${centerSize}px` }"
 			:class="{ pressed: centerPressed }" @keydown.space="centerPressed = true" @keyup.space="centerPressed = false"
 			@click.prevent="toggleOpen">
@@ -22,8 +21,8 @@
 	</div>
 </template>
 
-<script setup lang="ts" generic="Context extends ButtonContext">
-import { ref, useTemplateRef, toRef, inject, computed, onMounted } from 'vue'
+<script setup lang="ts" generic="Context extends Reactive<ButtonContext>">
+import { ref, useTemplateRef, toRef, inject, computed, onMounted, type Reactive } from 'vue'
 import { autoUpdate, offset, useFloating } from '@floating-ui/vue'
 import diceImage from '../../assets/d20-128x128.png'
 import buttonImage from '../../assets/d20.png'
@@ -122,15 +121,10 @@ async function onSubButtonClick(_: number, callback: (params: Context) => Promis
 	center.value?.blur()
 }
 
-function hoverIn() {
-	if (!isOpen.value) {
-		toggleOpen()
-	}
-}
-
 function toggleOpen() {
 	if (menuContext.loading) return
 	isOpen.value = !isOpen.value;
+	center.value?.focus()
 	// Fix overlap of subsequent radial menus
 	if (root.value?.parentElement)
 		root.value.parentElement.style.zIndex = isOpen.value ? "999" : "99"
@@ -138,7 +132,6 @@ function toggleOpen() {
 
 function focusOut(event: FocusEvent) {
 	if (root.value?.contains(event.relatedTarget as HTMLElement)) return
-	center.value?.blur()
 	isOpen.value = false
 }
 
@@ -195,7 +188,7 @@ function getSubButtonStyle(index: number) {
 
 .radial-menu-container {
 	transition: width 0.2s ease, height 0.2s ease !important;
-	pointer-events: all;
+	pointer-events: none;
 	overflow: visible;
 	margin: 0;
 	padding: 0;

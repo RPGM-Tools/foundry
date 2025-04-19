@@ -10,3 +10,8 @@ export async function writeOn(context: InputContext, text: string, time: number)
 		}, time / text.length)
 	})
 }
+
+export function shimmerInput(context: InputContext) {
+	context.element.classList.add("rpgm-active")
+	return () => { context.element.classList.remove("rpgm-active") }
+}
