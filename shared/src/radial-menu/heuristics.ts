@@ -1,6 +1,4 @@
-import * as logging from "#/util/logging"
-
-export function contextHeuristics(context: InputContext) {
+export function hudHeuristics(context: TokenHudContext) {
 	let flag = false
 	let chatAllowed = false
 
@@ -14,7 +12,34 @@ export function contextHeuristics(context: InputContext) {
 
 	const api = {
 		/** Get the result of the heuristics */
-		get value() {
+		get result() {
+			defaults()
+			return !flag
+		},
+		isGM() {
+			flag ||= !game.user.isGM
+			return api
+		},
+	}
+
+	return api
+}
+
+export function inputHeuristics(context: InputContext) {
+	let flag = false
+	let chatAllowed = false
+
+	function defaults() {
+		// Prevent attaching to any input which contains "search"
+		flag ||= context.element.outerHTML.toLowerCase().includes("search")
+		// Don't attach to chat interface by default
+		if (!chatAllowed)
+			flag ||= context.element.id === "chat-message"
+	}
+
+	const api = {
+		/** Get the result of the heuristics */
+		get result() {
 			defaults()
 			return !flag
 		},
@@ -30,7 +55,6 @@ export function contextHeuristics(context: InputContext) {
 		/** Attach button to the main chat interface */
 		isChat() {
 			chatAllowed = true
-			if (context.element.id === "chat-message") logging.log("Found chat-message!")
 			flag ||= context.element.id !== "chat-message"
 			return api
 		},

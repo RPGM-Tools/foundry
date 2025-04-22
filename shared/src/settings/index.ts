@@ -1,5 +1,5 @@
 import { SecretsSettings } from "./secrets"
-import { RadialMenuSettings } from "./radial_menu"
+import { RadialMenuSettings } from "./radialMenu"
 
 /** Register shared settings once */
 export function GlobalSettings() {
@@ -17,7 +17,6 @@ export function GlobalSettings() {
 	game.settings.register("rpgm-tools", "radial_menu_enabled", {
 		name: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED"),
 		hint: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED_HINT"),
-		type: String,
 	})
 }
 

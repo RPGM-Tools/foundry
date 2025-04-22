@@ -45,6 +45,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 	}
 
 	async fadeIn(duration: number = 1000): Promise<void> {
+		if (this.active) return
 		return new Promise((resolve) => {
 			this.active = true
 			const start = performance.now();

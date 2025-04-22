@@ -1,14 +1,13 @@
-import { type Ref } from "vue"
-
 declare global {
+	// List of valid category strings, to be merged by modules
+	interface RadialMenuCategories { }
+
 	type RadialMenuCategoryOptions = {
 		color: string
 	}
-}
 
-declare global {
-	interface RadialButton<T extends ButtonContext> {
-		category: string
+	interface RadialButton<T = ButtonContext> {
+		category: RadialMenuCategoryOptions
 		icon: string
 		tooltip: string
 		detective: (context: T) => boolean
@@ -17,16 +16,16 @@ declare global {
 
 	interface ButtonContext {
 		loading: boolean
+		element: HTMLElement
 	}
 
 	interface InputContext extends ButtonContext {
-		element: HTMLElement
 		getValue(): string
 		setValue(value: string): void
 	}
 
 	interface TokenHudContext extends ButtonContext {
-		token: Token
+		token: Token | undefined
 	}
 }
 export { }

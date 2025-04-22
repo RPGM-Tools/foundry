@@ -1,14 +1,16 @@
-import * as logging from '#/util/logging'
-import { createApp, App, reactive } from 'vue'
+import { createApp, App, type Reactive, shallowReactive } from 'vue'
 import RadialMenu from './RadialMenu.vue'
 import { RPGMTokenHUD } from './hud'
 
-export { contextHeuristics } from './heuristics'
+export * from './heuristics'
 export * from './funcs'
 
 export class RadialMenuRegister {
 	elements = new Map<HTMLElement, { vueApp: App, injectedEl: HTMLElement }>()
-	categories: Map<string, RadialMenuCategoryOptions> = new Map()
+	private _categories: Record<string, RadialMenuCategoryOptions> = {}
+	get categories(): Readonly<typeof this._categories> {
+		return this._categories
+	}
 	buttons: RadialButton<InputContext>[] = []
 	tokenHudButtons: RadialButton<TokenHudContext>[] = []
 	inputObserver: MutationObserver
@@ -34,6 +36,7 @@ export class RadialMenuRegister {
 	}
 
 	private async createRadialMenu(el: HTMLElement) {
+		rpgm.logger.log("Attached to " + el)
 		const vueApp = createApp(RadialMenu, { element: el })
 		const appContainer = document.createElement('div')
 		appContainer.style.position = 'fixed'
@@ -53,7 +56,7 @@ export class RadialMenuRegister {
 		}
 		vueApp.provide('element', el)
 		vueApp.provide<RadialButton<InputContext>[]>('items', rpgm.radialMenu.buttons)
-		vueApp.provide<InputContext>('context', reactive({
+		vueApp.provide<Reactive<InputContext>>('context', shallowReactive({
 			loading: false,
 			element: el,
 			getValue,
@@ -64,6 +67,7 @@ export class RadialMenuRegister {
 	}
 	private deleteRadialMenu(el: HTMLElement): void {
 		if (!this.elements.has(el)) return
+		rpgm.logger.log("Detatched from " + el)
 		const { vueApp, injectedEl } = this.elements.get(el) as { vueApp: App, injectedEl: HTMLElement }
 		vueApp.unmount()
 		injectedEl.remove()
@@ -88,9 +92,8 @@ export class RadialMenuRegister {
 		)
 	}
 
-
 	update() {
-		if (game.settings.get("rpgm-tools", "radial_menu_enabled") === "true")
+		if (game.settings.get("rpgm-tools", "radial_menu_enabled") === true)
 			this.startWatching()
 		else
 			this.stopWatching()
@@ -113,21 +116,18 @@ export class RadialMenuRegister {
 		})
 	}
 
-	registerCategory(key: string, options: RadialMenuCategoryOptions) {
-		this.categories.set(key, options)
+	registerCategory<T extends keyof RadialMenuCategories>(id: T, category: RadialMenuCategoryOptions) {
+		rpgm.logger.debug(`Registering radial menu category: ${id}`)
+		this._categories[id] = category
 	}
 
 	registerInputButton(button: RadialButton<InputContext>) {
-		if (this.categories.has(button.category))
-			this.buttons.push(button)
-		else
-			logging.error(`Failed to register radial button: "${button.category} " is not a valid category!`)
+		rpgm.logger.debug(`Registering radial menu button: ${game.i18n.localize(button.tooltip)}`)
+		this.buttons.push(button)
 	}
 
 	registerTokenHudButton(button: RadialButton<TokenHudContext>) {
-		if (this.categories.has(button.category))
-			this.tokenHudButtons.push(button)
-		else
-			logging.error(`Failed to register radial button: "${button.category} " is not a valid category!`)
+		rpgm.logger.debug(`Registering radial menu button: ${game.i18n.localize(button.tooltip)}`)
+		this.tokenHudButtons.push(button)
 	}
 }

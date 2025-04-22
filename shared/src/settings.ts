@@ -1,4 +1,5 @@
-import { RadialMenuSettings } from "./settings/radial_menu"
+import { DeveloperSettings } from "./settings/developer"
+import { RadialMenuSettings } from "./settings/radialMenu"
 import { SecretsSettings } from "./settings/secrets"
 
 /** Register shared settings once */
@@ -16,8 +17,12 @@ export function GlobalSettings() {
 	game.settings.register("rpgm-tools", "radial_menu_enabled", {
 		name: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED"),
 		hint: game.i18n.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED_HINT"),
-		default: "true",
-		type: String,
+		default: true,
+	})
+	game.settings.register("rpgm-tools", "debug_mode", {
+		name: game.i18n.localize("RPGM.CONFIG.DEBUG_MODE"),
+		hint: game.i18n.localize("RPGM.CONFIG.DEBUG_MODE_HINT"),
+		default: false,
 	})
 }
 
@@ -38,5 +43,13 @@ export function GlobalMenus(id: string) {
 		icon: "fas fa-key",
 		type: SecretsSettings,
 		restricted: true,
+	})
+	game.settings.registerMenu(id, "developer", {
+		name: game.i18n.localize("RPGM.CONFIG.DEVELOPER_SETTINGS"),
+		hint: game.i18n.localize("RPGM.CONFIG.DEVELOPER_SETTINGS_HINT"),
+		label: game.i18n.localize("RPGM.CONFIG.DEVELOPER_SETTINGS"),
+		icon: "fa fa-flask",
+		type: DeveloperSettings,
+		restricted: true
 	})
 }

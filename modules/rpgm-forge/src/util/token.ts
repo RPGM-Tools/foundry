@@ -1,5 +1,4 @@
 import { ForgeNames } from '@rpgm/forge'
-import * as logging from '#/util/logging'
 import { shimmerToken } from './shimmer'
 
 export async function generateTokenNames(tokenDocument: TokenDocument) {
@@ -22,7 +21,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument) {
 		auth_token: game.settings.get("rpgm-tools", "api_key")
 	})
 	if (!result.success)
-		logging.errorU(result.error)
+		rpgm.logger.errorU(result.error)
 	else {
 		//@ts-ignore 
 		tokenDocument.update({ name: result.output.names[0] }, {})

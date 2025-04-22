@@ -13,7 +13,7 @@
 		"types": [
 			"vite/client",
 			"fvtt-types/lenient",
-			"@rpgm/forge/types"
+			"@rpgm/forge/types",
 		],
 		"plugins": [
 			{

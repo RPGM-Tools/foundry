@@ -1,10 +1,14 @@
-import { RadialMenuRegister } from "#/radial-menu"
+import type { RadialMenuRegister } from "#/radial-menu"
+import { ChatCommands } from "@/chat"
+import type { RPGMLogger } from "@/util/logging"
 
 interface RPGM {
 	gameVersion: string
 	majorGameVersion: number
 	settings: {},
 	radialMenu: RadialMenuRegister
+	chatCommands: ChatCommands
+	logger: RPGMLogger
 	forge?: ForgeApi
 	vault?: VaultApi
 	tome?: TomeApi
@@ -25,7 +29,8 @@ declare global {
 	interface SettingConfig {
 		'rpgm-tools.api_key': string
 		'rpgm-tools.verbosity': string
-		'rpgm-tools.radial_menu_enabled': string
+		'rpgm-tools.radial_menu_enabled': boolean
+		'rpgm-tools.debug_mode': boolean
 	}
 
 	namespace Hooks {
