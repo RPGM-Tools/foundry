@@ -1,10 +1,13 @@
 declare global {
-	interface VaultLang {
-		SOMETHING: string,
-		EVEN: string,
-		CRAZIER: string,
+	interface VaultI18n {
+		VAULT: {
+			RADIAL_MENU: {
+				SAVE
+				ANALYZE
+			},
+		}
 	}
-	interface RpgmLang extends ForgeLang { }
+	interface RpgmI18n extends VaultI18n { }
 }
 
 export { }

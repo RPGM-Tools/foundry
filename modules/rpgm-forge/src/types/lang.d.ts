@@ -4,7 +4,7 @@ declare global {
 		SOMETHING
 		CRAZY
 	}
-	interface RpgmLang extends ForgeLang { }
+	interface RpgmI18n extends ForgeLang { }
 }
 
 export { }

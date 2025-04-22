@@ -6,6 +6,9 @@
 	"scripts": {
 		"dev": "vite build --watch & vite",
 		"preview": "vite build --watch & vite preview",
-		"build": "vite build"
+		"build": "vue-tsc && vite build"
+	},
+	"dependencies": {
+		"@rpgm/utils": "github:RPGM-Tools/utils"
 	}
 }

@@ -1,5 +1,5 @@
 import type { RadialMenuRegister } from "#/radial-menu"
-import type { ChatCommands } from "@/chat"
+import type { ChatCommands } from "#/chat"
 import type { RPGMLogger } from "#/util/logging"
 
 interface RPGM {

@@ -15,7 +15,7 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerInputButton({
 		category: rpgm.radialMenu.categories.rpgm_vault,
 		icon: 'fa fa-file-export',
-		tooltip: "",
+		tooltip: "VAULT.RADIAL_MENU.SAVE",
 		detective: (context) => inputHeuristics(context).noNumber().result,
 		callback: async () => {
 			rpgm.logger.logU("Saving this value...")
@@ -24,7 +24,7 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerInputButton({
 		category: rpgm.radialMenu.categories.rpgm_vault,
 		icon: 'fa fa-crosshairs-simple',
-		tooltip: "",
+		tooltip: "VAULT.RADIAL_MENU.ANALYZE",
 		detective: (context) => inputHeuristics(context).noNumber().result,
 		callback: async () => rpgm.logger.logU("Analyzing this value...")
 	})

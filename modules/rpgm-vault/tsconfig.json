@@ -18,8 +18,7 @@
 		},
 		"types": [
 			"vite/client",
-			"fvtt-types/lenient",
-			"@rpgm/vault/types"
+			"fvtt-types/lenient"
 		],
 		"plugins": [
 			{

@@ -14,14 +14,14 @@ const submit = () => {
 <template>
 	<form @submit.prevent="submit" class="rpgm-app flexcol">
 		<div class="scrollable">
-			<h2>{{ rpgm.localize("CONFIG.RADIAL_MENU_SETTINGS") }}</h2>
-			<i>{{ rpgm.localize("CONFIG.RADIAL_MENU_SETTINGS_SUBTITLE") }}</i>
+			<h2>{{ rpgm.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS") }}</h2>
+			<i>{{ rpgm.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS_SUBTITLE") }}</i>
 			<div class="form-group" data-setting-id="rpgm-tools.api_key">
-				<label>{{ rpgm.localize("CONFIG.RADIAL_MENU_ENABLED") }}</label>
+				<label>{{ rpgm.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED") }}</label>
 				<div class="form-fields">
 					<input v-model="radialMenuEnabled" type="checkbox" data-dtype="String">
 				</div>
-				<p class="notes">{{ rpgm.localize("CONFIG.RADIAL_MENU_ENABLED_HINT") }}</p>
+				<p class="notes">{{ rpgm.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED_HINT") }}</p>
 			</div>
 		</div>
 		<footer>

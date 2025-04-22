@@ -1,5 +1,8 @@
 export default {
-	SOMETHING: "",
-	EVEN: "",
-	CRAZIER: ""
-} satisfies VaultLang
+	VAULT: {
+		RADIAL_MENU: {
+			SAVE: "Save",
+			ANALYZE: "Analyze"
+		}
+	}
+} satisfies VaultI18n

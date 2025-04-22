@@ -13,14 +13,14 @@ const submit = () => {
 <template>
 	<form @submit.prevent="submit" class="rpgm-app flexcol">
 		<div class="scrollable">
-			<h2>{{ rpgm.localize("CONFIG.SECRETS_SETTINGS") }}</h2>
-			<i>{{ rpgm.localize("CONFIG.SECRETS_SETTINGS_SUBTITLE") }}</i>
+			<h2>{{ rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS") }}</h2>
+			<i>{{ rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS_SUBTITLE") }}</i>
 			<div class="form-group" data-setting-id="rpgm-tools.api_key">
-				<label>{{ rpgm.localize("CONFIG.API_KEY") }}</label>
+				<label>{{ rpgm.localize("RPGM.CONFIG.API_KEY") }}</label>
 				<div class="form-fields">
 					<input v-model="api_key" type="password" name="rpgm-tools.api_key" data-dtype="String">
 				</div>
-				<p class="notes">{{ rpgm.localize("CONFIG.API_KEY_HINT") }}</p>
+				<p class="notes">{{ rpgm.localize("RPGM.CONFIG.API_KEY_HINT") }}</p>
 			</div>
 		</div>
 		<footer>

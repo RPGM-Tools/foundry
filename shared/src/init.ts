@@ -19,7 +19,7 @@ export function initRpgm(source: string) {
 	GlobalSettings()
 	readyRpgm()
 	rpgm.radialMenu.registerCategory("rpgm_debug", { color: '60deg' })
-	rpgm.localize("CONFIG.SECRETS_SETTINGS")
+	rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS")
 	rpgm.logger.log(`This RPGM Tools experience was brought to you by: '${source}'`)
 }
 

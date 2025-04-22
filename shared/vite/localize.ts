@@ -31,7 +31,7 @@ export function GenerateI18n(langGlob: string): Plugin {
 				const name = basename(file).split('.')[0]
 
 				const { default: m } = await import(file)
-				const merged = { RPGM: { ...langs[name], ...m } }
+				const merged = { ...langs[name], ...m }
 				fs.mkdirSync(`${config.build.outDir}/lang`)
 				fs.writeFileSync(`${config.build.outDir}/lang/${name}.json`, JSON.stringify(merged, null, 4))
 			}

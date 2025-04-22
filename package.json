@@ -12,7 +12,8 @@
 		"@vitejs/plugin-vue": "^5.2.1",
 		"fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#documents-v2",
 		"typescript-vue-plugin": "^1.8.27",
-		"vite": "^6.2.1"
+		"vite": "^6.2.1",
+		"vue-tsc": "^2.2.10"
 	},
 	"dependencies": {
 		"@floating-ui/vue": "^1.1.6"

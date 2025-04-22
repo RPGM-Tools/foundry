@@ -18,14 +18,14 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerTokenHudButton({
 		category: rpgm.radialMenu.categories.rpgm_debug,
 		icon: 'fa-regular fa-circle-info',
-		tooltip: "RADIAL_MENU.INFO",
+		tooltip: "RPGM.RADIAL_MENU.INFO",
 		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
 		callback: async (context) => rpgm.logger.log(context.token?.actor)
 	})
 	rpgm.radialMenu.registerInputButton({
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		icon: 'fa fa-dice-d4',
-		tooltip: "RADIAL_MENU.D4",
+		tooltip: "RPGM.RADIAL_MENU.D4",
 		detective: (context) => inputHeuristics(context).noNumber().result,
 		callback: async (context) => {
 			const effect = shimmerInput(context)
@@ -36,7 +36,7 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerInputButton({
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		icon: 'fa fa-dice-d6',
-		tooltip: "RADIAL_MENU.D6",
+		tooltip: "RPGM.RADIAL_MENU.D6",
 		detective: (context) => inputHeuristics(context).noNumber().result,
 		callback: async (context) => {
 			const effect = shimmerInput(context)
@@ -47,7 +47,7 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerInputButton({
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		icon: 'fa fa-comment',
-		tooltip: "RADIAL_MENU.LOREM_IPSUM",
+		tooltip: "RPGM.RADIAL_MENU.LOREM_IPSUM",
 		detective: (context) => inputHeuristics(context).isChat().noNumber().result,
 		callback: async (context) => {
 			const effect = shimmerInput(context)
@@ -58,7 +58,7 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerInputButton({
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		icon: 'fa fa-sparkles',
-		tooltip: "RADIAL_MENU.START_SHIMMER",
+		tooltip: "RPGM.RADIAL_MENU.START_SHIMMER",
 		detective: (context) => inputHeuristics(context).isChat().noNumber().result,
 		callback: async (context) => {
 			context.element.classList.add("rpgm-active")
@@ -67,7 +67,7 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerInputButton({
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		icon: 'fa-regular fa-sparkle',
-		tooltip: "RADIAL_MENU.STOP_SHIMMER",
+		tooltip: "RPGM.RADIAL_MENU.STOP_SHIMMER",
 		detective: (context) => inputHeuristics(context).isChat().noNumber().result,
 		callback: async (context) => {
 			context.element.classList.remove("rpgm-active")
@@ -76,9 +76,9 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerTokenHudButton({
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		icon: 'fa fa-input-text',
-		tooltip: "RADIAL_MENU.NAMES",
+		tooltip: "RPGM.RADIAL_MENU.NAMES",
 		detective: () => true,
-		callback: (context) => {
+		callback: async (context) => {
 			if (!context.token) return rpgm.logger.log("No token selected")
 			return generateTokenNames(context.token.document)
 		}
@@ -86,7 +86,7 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerTokenHudButton({
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		icon: 'fa fa-sparkles',
-		tooltip: "RADIAL_MENU.START_SHIMMER",
+		tooltip: "RPGM.RADIAL_MENU.START_SHIMMER",
 		detective: () => true,
 		callback: async (context) => {
 			if (!context.token) return
@@ -97,7 +97,7 @@ function registerRadialMenu() {
 	rpgm.radialMenu.registerTokenHudButton({
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		icon: 'fa-regular fa-sparkle',
-		tooltip: "RADIAL_MENU.STOP_SHIMMER",
+		tooltip: "RPGM.RADIAL_MENU.STOP_SHIMMER",
 		detective: () => true,
 		callback: async (context) => {
 			if (!context.token) return
