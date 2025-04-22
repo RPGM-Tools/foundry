@@ -1,8 +1,8 @@
+import vue from '@vitejs/plugin-vue'
+import { GenerateI18n, Versioning } from '##/vite'
 import { defineConfig, loadEnv } from 'vite'
 import { resolve } from 'node:path'
 import { version } from './package.json'
-import { Versioning } from '#/versioning'
-import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd())
@@ -24,7 +24,9 @@ export default defineConfig(({ mode }) => {
 		resolve: {
 			alias: {
 				'@': resolve(__dirname, 'src'),
+				'@@': __dirname,
 				'#': resolve(__dirname, "../../shared/src"),
+				'##': resolve(__dirname, "../../shared"),
 			},
 		},
 		define: {
@@ -34,7 +36,7 @@ export default defineConfig(({ mode }) => {
 		envPrefix: "RPGM_",
 		keepProcessEnv: false,
 		build: {
-			outDir: resolve(__dirname, "dist"),
+			outDir: resolve(__dirname, ".dist"),
 			emptyOutDir: true,
 			// // This wasn't minifying correctly, try enabling if things break
 			// lib: {
@@ -57,6 +59,7 @@ export default defineConfig(({ mode }) => {
 		plugins: [
 			vue(),
 			Versioning(version),
+			GenerateI18n(resolve(__dirname, "./lang/*"))
 		]
 	})
 })

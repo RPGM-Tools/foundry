@@ -5,6 +5,7 @@
 
 .rpgm-app {
 	min-height: 400px;
+	max-width: 600px;
 
 	.scrollable {
 		flex-grow: 1;

@@ -7,10 +7,8 @@ export * from './funcs'
 
 export class RadialMenuRegister {
 	elements = new Map<HTMLElement, { vueApp: App, injectedEl: HTMLElement }>()
-	private _categories: Record<string, RadialMenuCategoryOptions> = {}
-	get categories(): Readonly<typeof this._categories> {
-		return this._categories
-	}
+	private _categories: Record<keyof RadialMenuCategories, RadialMenuCategoryOptions> = {} as any
+	get categories(): Readonly<typeof this._categories> { return this._categories }
 	buttons: RadialButton<InputContext>[] = []
 	tokenHudButtons: RadialButton<TokenHudContext>[] = []
 	inputObserver: MutationObserver
@@ -36,7 +34,7 @@ export class RadialMenuRegister {
 	}
 
 	private async createRadialMenu(el: HTMLElement) {
-		rpgm.logger.log("Attached to " + el)
+		rpgm.logger.debug("Attached to ", el)
 		const vueApp = createApp(RadialMenu, { element: el })
 		const appContainer = document.createElement('div')
 		appContainer.style.position = 'fixed'
@@ -122,12 +120,12 @@ export class RadialMenuRegister {
 	}
 
 	registerInputButton(button: RadialButton<InputContext>) {
-		rpgm.logger.debug(`Registering radial menu button: ${game.i18n.localize(button.tooltip)}`)
+		rpgm.logger.debug(`Registering radial menu button: ${rpgm.localize(button.tooltip)}`)
 		this.buttons.push(button)
 	}
 
 	registerTokenHudButton(button: RadialButton<TokenHudContext>) {
-		rpgm.logger.debug(`Registering radial menu button: ${game.i18n.localize(button.tooltip)}`)
+		rpgm.logger.debug(`Registering radial menu button: ${rpgm.localize(button.tooltip)}`)
 		this.tokenHudButtons.push(button)
 	}
 }

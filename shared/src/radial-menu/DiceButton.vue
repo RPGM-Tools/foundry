@@ -4,15 +4,15 @@
 		@keyup.space="pressed = false">
 		<img :src="buttonImage" :style="[colorStyle, rotationStyle]" class="button-image">
 		<i class="button-icon" :class="button.icon"></i>
-		<span v-if="button.tooltip" class="radial-menu-tooltip">{{ localize(button.tooltip) }}</span>
+		<span v-if="button.tooltip" class="radial-menu-tooltip">{{ rpgm.localize(button.tooltip) }}</span>
 	</button>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, ref, type StyleValue, watch } from 'vue';
 import buttonImage from '../../assets/d20.png'
-import { localize } from '../util/util';
 
+const rpgm = globalThis.rpgm
 const pressed = ref(false)
 
 const emit = defineEmits(['click'])

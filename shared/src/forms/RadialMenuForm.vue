@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useGame, localize } from '#/util/util'
 import { ref } from 'vue';
 
-const game = useGame()
+const game = globalThis.game
+const rpgm = globalThis.rpgm
 const radialMenuEnabled = ref(game.settings.get("rpgm-tools", "radial_menu_enabled"))
 
 const submit = () => {
@@ -14,14 +14,14 @@ const submit = () => {
 <template>
 	<form @submit.prevent="submit" class="rpgm-app flexcol">
 		<div class="scrollable">
-			<h2>{{ localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS") }}</h2>
-			<i>{{ localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS_SUBTITLE") }}</i>
+			<h2>{{ rpgm.localize("CONFIG.RADIAL_MENU_SETTINGS") }}</h2>
+			<i>{{ rpgm.localize("CONFIG.RADIAL_MENU_SETTINGS_SUBTITLE") }}</i>
 			<div class="form-group" data-setting-id="rpgm-tools.api_key">
-				<label>{{ localize("RPGM.CONFIG.RADIAL_MENU_ENABLED") }}</label>
+				<label>{{ rpgm.localize("CONFIG.RADIAL_MENU_ENABLED") }}</label>
 				<div class="form-fields">
 					<input v-model="radialMenuEnabled" type="checkbox" data-dtype="String">
 				</div>
-				<p class="notes">{{ localize("RPGM.CONFIG.RADIAL_MENU_ENABLED_HINT") }}</p>
+				<p class="notes">{{ rpgm.localize("CONFIG.RADIAL_MENU_ENABLED_HINT") }}</p>
 			</div>
 		</div>
 		<footer>

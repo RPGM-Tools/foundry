@@ -1,6 +1,8 @@
 declare global {
 	// List of valid category strings, to be merged by modules
-	interface RadialMenuCategories { }
+	interface RadialMenuCategories {
+		"rpgm_debug"
+	}
 
 	type RadialMenuCategoryOptions = {
 		color: string
@@ -9,7 +11,7 @@ declare global {
 	interface RadialButton<T = ButtonContext> {
 		category: RadialMenuCategoryOptions
 		icon: string
-		tooltip: string
+		tooltip: RpgmLangs
 		detective: (context: T) => boolean
 		callback: (context: T) => Promise<void>
 	}

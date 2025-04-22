@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useGame, localize } from '#/util/util'
 import { ref } from 'vue';
 
-const game = useGame()
+const game = globalThis.game
+const rpgm = globalThis.rpgm
 const debugEnabled = ref(game.settings.get("rpgm-tools", "debug_mode"))
 
 const submit = () => {
@@ -13,14 +13,14 @@ const submit = () => {
 <template>
 	<form @submit.prevent="submit" class="rpgm-app flexcol">
 		<div class="scrollable">
-			<h2>{{ localize("RPGM.CONFIG.DEVELOPER_SETTINGS") }}</h2>
-			<i>{{ localize("RPGM.CONFIG.DEVELOPER_SETTINGS_SUBTITLE") }}</i>
+			<h2>{{ rpgm.localize("CONFIG.DEVELOPER_SETTINGS") }}</h2>
+			<i>{{ rpgm.localize("CONFIG.DEVELOPER_SETTINGS_SUBTITLE") }}</i>
 			<div class="form-group" data-setting-id="rpgm-tools.debug_mode">
-				<label>{{ localize("RPGM.CONFIG.DEBUG_MODE") }}</label>
+				<label>{{ rpgm.localize("CONFIG.DEBUG_MODE") }}</label>
 				<div class="form-fields">
 					<input v-model="debugEnabled" type="checkbox" data-dtype="String">
 				</div>
-				<p class="notes">{{ localize("RPGM.CONFIG.DEBUG_MODE_HINT") }}</p>
+				<p class="notes">{{ rpgm.localize("CONFIG.DEBUG_MODE_HINT") }}</p>
 			</div>
 		</div>
 		<footer>

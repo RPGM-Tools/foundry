@@ -2,20 +2,24 @@ import { ChatCommands } from './chat'
 import { RadialMenuRegister } from './radial-menu'
 import { GlobalSettings } from './settings'
 import { RPGMLogger } from './util/logging'
+import { localize } from './util/localize'
 
 export function initRpgm(source: string) {
 	if (globalThis.rpgm) return
-	GlobalSettings()
-
 	globalThis.rpgm = {
 		gameVersion: game.version,
 		majorGameVersion: game.data.release.generation,
 		logger: new RPGMLogger(),
 		radialMenu: new RadialMenuRegister(),
 		chatCommands: new ChatCommands(),
+		localize,
 		settings: {}
 	}
+
+	GlobalSettings()
 	readyRpgm()
+	rpgm.radialMenu.registerCategory("rpgm_debug", { color: '60deg' })
+	rpgm.localize("CONFIG.SECRETS_SETTINGS")
 	rpgm.logger.log(`This RPGM Tools experience was brought to you by: '${source}'`)
 }
 

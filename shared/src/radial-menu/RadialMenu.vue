@@ -27,10 +27,6 @@ const MAX_CENTER_SIZE = 35
 const items = inject<RadialButton<ButtonContext>[]>('items', [])
 const menuContext = inject<ButtonContext>('context') as ButtonContext
 
-// watch(() => menuContext.loading, (value) => {
-// 	rpgm.logger.log(value)
-// })
-
 // States for menu open/close and hover
 const isOpen = ref(false)
 const centerPressed = ref(false)
@@ -38,6 +34,8 @@ const root = useTemplateRef('root')
 const center = useTemplateRef('center')
 
 const Items = computed(() => {
+	// Update items each time the menu is opened 
+	isOpen.value
 	return items.filter(value => value.detective(menuContext))
 })
 

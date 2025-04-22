@@ -16,6 +16,10 @@ export function hudHeuristics(context: TokenHudContext) {
 			defaults()
 			return !flag
 		},
+		isDebug() {
+			flag ||= !game.settings.get("rpgm-tools", "debug_mode")
+			return api
+		},
 		isGM() {
 			flag ||= !game.user.isGM
 			return api
@@ -46,6 +50,10 @@ export function inputHeuristics(context: InputContext) {
 		/** Only inputs with text content are allowed */
 		noNumber() {
 			flag ||= /^\d+$/.test(context.getValue())
+			return api
+		},
+		isDebug() {
+			flag ||= !game.settings.get("rpgm-tools", "debug_mode")
 			return api
 		},
 		isGM() {
