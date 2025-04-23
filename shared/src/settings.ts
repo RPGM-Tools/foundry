@@ -14,9 +14,14 @@ export function GlobalSettings() {
 		hint: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED_HINT"),
 		default: true,
 	})
-	game.settings.register("rpgm-tools", "debug_mode", {
-		name: rpgm.localize("RPGM.CONFIG.DEBUG_MODE"),
-		hint: rpgm.localize("RPGM.CONFIG.DEBUG_MODE_HINT"),
+	game.settings.register("rpgm-tools", "radial_menu_debug", {
+		name: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_DEBUG"),
+		hint: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_DEBUG_HINT"),
+		default: false,
+	})
+	game.settings.register("rpgm-tools", "verbose-logs", {
+		name: rpgm.localize("RPGM.CONFIG.VERBOSE_LOGS"),
+		hint: rpgm.localize("RPGM.CONFIG.VERBOSE_LOGS_HINT"),
 		default: false,
 	})
 }

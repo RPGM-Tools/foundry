@@ -1,7 +1,7 @@
 import { RegisterSettings } from "./settings"
 import { generateTokenNames, registerTokenCreate } from "./util/token"
 import { initRpgm } from "#/init"
-import { inputHeuristics, hudHeuristics, shimmerInput, writeOn } from "#/radial-menu"
+import { inputHeuristics, shimmerInput, writeOn } from "#/radial-menu"
 import { shimmerToken } from "./util/shimmer"
 import '#/style.css'
 
@@ -15,13 +15,6 @@ registerTokenCreate()
 
 function registerRadialMenu() {
 	rpgm.radialMenu.registerCategory("rpgm_forge", { color: "276deg" })
-	rpgm.radialMenu.registerTokenHudButton({
-		category: rpgm.radialMenu.categories.rpgm_debug,
-		icon: 'fa-regular fa-circle-info',
-		tooltip: "RPGM.RADIAL_MENU.INFO",
-		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
-		callback: async (context) => rpgm.logger.log(context.token?.actor)
-	})
 	rpgm.radialMenu.registerInputButton({
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		icon: 'fa fa-dice-d4',

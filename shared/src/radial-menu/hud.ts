@@ -6,7 +6,7 @@ export class RPGMTokenHUD<Options extends Application.Options> extends TokenHUD<
 
 	protected override _replaceHTML(element: JQuery, html: JQuery): void {
 		super._replaceHTML(element, html)
-		new Promise(async () => {
+		new Promise(() => {
 			if (game.settings.get("rpgm-tools", "radial_menu_enabled") !== true) return
 			/**
 			 * Workaround for differences between Foundry 12 and 13 

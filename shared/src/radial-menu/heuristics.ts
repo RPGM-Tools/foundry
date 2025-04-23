@@ -17,7 +17,7 @@ export function hudHeuristics(context: TokenHudContext) {
 			return !flag
 		},
 		isDebug() {
-			flag ||= !game.settings.get("rpgm-tools", "debug_mode")
+			flag ||= !game.settings.get("rpgm-tools", "radial_menu_debug")
 			return api
 		},
 		isGM() {
@@ -53,7 +53,7 @@ export function inputHeuristics(context: InputContext) {
 			return api
 		},
 		isDebug() {
-			flag ||= !game.settings.get("rpgm-tools", "debug_mode")
+			flag ||= !game.settings.get("rpgm-tools", "radial_menu_debug")
 			return api
 		},
 		isGM() {

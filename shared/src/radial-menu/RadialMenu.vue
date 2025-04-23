@@ -8,8 +8,8 @@
 		</button>
 
 		<div class="submenu-group">
-			<DiceButton v-for="(button, index) in Items" @click="onSubClick" :item="menuContext" :button :index
-				:style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" />
+			<DiceButton v-for="(button, index) in Items" @click="onSubClick" :key="button.callback.toString()"
+				:item="menuContext" :button :index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" />
 		</div>
 	</div>
 </template>

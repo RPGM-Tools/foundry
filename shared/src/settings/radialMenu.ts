@@ -6,4 +6,6 @@ export class RadialMenuSettings extends RPGMSettingsMenu {
 	override get title(): string {
 		return "RPGM Tools - " + rpgm.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS")
 	}
+
+	override get id(): string { return "rpgm-radial-menu" }
 }

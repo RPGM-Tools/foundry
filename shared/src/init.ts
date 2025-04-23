@@ -1,5 +1,5 @@
 import { ChatCommands } from './chat'
-import { RadialMenuRegister } from './radial-menu'
+import { hudHeuristics, RadialMenuRegister } from './radial-menu'
 import { GlobalSettings } from './settings'
 import { RPGMLogger } from './util/logging'
 import { localize } from './util/localize'
@@ -13,12 +13,21 @@ export function initRpgm(source: string) {
 		radialMenu: new RadialMenuRegister(),
 		chatCommands: new ChatCommands(),
 		localize,
-		settings: {}
+		settings: {},
 	}
 
 	GlobalSettings()
 	readyRpgm()
+
 	rpgm.radialMenu.registerCategory("rpgm_debug", { color: '60deg' })
+	rpgm.radialMenu.registerTokenHudButton({
+		category: rpgm.radialMenu.categories.rpgm_debug,
+		icon: 'fa-regular fa-circle-info',
+		tooltip: "RPGM.RADIAL_MENU.INFO",
+		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
+		callback: async (context) => rpgm.logger.log(context.token?.actor)
+	})
+
 	rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS")
 	rpgm.logger.log(`This RPGM Tools experience was brought to you by: '${source}'`)
 }

@@ -22,11 +22,12 @@ export abstract class RPGMSettingsMenu extends FormApplication {
 
 	static override get defaultOptions() {
 		return foundry.utils.mergeObject(super.defaultOptions, {
-			id: "rpgm-secrets",
 			height: "500px",
 			width: "auto",
 		})
 	}
+
+	abstract override get id(): string
 
 	override async close(options?: FormApplication.CloseOptions): Promise<void> {
 		await super.close(options)

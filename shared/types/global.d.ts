@@ -24,12 +24,6 @@ declare global {
 	var rpgm: RPGM
 	var game: ReadyGame
 
-	interface SettingConfig {
-		'rpgm-tools.api_key': string
-		'rpgm-tools.radial_menu_enabled': boolean
-		'rpgm-tools.debug_mode': boolean
-	}
-
 	namespace Hooks {
 		interface StaticCallbacks {
 			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement>, app: Application) => void

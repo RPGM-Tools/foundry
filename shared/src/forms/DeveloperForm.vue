@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { useSetting } from '#/util';
 
-const game = globalThis.game
 const rpgm = globalThis.rpgm
-const debugEnabled = ref(game.settings.get("rpgm-tools", "debug_mode"))
+const verboseLogs = useSetting("rpgm-tools", "verbose-logs")
+const radialMenuDebug = useSetting("rpgm-tools", "radial_menu_debug")
 
 const submit = () => {
-	game.settings.set("rpgm-tools", "debug_mode", debugEnabled.value)
+	verboseLogs.apply()
+	radialMenuDebug.apply()
 }
 </script>
 
@@ -15,12 +16,19 @@ const submit = () => {
 		<div class="scrollable">
 			<h2>{{ rpgm.localize("RPGM.CONFIG.DEVELOPER_SETTINGS") }}</h2>
 			<i>{{ rpgm.localize("RPGM.CONFIG.DEVELOPER_SETTINGS_SUBTITLE") }}</i>
-			<div class="form-group" data-setting-id="rpgm-tools.debug_mode">
-				<label>{{ rpgm.localize("RPGM.CONFIG.DEBUG_MODE") }}</label>
+			<div class="form-group">
+				<label>{{ verboseLogs.name }}</label>
 				<div class="form-fields">
-					<input v-model="debugEnabled" type="checkbox" data-dtype="String">
+					<input v-model="verboseLogs.value" type="checkbox">
 				</div>
-				<p class="notes">{{ rpgm.localize("RPGM.CONFIG.DEBUG_MODE_HINT") }}</p>
+				<p class="notes">{{ verboseLogs.hint }}</p>
+			</div>
+			<div class="form-group">
+				<label>{{ radialMenuDebug.name }}</label>
+				<div class="form-fields">
+					<input v-model="radialMenuDebug.value" type="checkbox">
+				</div>
+				<p class="notes">{{ radialMenuDebug.hint }}</p>
 			</div>
 		</div>
 		<footer>

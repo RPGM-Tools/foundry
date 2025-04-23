@@ -20,8 +20,7 @@ export class ChatCommands {
 		this.chatPanel.mount(panelContainer)
 	}
 
-	// @ts-ignore
-	handleMessage(chatLog: ChatLog, message: string, chatData: { user: string; speaker: ReturnType<ChatMessage.ImplementationClass["getSpeaker"]>; },): boolean | void {
+	handleMessage(_: ChatLog, message: string, _1: { user: string; speaker: ReturnType<ChatMessage.ImplementationClass["getSpeaker"]>; },): boolean | void {
 		if (message.startsWith('*')) {
 			rpgm.logger.logU("Caught message: " + message)
 			return false

@@ -2,7 +2,7 @@ import fs from "fs";
 import { basename, resolve } from "path";
 import type { Plugin, ResolvedConfig } from "vite";
 
-const SHARED_LANG = './lang/*'
+const SHARED_LANG = '../lang/*'
 
 /*
  * Generates i18n files

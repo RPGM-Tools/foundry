@@ -15,7 +15,7 @@ export class RPGMLogger {
 	};
 
 	debug(...args: any) {
-		if (game.settings.get("rpgm-tools", "debug_mode"))
+		if (game.settings.get("rpgm-tools", "verbose-logs"))
 			this.sendMessage("log", "color: #dddddd; font-weight: bold;", ...args)
 	}
 
@@ -50,7 +50,7 @@ export class RPGMLogger {
 	}
 
 	debugF(style: string, ...msgs: any[]) {
-		if (game.settings.get("rpgm-tools", "debug_mode"))
+		if (game.settings.get("rpgm-tools", "verbose-logs"))
 			this.sendMessage("log", style, ...msgs)
 	}
 

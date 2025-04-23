@@ -6,4 +6,6 @@ export class SecretsSettings extends RPGMSettingsMenu {
 	override get title(): string {
 		return "RPGM Tools - " + rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS")
 	}
+
+	override get id(): string { return "rpgm-secrets" }
 }

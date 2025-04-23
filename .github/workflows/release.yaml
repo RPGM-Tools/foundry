@@ -41,7 +41,7 @@ jobs:
 
       - name: Get Version from package.json
         run: | 
-          "VERSION=$(node -p 'require("./modules/$MODULE_NAME/package.json").version')" >> $GITHUB_ENV
+          "VERSION=jq -r '.version' < ./modules/$MODULE_NAME" >> $GITHUB_ENV
           if ! test "$VERSION" == "$VERSION_NAME"; then
             echo "Version name is incorrect! Should be ${{env.VERSION}}, is ${{env.VERSION_NAME}}";
             exit 1

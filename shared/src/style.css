@@ -5,14 +5,26 @@
 
 .rpgm-app {
 	min-height: 400px;
+	max-height: 500px;
 	max-width: 600px;
+	position: relative;
 
 	.scrollable {
+		display: flex;
 		flex-grow: 1;
+		flex-direction: column;
 	}
 
 	footer {
 		flex-grow: 0;
+	}
+
+	.anchor-bottom {
+		margin-top: auto;
+	}
+
+	::placeholder {
+		text-align: center;
 	}
 }
 
