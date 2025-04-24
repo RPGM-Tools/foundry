@@ -13,7 +13,7 @@ declare global {
 		icon: string
 		tooltip: RpgmLangs
 		detective: (context: T) => boolean
-		callback: (context: T) => Promise<void>
+		callback: (context: T) => Promise<void> | void
 	}
 
 	interface ButtonContext {
@@ -30,4 +30,4 @@ declare global {
 		token: Token | undefined
 	}
 }
-export { }
+export { };

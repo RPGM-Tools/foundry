@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { shallowReactive } from 'vue';
 
 type SettingsRef<T> = {
 	name: string
@@ -14,15 +14,15 @@ export function useSetting<N extends ClientSettings.Namespace, K extends ClientS
 		namespace: N,
 		key: K,
 	) {
-	let setting = game.settings.settings.get(`${namespace}.${key}`)
-	let value = game.settings.get(namespace, key)
-	return reactive({
-		get name() { return game.i18n.localize(setting!.name ?? "") },
-		get hint() { return game.i18n.localize(setting!.hint ?? "") },
+	const setting = game.settings.settings.get(`${namespace}.${key}`);
+	const value = game.settings.get(namespace, key);
+	return shallowReactive({
+		get name() { return game.i18n.localize(setting!.name ?? ""); },
+		get hint() { return game.i18n.localize(setting!.hint ?? ""); },
 		initial: value as V,
-		value: value as any,
+		value: value as V,
 		apply() {
-			game.settings.set(namespace, key, this.value as ClientSettings.SettingAssignmentType<N, K>)
+			void game.settings.set(namespace, key, this.value as ClientSettings.SettingAssignmentType<N, K>);
 		}
-	}) as SettingsRef<V>
+	}) as SettingsRef<V>;
 }

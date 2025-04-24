@@ -6,4 +6,4 @@ declare global {
 		'rpgm-tools.radial_menu_debug': boolean
 	}
 }
-export { }
+export { };

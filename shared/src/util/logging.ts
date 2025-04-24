@@ -1,78 +1,84 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+type Msg = any
+
 export class RPGMLogger {
 	/** Logs a message to the console */
-	log(...msgs: any[]) {
-		this.sendMessage("log", "color: #ad8cef; font-weight: bold;", ...msgs)
+	log(...msgs: Msg[]) {
+		this.sendMessage("log", "color: #ad8cef; font-weight: bold;", ...msgs);
 	}
 
 	/** Logs a warning to the console */
-	warn(...args: any) {
-		this.sendMessage("warn", "color: #d47b4e; font-weight: bold;", ...args);
+	warn(...msgs: Msg[]) {
+		this.sendMessage("warn", "color: #d47b4e; font-weight: bold;", ...msgs);
 	};
 
 	/** Logs an error to the console */
-	error(...args: any) {
-		this.sendMessage("error", "color: #f46464; font-weight: bold;", ...args);
+	error(...msgs: Msg[]) {
+		this.sendMessage("error", "color: #f46464; font-weight: bold;", ...msgs);
 	};
 
-	debug(...args: any) {
+	debug(...msgs: Msg[]) {
 		if (game.settings.get("rpgm-tools", "verbose-logs"))
-			this.sendMessage("log", "color: #dddddd; font-weight: bold;", ...args)
+			this.sendMessage("log", "color: #dddddd; font-weight: bold;", ...msgs);
 	}
 
 	/** Shows information in Foundry and logs to the console */
-	logU(...msgs: any[]) {
-		this.showNotification("log", msgs.join(' '))
-		this.log(...msgs)
+	logU(...msgs: Msg[]) {
+		this.showNotification("log", msgs.join(' '));
+		this.log(...msgs);
 	}
 
 	/** Shows a warning in Foundry and logs to the console */
-	warnU(...msgs: any[]) {
-		this.showNotification("warn", msgs.join(' '))
-		this.warn(...msgs)
+	warnU(...msgs: Msg[]) {
+		this.showNotification("warn", msgs.join(' '));
+		this.warn(...msgs);
 	}
 
 	/** Shows an error in Foundry and logs to the console */
-	errorU(...msgs: any[]) {
-		this.showNotification("error", msgs.join(' '))
-		this.error(...msgs)
+	errorU(...msgs: Msg[]) {
+		this.showNotification("error", msgs.join(' '));
+		this.error(...msgs);
 	}
 
-	logF(style: string, ...msgs: any[]) {
-		this.sendMessage("log", style, ...msgs)
+	logF(style: string, ...msgs: Msg[]) {
+		this.sendMessage("log", style, ...msgs);
 	}
 
-	warnF(style: string, ...msgs: any[]) {
-		this.sendMessage("warn", style, ...msgs)
+	warnF(style: string, ...msgs: Msg[]) {
+		this.sendMessage("warn", style, ...msgs);
 	}
 
-	errorF(style: string, ...msgs: any[]) {
-		this.sendMessage("error", style, ...msgs)
+	errorF(style: string, ...msgs: Msg[]) {
+		this.sendMessage("error", style, ...msgs);
 	}
 
-	debugF(style: string, ...msgs: any[]) {
+	debugF(style: string, ...msgs: Msg[]) {
 		if (game.settings.get("rpgm-tools", "verbose-logs"))
-			this.sendMessage("log", style, ...msgs)
+			this.sendMessage("log", style, ...msgs);
 	}
 
 	/**
 	 * Sends a formatted log message to the console.
-	 *
 	 * @param {"log"|"warn"|"error"} method - The console method.
 	 * @param {string} style - CSS style for the log message.
 	 * @param {...any} messages - The messages to log.
 	 * @private
 	 */
-	private sendMessage(method: "log" | "warn" | "error", style: string, ...messages: any[]): void {
+	private sendMessage(method: "log" | "warn" | "error", style: string, ...messages: Msg[]): void {
 		const now = new Date();
 		const timestamp = now.toISOString().split("T")[1].split(".")[0];
-		const { strings, objects } = messages.reduce(
+		const { strings, objects } = messages.reduce<{ strings: string[], objects: any[] }>(
 			(acc, msg) => {
-				typeof msg === "string" ? acc.strings.push(msg) : acc.objects.push(msg);
+				if (typeof msg === "string")
+					acc.strings.push(msg);
+				else acc.objects.push(msg);
 				return acc;
 			},
 			{ strings: [], objects: [] }
 		);
 		const formattedMessage = `%c🎲📚 [${timestamp}] ${strings.join(" ")}`;
+		/* eslint-disable-next-line no-console */
 		console[method](formattedMessage, style, ...objects);
 	}
 
@@ -85,7 +91,7 @@ export class RPGMLogger {
 	 */
 	private showNotification(method: "log" | "warn" | "error", formattedMessage: string) {
 		if (!game.user.isGM) return;
-		let uiMessage = formattedMessage.replace(/%c/g, "");
+		const uiMessage = formattedMessage.replace(/%c/g, "");
 		const notificationMethod = method === "log" ? "info" : method;
 		ui.notifications[notificationMethod](uiMessage, { console: false });
 	}

@@ -1,55 +1,34 @@
-import { DeveloperSettings } from "./settings/developer"
-import { RadialMenuSettings } from "./settings/radialMenu"
-import { SecretsSettings } from "./settings/secrets"
+import { DeveloperSettings } from "./settings/developer";
+import { RadialMenuSettings } from "./settings/radialMenu";
+import { SecretsSettings } from "./settings/secrets";
 
 /** Register shared settings once */
 export function GlobalSettings() {
 	game.settings.register("rpgm-tools", "api_key", {
-		name: rpgm.localize("RPGM.CONFIG.API_KEY"),
-		hint: rpgm.localize("RPGM.CONFIG.API_KEY_HINT"),
+		name: rpgm.localize("RPGM_TOOLS.CONFIG.API_KEY"),
+		hint: rpgm.localize("RPGM_TOOLS.CONFIG.API_KEY_HINT"),
 		type: String,
-	})
+	});
 	game.settings.register("rpgm-tools", "radial_menu_enabled", {
-		name: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED"),
-		hint: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_ENABLED_HINT"),
+		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_ENABLED"),
+		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_ENABLED_HINT"),
 		default: true,
-	})
+	});
 	game.settings.register("rpgm-tools", "radial_menu_debug", {
-		name: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_DEBUG"),
-		hint: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_DEBUG_HINT"),
+		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG"),
+		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG_HINT"),
 		default: false,
-	})
+	});
 	game.settings.register("rpgm-tools", "verbose-logs", {
-		name: rpgm.localize("RPGM.CONFIG.VERBOSE_LOGS"),
-		hint: rpgm.localize("RPGM.CONFIG.VERBOSE_LOGS_HINT"),
+		name: rpgm.localize("RPGM_TOOLS.CONFIG.VERBOSE_LOGS"),
+		hint: rpgm.localize("RPGM_TOOLS.CONFIG.VERBOSE_LOGS_HINT"),
 		default: false,
-	})
+	});
 }
 
 /** Register shared settings menus on each module's settings page */
 export function GlobalMenus(id: string) {
-	game.settings.registerMenu(id, "radial-menu", {
-		name: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS"),
-		hint: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS_HINT"),
-		label: rpgm.localize("RPGM.CONFIG.RADIAL_MENU_SETTINGS"),
-		icon: "fas fa-dice-d20",
-		type: RadialMenuSettings,
-		restricted: true,
-	})
-	game.settings.registerMenu(id, "secrets", {
-		name: rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS"),
-		hint: rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS_HINT"),
-		label: rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS"),
-		icon: "fas fa-key",
-		type: SecretsSettings,
-		restricted: true,
-	})
-	game.settings.registerMenu(id, "developer", {
-		name: rpgm.localize("RPGM.CONFIG.DEVELOPER_SETTINGS"),
-		hint: rpgm.localize("RPGM.CONFIG.DEVELOPER_SETTINGS_HINT"),
-		label: rpgm.localize("RPGM.CONFIG.DEVELOPER_SETTINGS"),
-		icon: "fa fa-flask",
-		type: DeveloperSettings,
-		restricted: true
-	})
+	RadialMenuSettings.registerMenu(id);
+	SecretsSettings.registerMenu(id);
+	DeveloperSettings.registerMenu(id);
 }

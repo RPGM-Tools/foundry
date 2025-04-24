@@ -4,6 +4,19 @@
 }
 
 .rpgm-app {
+	animation: enter 200ms cubic-bezier(0, .3, .5, 1) forwards !important;
+	transform-origin: center;
+}
+
+.rpgm-app.closing {
+	animation: exit 200ms cubic-bezier(0, .3, .5, 1) forwards !important;
+}
+
+.rpgm-app p.notes {
+	flex: 1 1 100% !important;
+}
+
+.rpgm-app-inner {
 	min-height: 400px;
 	max-height: 500px;
 	max-width: 600px;
@@ -25,6 +38,25 @@
 
 	::placeholder {
 		text-align: center;
+	}
+}
+
+@keyframes enter {
+	from {
+		scale: 1.025;
+	}
+	to {
+		scale: 1;
+	}
+}
+
+@keyframes exit {
+	from {
+		scale: 1;
+	}
+	to {
+		scale: 1.025;
+		opacity: 0;
 	}
 }
 

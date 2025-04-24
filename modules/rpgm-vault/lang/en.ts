@@ -1,8 +1,8 @@
 export default {
-	VAULT: {
+	RPGM_VAULT: {
 		RADIAL_MENU: {
 			SAVE: "Save",
 			ANALYZE: "Analyze"
 		}
 	}
-} satisfies VaultI18n
+} satisfies VaultI18n;

@@ -1,11 +1,11 @@
-import { defineConfig, loadEnv } from 'vite'
-import { resolve } from 'node:path'
-import { version } from './package.json'
-import { GenerateI18n, Versioning } from '##/vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig, loadEnv } from 'vite';
+import { resolve } from 'node:path';
+import { version } from './package.json';
+import { GenerateI18n, Versioning } from '##/vite';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig(({ mode }) => {
-	const env = loadEnv(mode, process.cwd())
+	const env = loadEnv(mode, process.cwd());
 
 	return defineConfig({
 		root: "src/",
@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
 			port: 30001,
 			proxy: {
 				"^(?!/modules/rpgm-forge)": `http://${env.VITE_FOUNDRY_URL}`,
+				"^(/modules/rpgm-forge/lang)": `http://${env.VITE_FOUNDRY_URL}`,
 				"/socket.io": {
 					"target": `ws://${env.VITE_FOUNDRY_URL}`,
 					ws: true,
@@ -32,6 +33,7 @@ export default defineConfig(({ mode }) => {
 		define: {
 			"__API_URL__": JSON.stringify(env.VITE_RPGM_URL ?? "https://api.rpgm.tools"),
 			"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+			"__RPGM_MODULE__": `"RPGM_FORGE"`
 		},
 		envPrefix: "RPGM_",
 		keepProcessEnv: false,
@@ -49,7 +51,7 @@ export default defineConfig(({ mode }) => {
 				input: resolve(__dirname, "src/init.ts"),
 				output: {
 					assetFileNames: () => {
-						return "[name][extname]"
+						return "[name][extname]";
 					},
 					entryFileNames: "[name].js",
 				},
@@ -61,5 +63,5 @@ export default defineConfig(({ mode }) => {
 			Versioning(version),
 			GenerateI18n(resolve(__dirname, "./lang/*")),
 		]
-	})
-})
+	});
+});

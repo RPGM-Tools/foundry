@@ -1,20 +1,28 @@
 declare global {
-	export type RpgmLang = ToString<RpgmI18n>
-	export type RpgmLangs = ObjectDotNotation<RpgmLang>
+	type RpgmLangs = ObjectDotNotation<I18n_Merged>
+	type GetI18nCombinedTypes<T> = T extends { langs: infer A } ? A : never;
+	type I18n_Merged = DeepMergeAll<GetI18nCombinedTypes<RpgmI18nCombined>>;
+	interface RpgmI18nCombined {
+		langs: [RpgmI18n]
+	}
+	type LanguageSchema = { [key: string]: string | LanguageSchema }
 	export interface RpgmI18n {
-		RPGM: {
+		RPGM_TOOLS: {
 			LOGGING: {
 				READY
 			},
 			CONFIG: {
 				SECRETS_SETTINGS
 				SECRETS_SETTINGS_HINT
+				SECRETS_SETTINGS_LABEL
 				SECRETS_SETTINGS_SUBTITLE
 				RADIAL_MENU_SETTINGS
 				RADIAL_MENU_SETTINGS_HINT
+				RADIAL_MENU_SETTINGS_LABEL
 				RADIAL_MENU_SETTINGS_SUBTITLE
 				DEVELOPER_SETTINGS
 				DEVELOPER_SETTINGS_HINT
+				DEVELOPER_SETTINGS_LABEL
 				DEVELOPER_SETTINGS_SUBTITLE
 				RADIAL_MENU_ENABLED
 				RADIAL_MENU_ENABLED_HINT
@@ -26,20 +34,15 @@ declare global {
 				VERBOSE_LOGS_HINT
 			},
 			RADIAL_MENU: {
-				NAMES
 				INFO
-				D4
-				D6
-				LOREM_IPSUM
-				START_SHIMMER
-				STOP_SHIMMER
+				COMMAND
 			}
 		}
 	}
 
 	type ToString<T> =
-		IsAnyOr<T, string> extends true ? string
-		: { [K in keyof T]: ToString<T[K]> }
+	IsAnyOr<T, string> extends true ? string
+	: { [K in keyof T]: ToString<T[K]> }
 }
 
 type IsAnyOr<T, U> = 0 extends (1 & T) | (1 & U) ? true : false;
@@ -53,10 +56,33 @@ type BreakDownObject<O, R = void> = {
 }
 
 type ObjectDotNotation<O, R = void> =
-	(O extends string
-		? (R extends string
-			? R
-			: never)
-		: BreakDownObject<O, R>[keyof BreakDownObject<O, R>])
+(O extends string
+? (R extends string
+? R
+: never)
+: BreakDownObject<O, R>[keyof BreakDownObject<O, R>])
 
-export { }
+type DeepMerge<A, B> =
+A extends object
+? B extends object
+? {
+	[K in keyof A | keyof B]:
+	K extends keyof B
+	? K extends keyof A
+	? DeepMerge<A[K], B[K]>
+	: B[K]
+	: K extends keyof A
+	? A[K]
+	: never
+}
+: B
+: B
+
+type DeepMergeAll<T extends []> =
+T extends [infer A, ...infer B]
+? B extends []
+? ToString<A>
+: DeepMerge<ToString<A>, DeepMergeAll<B>>
+: unknown
+
+export { };

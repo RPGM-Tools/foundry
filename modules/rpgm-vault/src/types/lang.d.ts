@@ -1,13 +1,15 @@
 declare global {
+	interface RpgmI18nCombined {
+		langs: [RpgmI18n, VaultI18n]
+	}
 	interface VaultI18n {
-		VAULT: {
+		RPGM_VAULT: {
 			RADIAL_MENU: {
 				SAVE
 				ANALYZE
-			},
+			}
 		}
 	}
-	interface RpgmI18n extends VaultI18n { }
 }
 
-export { }
+export { };

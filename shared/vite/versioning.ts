@@ -3,18 +3,18 @@
  * for our module's version. It will update the version in all the relevant places
  * during development and in the build
  */
-import type { PluginOption, ResolvedConfig } from "vite"
-import { existsSync, readFile, writeFile } from 'node:fs'
+import type { PluginOption, ResolvedConfig } from "vite";
+import { existsSync, readFile, writeFile } from 'node:fs';
 
 /** Set version number in module.json */
 export function Versioning(version: string): PluginOption {
-	let config: ResolvedConfig
-	const moduleFile = () => `${config.build.outDir}/module.json`
+	let config: ResolvedConfig;
+	const moduleFile = () => `${config.build.outDir}/module.json`;
 	return {
 		name: "versioning",
 
 		configResolved(resolvedConfig) {
-			config = resolvedConfig
+			config = resolvedConfig;
 		},
 
 		// Process dev server
@@ -23,27 +23,27 @@ export function Versioning(version: string): PluginOption {
 				if (req.url?.endsWith("module.json")) {
 					if (existsSync(moduleFile())) {
 						readFile(moduleFile(), "utf8", function(err, data) {
-							if (err) return next(err)
-							const result = data.replaceAll(/{{RPGM_VERSION}}/g, version)
+							if (err) return next(err);
+							const result = data.replaceAll(/{{RPGM_VERSION}}/g, version);
 							res.setHeader('Content-Type', 'application/json');
-							res.end(result)
-						})
-						return
+							res.end(result);
+						});
+						return;
 					}
 				}
-				next()
-			})
+				next();
+			});
 		},
 
 		// Process build output
 		closeBundle() {
 			readFile(moduleFile(), "utf8", function(err, data) {
-				if (err) return console.error(err)
-				const result = data.replaceAll(/{{RPGM_VERSION}}/g, version)
+				if (err) return console.error(err);
+				const result = data.replaceAll(/{{RPGM_VERSION}}/g, version);
 				writeFile(moduleFile(), result, function(err) {
-					if (err) return console.error(err)
-				})
-			})
+					if (err) return console.error(err);
+				});
+			});
 		}
-	}
+	};
 }

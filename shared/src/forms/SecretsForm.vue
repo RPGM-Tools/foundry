@@ -1,34 +1,47 @@
 <script setup lang="ts">
 import { useSetting } from '#/util';
+import { SecretsSettings } from '#/settings/secrets';
+import { inject } from 'vue';
 
-const rpgm = globalThis.rpgm
-const game = globalThis.game
-const api_key = useSetting("rpgm-tools", "api_key")
+const game = globalThis.game;
+const api_key = useSetting("rpgm-tools", "api_key");
+const app = inject<SecretsSettings>("app")!;
 
 const submit = () => {
-	game.settings.set("rpgm-tools", "api_key", api_key.value)
-}
+	void game.settings.set("rpgm-tools", "api_key", api_key.value);
+	void app.close();
+};
 </script>
 
 <template>
-	<form @submit.prevent="submit" class="rpgm-app flexcol">
-		<div class="scrollable">
-			<h2>{{ rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS") }}</h2>
-			<i>{{ rpgm.localize("RPGM.CONFIG.SECRETS_SETTINGS_SUBTITLE") }}</i>
-			<div class="form-group">
-				<label>{{ api_key.name }}</label>
-				<div class="form-fields">
-					<input v-model="api_key.value" placeholder="↑ ↑ ↓ ↓ ← → ← → B A ⏎" type="password" name="rpgm-tools.api_key"
-						data-dtype="String">
-				</div>
-				<p class="notes">{{ api_key.hint }}</p>
-			</div>
-		</div>
-		<footer>
-			<button type="submit">
-				<i class="fas fa-save"></i>
-				Save Changes
-			</button>
-		</footer>
-	</form>
+  <form
+    @submit.prevent="submit"
+    class="rpgm-app-inner standard-form flexcol"
+  >
+    <div class="scrollable tab">
+      <h2>{{ SecretsSettings.name }}</h2>
+      <i>{{ SecretsSettings.subtitle }}</i>
+      <div class="form-group">
+        <label>{{ api_key.name }}</label>
+        <div class="form-fields">
+          <input
+            v-model="api_key.value"
+            placeholder="↑ ↑ ↓ ↓ ← → ← → B A ⏎"
+            type="password"
+            name="rpgm-tools.api_key"
+            data-dtype="String"
+          >
+        </div>
+        <p class="hint notes">
+          {{ api_key.hint }}
+        </p>
+      </div>
+    </div>
+    <footer class="form-footer">
+      <button @click.prevent="submit">
+        <i class="fas fa-save" />
+        Save Changes
+      </button>
+    </footer>
+  </form>
 </template>

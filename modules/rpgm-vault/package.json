@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vite build --watch & vite",
 		"preview": "vite build --watch & vite preview",
+		"lint": "eslint",
 		"build": "vue-tsc && vite build"
 	},
 	"dependencies": {

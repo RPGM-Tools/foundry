@@ -1,10 +1,10 @@
-import frag from './shimmer2.glsl?raw'
-import vertex from './vertex.glsl?raw'
+import frag from './shimmer2.glsl?raw';
+import vertex from './vertex.glsl?raw';
 
 export function shimmerToken(token: Token): Shimmer {
 	/** Ensure only one shimmer filter per token */
 	return ShimmerFilter.shimmering.get(token) ??
-		new ShimmerFilter(token)
+		new ShimmerFilter(token);
 }
 
 interface Shimmer {
@@ -13,11 +13,11 @@ interface Shimmer {
 }
 
 class ShimmerFilter extends PIXI.Filter implements Shimmer {
-	static shimmering: WeakMap<Token, ShimmerFilter> = new WeakMap()
-	token: Token
-	startTime: number
-	active: boolean = false
-	fadingOut: boolean
+	static shimmering: WeakMap<Token, ShimmerFilter> = new WeakMap();
+	token: Token;
+	startTime: number;
+	active: boolean = false;
+	fadingOut: boolean;
 
 	constructor(token: Token) {
 		super(vertex, frag, {
@@ -25,29 +25,29 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 			fade: 0,
 			seed: 1 + Math.random(),
 			tokenSize: [token.w, token.h],
-		})
-		this.fadingOut = false
-		this.token = token
+		});
+		this.fadingOut = false;
+		this.token = token;
 		this.token.draw().then(t => {
 			if (t.mesh.filters)
-				t.mesh.filters.push(this)
+				t.mesh.filters.push(this);
 			else
-				t.mesh.filters = [this]
-			ShimmerFilter.shimmering.set(token, this)
-			canvas.app?.ticker.add(this.updateFn, this)
-		})
-		this.startTime = performance.now()
+				t.mesh.filters = [this];
+			ShimmerFilter.shimmering.set(token, this);
+			canvas.app?.ticker.add(() => this.updateFn(), this);
+		}).catch(() => { });
+		this.startTime = performance.now();
 	}
 
 	updateFn() {
-		let elapsed = (performance.now() - this.startTime) / 1000
-		this.uniforms.iTime = elapsed
+		const elapsed = (performance.now() - this.startTime) / 1000;
+		this.uniforms.iTime = elapsed;
 	}
 
 	async fadeIn(duration: number = 1000): Promise<void> {
-		if (this.active) return
+		if (this.active) return;
 		return new Promise((resolve) => {
-			this.active = true
+			this.active = true;
 			const start = performance.now();
 			const animate = () => {
 				const now = performance.now();
@@ -64,8 +64,8 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 	}
 
 	async fadeOut(duration: number = 1000): Promise<void> {
-		if (!this.active) return
-		this.fadingOut = true
+		if (!this.active) return;
+		this.fadingOut = true;
 		return new Promise((resolve) => {
 			const start = performance.now();
 			const animate = () => {
@@ -76,9 +76,9 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 				this.uniforms.fade = 1 - progress;
 				if (progress >= 1) {
 					canvas.app?.ticker.remove(animate, this);
-					const i = this.token.mesh.filters?.indexOf(this) ?? -1
-					this.token.mesh.filters?.splice(i, 1)
-					ShimmerFilter.shimmering.delete(this.token)
+					const i = this.token.mesh.filters?.indexOf(this) ?? -1;
+					this.token.mesh.filters?.splice(i, 1);
+					ShimmerFilter.shimmering.delete(this.token);
 					resolve();
 				}
 			};

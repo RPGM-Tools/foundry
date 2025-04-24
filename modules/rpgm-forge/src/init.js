@@ -1,1 +1,1 @@
-import './init.ts'
+import './init.ts';

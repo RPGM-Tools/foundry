@@ -1,36 +1,36 @@
-import { ForgeNames } from '@rpgm/forge'
-import { shimmerToken } from './shimmer'
+import { ForgeNames } from '@rpgm/forge';
+import { shimmerToken } from './shimmer';
 
 export async function generateTokenNames(tokenDocument: TokenDocument) {
-	const actor = tokenDocument.actor
-	if (!actor?.name) return
+	const actor = tokenDocument.actor;
+	if (!actor?.name) return;
 	const options: NamesOptions = {
 		quantity: 4,
 		gender: "random",
 		genre: "Fantasy",
 		method: "ai",
 		type: actor.name
-	}
-	const token = canvas.tokens?.get(tokenDocument._id ?? "")
-	let shimmerFilter
+	};
+	const token = canvas.tokens?.get(tokenDocument._id ?? "");
+	let shimmerFilter;
 	if (token) {
-		shimmerFilter = shimmerToken(token)
-		shimmerFilter.fadeIn(500)
+		shimmerFilter = shimmerToken(token);
+		void shimmerFilter.fadeIn(500);
 	}
 	const result = await ForgeNames.fromOptions(options).generate({
 		auth_token: game.settings.get("rpgm-tools", "api_key")
-	})
+	});
 	if (!result.success)
-		rpgm.logger.errorU(result.error)
+		rpgm.logger.errorU(result.error);
 	else {
-		//@ts-ignore 
-		tokenDocument.update({ name: result.output.names[0] }, {})
+		//@ts-expect-error Unsafe updating of tokenDocument
+		await tokenDocument.update({ name: result.output.names[0] }, {});
 	}
 	if (shimmerFilter)
-		shimmerFilter.fadeOut(500)
+		void shimmerFilter.fadeOut(500);
 }
 
 export function registerTokenCreate() {
 	Hooks.on("createToken", async (tokenDocument: TokenDocument) => generateTokenNames(tokenDocument)
-	)
+	);
 }

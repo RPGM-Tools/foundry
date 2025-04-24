@@ -1,4 +1,5 @@
 .dist
+tsconfig.tsbuildinfo
 node_modules
 .DS_Store
 .env*

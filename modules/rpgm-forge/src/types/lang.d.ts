@@ -1,10 +1,19 @@
 declare global {
-	type ForgeLang = ToString<ForgeI18n>
-	interface ForgeI18n {
-		SOMETHING
-		CRAZY
+	interface RpgmI18nCombined {
+		langs: [RpgmI18n, ForgeI18n]
 	}
-	interface RpgmI18n extends ForgeLang { }
+	interface ForgeI18n {
+		RPGM_FORGE: {
+			RADIAL_MENU: {
+				NAMES
+				D4
+				D6
+				LOREM_IPSUM
+				START_SHIMMER
+				STOP_SHIMMER
+			}
+		}
+	}
 }
 
-export { }
+export { };
