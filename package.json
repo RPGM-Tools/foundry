@@ -1,5 +1,6 @@
 {
 	"private": true,
+	"version": "0.1.8",
 	"type": "module",
 	"workspaces": [
 		"modules/*"
@@ -24,6 +25,6 @@
 	},
 	"dependencies": {
 		"@floating-ui/vue": "^1.1.6",
-		"brigadier-ts-lite": "github:dallenb4/brigadier-ts-lite"
+		"brigadier-ts-lite": "^1.0.1"
 	}
 }

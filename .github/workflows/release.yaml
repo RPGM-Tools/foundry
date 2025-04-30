@@ -3,7 +3,7 @@ name: Release Process
 on:
   push:
     tags:
-      - '*-v**'
+      - 'v**'
 
 jobs:
   release:
@@ -16,45 +16,39 @@ jobs:
         with:
           fetch-depth: 0 # Fetch depth is required for tag operations
 
-      - name: Extract Module Info from Tag
+      - name: Extract version number from tag
         id: module_info
         run: |
           TAG_NAME=${{ github.ref_name }}
-          MODULE_NAME=$(echo "$TAG_NAME" | cut -d'-' -f1)  # Extract 'forge', 'vault', or 'tome'
-          VERSION_NAME=$(echo "$TAG_NAME" | cut -d'v' -f2)  # Extract '1.2.3'
-          ZIP_FILE="rpgm-${MODULE_NAME}-v${VERSION}.zip"
-          
-          echo "MODULE_NAME=$MODULE_NAME" >> $GITHUB_ENV
-          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
-          echo "ZIP_FILE=$ZIP_FILE" >> $GITHUB_ENV
+          TAG_VERSION=$(echo "$TAG_NAME" | cut -d 'v' -f2)  # Extract '1.2.3'
+          echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
 
-          if ! test -d ./modules/$MODULE_NAME; then
-            echo "Module does not exist!"
+      - name: Get Version from package.json
+        run: | 
+          VERSION=$(jq -r '.version' < ./package.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          if ! test "$VERSION" == "$TAG_VERSION"; then
+            echo "Version name is incorrect! Should be ${{env.VERSION}}, is ${{env.TAG_VERSION}}";
             exit 1
           fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 23
           cache: 'npm'
-
-      - name: Get Version from package.json
-        run: | 
-          "VERSION=jq -r '.version' < ./modules/$MODULE_NAME" >> $GITHUB_ENV
-          if ! test "$VERSION" == "$VERSION_NAME"; then
-            echo "Version name is incorrect! Should be ${{env.VERSION}}, is ${{env.VERSION_NAME}}";
-            exit 1
-          fi
 
       - name: Install Dependencies
         run: npm install
 
       - name: Build Project
-        run: npm run build --workspace modules/${{env.MODULE_NAME}}
+        run: npm run build
 
-      - name: Zip dist/ folder
-        run: zip -r $ZIP_FILE ./modules/${{env.MODULE_NAME}}/dist/*
+      - name: Zip .dist/ folder
+        run: (cd modules; for i in *; do zip -r "../${i%}-v$VERSION.zip" "$i"; done)
+
+      - name: Copy module.json 
+        run: (cd modules; for i in *; do cp "${i%}/.dist/module.json" "../$i.json"; done)
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -64,5 +58,5 @@ jobs:
           body: "Automated release for v${{ env.VERSION }}"
           draft: true
           files: |
-            rpgm-tools-v${{ env.VERSION }}.zip
-            dist/module.json
+            rpgm*.zip
+            rpgm*.json
