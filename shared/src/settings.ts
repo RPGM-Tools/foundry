@@ -1,23 +1,7 @@
-import { ChatCommands } from "./chat";
-import { RadialMenuRegister } from "./radial-menu";
+import { hudHeuristics, inputHeuristics } from "./radial-menu";
 import { DeveloperSettings } from "./settings/developer";
 import { RadialMenuSettings } from "./settings/radialMenu";
 import { SecretsSettings } from "./settings/secrets";
-import { localize } from "./util/localize";
-import { RPGMLogger } from "./util/logging";
-
-export function GlobalInit() {
-	globalThis.rpgm = {
-		gameVersion: game.version,
-		majorGameVersion: game.data.release.generation,
-		logger: new RPGMLogger(),
-		radialMenu: new RadialMenuRegister(),
-		chat: new ChatCommands(),
-		modules: {},
-		localize,
-	};
-
-}
 
 /** Register shared settings once */
 export function GlobalSettings() {
@@ -40,6 +24,25 @@ export function GlobalSettings() {
 		name: rpgm.localize("RPGM_TOOLS.CONFIG.VERBOSE_LOGS"),
 		hint: rpgm.localize("RPGM_TOOLS.CONFIG.VERBOSE_LOGS_HINT"),
 		default: false,
+	});
+	rpgm.radialMenu.registerCategory("rpgm_debug", { color: '60deg' });
+	rpgm.radialMenu.registerTokenHudButton({
+		category: rpgm.radialMenu.categories.rpgm_debug,
+		icon: 'fa-regular fa-circle-info',
+		tooltip: "RPGM_TOOLS.RADIAL_MENU.INFO",
+		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
+		callback: (context) => rpgm.logger.log(context.token?.actor)
+	});
+	rpgm.radialMenu.registerInputButton({
+		category: rpgm.radialMenu.categories.rpgm_debug,
+		icon: 'fa fa-terminal',
+		tooltip: "RPGM_TOOLS.RADIAL_MENU.COMMAND",
+		detective: (context) => inputHeuristics(context).isChat().isGM().isDebug().result,
+		callback: (context) => {
+			context.element.focus();
+			context.setValue('*');
+			context.element.dispatchEvent(new KeyboardEvent("keyup", { key: "*" }));
+		}
 	});
 }
 

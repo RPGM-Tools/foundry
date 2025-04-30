@@ -1,4 +1,5 @@
-import { createApp, App, type Reactive, shallowReactive } from 'vue';
+import type { App, Component } from 'vue';
+import { createApp, type Reactive, shallowReactive } from 'vue';
 import RadialMenu from './RadialMenu.vue';
 import { RPGMTokenHUD } from './hud';
 
@@ -7,6 +8,7 @@ export * from './funcs';
 
 export class RadialMenuRegister {
 	elements = new Map<HTMLElement, { vueApp: App, injectedEl: HTMLElement }>();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
 	private _categories: Record<keyof RadialMenuCategories, RadialMenuCategoryOptions> = {} as any;
 	get categories(): Readonly<typeof this._categories> { return this._categories; }
 	buttons: RadialButton<InputContext>[] = [];
@@ -33,9 +35,9 @@ export class RadialMenuRegister {
 		});
 	}
 
-	private async createRadialMenu(el: HTMLElement) {
+	private createRadialMenu(el: HTMLElement) {
 		rpgm.logger.debug("Attached to ", el);
-		const vueApp = createApp(RadialMenu, { element: el });
+		const vueApp = createApp(RadialMenu as Component, { element: el });
 		const appContainer = document.createElement('div');
 		appContainer.style.position = 'fixed';
 		appContainer.style.zIndex = '99';
@@ -55,6 +57,7 @@ export class RadialMenuRegister {
 		vueApp.provide('element', el);
 		vueApp.provide<RadialButton<InputContext>[]>('items', rpgm.radialMenu.buttons);
 		vueApp.provide<Reactive<InputContext>>('context', shallowReactive({
+			shift: false,
 			loading: false,
 			element: el,
 			getValue,
@@ -65,7 +68,7 @@ export class RadialMenuRegister {
 	}
 	private deleteRadialMenu(el: HTMLElement): void {
 		if (!this.elements.has(el)) return;
-		rpgm.logger.log("Detatched from " + el);
+		rpgm.logger.log("Detatched from ", el);
 		const { vueApp, injectedEl } = this.elements.get(el) as { vueApp: App, injectedEl: HTMLElement };
 		vueApp.unmount();
 		injectedEl.remove();

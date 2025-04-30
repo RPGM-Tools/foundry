@@ -1,4 +1,4 @@
-import { type App, createApp, Reactive, shallowReactive } from 'vue';
+import type { App, Reactive, Component } from 'vue';
 import RadialMenu from './RadialMenu.vue';
 
 export class RPGMTokenHUD<Options extends Application.Options> extends TokenHUD<Options> {
@@ -6,7 +6,7 @@ export class RPGMTokenHUD<Options extends Application.Options> extends TokenHUD<
 
 	protected override _replaceHTML(element: JQuery, html: JQuery): void {
 		super._replaceHTML(element, html);
-		new Promise(() => {
+		void new Promise(() => {
 			if (game.settings.get("rpgm-tools", "radial_menu_enabled") !== true) return;
 			/**
 			 * Workaround for differences between Foundry 12 and 13 
@@ -20,11 +20,12 @@ export class RPGMTokenHUD<Options extends Application.Options> extends TokenHUD<
 			appContainer.style.height = '100%';
 			appContainer.style.zIndex = '99';
 			htmlElement.appendChild(appContainer);
-			this.menuApp = createApp(RadialMenu);
+			this.menuApp = createApp(RadialMenu as Component);
 			this.menuApp.provide<HTMLElement>('element', htmlElement);
 			this.menuApp.provide<RadialButton<TokenHudContext>[]>('items', rpgm.radialMenu.tokenHudButtons);
 			this.menuApp.provide<Reactive<TokenHudContext>>('context', shallowReactive({
 				loading: false,
+				shift: false,
 				element: htmlElement,
 				token: this.object
 			}));

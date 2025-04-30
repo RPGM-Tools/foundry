@@ -1,14 +1,17 @@
 import { RpgmModule } from "#/module";
 import { literal, argument, string } from "brigadier-ts-lite";
-import { chatTokenNames, renameToken } from "./util/token";
+import { chatDescription, chatTokenNames, getSelectedToken, renameToken } from "./util/token";
 import { inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
 import { shimmerToken } from "./util/shimmer";
 import type { Component } from "vue";
 import NamesChat from "./chat/NamesChat.vue";
+import { RPGMLogger } from "#/util/logging";
+import DescriptionChat from "./chat/DescriptionChat.vue";
 
 export class RpgmForge extends RpgmModule {
 	override id: string = "rpgm-forge";
 	override name: string = "RPGM Forge";
+	override readonly logger = new RPGMLogger("🎲 RPGM Forge");
 
 	override init(): Promise<void> | void {
 		rpgm.forge = this;
@@ -16,11 +19,20 @@ export class RpgmForge extends RpgmModule {
 
 	override registerSettings(): Promise<void> | void {
 		game.settings.register("rpgm-forge", "names", { default: {} });
+		game.settings.register("rpgm-forge", "description", { default: {} });
 		rpgm.chat.registerCommand(literal("name")
 			.then(argument("prompt", string("greedy_phrase")).executes(c => {
 				void chatTokenNames(c.get<string>("prompt"));
 			})).executes(() => {
 				void chatTokenNames();
+			}));
+		rpgm.chat.registerCommand(literal("description")
+			.then(argument("prompt", string("greedy_phrase")).executes(c => {
+				void chatDescription({ type: c.get<string>("prompt")! });
+			})).executes(() => {
+				const token = getSelectedToken();
+				if (!token) return;
+				void chatDescription({ type: token.actor!.name, name: token.name ?? "" });
 			}));
 		rpgm.radialMenu.registerCategory("rpgm_forge", { color: "276deg" });
 		rpgm.radialMenu.registerInputButton({
@@ -81,7 +93,10 @@ export class RpgmForge extends RpgmModule {
 			detective: () => true,
 			callback: async (context) => {
 				if (!context.token) return rpgm.logger.log("No token selected");
-				return renameToken(context.token.document);
+				if (context.shift)
+					void chatTokenNames(context.token.actor!.name);
+				else
+					return renameToken(context.token.document);
 			}
 		});
 		rpgm.radialMenu.registerTokenHudButton({
@@ -108,14 +123,18 @@ export class RpgmForge extends RpgmModule {
 		});
 	}
 
-	override i18nInit(): Promise<void> | void { }
+	override i18nInit(): Promise<void> | void {
+		this.loadNames();
+		this.loadDescriptions();
+	}
 
 	override rpgmReady(): Promise<void> | void {
-		this.loadNames();
 		this.pruneNames();
+		this.pruneDescriptions();
 	}
 
 	names!: Map<string, ForgeChatNames>;
+	descriptions!: Map<string, ForgeChatDescription>;
 
 	loadNames() {
 		this.names = new Map(Object.entries(game.settings.get("rpgm-forge", "names")));
@@ -124,8 +143,19 @@ export class RpgmForge extends RpgmModule {
 				? NamesChat as Component : undefined);
 	}
 
+	loadDescriptions() {
+		this.descriptions = new Map(Object.entries(game.settings.get("rpgm-forge", "description")));
+		rpgm.chat.registerMessageRenderer((id, message) =>
+			this.descriptions.has(id) || message.flags["rpgm-forge"] === "description"
+				? DescriptionChat as Component : undefined);
+	}
+
 	saveNames() {
 		void game.settings.set("rpgm-forge", "names", Object.fromEntries(this.names));
+	}
+
+	saveDescriptions() {
+		void game.settings.set("rpgm-forge", "description", Object.fromEntries(this.descriptions));
 	}
 
 	pruneNames() {
@@ -136,13 +166,29 @@ export class RpgmForge extends RpgmModule {
 		this.saveNames();
 	}
 
+	pruneDescriptions() {
+		this.descriptions = Array.from(this.descriptions).reduce((obj, [key, value]) => {
+			if (ui.chat.collection.has(key)) obj.set(key, value);
+			return obj;
+		}, new Map<string, ForgeChatDescription>());
+		this.saveDescriptions();
+	}
+
 	getName(id: string) {
 		return this.names.get(id);
 	}
 
+	getDescription(id: string) {
+		return this.descriptions.get(id);
+	}
+
 	setName(id: string, data: ForgeChatNames) {
-		rpgm.logger.debug(id);
 		this.names.set(id, data);
 		this.saveNames();
+	}
+
+	setDescription(id: string, data: ForgeChatDescription) {
+		this.descriptions.set(id, data);
+		this.saveDescriptions();
 	}
 }

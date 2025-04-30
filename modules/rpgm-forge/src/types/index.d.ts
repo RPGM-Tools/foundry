@@ -9,16 +9,17 @@ declare global {
 		"rpgm_forge"
 	}
 
-	interface ForgeChatNames {
+	type ForgeChatNames = {
 		prompt: string
 		names: Names
 		tokenId?: string
 	}
-}
 
-declare global {
-	interface RPGM {
-		forge?: RpgmForge
+	type ForgeChatDescription = {
+		type: string
+		name?: string
+		description: Description
+		tokenId?: string
 	}
 }
 

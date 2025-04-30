@@ -9,40 +9,41 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, type StyleValue, watch } from 'vue';
-import buttonImage from '../../assets/d20.png'
+import type { StyleValue } from 'vue';
+import buttonImage from '../../assets/d20.png';
 
-const rpgm = globalThis.rpgm
-const pressed = ref(false)
+const rpgm = globalThis.rpgm;
+const pressed = ref(false);
 
-const emit = defineEmits(['click'])
-const menuContext = inject<ButtonContext>('context') as ButtonContext
+const emit = defineEmits(['click']);
+const menuContext = inject<ButtonContext>('context') as ButtonContext;
 const { button, rotation = "uniform" } = defineProps<{
 	button: RadialButton<ButtonContext>,
 	index: number,
 	rotation?: "uniform" | "random"
-}>()
+}>();
 
 const colorStyle = computed<StyleValue>(() => ({
 	filter: `hue-rotate(${button.category.color ?? 0}) saturate(1.25) brightness(1.5)`
-}))
+}));
 
 watch(() => menuContext.element, (value) => {
-	rpgm.logger.log(value)
-})
+	rpgm.logger.log(value);
+});
 
 const rotationStyle = computed<StyleValue>(() =>
 	rotation === 'uniform' ? {
 		rotate: `${Math.floor(Math.random() * 3) * 120}deg`
 	} : {
 		rotate: `${Math.random() * 360}deg`
-	})
+	});
 
-async function onClick() {
-	emit('click')
-	menuContext.loading = true
-	await button.callback(menuContext)
-	menuContext.loading = false
+async function onClick(event: MouseEvent) {
+	emit('click');
+	menuContext.loading = true;
+	menuContext.shift = event.shiftKey;
+	await button.callback(menuContext);
+	menuContext.loading = false;
 }
 
 </script>

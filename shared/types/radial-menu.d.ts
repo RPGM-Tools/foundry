@@ -18,6 +18,7 @@ declare global {
 
 	interface ButtonContext {
 		loading: boolean
+		shift: boolean
 		element: HTMLElement
 	}
 

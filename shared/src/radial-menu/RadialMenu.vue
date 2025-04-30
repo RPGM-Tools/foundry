@@ -15,68 +15,70 @@
 </template>
 
 <script setup lang="ts">
-import DiceButton from './DiceButton.vue'
-import { ref, useTemplateRef, toRef, inject, computed, onMounted, type StyleValue } from 'vue'
-import { autoUpdate, offset, useFloating } from '@floating-ui/vue'
-import diceImage from '../../assets/d20-128x128.png'
-import { shift } from '@floating-ui/vue'
+import DiceButton from './DiceButton.vue';
+import type { StyleValue } from 'vue';
+import { autoUpdate, offset, useFloating } from '@floating-ui/vue';
+import diceImage from '../../assets/d20-128x128.png';
+import { shift } from '@floating-ui/vue';
 
-const ANIMATION_DURATION = 0.2
-const MAX_CENTER_SIZE = 35
+const ANIMATION_DURATION = 0.2;
+const MAX_CENTER_SIZE = 35;
 
-const items = inject<RadialButton<ButtonContext>[]>('items', [])
-const menuContext = inject<ButtonContext>('context') as ButtonContext
+const items = inject<RadialButton<ButtonContext>[]>('items', []);
+const menuContext = inject<ButtonContext>('context') as ButtonContext;
 
 // States for menu open/close and hover
-const isOpen = ref(false)
-const centerPressed = ref(false)
-const root = useTemplateRef('root')
-const center = useTemplateRef('center')
+const isOpen = ref(false);
+const centerPressed = ref(false);
+const root = useTemplateRef('root');
+const center = useTemplateRef('center');
 
 const Items = computed(() => {
 	// Update items each time the menu is opened 
-	isOpen.value
-	return items.filter(value => value.detective(menuContext))
-})
+	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+	isOpen.value;
+	return items.filter(value => value.detective(menuContext));
+});
 
 const anchor = computed((): 'right' | 'right-start' => {
 	// If element has multiple lines, anchor to right-start
 	if (menuContext.element instanceof HTMLInputElement) {
-		return 'right'
+		return 'right';
 	} else if (menuContext.element instanceof HTMLTextAreaElement) {
-		return menuContext.element.rows > 1 ? 'right-start' : 'right'
+		return menuContext.element.rows > 1 ? 'right-start' : 'right';
 	}
-	return 'right-start'
-})
+	return 'right-start';
+});
 
 /** Expand radial menu when open, used for overflow protection */
 const rootStyle = computed(() => ({
 	width: `${isOpen.value ? radius.value * 2 + centerSize.value : 30}px`,
 	height: `${isOpen.value ? radius.value * 2 + centerSize.value : 30}px`,
-}))
+}));
 
 /* 
 _updateSize is a hack to fix the radial menu not updating
 its dimensions when its parent input element becomes visible
 */
-let _updateSize = ref(0)
+const _updateSize = ref(0);
 onMounted(() => {
-	new ResizeObserver(() => setTimeout(() => { _updateSize.value++; radialFloater.update() }, 1)).observe(menuContext.element)
-})
+	new ResizeObserver(() => setTimeout(() => { _updateSize.value++; radialFloater.update(); }, 1)).observe(menuContext.element);
+});
 
 const centerSize = computed(() => {
-	_updateSize.value
-	return Math.min(menuContext.element.scrollHeight, MAX_CENTER_SIZE)
-})
+	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+	_updateSize.value;
+	return Math.min(menuContext.element.scrollHeight, MAX_CENTER_SIZE);
+});
 
 const padding = () =>
 	offset(() => {
-		const padding = parseInt(document.defaultView?.getComputedStyle(menuContext.element).padding || '0')
+		const padding = parseInt(document.defaultView?.getComputedStyle(menuContext.element).padding || '0');
 		return {
 			mainAxis: -padding / 2,
 			crossAxis: anchor.value === 'right-start' ? padding / 2 : 0,
-		}
-	})
+		};
+	});
 
 const widthOffset = () =>
 	offset(({ rects }) => {
@@ -84,8 +86,8 @@ const widthOffset = () =>
 			// Keep the menu in the top right
 			mainAxis: anchor.value === 'right-start' ? -rects.floating.width / 2 - centerSize.value / 2 : -rects.floating.width / 2 - centerSize.value / 2,
 			crossAxis: anchor.value === 'right-start' ? -rects.floating.height / 2 + centerSize.value / 2 : 0,
-		}
-	})
+		};
+	});
 
 const radialFloater = useFloating(toRef(menuContext.element), root, {
 	placement: anchor.value,
@@ -95,27 +97,27 @@ const radialFloater = useFloating(toRef(menuContext.element), root, {
 		shift({ crossAxis: true, boundary: document.body, altBoundary: true, rootBoundary: 'document' }),
 	],
 	whileElementsMounted(reference, floating, update) {
-		return autoUpdate(reference, floating, update, { animationFrame: true })
+		return autoUpdate(reference, floating, update, { animationFrame: true });
 	},
-})
+});
 
 function onSubClick() {
-	isOpen.value = false
-	center.value?.blur()
+	isOpen.value = false;
+	center.value?.blur();
 }
 
 function toggleOpen() {
-	if (menuContext.loading) return
+	if (menuContext.loading) return;
 	isOpen.value = !isOpen.value;
-	center.value?.focus()
+	center.value?.focus();
 	// Fix overlap of subsequent radial menus
 	if (root.value?.parentElement)
-		root.value.parentElement.style.zIndex = isOpen.value ? "999" : "99"
+		root.value.parentElement.style.zIndex = isOpen.value ? "999" : "99";
 }
 
 function focusOut(event: FocusEvent) {
-	if (root.value?.contains(event.relatedTarget as HTMLElement)) return
-	isOpen.value = false
+	if (root.value?.contains(event.relatedTarget as HTMLElement)) return;
+	isOpen.value = false;
 }
 
 /**
@@ -125,33 +127,33 @@ function focusOut(event: FocusEvent) {
  * - A stagger delay based on the button index
  */
 const buttonStyle = computed(() => {
-	return Items.value.map((_, index) => getSubButtonStyle(index))
-})
+	return Items.value.map((_, index) => getSubButtonStyle(index));
+});
 
 const radius = computed(() => {
-	return Math.max(centerSize.value * 1.25, centerSize.value / Math.sin(2 * Math.PI / Math.max(3, Items.value.length)))
-})
+	return Math.max(centerSize.value * 1.25, centerSize.value / Math.sin(2 * Math.PI / Math.max(3, Items.value.length)));
+});
 
 function getSubButtonStyle(index: number): StyleValue {
-	const itemCount = Items.value.length
-	const anglePerItem = 360 / itemCount
-	const angle = index * anglePerItem - 45
-	const radians = (Math.PI / 180) * angle
+	const itemCount = Items.value.length;
+	const anglePerItem = 360 / itemCount;
+	const angle = index * anglePerItem - 45;
+	const radians = (Math.PI / 180) * angle;
 
 	// Calculate the radius from how many items such that they don't overlap
 	// Final X, Y offset if open
-	const finalX = Math.cos(radians) * radius.value
-	const finalY = Math.sin(radians) * radius.value
+	const finalX = Math.cos(radians) * radius.value;
+	const finalY = Math.sin(radians) * radius.value;
 
 	/** Stagger delay to collectively take {@link ANIMATION_DURATION}
 	Reverse the delay if closing */
-	const staggerDelay = (ANIMATION_DURATION / itemCount) * (isOpen.value ? index : itemCount - index)
+	const staggerDelay = (ANIMATION_DURATION / itemCount) * (isOpen.value ? index : itemCount - index);
 
 	// If open => transform to final position with scale(1)
 	// If not => scale(0) at the center
 	const transform = isOpen.value
 		? `rotate(0deg) translate(${finalX}px, ${finalY}px) rotate(0deg) scale(1)`
-		: `rotate(-90deg) translate(0px, 0px) rotate(-180deg) scale(0)`
+		: `rotate(-90deg) translate(0px, 0px) rotate(-180deg) scale(0)`;
 
 	return {
 		scale: Number(isOpen.value),
@@ -159,7 +161,7 @@ function getSubButtonStyle(index: number): StyleValue {
 		opacity: isOpen.value ? 1 : 0,
 		transitionDelay: `${staggerDelay}s`,
 		transitionTimingFunction: isOpen.value ? "cubic-bezier(0, 0, .4, 1)" : "cubic-bezier(.4, 0, 1, 1)",
-	}
+	};
 }
 
 </script>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ForgeNames } from '@rpgm/forge';
-import { inject, onMounted, reactive, toRaw } from 'vue';
+import { getSelectedToken } from '@/util/token';
 
 const message = inject<ChatMessage>("message")!;
 const data = reactive(rpgm.forge!.getName(message.id!)!);
+const localize = rpgm.localize;
 
 async function generate(regenerate: boolean = false) {
 	if (regenerate)
@@ -32,13 +33,21 @@ async function generate(regenerate: boolean = false) {
 			data.names.push(v);
 			rpgm.chat.updateScroll(chatlog);
 			if (i === result.output.length - 1)
-				rpgm.forge?.setName(message.id!, toRaw(data));
+				rpgm.forge!.setName(message.id!, toRaw(data));
 		}, i * 100);
 	});
 }
 
+function assign(name: string) {
+	const token = getSelectedToken();
+	if (!token) return;
+	const oldName = token.name;
+	//@ts-expect-error Unsafe updating of tokenDocument
+	void token.document.update({ name }, {});
+	rpgm.forge!.logger.logU(`Renamed ${oldName} to ${name}`);
+}
+
 onMounted(() => {
-	rpgm.logger.debug(data.names);
 	if (!data.names.length) void generate();
 });
 </script>
@@ -46,8 +55,9 @@ onMounted(() => {
 <template>
 	<h3>{{ data.prompt }}</h3>
 	<TransitionGroup name="gak" class="rpgm-forge-name-container" tag="ul">
-		<li class="rpgm-forge-name" v-for="name in data.names" :key="name">
-			{{ name }}
+		<li @click="assign(name)" :title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')" class="rpgm-forge-name"
+			v-for="name in data.names" :key="name">
+			‣ {{ name }}
 		</li>
 	</TransitionGroup>
 	<button @click="generate(true)">Regenerate</button>
@@ -64,13 +74,23 @@ onMounted(() => {
 .rpgm-forge-name {
 	list-style: none;
 	position: relative;
-	transition-property: all;
-	transition-duration: 750ms;
-	transition-timing-function: ease;
+	left: 0;
+	transition: left 150ms ease-in-out !important;
+}
+
+.rpgm-forge-name:hover {
+	left: 4px;
 }
 
 .gak-enter-active {
 	transition-delay: 750ms !important;
+}
+
+.gak-enter-active,
+.gak-leave-active {
+	transition-property: all !important;
+	transition-duration: 750ms !important;
+	transition-timing-function: ease !important;
 }
 
 .gak-enter-from,

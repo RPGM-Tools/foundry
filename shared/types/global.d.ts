@@ -1,23 +1,12 @@
 /* eslint-disable no-var */
-import type { RadialMenuRegister } from "#/radial-menu";
-import type { ChatCommands } from "#/chat";
-import type { RPGMLogger } from "#/util/logging";
 import type { RpgmModule } from "#/module";
 
-type ModulesList<T = RpgmModule> = Record<T['id'], T>;
-
 declare global {
-	interface RPGM {
-		gameVersion: string
-		majorGameVersion: number
-		radialMenu: RadialMenuRegister
-		chat: ChatCommands
-		modules: ModulesList
-		logger: RPGMLogger
-		localize: (id: RpgmLangs) => string
-	}
+	declare const __MODULE_VERSION__: string;
 
-	var rpgm: RPGM;
+	interface RPGM extends object { }
+
+	var rpgm: Partial<RPGM> & typeof RpgmModule;
 	var game: ReadyGame;
 
 	namespace Hooks {

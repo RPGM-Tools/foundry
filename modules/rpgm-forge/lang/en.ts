@@ -1,5 +1,12 @@
 export default {
 	RPGM_FORGE: {
+		NAMES: {
+			ASSIGN_TOOLTIP: "Click to assign this name to the selected token",
+			REGENERATE_BUTTON: "Regenerate",
+		},
+		DESCRIPTION: {
+			REGENERATE_BUTTON: "Regenerate",
+		},
 		RADIAL_MENU: {
 			D4: "Roll a D4",
 			D6: "Roll a D6",
@@ -7,6 +14,9 @@ export default {
 			START_SHIMMER: "Shimmer",
 			STOP_SHIMMER: "Stop Shimmer",
 			NAMES: "Generate Name",
+		},
+		ERORRS: {
+			TOKEN_SELECT: "Please select a token on the board"
 		}
 	}
 } satisfies ForgeI18n;

@@ -1,23 +1,45 @@
 import { ForgeNames } from '@rpgm/forge';
 import { shimmerToken } from './shimmer';
 
-export async function chatTokenNames(name?: string) {
+export function getSelectedToken(): Token | undefined {
+	if (canvas.tokens!.controlled.length === 1) {
+		return canvas.tokens!.controlled[0];
+	} else {
+		rpgm.forge!.logger.errorU(rpgm.localize("RPGM_FORGE.ERORRS.TOKEN_SELECT"));
+	}
+}
+
+export async function chatDescription(prompt?: { type: string, name?: string }) {
+	if (!prompt) {
+		const token = getSelectedToken();
+		if (!token) return;
+		const actor = token.actor;
+		if (!actor || !actor.name) return;
+		const id = await rpgm.chat.createMessage("rpgm-forge", "description");
+		rpgm.forge!.setDescription(id, { name: "", tokenId: token.id, description: "", type: actor.name });
+	} else {
+		const id = await rpgm.chat.createMessage("rpgm-forge", "description");
+		rpgm.forge!.setDescription(id, { description: "", type: prompt.type, name: prompt.name });
+	}
+}
+
+export async function chatTokenNames(prompt?: string) {
 	// User wants a token for the selected token
-	if (!name) {
+	if (!prompt) {
 		if (canvas.tokens!.controlled.length === 1) {
 			const token = canvas.tokens!.controlled[0];
 			const actor = token.actor;
-			if (!actor || !actor.name) return { success: false, error: "Token has no name!" };
+			if (!actor || !actor.name) return;
 			const id = await rpgm.chat.createMessage("rpgm-forge", "names");
-			rpgm.forge?.setName(id, { tokenId: token.id, names: [], prompt: actor.name });
+			rpgm.forge!.setName(id, { tokenId: token.id, names: [], prompt: actor.name });
 		} else {
-			rpgm.logger.errorU("Select a token to generate names for");
+			rpgm.forge!.logger.errorU("Select a token to generate names for");
 		}
 	}
 	// User has a name for us to use
 	else {
 		const id = await rpgm.chat.createMessage("rpgm-forge", "names");
-		rpgm.forge?.setName(id, { names: [], prompt: name });
+		rpgm.forge!.setName(id, { names: [], prompt });
 	}
 }
 
@@ -41,7 +63,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, name?: st
 		auth_token: game.settings.get("rpgm-tools", "api_key")
 	});
 	if (!result.success)
-		rpgm.logger.errorU(result.error);
+		rpgm.forge!.logger.errorU(result.error);
 	if (shimmerFilter)
 		void shimmerFilter.fadeOut(500);
 	return result;

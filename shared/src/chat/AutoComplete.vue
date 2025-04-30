@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ParseResults } from 'brigadier-ts-lite';
 import { Suggestions } from 'brigadier-ts-lite';
-import { computed, type Directive, onMounted, onUnmounted, ref, type StyleValue } from 'vue';
+import type { Directive, StyleValue } from 'vue';
 
 const MAX_AUTO_COMPLETE = 7;
 const CHAT_MESSAGE = '#chat-message';

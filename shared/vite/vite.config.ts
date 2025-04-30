@@ -1,6 +1,7 @@
 import { resolve } from 'path';
 import { loadEnv, type UserConfig } from 'vite';
 import { GenerateI18n, Versioning } from '.';
+import AutoImport from 'unplugin-auto-import/vite';
 import vue from '@vitejs/plugin-vue';
 
 export default function defaultConfig(id: string, mode: string, dirname: string, version: string): UserConfig {
@@ -11,6 +12,9 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 		publicDir: resolve(dirname, "public"),
 		base: `/modules/${id}/`,
 		server: {
+			hmr: {
+				overlay: false,
+			},
 			port: 30001,
 			proxy: {
 				[`^(?!/modules/${id})`]: `http://${env.VITE_FOUNDRY_URL}`,
@@ -23,13 +27,14 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 		},
 		resolve: {
 			alias: {
-				'@': resolve(__dirname, 'src'),
-				'@@': __dirname,
-				'#': resolve(__dirname, "../../shared/src"),
-				'##': resolve(__dirname, "../../shared"),
+				'@': resolve(dirname, 'src'),
+				'@@': dirname,
+				'#': resolve(dirname, "../../shared/src"),
+				'##': resolve(dirname, "../../shared"),
 			},
 		},
 		define: {
+			"__MODULE_VERSION__": `"${version}"`,
 			"__API_URL__": JSON.stringify(env.VITE_RPGM_URL ?? "https://api.rpgm.tools"),
 			"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
 		},
@@ -50,7 +55,7 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 			// 	fileName: "init"
 			// },
 			rollupOptions: {
-				input: resolve(dirname, "src/init.ts"),
+				input: resolve(dirname, "src/init.js"),
 				output: {
 					manualChunks: {
 						vue: ["vue"],
@@ -66,6 +71,7 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 		},
 		plugins: [
 			vue(),
+			AutoImport({ imports: ['vue'] }),
 			Versioning(version),
 			GenerateI18n(resolve(dirname, "./lang/*")),
 		]

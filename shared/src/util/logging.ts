@@ -3,24 +3,26 @@
 type Msg = any
 
 export class RPGMLogger {
+	constructor(private prefix: string) { }
+
 	/** Logs a message to the console */
 	log(...msgs: Msg[]) {
-		this.sendMessage("log", "color: #ad8cef; font-weight: bold;", ...msgs);
+		this.sendMessage("log", "color: #ad8cef; font-weight: bold;", undefined, ...msgs);
 	}
 
 	/** Logs a warning to the console */
 	warn(...msgs: Msg[]) {
-		this.sendMessage("warn", "color: #d47b4e; font-weight: bold;", ...msgs);
+		this.sendMessage("warn", "color: #d47b4e; font-weight: bold;", undefined, ...msgs);
 	};
 
 	/** Logs an error to the console */
 	error(...msgs: Msg[]) {
-		this.sendMessage("error", "color: #f46464; font-weight: bold;", ...msgs);
+		this.sendMessage("error", "color: #f46464; font-weight: bold;", undefined, ...msgs);
 	};
 
 	debug(...msgs: Msg[]) {
 		if (game.settings.get("rpgm-tools", "verbose-logs"))
-			this.sendMessage("log", "color: #dddddd; font-weight: bold;", ...msgs);
+			this.sendMessage("log", "color: #dddddd; font-weight: bold;", undefined, ...msgs);
 	}
 
 	/** Shows information in Foundry and logs to the console */
@@ -41,21 +43,33 @@ export class RPGMLogger {
 		this.error(...msgs);
 	}
 
-	logF(style: string, ...msgs: Msg[]) {
-		this.sendMessage("log", style, ...msgs);
+	/**
+	 * @param prefix - Override the prefix, or undefined to not
+	 */
+	logF(style: string, prefix: string | undefined, ...msgs: Msg[]) {
+		this.sendMessage("log", style, prefix, ...msgs);
 	}
 
-	warnF(style: string, ...msgs: Msg[]) {
-		this.sendMessage("warn", style, ...msgs);
+	/**
+	 * @param prefix - Override the prefix, or undefined to not
+	 */
+	warnF(style: string, prefix: string | undefined, ...msgs: Msg[]) {
+		this.sendMessage("warn", style, prefix, ...msgs);
 	}
 
-	errorF(style: string, ...msgs: Msg[]) {
-		this.sendMessage("error", style, ...msgs);
+	/**
+	 * @param prefix - Override the prefix, or undefined to not
+	 */
+	errorF(style: string, prefix: string | undefined, ...msgs: Msg[]) {
+		this.sendMessage("error", style, prefix, ...msgs);
 	}
 
-	debugF(style: string, ...msgs: Msg[]) {
+	/**
+	 * @param prefix - Override the prefix, or undefined to not
+	 */
+	debugF(style: string, prefix: string | undefined, ...msgs: Msg[]) {
 		if (game.settings.get("rpgm-tools", "verbose-logs"))
-			this.sendMessage("log", style, ...msgs);
+			this.sendMessage("log", style, prefix, ...msgs);
 	}
 
 	/**
@@ -65,9 +79,7 @@ export class RPGMLogger {
 	 * @param {...any} messages - The messages to log.
 	 * @private
 	 */
-	private sendMessage(method: "log" | "warn" | "error", style: string, ...messages: Msg[]): void {
-		const now = new Date();
-		const timestamp = now.toISOString().split("T")[1].split(".")[0];
+	private sendMessage(method: "log" | "warn" | "error", style: string, prefix = `${this.prefix} | `, ...messages: Msg[]): void {
 		const { strings, objects } = messages.reduce<{ strings: string[], objects: any[] }>(
 			(acc, msg) => {
 				if (typeof msg === "string")
@@ -77,7 +89,7 @@ export class RPGMLogger {
 			},
 			{ strings: [], objects: [] }
 		);
-		const formattedMessage = `%c🎲📚 [${timestamp}] ${strings.join(" ")}`;
+		const formattedMessage = `%c${prefix}${strings.join(" ")}`;
 		/* eslint-disable-next-line no-console */
 		console[method](formattedMessage, style, ...objects);
 	}

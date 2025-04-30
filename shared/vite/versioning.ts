@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * This file facilitates the ability for package.json to be the source of truth
  * for our module's version. It will update the version in all the relevant places
