@@ -9,7 +9,7 @@
 		"init.js"
 	],
 	"styles": [
-		"init.css"
+		"assets/init.css"
 	],
 	"id": "rpgm-forge",
 	"authors": [

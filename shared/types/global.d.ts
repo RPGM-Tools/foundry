@@ -2,24 +2,19 @@
 import type { RadialMenuRegister } from "#/radial-menu";
 import type { ChatCommands } from "#/chat";
 import type { RPGMLogger } from "#/util/logging";
+import type { RpgmModule } from "#/module";
 
-interface RPGM {
-	gameVersion: string
-	majorGameVersion: number
-	radialMenu: RadialMenuRegister
-	chatCommands: ChatCommands
-	logger: RPGMLogger
-	localize: (id: RpgmLangs) => string
-	forge?: ForgeApi
-	vault?: VaultApi
-	tome?: TomeApi
-}
+type ModulesList<T = RpgmModule> = Record<T['id'], T>;
 
 declare global {
-	declare const __RPGM_MODULE__: string;
-	interface DRef<T> {
-		get value(): T
-		set value(value: T)
+	interface RPGM {
+		gameVersion: string
+		majorGameVersion: number
+		radialMenu: RadialMenuRegister
+		chat: ChatCommands
+		modules: ModulesList
+		logger: RPGMLogger
+		localize: (id: RpgmLangs) => string
 	}
 
 	var rpgm: RPGM;

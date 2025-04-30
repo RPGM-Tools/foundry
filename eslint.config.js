@@ -8,7 +8,7 @@ export default tslint.config([
 		extends: [
 			eslint.configs.recommended,
 			...tslint.configs.recommendedTypeChecked,
-			...vuelint.configs['flat/strongly-recommended'],
+			...vuelint.configs['flat/essential'],
 		],
 		files: ["**/*.{ts,vue}"],
 		languageOptions: {
@@ -25,6 +25,16 @@ export default tslint.config([
 			"no-console": "error",
 			"prefer-const": "error",
 			"@typescript-eslint/no-empty-object-type": ["error", { allowInterfaces: 'with-single-extends' }],
+			"@typescript-eslint/consistent-type-imports": "warn",
+			"@typescript-eslint/no-unused-vars": ["error", {
+				"args": "all",
+				"argsIgnorePattern": "^_",
+				"caughtErrors": "all",
+				"caughtErrorsIgnorePattern": "^_",
+				"destructuredArrayIgnorePattern": "^_",
+				"varsIgnorePattern": "^_",
+				"ignoreRestSiblings": true
+			}]
 		}
 	},
 	// ...vuelint.configs['flat/strongly-recommended'],

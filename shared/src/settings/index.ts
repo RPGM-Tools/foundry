@@ -1,4 +1,4 @@
-import { DeepPartial } from 'fvtt-types/utils';
+import type { DeepPartial } from 'fvtt-types/utils';
 import { createApp, type App, type Component } from 'vue';
 const { ApplicationV2 } = foundry.applications.api;
 type ClosingOptions = foundry.applications.api.ApplicationV2.ClosingOptions
@@ -29,7 +29,7 @@ export abstract class RPGMSettingsMenu extends ApplicationV2 {
 	override async close(options?: DeepPartial<ClosingOptions>): Promise<this> {
 		this.element.classList.add("closing");
 		await new Promise(p => setTimeout(p, 200));
-		return super.close({animate : false, closeKey: options?.closeKey});
+		return super.close({ animate: false, closeKey: options?.closeKey });
 	}
 
 	override _onClose(): void {

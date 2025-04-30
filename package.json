@@ -22,6 +22,7 @@
 		"vue-tsc": "^2.2.10"
 	},
 	"dependencies": {
-		"@floating-ui/vue": "^1.1.6"
+		"@floating-ui/vue": "^1.1.6",
+		"brigadier-ts-lite": "github:dallenb4/brigadier-ts-lite"
 	}
 }

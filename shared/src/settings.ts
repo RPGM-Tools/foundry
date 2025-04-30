@@ -1,6 +1,23 @@
+import { ChatCommands } from "./chat";
+import { RadialMenuRegister } from "./radial-menu";
 import { DeveloperSettings } from "./settings/developer";
 import { RadialMenuSettings } from "./settings/radialMenu";
 import { SecretsSettings } from "./settings/secrets";
+import { localize } from "./util/localize";
+import { RPGMLogger } from "./util/logging";
+
+export function GlobalInit() {
+	globalThis.rpgm = {
+		gameVersion: game.version,
+		majorGameVersion: game.data.release.generation,
+		logger: new RPGMLogger(),
+		radialMenu: new RadialMenuRegister(),
+		chat: new ChatCommands(),
+		modules: {},
+		localize,
+	};
+
+}
 
 /** Register shared settings once */
 export function GlobalSettings() {

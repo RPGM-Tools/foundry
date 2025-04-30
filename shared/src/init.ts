@@ -3,6 +3,7 @@ import { hudHeuristics, inputHeuristics, RadialMenuRegister } from './radial-men
 import { GlobalSettings } from './settings';
 import { RPGMLogger } from './util/logging';
 import { localize } from './util/localize';
+import { literal, argument, string } from 'brigadier-ts-lite';
 
 export function initRpgm(source: string) {
 	if (globalThis.rpgm) return;
@@ -11,7 +12,8 @@ export function initRpgm(source: string) {
 		majorGameVersion: game.data.release.generation,
 		logger: new RPGMLogger(),
 		radialMenu: new RadialMenuRegister(),
-		chatCommands: new ChatCommands(),
+		chat: new ChatCommands(),
+		modules: {},
 		localize,
 	};
 	rpgm.logger.log(`This RPGM Tools experience was brought to you by: '${source}'`);
@@ -19,10 +21,9 @@ export function initRpgm(source: string) {
 	i18nInit();
 	readyRpgm();
 }
-
 function i18nInit() {
 	Hooks.once("i18nInit", () => {
-		Hooks.call("rpgm-init");
+		rpgm.chat.registerCommand(literal("say").then(argument("words", string("greedy_phrase")).executes(c => rpgm.logger.logU(c.get<string>("words")))));
 		rpgm.radialMenu.registerCategory("rpgm_debug", { color: '60deg' });
 		rpgm.radialMenu.registerTokenHudButton({
 			category: rpgm.radialMenu.categories.rpgm_debug,
@@ -42,73 +43,13 @@ function i18nInit() {
 				context.element.dispatchEvent(new KeyboardEvent("keyup", { key: "*" }));
 			}
 		});
+		Hooks.call("rpgm-init");
 	});
 }
 
 function readyRpgm() {
 	Hooks.once("ready", () => {
 		rpgm.radialMenu.update();
-		rpgm.chatCommands.createChatPanel();
-		rpgm.chatCommands.commands.push({
-			name: "test1",
-			callback: () => rpgm.logger.log("test1")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "test2",
-			callback: () => rpgm.logger.log("test2")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "foo1",
-			callback: () => rpgm.logger.log("foo1")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "bar1",
-			callback: () => rpgm.logger.log("bar1")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "baz1",
-			callback: () => rpgm.logger.log("baz1")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "test3",
-			callback: () => rpgm.logger.log("test3")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "test4",
-			callback: () => rpgm.logger.log("test4")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "foo2",
-			callback: () => rpgm.logger.log("foo2")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "bar2",
-			callback: () => rpgm.logger.log("bar2")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "baz2",
-			callback: () => rpgm.logger.log("baz1")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "test5",
-			callback: () => rpgm.logger.log("test5")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "test6",
-			callback: () => rpgm.logger.log("test6")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "foo3",
-			callback: () => rpgm.logger.log("foo3")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "bar3",
-			callback: () => rpgm.logger.log("bar3")
-		});
-		rpgm.chatCommands.commands.push({
-			name: "baz3",
-			callback: () => rpgm.logger.log("baz3")
-		});
 		const asciiArt = String.raw`
 ________________________________________________
 _____  ____   ____ __  __  _              _     

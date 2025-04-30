@@ -1,8 +1,9 @@
-import frag from './shimmer2.glsl?raw';
-import vertex from './vertex.glsl?raw';
+import fragURL from './shimmer2.glsl?url';
+import vertexURL from './vertex.glsl?url';
 
-export function shimmerToken(token: Token): Shimmer {
+export async function shimmerToken(token: Token): Promise<Shimmer> {
 	/** Ensure only one shimmer filter per token */
+	await ShimmerFilter.setShader();
 	return ShimmerFilter.shimmering.get(token) ??
 		new ShimmerFilter(token);
 }
@@ -14,13 +15,26 @@ interface Shimmer {
 
 class ShimmerFilter extends PIXI.Filter implements Shimmer {
 	static shimmering: WeakMap<Token, ShimmerFilter> = new WeakMap();
+	static frag?: string;
+	static vertex?: string;
 	token: Token;
 	startTime: number;
 	active: boolean = false;
 	fadingOut: boolean;
 
+	static async setShader(): Promise<void> {
+		await fetch(vertexURL).then(async (v) => {
+			if (v.ok) ShimmerFilter.vertex ??= await v.text();
+			else rpgm.logger.error("Failed to grab shimmer shaders");
+		});
+		await fetch(fragURL).then(async (v) => {
+			if (v.ok) ShimmerFilter.frag ??= await v.text();
+			else rpgm.logger.error("Failed to grab shimmer shaders");
+		});
+	}
+
 	constructor(token: Token) {
-		super(vertex, frag, {
+		super(ShimmerFilter.vertex, ShimmerFilter.frag, {
 			iTime: 0,
 			fade: 0,
 			seed: 1 + Math.random(),

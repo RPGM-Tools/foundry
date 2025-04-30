@@ -14,6 +14,7 @@ export function useSetting<N extends ClientSettings.Namespace, K extends ClientS
 		namespace: N,
 		key: K,
 	) {
+	//@ts-expect-error Something with interface merging, idk
 	const setting = game.settings.settings.get(`${namespace}.${key}`);
 	const value = game.settings.get(namespace, key);
 	return shallowReactive({
