@@ -16,6 +16,21 @@
 	flex: 1 1 100% !important;
 }
 
+.rpgm-button {
+	margin-top: 2px;
+	transition: background 150ms ease !important;
+	box-shadow: none !important;
+	position: relative;
+}
+
+.rpgm-button:hover {
+	background: rgba(200, 0, 255) !important;
+}
+
+.rpgm-button:active {
+	background: #6633cc !important;
+}
+
 .rpgm-app-inner {
 	min-height: 400px;
 	max-height: 500px;
@@ -45,6 +60,7 @@
 	from {
 		scale: 1.025;
 	}
+
 	to {
 		scale: 1;
 	}
@@ -54,6 +70,7 @@
 	from {
 		scale: 1;
 	}
+
 	to {
 		scale: 1.025;
 		opacity: 0;

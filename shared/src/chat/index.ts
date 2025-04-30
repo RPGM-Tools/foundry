@@ -36,14 +36,14 @@ export class ChatCommands {
 		return message!.id!;
 	}
 
-	updateScroll(chatlog?: HTMLElement) {
+	updateScroll(chatlog?: HTMLElement, force?: boolean) {
 		setTimeout(() => {
 			chatlog ??= document.querySelector("#chat #chat-log") as HTMLElement;
-			const scrolledToBottom = chatlog.scrollTop + chatlog.clientHeight - chatlog.scrollHeight >= -60;
+			const scrolledToBottom = chatlog.scrollTop + chatlog.clientHeight - chatlog.scrollHeight >= -100;
 
-			if (scrolledToBottom)
+			if (force || scrolledToBottom)
 				chatlog.scrollBy({ top: 9999, behavior: "smooth" });
-		}, 1000);
+		}, force ? 1 : 0);
 	}
 
 	registerMessageRenderer(handler: typeof this.messageHandlers[number]) {

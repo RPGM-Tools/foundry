@@ -5,8 +5,10 @@ import { getSelectedToken } from '@/util/token';
 const message = inject<ChatMessage>("message")!;
 const data = reactive(rpgm.forge!.getName(message.id!)!);
 const localize = rpgm.localize;
+const loading = ref(false);
 
 async function generate(regenerate: boolean = false) {
+	loading.value = true;
 	if (regenerate)
 		for (let i = 0; i < data.names.length; i++)
 			setTimeout(() => {
@@ -31,9 +33,11 @@ async function generate(regenerate: boolean = false) {
 	result.output.forEach((v, i) => {
 		setTimeout(() => {
 			data.names.push(v);
-			rpgm.chat.updateScroll(chatlog);
-			if (i === result.output.length - 1)
+			rpgm.chat.updateScroll(chatlog, !regenerate);
+			if (i === result.output.length - 1) {
 				rpgm.forge!.setName(message.id!, toRaw(data));
+				loading.value = false;
+			}
 		}, i * 100);
 	});
 }
@@ -54,54 +58,56 @@ onMounted(() => {
 
 <template>
 	<h3>{{ data.prompt }}</h3>
-	<TransitionGroup name="gak" class="rpgm-forge-name-container" tag="ul">
+	<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">
 		<li @click="assign(name)" :title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')" class="rpgm-forge-name"
 			v-for="name in data.names" :key="name">
-			‣ {{ name }}
+			{{ name }}
 		</li>
 	</TransitionGroup>
-	<button @click="generate(true)">Regenerate</button>
+	<button :disabled="loading" class="rpgm-button" @click="generate(true)">Regenerate</button>
 </template>
 
 <style>
 .rpgm-forge-name-container {
 	position: relative;
-	margin: 0;
-	padding-left: 0;
-	padding-bottom: 4px;
+	padding-left: 4px;
+	margin: 0 !important;
+}
+
+.rpgm-forge-name::marker {
+	content: "‣ ";
 }
 
 .rpgm-forge-name {
-	list-style: none;
 	position: relative;
 	left: 0;
-	transition: left 150ms ease-in-out !important;
+	transition: transform 150ms ease-in-out !important;
 }
 
 .rpgm-forge-name:hover {
-	left: 4px;
+	transform: translateX(4px);
 }
 
-.gak-enter-active {
+.rpgm-forge-name-enter-active {
 	transition-delay: 750ms !important;
 }
 
-.gak-enter-active,
-.gak-leave-active {
+.rpgm-forge-name-enter-active,
+.rpgm-forge-name-leave-active {
 	transition-property: all !important;
 	transition-duration: 750ms !important;
 	transition-timing-function: ease !important;
 }
 
-.gak-enter-from,
-.gak-leave-to {
+.rpgm-forge-name-enter-from,
+.rpgm-forge-name-leave-to {
 	opacity: 0;
 	max-height: 0;
 	left: -10px;
 }
 
-.gak-enter-to,
-.gak-leave-from {
+.rpgm-forge-name-enter-to,
+.rpgm-forge-name-leave-from {
 	opacity: 1;
 	max-height: 100px;
 	left: 0px;

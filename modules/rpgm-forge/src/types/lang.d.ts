@@ -16,6 +16,7 @@ declare global {
 			}
 			RADIAL_MENU: {
 				NAMES
+				DESCRIPTION
 				D4
 				D6
 				LOREM_IPSUM

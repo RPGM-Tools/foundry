@@ -1,7 +1,7 @@
 import { RpgmModule } from "#/module";
 import { literal, argument, string } from "brigadier-ts-lite";
 import { chatDescription, chatTokenNames, getSelectedToken, renameToken } from "./util/token";
-import { inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
+import { hudHeuristics, inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
 import { shimmerToken } from "./util/shimmer";
 import type { Component } from "vue";
 import NamesChat from "./chat/NamesChat.vue";
@@ -32,7 +32,12 @@ export class RpgmForge extends RpgmModule {
 			})).executes(() => {
 				const token = getSelectedToken();
 				if (!token) return;
-				void chatDescription({ type: token.actor!.name, name: token.name ?? "" });
+				void chatDescription(
+					{
+						type: token.actor!.name,
+						// Don't include name if it's the default actor name
+						name: token.name ? token.name !== token.actor!.name ? token.name : "" : ""
+					});
 			}));
 		rpgm.radialMenu.registerCategory("rpgm_forge", { color: "276deg" });
 		rpgm.radialMenu.registerInputButton({
@@ -88,7 +93,7 @@ export class RpgmForge extends RpgmModule {
 		});
 		rpgm.radialMenu.registerTokenHudButton({
 			category: rpgm.radialMenu.categories.rpgm_forge,
-			icon: 'fa fa-input-text',
+			icon: 'fa fa-signature',
 			tooltip: "RPGM_FORGE.RADIAL_MENU.NAMES",
 			detective: () => true,
 			callback: async (context) => {
@@ -101,9 +106,24 @@ export class RpgmForge extends RpgmModule {
 		});
 		rpgm.radialMenu.registerTokenHudButton({
 			category: rpgm.radialMenu.categories.rpgm_forge,
+			icon: 'fa fa-align-left',
+			tooltip: "RPGM_FORGE.RADIAL_MENU.DESCRIPTION",
+			detective: () => true,
+			callback: async (context) => {
+				const token = context.token;
+				if (!token) return rpgm.logger.log("No token selected");
+				await chatDescription({
+					type: token.actor!.name,
+					// Don't include name if it's the default actor name
+					name: token.name ? token.name !== token.actor!.name ? token.name : "" : ""
+				});
+			}
+		});
+		rpgm.radialMenu.registerTokenHudButton({
+			category: rpgm.radialMenu.categories.rpgm_debug,
 			icon: 'fa fa-sparkles',
 			tooltip: "RPGM_FORGE.RADIAL_MENU.START_SHIMMER",
-			detective: () => true,
+			detective: context => hudHeuristics(context).isDebug().result,
 			callback: async (context) => {
 				if (!context.token) return;
 				const filter = await shimmerToken(context.token);
@@ -111,10 +131,10 @@ export class RpgmForge extends RpgmModule {
 			}
 		});
 		rpgm.radialMenu.registerTokenHudButton({
-			category: rpgm.radialMenu.categories.rpgm_forge,
+			category: rpgm.radialMenu.categories.rpgm_debug,
 			icon: 'fa-regular fa-sparkle',
 			tooltip: "RPGM_FORGE.RADIAL_MENU.STOP_SHIMMER",
-			detective: () => true,
+			detective: context => hudHeuristics(context).isDebug().result,
 			callback: async (context) => {
 				if (!context.token) return;
 				const filter = await shimmerToken(context.token);

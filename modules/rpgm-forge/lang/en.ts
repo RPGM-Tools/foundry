@@ -14,6 +14,7 @@ export default {
 			START_SHIMMER: "Shimmer",
 			STOP_SHIMMER: "Stop Shimmer",
 			NAMES: "Generate Name",
+			DESCRIPTION: "Generate Description",
 		},
 		ERORRS: {
 			TOKEN_SELECT: "Please select a token on the board"
