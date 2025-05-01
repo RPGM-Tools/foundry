@@ -2,8 +2,8 @@
 import { DeveloperSettings } from '#/settings/developer';
 import { useSetting } from '#/util';
 
-const verboseLogs = useSetting("rpgm-tools", "verbose-logs");
-const radialMenuDebug = useSetting("rpgm-tools", "radial_menu_debug");
+const verboseLogs = useSetting("rpgm-tools.verbose-logs");
+const radialMenuDebug = useSetting("rpgm-tools.radial_menu_debug");
 const app = inject<DeveloperSettings>("app")!;
 
 const submit = () => {

@@ -1,5 +1,7 @@
+import type * as config from 'fvtt-types/configuration';
+
 declare global {
-	interface SettingConfig {
+	interface SettingConfig extends config.SettingConfig {
 		'rpgm-tools.api_key': string
 		'rpgm-tools.radial_menu_enabled': boolean
 		'rpgm-tools.verbose-logs': boolean

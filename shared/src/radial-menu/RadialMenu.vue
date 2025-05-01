@@ -231,6 +231,7 @@ function getSubButtonStyle(index: number): StyleValue {
 	border: none !important;
 	transition: filter 0.1s, scale 0.1s ease !important;
 	filter: drop-shadow(2px 2px 2px #00000044);
+	margin: 0 !important;
 }
 
 .radial-menu-center:hover>.center-image,

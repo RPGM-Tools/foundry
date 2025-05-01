@@ -3,7 +3,7 @@ import { useSetting } from '#/util';
 import { SecretsSettings } from '#/settings/secrets';
 
 const game = globalThis.game;
-const api_key = useSetting("rpgm-tools", "api_key");
+const api_key = useSetting("rpgm-tools.api_key");
 const app = inject<SecretsSettings>("app")!;
 
 const submit = () => {
