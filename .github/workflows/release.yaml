@@ -53,7 +53,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{env.MODULE_NAME}}-v${{ env.VERSION }}
+          tag_name: v${{ env.VERSION }}
           name: "Release v${{ env.VERSION }}"
           body: "Automated release for v${{ env.VERSION }}"
           draft: true
