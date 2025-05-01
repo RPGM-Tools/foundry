@@ -21,6 +21,7 @@
 	transition: background 150ms ease !important;
 	box-shadow: none !important;
 	position: relative;
+	width: 100%;
 }
 
 .rpgm-button:hover {
