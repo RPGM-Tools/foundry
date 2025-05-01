@@ -3,7 +3,7 @@ name: Release Process
 on:
   push:
     tags:
-      - 'v**'
+      - '*-v**'
 
 jobs:
   release:
@@ -16,16 +16,26 @@ jobs:
         with:
           fetch-depth: 0 # Fetch depth is required for tag operations
 
-      - name: Extract version number from tag
+      - name: Extract Module Info from Tag
         id: module_info
         run: |
           TAG_NAME=${{ github.ref_name }}
-          TAG_VERSION=$(echo "$TAG_NAME" | cut -d 'v' -f2)  # Extract '1.2.3'
+          MODULE_ID=$(echo "$TAG_NAME" | cut -d'-' -f1)  # Extract 'forge', 'vault', or 'tome'
+          TAG_VERSION=$(echo "$TAG_NAME" | cut -d'v' -f2)  # Extract '1.2.3'
+          MODULE_NAME=$(jq -r '.title' < ./modules/rpgm-$MODULE_ID/public/module.json)
+          
+          echo "MODULE_ID=$MODULE_ID" >> $GITHUB_ENV
+          echo "MODULE_NAME=$MODULE_NAME" >> $GITHUB_ENV
           echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
+
+          if ! test -d ./modules/rpgm-$MODULE_ID; then
+            echo "Module does not exist!"
+            exit 1
+          fi
 
       - name: Get Version from package.json
         run: | 
-          VERSION=$(jq -r '.version' < ./package.json)
+          VERSION=$(jq -r '.version' < ./modules/rpgm-$MODULE_ID/package.json)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           if ! test "$VERSION" == "$TAG_VERSION"; then
             echo "Version name is incorrect! Should be ${{env.VERSION}}, is ${{env.TAG_VERSION}}";
@@ -45,7 +55,7 @@ jobs:
         run: npm run build
 
       - name: Zip .dist/ folder
-        run: (cd modules; for i in *; do zip -r "../${i%}-v$VERSION.zip" "$i"; done)
+        run: (cd modules; for i in *; do VERSION=$(jq -r '.version' < ${i%}/.dist/module.json); zip -r "../${i%}-v$VERSION.zip" "$i"; done)
 
       - name: Copy module.json 
         run: (cd modules; for i in *; do cp "${i%}/.dist/module.json" "../$i.json"; done)
@@ -53,9 +63,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.VERSION }}
-          name: "Release v${{ env.VERSION }}"
-          body: "Automated release for v${{ env.VERSION }}"
+          tag_name: "${{ env.MODULE_ID }}-v${{ env.TAG_VERSION }}"
+          name: "${{ env.MODULE_NAME }} v${{ env.TAG_VERSION }}"
+          body: "Automated release for rpgm-${{ env.MODULE_ID }}-v${{ env.TAG_VERSION }}"
           draft: true
           files: |
             rpgm*.zip

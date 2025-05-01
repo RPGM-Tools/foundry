@@ -1,5 +1,6 @@
 {
 	"name": "rpgm-forge",
+	"version": "0.1.8",
 	"private": true,
 	"type": "module",
 	"scripts": {
