@@ -55,7 +55,7 @@ jobs:
         run: npm run build
 
       - name: Zip .dist/ folder
-        run: (cd modules; for i in *; do VERSION=$(jq -r '.version' < ${i%}/.dist/module.json); zip -r "../${i%}-v$VERSION.zip" "$i"; done)
+        run: (cd modules; for i in *; do VERSION=$(jq -r '.version' < ${i%}/.dist/module.json); (cd ${i%}/.dist; zip -r "../../../${i%}-v$VERSION.zip" *); done)
 
       - name: Copy module.json 
         run: (cd modules; for i in *; do cp "${i%}/.dist/module.json" "../$i.json"; done)
