@@ -66,7 +66,7 @@ async function generate() {
 		editing.value = false;
 	}
 	else
-		rpgm.forge?.logger.errorU("Failed to generate homebrew!");
+		rpgm.forge?.logger.errorU(response.error);
 	loading.value = false;
 }
 
