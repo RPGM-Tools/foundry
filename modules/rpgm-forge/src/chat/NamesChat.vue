@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ForgeNames } from '@rpgm/forge';
 import { getSelectedToken } from '@/util/token';
+import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
 
-const message = inject<ChatMessage>("message")!;
-const data = reactive(rpgm.forge!.getName(message.id!)!);
+const { data } = rpgm.forge!.namesChats.useChatDatabase();
 const localize = rpgm.localize;
 const loading = ref(false);
 
@@ -13,7 +13,7 @@ async function generate(regenerate: boolean = false) {
 		for (let i = 0; i < data.names.length; i++)
 			setTimeout(() => {
 				data.names.pop();
-			}, 100 * i);
+			}, 20 * i);
 
 	const options: NamesOptions = {
 		quantity: 4,
@@ -31,13 +31,11 @@ async function generate(regenerate: boolean = false) {
 	const chatlog = document.querySelector("#chat #chat-log") as HTMLElement;
 
 	result.output.forEach((v, i) => {
+		loading.value = false;
 		setTimeout(() => {
 			data.names.push(v);
+			// Force scroll if this is the initial generation
 			rpgm.chat.updateScroll(chatlog, !regenerate);
-			if (i === result.output.length - 1) {
-				rpgm.forge!.setName(message.id!, toRaw(data));
-				loading.value = false;
-			}
 		}, i * 100);
 	});
 }
@@ -58,13 +56,16 @@ onMounted(() => {
 
 <template>
 	<h3>{{ data.prompt }}</h3>
-	<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">
-		<li @click="assign(name)" :title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')" class="rpgm-forge-name"
-			v-for="name in data.names" :key="name">
-			{{ name }}
-		</li>
-	</TransitionGroup>
-	<button :disabled="loading" class="rpgm-button" @click="generate(true)">Regenerate</button>
+	<SkeletonParagraph :loading="false" width="100%" height="400px">
+		<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">
+			<li @click="assign(name)" :title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')" class="rpgm-forge-name"
+				v-for="name in data.names" :key="name">
+				{{ name }}
+			</li>
+		</TransitionGroup>
+	</SkeletonParagraph>
+	<button :disabled="loading" :class="{ 'rpgm-button': true, 'rpgm-active': loading }"
+		@click="generate(true)">Regenerate</button>
 </template>
 
 <style>
@@ -81,10 +82,15 @@ onMounted(() => {
 .rpgm-forge-name {
 	position: relative;
 	left: 0;
-	transition: transform 150ms ease-in-out !important;
+	font-weight: bold;
+	scale: 1;
+	transition: transform 150ms ease-in-out, color 150ms, scale 150ms !important;
+	transform-origin: left;
 }
 
 .rpgm-forge-name:hover {
+	color: #6633cc;
+	scale: 1.1;
 	transform: translateX(4px);
 }
 
@@ -99,11 +105,16 @@ onMounted(() => {
 	transition-timing-function: ease !important;
 }
 
-.rpgm-forge-name-enter-from,
-.rpgm-forge-name-leave-to {
+.rpgm-forge-name-enter-from {
 	opacity: 0;
 	max-height: 0;
 	left: -10px;
+}
+
+.rpgm-forge-name-leave-to {
+	opacity: 0;
+	max-height: 0;
+	left: 100%;
 }
 
 .rpgm-forge-name-enter-to,

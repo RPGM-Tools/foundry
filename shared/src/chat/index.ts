@@ -2,23 +2,22 @@ import type { LiteralArgumentBuilder, ParseResults } from "brigadier-ts-lite";
 import { CommandDispatcher } from "brigadier-ts-lite";
 import { type App, type Component, createApp } from 'vue';
 import AutoComplete from "./AutoComplete.vue";
+import type { ChatDatabase } from "./ChatDatabase";
 
 export class ChatCommands {
 	chatPanel: App | undefined;
 	COMMAND_PREFIX = '*';
 	private commands = new CommandDispatcher();
-	private messageHandlers: ((id: string, message: ChatMessage, html: JQuery) => Component | undefined)[] = [];
+	private messageHandlers: ChatDatabase<object>[] = [];
+	private messageRenderers: ((id: string, message: ChatMessage, html: JQuery) => Component | undefined)[] = [];
 
 	constructor() {
 		Hooks.on("chatMessage", (...args) => this.handleMessage(...args));
 		Hooks.on("renderChatMessage", (message, html) => {
 			for (const handler of this.messageHandlers) {
-				const component = handler(message.id!, message, html);
-				if (!component) continue;
-				const mount = html.find(".rpgm-placeholder").get(0);
-				const app = createApp(component);
-				app.provide("message", message);
-				app.mount(mount as HTMLElement);
+				const shouldHandle = handler.query(message);
+				if (!shouldHandle) continue;
+				handler.render(message, html);
 				break;
 			}
 		});
@@ -36,18 +35,27 @@ export class ChatCommands {
 		return message!.id!;
 	}
 
+	getScrollDistance(chatlog?: HTMLElement) {
+		chatlog ??= document.querySelector("#chat #chat-log") as HTMLElement;
+		return chatlog.scrollTop + chatlog.clientHeight - chatlog.scrollHeight;
+	}
+
 	updateScroll(chatlog?: HTMLElement, force?: boolean) {
 		setTimeout(() => {
 			chatlog ??= document.querySelector("#chat #chat-log") as HTMLElement;
-			const scrolledToBottom = chatlog.scrollTop + chatlog.clientHeight - chatlog.scrollHeight >= -100;
+			const scrolledToBottom = this.getScrollDistance(chatlog) >= -100;
 
 			if (force || scrolledToBottom)
 				chatlog.scrollBy({ top: 9999, behavior: "smooth" });
-		}, force ? 1 : 0);
+		}, force ? 200 : 500);
 	}
 
-	registerMessageRenderer(handler: typeof this.messageHandlers[number]) {
+	registerMessageHandler(handler: ChatDatabase<object>) {
 		this.messageHandlers.push(handler);
+	}
+
+	registerMessageRenderer(handler: typeof this.messageRenderers[number]) {
+		this.messageRenderers.push(handler);
 	}
 
 	registerCommand(command: LiteralArgumentBuilder) {

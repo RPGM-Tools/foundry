@@ -7,6 +7,9 @@ export default {
 		DESCRIPTION: {
 			REGENERATE_BUTTON: "Regenerate",
 		},
+		HOMEBREW: {
+			PLACEHOLDER: "Leave blank to let AI decide"
+		},
 		RADIAL_MENU: {
 			D4: "Roll a D4",
 			D6: "Roll a D6",

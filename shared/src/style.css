@@ -18,18 +18,35 @@
 
 .rpgm-button {
 	margin-top: 2px;
-	transition: background 150ms ease !important;
+	transition: background 150ms ease;
 	box-shadow: none !important;
 	position: relative;
 	width: 100%;
 }
 
 .rpgm-button:hover {
-	background: rgba(200, 0, 255) !important;
+	background-color: rgba(200, 0, 255);
 }
 
 .rpgm-button:active {
-	background: #6633cc !important;
+	background-color: #6633cc;
+}
+
+.rpgm-icons {
+	filter: blur(4px);
+	opacity: 0;
+	transition: opacity 150ms ease, filter 150ms ease;
+	position: absolute;
+	pointer-events: none;
+}
+
+.rpgm-icons a {
+	padding: 4px;
+	pointer-events: all;
+}
+
+.rpgm-icons a:hover {
+	text-shadow: 0 0 8px #6633cc;
 }
 
 .rpgm-app-inner {
@@ -79,16 +96,14 @@
 }
 
 .rpgm-active {
-	/* Two gradient layers with default centering */
-	box-shadow: #6633cc 0 0 4px !important;
+	box-shadow: #6633cc 0 0 4px;
 	background-image:
 		radial-gradient(circle, rgba(255, 0, 200, 0.5), transparent 70%),
 		radial-gradient(circle, rgba(200, 0, 200, 0.5), transparent 70%),
 		radial-gradient(circle, rgba(200, 0, 255, 0.5), transparent 70%),
 		radial-gradient(circle, #6633cc, transparent 70%) !important;
-	/* Make the gradients larger than the textarea so that shifting shows movement */
 	background-size: 250% 250% !important;
-	/* Animate both layers’ positions */
+	position: relative;
 	animation: moveBackground 4s ease infinite !important;
 }
 

@@ -21,6 +21,12 @@ declare global {
 		description: Description
 		tokenId?: string
 	}
+
+	type ForgeChatHomebrew = {
+		schema: HomebrewOptions | undefined
+		activeGeneration: string
+		generations: { [id: string]: Homebrew }
+	}
 }
 
 export { };

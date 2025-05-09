@@ -160,13 +160,16 @@ onUnmounted(() => {
 }
 
 .rpgm-chat-command {
-	margin: 1px;
 	padding: 1px;
 	position: relative;
 	transition: all 0.25s ease;
+	color: white;
+	margin: 0;
+	padding: 0.25em;
 }
 
-.rpgm-chat-command:first-child {
+.rpgm-chat-command:focus,
+.rpgm-chat-commands:not(:focus-within)>.rpgm-chat-command:first-child {
 	color: mediumspringgreen;
 }
 

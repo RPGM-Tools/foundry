@@ -1,6 +1,5 @@
 {
 	"private": true,
-	"version": "0.1.9",
 	"type": "module",
 	"workspaces": [
 		"modules/*"
@@ -25,6 +24,9 @@
 	},
 	"dependencies": {
 		"@floating-ui/vue": "^1.1.6",
+		"@rpgm/forge": "github:RPGM-Tools/forge",
+		"@rpgm/utils": "github:RPGM-Tools/utils",
+		"@vueuse/core": "^13.1.0",
 		"brigadier-ts-lite": "^1.0.1"
 	}
 }

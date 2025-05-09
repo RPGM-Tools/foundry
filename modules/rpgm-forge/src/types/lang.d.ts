@@ -11,6 +11,9 @@ declare global {
 			DESCRIPTION: {
 				REGENERATE_BUTTON
 			}
+			HOMEBREW: {
+				PLACEHOLDER
+			}
 			ERORRS: {
 				TOKEN_SELECT
 			}

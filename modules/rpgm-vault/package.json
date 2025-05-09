@@ -8,8 +8,5 @@
 		"preview": "vite build --watch & vite preview",
 		"lint": "eslint",
 		"build": "vue-tsc && vite build"
-	},
-	"dependencies": {
-		"@rpgm/utils": "github:RPGM-Tools/utils"
 	}
 }

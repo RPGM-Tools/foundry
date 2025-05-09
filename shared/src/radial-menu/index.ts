@@ -77,10 +77,10 @@ export class RadialMenuRegister {
 
 	recursivelyWatch(root: ParentNode): void {
 		const selectors = [
-			'input[type="text"][inputmode="text"]:not([disabled])',
-			'input[type="text"]:not([disabled]):not([inputmode])',
-			'textarea',
-			'[contenteditable="true"]'].join(',');
+			'input[type="text"][inputmode="text"]:not(.rpgm-radial-ignore):not([disabled])',
+			'input[type="text"]:not(.rpgm-radial-ignore):not([disabled]):not([inputmode])',
+			'textarea:not(.rpgm-radial-ignore)',
+			'[contenteditable="true"]:not(.rpgm-radial-ignore)'].join(',');
 		const inputs = root.parentElement?.querySelectorAll(selectors);
 		if (!inputs) return;
 

@@ -9,37 +9,33 @@ export function getSelectedToken(): Token | undefined {
 	}
 }
 
-export async function chatDescription(prompt?: { type: string, name?: string }) {
+export function chatDescription(prompt?: { type: string, name?: string }) {
 	if (!prompt) {
 		const token = getSelectedToken();
 		if (!token) return;
 		const actor = token.actor;
 		if (!actor || !actor.name) return;
-		const id = await rpgm.chat.createMessage("rpgm-forge", "description");
-		rpgm.forge!.setDescription(id, { name: "", tokenId: token.id, description: "", type: actor.name });
+		void rpgm.forge!.descriptionsChats.newMessage({ name: "", tokenId: token.id, description: "", type: actor.name });
 	} else {
-		const id = await rpgm.chat.createMessage("rpgm-forge", "description");
-		rpgm.forge!.setDescription(id, { description: "", type: prompt.type, name: prompt.name });
+		void rpgm.forge!.descriptionsChats.newMessage({ description: "", type: prompt.type, name: prompt.name });
 	}
 }
 
-export async function chatTokenNames(prompt?: string) {
+export function chatTokenNames(prompt?: string) {
 	// User wants a token for the selected token
 	if (!prompt) {
 		if (canvas.tokens!.controlled.length === 1) {
 			const token = canvas.tokens!.controlled[0];
 			const actor = token.actor;
 			if (!actor || !actor.name) return;
-			const id = await rpgm.chat.createMessage("rpgm-forge", "names");
-			rpgm.forge!.setName(id, { tokenId: token.id, names: [], prompt: actor.name });
+			void rpgm.forge!.namesChats.newMessage({ tokenId: token.id, names: [], prompt: actor.name });
 		} else {
 			rpgm.forge!.logger.errorU("Select a token to generate names for");
 		}
 	}
 	// User has a name for us to use
 	else {
-		const id = await rpgm.chat.createMessage("rpgm-forge", "names");
-		rpgm.forge!.setName(id, { names: [], prompt });
+		void rpgm.forge!.namesChats.newMessage({ names: [], prompt });
 	}
 }
 

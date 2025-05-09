@@ -1,6 +1,6 @@
 {
 	"name": "rpgm-forge",
-	"version": "0.1.8",
+	"version": "0.1.9",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -8,9 +8,5 @@
 		"preview": "vite build --watch & vite preview",
 		"lint": "eslint",
 		"build": "vue-tsc && vite build"
-	},
-	"dependencies": {
-		"@rpgm/utils": "github:RPGM-Tools/utils",
-		"@rpgm/forge": "github:RPGM-Tools/forge"
 	}
 }

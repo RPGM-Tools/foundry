@@ -5,19 +5,41 @@ import { hudHeuristics, inputHeuristics, shimmerInput, writeOn } from "#/radial-
 import { shimmerToken } from "./util/shimmer";
 import type { Component } from "vue";
 import NamesChat from "./chat/NamesChat.vue";
-import { RPGMLogger } from "#/util/logging";
 import DescriptionChat from "./chat/DescriptionChat.vue";
+import { RPGMLogger } from "#/util/logging";
+import { ChatDatabase } from "#/chat/ChatDatabase";
+import { command } from "./util/homebrew";
+import HomebrewChat from "./chat/Homebrew/HomebrewChat.vue";
 
 export class RpgmForge extends RpgmModule {
 	override id: string = "rpgm-forge";
 	override name: string = "RPGM Forge";
 	override readonly logger = new RPGMLogger("🎲 RPGM Forge");
+	namesChats = new ChatDatabase<ForgeChatNames>(
+		this.id,
+		"names",
+		NamesChat as Component,
+		this.name
+	);
+	descriptionsChats = new ChatDatabase<ForgeChatDescription>(
+		this.id,
+		"description",
+		DescriptionChat as Component,
+		this.name
+	);
+	homebrewChats = new ChatDatabase<ForgeChatHomebrew>(
+		this.id,
+		"homebrew",
+		HomebrewChat as Component,
+		this.name
+	);
 
 	override init(): Promise<void> | void {
 		rpgm.forge = this;
 	}
 
 	override registerSettings(): Promise<void> | void {
+		command();
 		game.settings.register("rpgm-forge", "names", { default: {} });
 		game.settings.register("rpgm-forge", "description", { default: {} });
 		rpgm.chat.registerCommand(literal("name")
@@ -74,7 +96,7 @@ export class RpgmForge extends RpgmModule {
 			}
 		});
 		rpgm.radialMenu.registerInputButton({
-			category: rpgm.radialMenu.categories.rpgm_forge,
+			category: rpgm.radialMenu.categories.rpgm_debug,
 			icon: 'fa fa-sparkles',
 			tooltip: "RPGM_FORGE.RADIAL_MENU.START_SHIMMER",
 			detective: (context) => inputHeuristics(context).isChat().noNumber().result,
@@ -83,7 +105,7 @@ export class RpgmForge extends RpgmModule {
 			}
 		});
 		rpgm.radialMenu.registerInputButton({
-			category: rpgm.radialMenu.categories.rpgm_forge,
+			category: rpgm.radialMenu.categories.rpgm_debug,
 			icon: 'fa-regular fa-sparkle',
 			tooltip: "RPGM_FORGE.RADIAL_MENU.STOP_SHIMMER",
 			detective: (context) => inputHeuristics(context).isChat().noNumber().result,
@@ -109,10 +131,10 @@ export class RpgmForge extends RpgmModule {
 			icon: 'fa fa-align-left',
 			tooltip: "RPGM_FORGE.RADIAL_MENU.DESCRIPTION",
 			detective: () => true,
-			callback: async (context) => {
+			callback: (context) => {
 				const token = context.token;
 				if (!token) return rpgm.logger.log("No token selected");
-				await chatDescription({
+				chatDescription({
 					type: token.actor!.name,
 					// Don't include name if it's the default actor name
 					name: token.name ? token.name !== token.actor!.name ? token.name : "" : ""
@@ -144,71 +166,14 @@ export class RpgmForge extends RpgmModule {
 	}
 
 	override i18nInit(): Promise<void> | void {
-		this.loadNames();
-		this.loadDescriptions();
+		this.namesChats.load();
+		this.descriptionsChats.load();
+		this.homebrewChats.load();
 	}
 
 	override rpgmReady(): Promise<void> | void {
-		this.pruneNames();
-		this.pruneDescriptions();
-	}
-
-	names!: Map<string, ForgeChatNames>;
-	descriptions!: Map<string, ForgeChatDescription>;
-
-	loadNames() {
-		this.names = new Map(Object.entries(game.settings.get("rpgm-forge", "names")));
-		rpgm.chat.registerMessageRenderer((id, message) =>
-			this.names.has(id) || message.flags["rpgm-forge"] === "names"
-				? NamesChat as Component : undefined);
-	}
-
-	loadDescriptions() {
-		this.descriptions = new Map(Object.entries(game.settings.get("rpgm-forge", "description")));
-		rpgm.chat.registerMessageRenderer((id, message) =>
-			this.descriptions.has(id) || message.flags["rpgm-forge"] === "description"
-				? DescriptionChat as Component : undefined);
-	}
-
-	saveNames() {
-		void game.settings.set("rpgm-forge", "names", Object.fromEntries(this.names));
-	}
-
-	saveDescriptions() {
-		void game.settings.set("rpgm-forge", "description", Object.fromEntries(this.descriptions));
-	}
-
-	pruneNames() {
-		this.names = Array.from(this.names).reduce((obj, [key, value]) => {
-			if (ui.chat.collection.has(key)) obj.set(key, value);
-			return obj;
-		}, new Map<string, ForgeChatNames>());
-		this.saveNames();
-	}
-
-	pruneDescriptions() {
-		this.descriptions = Array.from(this.descriptions).reduce((obj, [key, value]) => {
-			if (ui.chat.collection.has(key)) obj.set(key, value);
-			return obj;
-		}, new Map<string, ForgeChatDescription>());
-		this.saveDescriptions();
-	}
-
-	getName(id: string) {
-		return this.names.get(id);
-	}
-
-	getDescription(id: string) {
-		return this.descriptions.get(id);
-	}
-
-	setName(id: string, data: ForgeChatNames) {
-		this.names.set(id, data);
-		this.saveNames();
-	}
-
-	setDescription(id: string, data: ForgeChatDescription) {
-		this.descriptions.set(id, data);
-		this.saveDescriptions();
+		this.namesChats.prune();
+		this.descriptionsChats.prune();
+		this.homebrewChats.prune();
 	}
 }
