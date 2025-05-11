@@ -36,7 +36,6 @@ export class RadialMenuRegister {
 	}
 
 	private createRadialMenu(el: HTMLElement) {
-		rpgm.logger.debug("Attached to ", el);
 		const vueApp = createApp(RadialMenu as Component, { element: el });
 		const appContainer = document.createElement('div');
 		appContainer.style.position = 'fixed';
@@ -68,7 +67,6 @@ export class RadialMenuRegister {
 	}
 	private deleteRadialMenu(el: HTMLElement): void {
 		if (!this.elements.has(el)) return;
-		rpgm.logger.log("Detatched from ", el);
 		const { vueApp, injectedEl } = this.elements.get(el) as { vueApp: App, injectedEl: HTMLElement };
 		vueApp.unmount();
 		injectedEl.remove();

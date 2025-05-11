@@ -4,7 +4,7 @@ import { ForgeDescription } from '@rpgm/forge';
 const { data } = rpgm.forge!.descriptionsChats.useChatDatabase();
 const loading = ref(false);
 
-async function generate(regenerate: boolean) {
+async function generate() {
 	loading.value = true;
 	data.description = "";
 	const options: DescriptionOptions = {
@@ -22,7 +22,7 @@ async function generate(regenerate: boolean) {
 	if (!result.success) return;
 
 	data.description = result.output;
-	rpgm.chat.updateScroll(undefined, !regenerate);
+	rpgm.chat.updateScroll();
 	loading.value = false;
 }
 
@@ -34,7 +34,7 @@ function copy() {
 }
 
 onMounted(() => {
-	if (!data.description) void generate(false);
+	if (!data.description && !loading.value) void generate();
 });
 </script>
 
@@ -44,7 +44,7 @@ onMounted(() => {
 		<p v-if="data.description" class="forge-description">{{ data.description }}</p>
 	</Transition>
 	<button class="rpgm-button" @click="copy">Copy to Clipboard</button>
-	<button :disabled="loading" class="rpgm-button" @click="generate(true)">Regenerate</button>
+	<button :disabled="loading" class="rpgm-button" @click="generate">Regenerate</button>
 </template>
 
 <style>

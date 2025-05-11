@@ -103,19 +103,23 @@ const radialFloater = useFloating(toRef(menuContext.element), root, {
 
 function onSubClick() {
 	isOpen.value = false;
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	center.value?.blur();
 }
 
 function toggleOpen() {
 	if (menuContext.loading) return;
 	isOpen.value = !isOpen.value;
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	center.value?.focus();
 	// Fix overlap of subsequent radial menus
 	if (root.value?.parentElement)
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		root.value.parentElement.style.zIndex = isOpen.value ? "999" : "99";
 }
 
 function focusOut(event: FocusEvent) {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	if (root.value?.contains(event.relatedTarget as HTMLElement)) return;
 	isOpen.value = false;
 }

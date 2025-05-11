@@ -9,18 +9,28 @@ export class ChatCommands {
 	COMMAND_PREFIX = '*';
 	private commands = new CommandDispatcher();
 	private messageHandlers: ChatDatabase<object>[] = [];
-	private messageRenderers: ((id: string, message: ChatMessage, html: JQuery) => Component | undefined)[] = [];
+	private chatlog?: HTMLElement;
 
 	constructor() {
 		Hooks.on("chatMessage", (...args) => this.handleMessage(...args));
-		Hooks.on("renderChatMessage", (message, html) => {
-			for (const handler of this.messageHandlers) {
-				const shouldHandle = handler.query(message);
-				if (!shouldHandle) continue;
-				handler.render(message, html);
-				break;
-			}
-		});
+		if (rpgm.majorGameVersion <= 12)
+			Hooks.on("renderChatMessage", (message, html) => {
+				for (const handler of this.messageHandlers) {
+					const shouldHandle = handler.query(message);
+					if (!shouldHandle) continue;
+					handler.render(message, html.get(0)!);
+					return true;
+				}
+			});
+		else
+			Hooks.on("renderChatMessageHTML", (message, html) => {
+				for (const handler of this.messageHandlers) {
+					const shouldHandle = handler.query(message);
+					if (!shouldHandle) continue;
+					handler.render(message, html);
+					return true;
+				}
+			});
 		Hooks.once("ready", () => { rpgm.chat.createChatPanel(); });
 	}
 
@@ -35,27 +45,26 @@ export class ChatCommands {
 		return message!.id!;
 	}
 
-	getScrollDistance(chatlog?: HTMLElement) {
-		chatlog ??= document.querySelector("#chat #chat-log") as HTMLElement;
-		return chatlog.scrollTop + chatlog.clientHeight - chatlog.scrollHeight;
+	get scrollDistances() {
+		this.chatlog ??= document.querySelector("#chat #chat-log,#chat .chat-scroll") as HTMLElement;
+		return {
+			top: this.chatlog.scrollTop,
+			bottom: this.chatlog.scrollHeight - this.chatlog.scrollTop - this.chatlog.clientHeight,
+		};
 	}
 
-	updateScroll(chatlog?: HTMLElement, force?: boolean) {
+	updateScroll(force?: boolean) {
 		setTimeout(() => {
-			chatlog ??= document.querySelector("#chat #chat-log") as HTMLElement;
-			const scrolledToBottom = this.getScrollDistance(chatlog) >= -100;
-
-			if (force || scrolledToBottom)
-				chatlog.scrollBy({ top: 9999, behavior: "smooth" });
+			this.chatlog ??= document.querySelector("#chat #chat-log,#chat .chat-scroll") as HTMLElement;
+			const { top, bottom } = this.scrollDistances;
+			const shouldScroll = force || (top > 300 && bottom < 300);
+			if (shouldScroll)
+				this.chatlog.scrollBy({ top: 9999, behavior: "smooth" });
 		}, force ? 200 : 500);
 	}
 
 	registerMessageHandler(handler: ChatDatabase<object>) {
 		this.messageHandlers.push(handler);
-	}
-
-	registerMessageRenderer(handler: typeof this.messageRenderers[number]) {
-		this.messageRenderers.push(handler);
 	}
 
 	registerCommand(command: LiteralArgumentBuilder) {

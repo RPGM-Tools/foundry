@@ -9,9 +9,14 @@ declare global {
 	var rpgm: Partial<RPGM> & typeof RpgmModule;
 	var game: ReadyGame;
 
+	interface CoreFlags {
+		"rpgm-forge": string
+	}
+
 	namespace Hooks {
 		interface StaticCallbacks {
 			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement>, app: Application) => void
+			renderChatMessageHTML: (message: ChatMessage, html: HTMLElement) => void
 			"rpgm-init": () => void
 		}
 	}

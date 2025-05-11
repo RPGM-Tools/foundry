@@ -6,6 +6,8 @@ const emit = defineEmits<{ generate: [] }>();
 
 const data = inject<ForgeChatHomebrew>("data")!;
 
+const { loading } = defineProps<{ loading: boolean }>();
+
 const _renaming = ref(false);
 function renaming() {
 	_renaming.value = true;
@@ -24,8 +26,8 @@ function buttonIndex(i: number): -1 | 0 | 1 {
 				<HomebrewInputField v-model="field.value" v-for="(field, i) in data.schema.fields" :i="buttonIndex(i)" :field
 					@modified="modified = true" @renaming="renaming" :key="field.name" />
 			</TransitionGroup>
-			<button class="rpgm-button" @click="emit('generate')"
-				:disabled="(data.schema.fields.length ?? 0) == 0">Generate</button>
+			<button class="rpgm-button" :class="{ 'rpgm-active': loading }" @click="emit('generate')"
+				:disabled="(data.schema.fields.length ?? 0) == 0 || loading">Generate</button>
 		</template>
 		<p v-else>
 			<i>Add some fields to get started</i>

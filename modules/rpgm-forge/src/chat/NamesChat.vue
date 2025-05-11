@@ -28,14 +28,16 @@ async function generate(regenerate: boolean = false) {
 	});
 
 	if (!result.success) return;
-	const chatlog = document.querySelector("#chat #chat-log") as HTMLElement;
 
 	result.output.forEach((v, i) => {
 		loading.value = false;
 		setTimeout(() => {
 			data.names.push(v);
 			// Force scroll if this is the initial generation
-			rpgm.chat.updateScroll(chatlog, !regenerate);
+			if (i == result.output.length - 1)
+				setTimeout(() => {
+					rpgm.chat.updateScroll();
+				}, 400);
 		}, i * 100);
 	});
 }
@@ -50,7 +52,12 @@ function assign(name: string) {
 }
 
 onMounted(() => {
-	if (!data.names.length) void generate();
+	rpgm.logger.log("Rendering names");
+	if (!data.names.length && !loading.value) void generate();
+});
+
+onUnmounted(() => {
+	rpgm.logger.log("Unmounted names");
 });
 </script>
 

@@ -128,13 +128,13 @@ function startEdit() {
 		<h3 ref="name" class="rpgm-homebrew-field-name rpgm-radial-ignore" :contenteditable="editing"
 			@keydown.enter.prevent="rename(true)" @blur="rename(false)" @keydown.escape="restore(nameRef, field.name)">{{
 				field.name }}</h3>
-		<input class="rpgm-homebrew-field-value rpgm-input rpgm-radial-ignore" v-model="fieldValue"
-			:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')" />
 		<div ref="description" v-show="editing || field.description.length > 0"
 			class="rpgm-homebrew-field-description rpgm-radial-ignore" :contenteditable="editing"
 			@keydown.enter.exact.prevent="redescription(true)" @blur="redescription(false)"
 			@keydown.escape="restore(descriptionRef, field.description)">{{
 				field.description }}</div>
+		<input class="rpgm-homebrew-field-value rpgm-input rpgm-radial-ignore" v-model="fieldValue"
+			:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')" />
 	</div>
 </template>
 
@@ -147,6 +147,12 @@ function startEdit() {
 	padding-right: 3px;
 	transition: all 0.2s ease;
 	border-radius: 6px;
+}
+
+.rpgm-homebrew-field-name {
+	font-style: normal;
+	font-size: 15px;
+	border-bottom: 1px solid black;
 }
 
 .rpgm-homebrew-field-container[editing="true"] {
@@ -174,7 +180,7 @@ function startEdit() {
 	opacity: 0;
 }
 
-.rpgm-homebrew-field-container>* {
+.rpgm-homebrew-field-container h3 {
 	margin: 2px;
 }
 

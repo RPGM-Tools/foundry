@@ -1,36 +1,48 @@
 import { watchDebounced } from "@vueuse/core";
+import type { App, Component } from "vue";
 
 export class ChatDatabase<T extends object> {
 	data!: Map<string, T>;
+	apps: Map<string, App> = new Map();
 	get placeholder() { return `<div class="${this.moduleId}-${this.key}">If you are seeing this, please install ${this.moduleId}</div>`; }
 
 	constructor(
 		readonly moduleId: string,
 		readonly key: string,
 		readonly renderer: Component,
-		readonly title: string
+		readonly title: string,
 	) { }
 
 	async newMessage(data: T) {
 		// Set render to false to try and delay the first message render by the time we set the data
-		const message = await ChatMessage.create({
+		const id = foundry.utils.randomID();
+		await ChatMessage.create({
 			speaker: { alias: this.title },
 			whisper: game.userId,
 			content: this.placeholder,
-		}, { broadcast: false, render: false, renderSheet: false });
-		this.data.set(message!.id!, data);
+			//@ts-expect-error Types broken for flags
+			flags: { [this.moduleId]: { [this.key]: id } }
+		}, { broadcast: false });
+		this.data.set(id, data);
 		this.save();
 	}
 
-	query(message: ChatMessage): boolean {
-		return this.data.has(message.id ?? "");
+	private messageId(message: ChatMessage): string {
+		//@ts-expect-error Types broken for flags
+		rpgm.logger.log(message.getFlag(this.moduleId, this.key));
+		//@ts-expect-error Types broken for flags
+		return message.getFlag(this.moduleId, this.key) ?? "";
 	}
 
-	render(message: ChatMessage, html: JQuery<HTMLElement>) {
-		const mount = html.find(`.${this.moduleId}-${this.key}`).get(0)!;
+	query(message: ChatMessage): boolean {
+		return this.data.has(this.messageId(message) ?? "");
+	}
+
+	render(message: ChatMessage, html: HTMLElement) {
 		const app = createApp(this.renderer);
+		const mount = html.querySelector<HTMLElement>(`.${this.moduleId}-${this.key}`)!;
 		app.provide("message", message);
-		app.provide("data", reactive(this.data.get(message.id!)!));
+		app.provide("data", reactive(this.data.get(this.messageId(message))!));
 		app.mount(mount);
 	}
 

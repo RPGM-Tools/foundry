@@ -31,17 +31,15 @@ onMounted(async () => {
 	if (data.activeGeneration && data.generations[data.activeGeneration]) {
 		editing.value = false;
 	}
+	// If the homebrew was just created
 	if (!data.schema) {
 		data.schema = schemas.value[Math.random() * schemas.value.length | 0];
-		rpgm.chat.updateScroll(undefined, true);
+		rpgm.chat.updateScroll(true);
 	}
 });
 
 function scrollDownIfNecessary() {
-	const chatlog = document.querySelector("#chat #chat-log") as HTMLElement;
-	const scrolldistance = rpgm.chat.getScrollDistance(chatlog);
-	if (scrolldistance >= -400)
-		void nextTick(() => rpgm.chat.updateScroll(chatlog, true));
+	void nextTick(() => rpgm.chat.updateScroll());
 }
 
 // Reset modified status, scroll down if necessary
@@ -111,8 +109,7 @@ function restoreSchemaFromActiveGeneration() {
 	<div class="rpgm-homebrew-content">
 		<Transition name="rpgm-homebrew-main">
 			<div v-if="editing">
-				<HomebrewInput v-model:modified="modified" :class="{ 'rpgm-active': loading }" :disabled="loading"
-					v-model="data.schema" @generate="generate" />
+				<HomebrewInput v-model:modified="modified" :loading v-model="data.schema" @generate="generate" />
 			</div>
 			<div v-else-if="!editing">
 				<Transition name="rpgm-homebrew-main">
@@ -129,6 +126,7 @@ function restoreSchemaFromActiveGeneration() {
 	max-height: 40vh;
 	overflow-y: auto;
 	overflow-x: hidden;
+	padding-bottom: 10px;
 }
 
 .rpgm-homebrew-main-leave-active {
