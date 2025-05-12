@@ -6,7 +6,10 @@ const game = globalThis.game;
 const api_key = useSetting("rpgm-tools.api_key");
 const app = inject<SecretsSettings>("app")!;
 
-const submit = () => {
+/**
+ Saves changed settings
+ */
+function submit() {
 	void game.settings.set("rpgm-tools", "api_key", api_key.value);
 	void app.close();
 };

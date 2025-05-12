@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 import { type Component } from "vue";
 import { RPGMSettingsMenu } from "./index";
 import SecretsForm from "#/forms/SecretsForm.vue";
@@ -15,7 +16,7 @@ export class SecretsSettings extends RPGMSettingsMenu {
 	icon: string = "fas fa-key";
 	override type = SecretsForm as Component;
 	override get title(): string {
-	    return `RPGM Tools - ${rpgm.localize("RPGM_TOOLS.CONFIG.SECRETS_SETTINGS")}`;
+		return `RPGM Tools - ${rpgm.localize("RPGM_TOOLS.CONFIG.SECRETS_SETTINGS")}`;
 	}
 	static override registerMenu(id: string) {
 		game.settings.registerMenu(id, this.DEFAULT_OPTIONS.id!, {

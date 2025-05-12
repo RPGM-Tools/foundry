@@ -1,7 +1,13 @@
+/**
+ * Heuristics for buttons using the hud radial menu
+ * @param context - The context for this button
+ * @returns A builder for the heuristics
+ */
 export function hudHeuristics(context: TokenHudContext) {
 	let flag = false;
 	const chatAllowed = false;
 
+	/** Default options that can be overridden */
 	function defaults() {
 		// Prevent attaching to any input which contains "search"
 		flag ||= context.element.outerHTML.toLowerCase().includes("search");
@@ -11,15 +17,17 @@ export function hudHeuristics(context: TokenHudContext) {
 	}
 
 	const api = {
-		/** Get the result of the heuristics */
+		/** @returns The result of the heuristics */
 		get result() {
 			defaults();
 			return !flag;
 		},
+		/** @returns Is rpgm-tools.radial_menu_debug enabled? */
 		isDebug() {
 			flag ||= !game.settings.get("rpgm-tools", "radial_menu_debug");
 			return api;
 		},
+		/** @returns Is the user the gamemaster? */
 		isGM() {
 			flag ||= !game.user.isGM;
 			return api;
@@ -29,10 +37,16 @@ export function hudHeuristics(context: TokenHudContext) {
 	return api;
 }
 
+/**
+ * Heuristics for buttons using the input radial menu
+ * @param context - The context for this button
+ * @returns A builder for the heuristics
+ */
 export function inputHeuristics(context: InputContext) {
 	let flag = false;
 	let chatAllowed = false;
 
+	/** Default options that can be overridden */
 	function defaults() {
 		// Prevent attaching to any input which contains "search"
 		flag ||= context.element.outerHTML.toLowerCase().includes("search");
@@ -42,25 +56,27 @@ export function inputHeuristics(context: InputContext) {
 	}
 
 	const api = {
-		/** Get the result of the heuristics */
+		/** @returns The result of the heuristics */
 		get result() {
 			defaults();
 			return !flag;
 		},
-		/** Only inputs with text content are allowed */
+		/** @returns Only inputs with text content are allowed */
 		noNumber() {
 			flag ||= /^\d+$/.test(context.getValue());
 			return api;
 		},
+		/** @returns Is rpgm-tools.radial_menu_debug enabled? */
 		isDebug() {
 			flag ||= !game.settings.get("rpgm-tools", "radial_menu_debug");
 			return api;
 		},
+		/** @returns Is the user the gamemaster? */
 		isGM() {
 			flag ||= !game.user.isGM;
 			return api;
 		},
-		/** Attach button to the main chat interface */
+		/** @returns Attach button to the main chat interface */
 		isChat() {
 			chatAllowed = true;
 			flag ||= context.element.id !== "chat-message";

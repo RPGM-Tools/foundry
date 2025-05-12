@@ -1,6 +1,11 @@
 import fragURL from './shimmer2.glsl?url';
 import vertexURL from './vertex.glsl?url';
 
+/**
+ * Prepare a shimmer effect for a token
+ * @param token - The token to shimmer
+ * @returns A unique shimmer object for this token
+ */
 export async function shimmerToken(token: Token): Promise<Shimmer> {
 	/** Ensure only one shimmer filter per token */
 	await ShimmerFilter.setShader();
@@ -8,11 +13,17 @@ export async function shimmerToken(token: Token): Promise<Shimmer> {
 		new ShimmerFilter(token);
 }
 
+/**
+ * An object for starting and stopping a shimmer effect
+ */
 interface Shimmer {
 	fadeIn(duration: number): Promise<void>
 	fadeOut(duration: number): Promise<void>
 }
 
+/**
+ * The Shimmer filter implementation
+ */
 class ShimmerFilter extends PIXI.Filter implements Shimmer {
 	static shimmering: WeakMap<Token, ShimmerFilter> = new WeakMap();
 	static frag?: string;
@@ -22,6 +33,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 	active: boolean = false;
 	fadingOut: boolean;
 
+	/** Fetch the shader code once */
 	static async setShader(): Promise<void> {
 		await fetch(vertexURL).then(async (v) => {
 			if (v.ok) ShimmerFilter.vertex ??= await v.text();
@@ -53,11 +65,16 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 		this.startTime = performance.now();
 	}
 
+	/** Update shader uniforms */
 	updateFn() {
 		const elapsed = (performance.now() - this.startTime) / 1000;
 		this.uniforms.iTime = elapsed;
 	}
 
+	/**
+	 * @param duration - How long to fade in for
+	 * @returns A promise that resolves when the fade animation has completed
+	 */
 	async fadeIn(duration: number = 1000): Promise<void> {
 		if (this.active) return;
 		return new Promise((resolve) => {
@@ -77,6 +94,10 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 		});
 	}
 
+	/**
+	 * @param duration - How long to fade out for
+	 * @returns A promise that resolves when the fade animation has completed
+	 */
 	async fadeOut(duration: number = 1000): Promise<void> {
 		if (!this.active) return;
 		this.fadingOut = true;

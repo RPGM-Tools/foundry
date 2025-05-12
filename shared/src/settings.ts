@@ -31,7 +31,7 @@ export function GlobalSettings() {
 		icon: 'fa-regular fa-circle-info',
 		tooltip: "RPGM_TOOLS.RADIAL_MENU.INFO",
 		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
-		callback: (context) => rpgm.logger.log(context.token?.actor)
+		callback: (context) => rpgm.logger.log(context.token)
 	});
 	rpgm.radialMenu.registerInputButton({
 		category: rpgm.radialMenu.categories.rpgm_debug,
@@ -46,7 +46,10 @@ export function GlobalSettings() {
 	});
 }
 
-/** Register shared settings menus on each module's settings page */
+/**
+ * Register shared settings menus on each module's settings page
+ * @param id - The foundry module to register menus to
+ */
 export function GlobalMenus(id: string) {
 	RadialMenuSettings.registerMenu(id);
 	SecretsSettings.registerMenu(id);

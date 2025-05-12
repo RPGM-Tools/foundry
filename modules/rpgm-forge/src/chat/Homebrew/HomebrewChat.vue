@@ -38,16 +38,15 @@ onMounted(async () => {
 	}
 });
 
-function scrollDownIfNecessary() {
-	void nextTick(() => rpgm.chat.updateScroll());
-}
-
-// Reset modified status, scroll down if necessary
+/** Reset modified status, scroll down if necessary */
 function newSelection() {
 	modified.value = false;
-	scrollDownIfNecessary();
+	rpgm.chat.updateScroll();
 }
 
+/**
+ * Generates the homebrew
+ */
 async function generate() {
 	if (!data.schema) return;
 	loading.value = true;
@@ -56,7 +55,7 @@ async function generate() {
 	});
 
 	if (response.success) {
-		scrollDownIfNecessary();
+		rpgm.chat.updateScroll();
 
 		const id = foundry.utils.randomID();
 		data.generations[id] = response.output;
@@ -68,17 +67,27 @@ async function generate() {
 	loading.value = false;
 }
 
+/**
+ * Sets the active schema to a copy of {@link v}
+ * @param v - The schema to select
+ * @returns The new schema
+ */
 function assign(v: HomebrewOptions): HomebrewOptions {
 	return structuredClone(toRaw(v));
 }
 
-function cycleGenerations(by: number) {
+/**
+ * Select the next generation, wrapping if necessary
+ * @param by - How many generations to move forwards or backwards
+ */
+function cycleGenerations(by: number = 1) {
 	const keys = Object.keys(data.generations);
 	const index = keys.indexOf(data.activeGeneration);
 	const newIndex = (index + keys.length + by) % keys.length;
 	data.activeGeneration = keys[newIndex];
 }
 
+/** Switches the wizard to the generations view */
 function gotoGenerations() {
 	if (!data.generations[data.activeGeneration]) {
 		data.activeGeneration = Object.keys(data.generations)[0];
@@ -86,6 +95,7 @@ function gotoGenerations() {
 	editing.value = false;
 }
 
+/** Switches the wizard to the editing view, creating an empty schema from the active generation */
 function restoreSchemaFromActiveGeneration() {
 	if (editing.value) return;
 	data.schema = {
@@ -96,7 +106,7 @@ function restoreSchemaFromActiveGeneration() {
 	};
 	modified.value = true;
 	editing.value = true;
-	scrollDownIfNecessary();
+	rpgm.chat.updateScroll();
 }
 </script>
 

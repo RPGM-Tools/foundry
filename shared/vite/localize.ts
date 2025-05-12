@@ -9,10 +9,15 @@ const SHARED_LANG = '../lang/*';
  * Merges shared and module langs into a single file in the build
  */
 
+/**
+ * @param langGlob - Where to search for i18n files
+ * @returns The GenerateI18n plugin
+ */
 export function GenerateI18n(langGlob: string): Plugin {
 	let config: ResolvedConfig;
 	const langs: { [key: string]: LanguageSchema } = {};
 
+	/** Grab language schemas from {@link SHARED_LANG} */
 	async function getLangs() {
 		const files = fs.globSync(resolve(__dirname, SHARED_LANG));
 		for (const file of files) {
@@ -22,6 +27,12 @@ export function GenerateI18n(langGlob: string): Plugin {
 		}
 	}
 
+	/** 
+	 * Merges language schemas recursively
+	 * @param a - First language schema
+	 * @param b - Second language schema
+	 * @returns The merged language schema
+	 */
 	function mergeDeep(a: LanguageSchema, b: LanguageSchema) {
 		const result: LanguageSchema = {};
 		for (const key in a) {

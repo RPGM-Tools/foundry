@@ -4,6 +4,10 @@ import { ForgeDescription } from '@rpgm/forge';
 const { data } = rpgm.forge!.descriptionsChats.useChatDatabase();
 const loading = ref(false);
 
+/**
+ * Generates the description
+ * @todo Less hardcoding
+ */
 async function generate() {
 	loading.value = true;
 	data.description = "";
@@ -26,6 +30,9 @@ async function generate() {
 	loading.value = false;
 }
 
+/**
+ * Copies the description to clipboard
+ */
 function copy() {
 	try {
 		void navigator.clipboard.writeText(data.description);

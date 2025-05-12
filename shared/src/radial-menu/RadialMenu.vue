@@ -101,12 +101,14 @@ const radialFloater = useFloating(toRef(menuContext.element), root, {
 	},
 });
 
+/** Close radial menu */
 function onSubClick() {
 	isOpen.value = false;
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	center.value?.blur();
 }
 
+/** Toggle radial menu */
 function toggleOpen() {
 	if (menuContext.loading) return;
 	isOpen.value = !isOpen.value;
@@ -118,6 +120,10 @@ function toggleOpen() {
 		root.value.parentElement.style.zIndex = isOpen.value ? "999" : "99";
 }
 
+/**
+ * Ignore focus changes within the radial menu, else close the menu
+ * @param event - The {@link FocusEvent} to detect the target of blur
+ */
 function focusOut(event: FocusEvent) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	if (root.value?.contains(event.relatedTarget as HTMLElement)) return;
@@ -138,6 +144,10 @@ const radius = computed(() => {
 	return Math.max(centerSize.value * 1.25, centerSize.value / Math.sin(2 * Math.PI / Math.max(3, Items.value.length)));
 });
 
+/**
+ * @param index - The index of the button to style
+ * @returns The rotation effect for this button
+ */
 function getSubButtonStyle(index: number): StyleValue {
 	const itemCount = Items.value.length;
 	const anglePerItem = 360 / itemCount;
@@ -149,8 +159,10 @@ function getSubButtonStyle(index: number): StyleValue {
 	const finalX = Math.cos(radians) * radius.value;
 	const finalY = Math.sin(radians) * radius.value;
 
-	/** Stagger delay to collectively take {@link ANIMATION_DURATION}
-	Reverse the delay if closing */
+	/**
+	 * Stagger delay to collectively take {@link ANIMATION_DURATION}
+	 * Reverse the delay if closing
+	 */
 	const staggerDelay = (ANIMATION_DURATION / itemCount) * (isOpen.value ? index : itemCount - index);
 
 	// If open => transform to final position with scale(1)

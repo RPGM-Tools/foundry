@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 import { type Component } from "vue";
 import { RPGMSettingsMenu } from "./index";
 import RadialMenuForm from "#/forms/RadialMenuForm.vue";
@@ -15,7 +16,7 @@ export class RadialMenuSettings extends RPGMSettingsMenu {
 	icon: string = "fas fa-dice-d20";
 	override type = RadialMenuForm as Component;
 	override get title(): string {
-	    return `RPGM Tools - ${rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_SETTINGS")}`;
+		return `RPGM Tools - ${rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_SETTINGS")}`;
 	}
 	static override registerMenu(id: string) {
 		game.settings.registerMenu(id, this.DEFAULT_OPTIONS.id!, {

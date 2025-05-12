@@ -15,6 +15,11 @@ const fieldContainer = useTemplateRef("fieldContainer");
 const nameRef = useTemplateRef("name");
 const descriptionRef = useTemplateRef("description");
 
+/**
+ * Checks to see if a field can be renamed to {@link n} 
+ * @param n - The name to validate
+ * @returns Whether or not this name is valid
+ */
 function validateNewName(n: string): boolean {
 	if (n === field.name) return false;
 	if (n.length == 0) {
@@ -32,11 +37,16 @@ function validateNewName(n: string): boolean {
 	return true;
 }
 
+/** Deletes this field from the schema */
 function remove() {
 	data.schema!.fields.splice(data.schema!.fields.indexOf(field), 1);
 	emit("modified");
 }
 
+/** 
+ * Renames this field in the schema
+ * @param force - Whether or not to exit out of editing mode
+ */
 function rename(force: boolean = false) {
 	if (!nameRef.value) return;
 	if (force)
@@ -58,10 +68,19 @@ function rename(force: boolean = false) {
 	}
 }
 
+/** 
+ * Checks to see if a field can be redescribed to {@link _d} 
+ * @param _d - The description to validate
+ * @returns Whether or not this name is valid
+ */
 function validateNewDescription(_d: string): boolean {
 	return true;
 }
 
+/**
+ * Redescribes this field in the schema
+ * @param force - Whether or not to exit out of editing mode
+ */
 function redescription(force: boolean = false) {
 	if (!descriptionRef.value) return;
 	if (force)
@@ -77,35 +96,49 @@ function redescription(force: boolean = false) {
 		descriptionRef.value.innerText = field.description;
 }
 
+/** 
+ * Reorders this field in the schema 
+ * @param by - How many fields to move forwards or backwards
+ */
 function move(by: number) {
 	const idx = data.schema!.fields.indexOf(field);
-	const newIdx = Math.max(0, Math.min(data.schema!.fields.length - 1, idx + by));
-	if (newIdx === idx) return;
+	const clippedIdx = Math.max(0, Math.min(data.schema!.fields.length - 1, idx + by));
+	if (clippedIdx === idx) return;
 
 	data.schema!.fields.splice(idx, 1);
-	data.schema!.fields.splice(newIdx, 0, field);
+	data.schema!.fields.splice(clippedIdx, 0, field);
 	emit("modified");
 }
 
+/**
+ * Ignore focus changes within the field, else disable editing mode
+ * @param e - The {@link FocusEvent} to detect the target of blur
+ */
 function tryBlur(e: FocusEvent) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	if (fieldContainer.value?.contains(e.relatedTarget as HTMLElement)) return;
 	editing.value = false;
 }
 
+/**
+ * Cancel editing this field
+ * @param element - The element to restore text to
+ * @param value - The value to restore to this 
+ */
 function restore(element: HTMLElement | null, value: string) {
 	if (element)
 		element.innerText = value;
-	// editing.value = false;
 }
 
+/**
+ * Enables editing of name and description divs and moves the cursor to the end of the name div
+ */
 function startEdit() {
 	editing.value = true;
 	void nextTick(() => {
 		if (!nameRef.value) return;
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		nameRef.value.focus();
-		nameRef.value.innerText = String(nameRef.value.innerText);
 		const range = document.createRange();
 		range.selectNodeContents(nameRef.value);
 		range.collapse();
@@ -169,6 +202,7 @@ function startEdit() {
 }
 
 .rpgm-homebrew-field-description {
+	font-style: italic;
 	padding-bottom: 4px;
 }
 

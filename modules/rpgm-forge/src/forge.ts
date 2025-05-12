@@ -1,6 +1,6 @@
 import { RpgmModule } from "#/module";
 import { literal, argument, string } from "brigadier-ts-lite";
-import { chatDescription, chatTokenNames, getSelectedToken, renameToken } from "./util/token";
+import { chatDescription, chatTokenNames, getSelectedToken, applyTokenName } from "./util/token";
 import { hudHeuristics, inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
 import { shimmerToken } from "./util/shimmer";
 import type { Component } from "vue";
@@ -11,6 +11,9 @@ import { ChatDatabase } from "#/chat/ChatDatabase";
 import { command } from "./util/homebrew";
 import HomebrewChat from "./chat/Homebrew/HomebrewChat.vue";
 
+/**
+ * {@link RpgmForge} stores chat databases for forge wizards
+ */
 export class RpgmForge extends RpgmModule {
 	override id: string = "rpgm-forge";
 	override name: string = "RPGM Forge";
@@ -34,10 +37,18 @@ export class RpgmForge extends RpgmModule {
 		this.name
 	);
 
+	/**
+	 * Called before everything else
+	 * Not much goes on in here
+	 */
 	override init(): Promise<void> | void {
 		rpgm.forge = this;
 	}
 
+	/**
+	 * Register module-specific settings here
+	 * Also where Radial Menu buttons and RP-Commands are registered (might change)
+	 */
 	override registerSettings(): Promise<void> | void {
 		command();
 		game.settings.register("rpgm-forge", "names", { default: {} });
@@ -68,9 +79,9 @@ export class RpgmForge extends RpgmModule {
 			tooltip: "RPGM_FORGE.RADIAL_MENU.D4",
 			detective: (context) => inputHeuristics(context).noNumber().result,
 			callback: async (context) => {
-				const effect = shimmerInput(context);
+				const shimmer = shimmerInput(context);
 				await writeOn(context, `Rolled a ${Math.floor(Math.random() * 4) + 1}`, 250);
-				effect();
+				shimmer();
 			}
 		});
 		rpgm.radialMenu.registerInputButton({
@@ -79,9 +90,9 @@ export class RpgmForge extends RpgmModule {
 			tooltip: "RPGM_FORGE.RADIAL_MENU.D6",
 			detective: (context) => inputHeuristics(context).noNumber().result,
 			callback: async (context) => {
-				const effect = shimmerInput(context);
+				const shimmer = shimmerInput(context);
 				await writeOn(context, `Rolled a ${Math.floor(Math.random() * 6) + 1}`, 250);
-				effect();
+				shimmer();
 			}
 		});
 		rpgm.radialMenu.registerInputButton({
@@ -90,9 +101,9 @@ export class RpgmForge extends RpgmModule {
 			tooltip: "RPGM_FORGE.RADIAL_MENU.LOREM_IPSUM",
 			detective: (context) => inputHeuristics(context).isChat().noNumber().result,
 			callback: async (context) => {
-				const effect = shimmerInput(context);
+				const shimmer = shimmerInput(context);
 				await writeOn(context, "Hello, World! Here is some lorem ipsum for you to consider.", 500);
-				effect();
+				shimmer();
 			}
 		});
 		rpgm.radialMenu.registerInputButton({
@@ -101,7 +112,7 @@ export class RpgmForge extends RpgmModule {
 			tooltip: "RPGM_FORGE.RADIAL_MENU.START_SHIMMER",
 			detective: (context) => inputHeuristics(context).isChat().noNumber().result,
 			callback: (context) => {
-				context.element.classList.add("rpgm-active");
+				shimmerInput(context);
 			}
 		});
 		rpgm.radialMenu.registerInputButton({
@@ -110,7 +121,7 @@ export class RpgmForge extends RpgmModule {
 			tooltip: "RPGM_FORGE.RADIAL_MENU.STOP_SHIMMER",
 			detective: (context) => inputHeuristics(context).isChat().noNumber().result,
 			callback: (context) => {
-				context.element.classList.remove("rpgm-active");
+				shimmerInput(context)();
 			}
 		});
 		rpgm.radialMenu.registerTokenHudButton({
@@ -119,11 +130,11 @@ export class RpgmForge extends RpgmModule {
 			tooltip: "RPGM_FORGE.RADIAL_MENU.NAMES",
 			detective: () => true,
 			callback: async (context) => {
-				if (!context.token) return rpgm.logger.log("No token selected");
+				if (!context.token) return rpgm.logger.logU("No token selected");
 				if (context.shift)
 					void chatTokenNames(context.token.actor!.name);
 				else
-					return renameToken(context.token.document);
+					return applyTokenName(context.token.document);
 			}
 		});
 		rpgm.radialMenu.registerTokenHudButton({
@@ -165,12 +176,18 @@ export class RpgmForge extends RpgmModule {
 		});
 	}
 
+	/**
+	 * Currently used for loading chat databases
+	 */
 	override i18nInit(): Promise<void> | void {
 		this.namesChats.load();
 		this.descriptionsChats.load();
 		this.homebrewChats.load();
 	}
 
+	/**
+	 * Currently used for pruning chat databases
+	 */
 	override rpgmReady(): Promise<void> | void {
 		this.namesChats.prune();
 		this.descriptionsChats.prune();

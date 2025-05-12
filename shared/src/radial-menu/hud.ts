@@ -1,9 +1,13 @@
 import type { App, Reactive, Component } from 'vue';
 import RadialMenu from './RadialMenu.vue';
 
+/**
+ * Mixin for {@link TokenHUD} that injects a radial menu into the hud
+ */
 export class RPGMTokenHUD<Options extends Application.Options> extends TokenHUD<Options> {
 	menuApp: App | null = null;
 
+	// eslint-disable-next-line jsdoc/require-jsdoc 
 	protected override _replaceHTML(element: JQuery, html: JQuery): void {
 		super._replaceHTML(element, html);
 		void new Promise(() => {

@@ -9,11 +9,16 @@ const data = inject<ForgeChatHomebrew>("data")!;
 const { loading } = defineProps<{ loading: boolean }>();
 
 const _renaming = ref(false);
+/** Disable css for 10ms when renaming a field */
 function renaming() {
 	_renaming.value = true;
 	setTimeout(() => _renaming.value = false, 10);
 }
 
+/** 
+ * @param i - the index of this field
+ * @returns -1 if first, 1 if last, 0 otherwise
+ */
 function buttonIndex(i: number): -1 | 0 | 1 {
 	return i <= 0 ? -1 : i >= data.schema!.fields.length - 1 ? 1 : 0;
 }

@@ -1,4 +1,3 @@
-<!--TODO: extract individual dice button-->
 <template>
 	<button class="dice-button" :class="{ pressed }" @click.prevent="onClick" @keydown.space="pressed = true"
 		@keyup.space="pressed = false">
@@ -27,10 +26,6 @@ const colorStyle = computed<StyleValue>(() => ({
 	filter: `hue-rotate(${button.category.color ?? 0}) saturate(1.25) brightness(1.5)`
 }));
 
-watch(() => menuContext.element, (value) => {
-	rpgm.logger.log(value);
-});
-
 const rotationStyle = computed<StyleValue>(() =>
 	rotation === 'uniform' ? {
 		rotate: `${Math.floor(Math.random() * 3) * 120}deg`
@@ -38,6 +33,10 @@ const rotationStyle = computed<StyleValue>(() =>
 		rotate: `${Math.random() * 360}deg`
 	});
 
+/**
+ * Execute this button's callback and set loading state to true 
+ * @param event - The {@link MouseEvent} used to detect the shift modifier
+ */
 async function onClick(event: MouseEvent) {
 	emit('click');
 	menuContext.loading = true;

@@ -6,7 +6,10 @@ const verboseLogs = useSetting("rpgm-tools.verbose-logs");
 const radialMenuDebug = useSetting("rpgm-tools.radial_menu_debug");
 const app = inject<DeveloperSettings>("app")!;
 
-const submit = () => {
+/**
+ Saves changed settings
+ */
+function submit() {
 	verboseLogs.apply();
 	radialMenuDebug.apply();
 	void app.close();

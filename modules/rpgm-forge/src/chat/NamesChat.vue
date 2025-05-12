@@ -7,6 +7,11 @@ const { data } = rpgm.forge!.namesChats.useChatDatabase();
 const localize = rpgm.localize;
 const loading = ref(false);
 
+/**
+ * Generates the name
+ * @param regenerate - Whether or not to delete the old names
+ * @todo Less hardcoding
+ */
 async function generate(regenerate: boolean = false) {
 	loading.value = true;
 	if (regenerate)
@@ -42,6 +47,10 @@ async function generate(regenerate: boolean = false) {
 	});
 }
 
+/** 
+ * Apply a name to the currently selected token
+ * @param name - The name to apply
+ */
 function assign(name: string) {
 	const token = getSelectedToken();
 	if (!token) return;
@@ -52,12 +61,7 @@ function assign(name: string) {
 }
 
 onMounted(() => {
-	rpgm.logger.log("Rendering names");
 	if (!data.names.length && !loading.value) void generate();
-});
-
-onUnmounted(() => {
-	rpgm.logger.log("Unmounted names");
 });
 </script>
 

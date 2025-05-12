@@ -43,14 +43,19 @@ const suggestions = computed<Suggestions>(() => {
 	return rpgm.chat.getCompletionSuggestions(parseResult.value);
 });
 
-/** For updating the input after pressing enter */
+/**
+ * For updating the input after pressing enter
+ * @param e - Keyboard event
+ */
 function onKeyPress(e: KeyboardEvent) {
+	hasFocus.value = true;
 	if (e.key === "Enter") {
 		chatValue.value = "";
 	}
 }
 
-function onInput(_: Event) {
+/** When a character is typed, parse the input */
+function onInput() {
 	hasFocus.value = true;
 	if (chatInput.value?.value === undefined) return;
 	chatValue.value = chatInput.value.value;
@@ -58,6 +63,7 @@ function onInput(_: Event) {
 	else parseResult.value = rpgm.chat.parse(chatValue.value.slice(1));
 }
 
+/** Custom directive for following an html element based on a css selector, inserting itself before the target */
 const vFollow: Directive<HTMLElement & { _observer: MutationObserver }, string> = {
 	mounted: (el, { value: targetSelector }) => {
 		const target = document.querySelector(targetSelector);

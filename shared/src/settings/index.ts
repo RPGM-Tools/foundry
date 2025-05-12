@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 import type { DeepPartial } from 'fvtt-types/utils';
 import { createApp, type App, type Component } from 'vue';
 const { ApplicationV2 } = foundry.applications.api;

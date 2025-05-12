@@ -1,9 +1,13 @@
 import { watchDebounced } from "@vueuse/core";
 import type { App, Component } from "vue";
 
+/**
+ * A record of unique ids to data for use in chat Wizards
+ */
 export class ChatDatabase<T extends object> {
 	data!: Map<string, T>;
 	apps: Map<string, App> = new Map();
+	/** @returns Placeholder content for when a module isn't installed */
 	get placeholder() { return `<div class="${this.moduleId}-${this.key}">If you are seeing this, please install ${this.moduleId}</div>`; }
 
 	constructor(
@@ -13,9 +17,14 @@ export class ChatDatabase<T extends object> {
 		readonly title: string,
 	) { }
 
+	/**
+	 * Creates a message and saves it to the database
+	 * @param data - The data to store to this message
+	 */
 	async newMessage(data: T) {
 		// Set render to false to try and delay the first message render by the time we set the data
 		const id = foundry.utils.randomID();
+		this.data.set(id, data);
 		await ChatMessage.create({
 			speaker: { alias: this.title },
 			whisper: game.userId,
@@ -23,22 +32,37 @@ export class ChatDatabase<T extends object> {
 			//@ts-expect-error Types broken for flags
 			flags: { [this.moduleId]: { [this.key]: id } }
 		}, { broadcast: false });
-		this.data.set(id, data);
 		this.save();
 	}
 
+	/**
+	 * Extracts the unique key from the flags of a message
+	 * @param message - The message to retrieve the id of
+	 * @returns A unique identifier extracted for this message if it exists
+	 */
 	private messageId(message: ChatMessage): string {
 		//@ts-expect-error Types broken for flags
 		rpgm.logger.log(message.getFlag(this.moduleId, this.key));
 		//@ts-expect-error Types broken for flags
-		return message.getFlag(this.moduleId, this.key) ?? "";
+		return message.getFlag(this.moduleId, this.key);
 	}
 
+	/**
+	 * Decides whether or not to handle rendering for a given message
+	 * @param message - The message to query
+	 * @returns Whether or not this message should be rendered with this database
+	 */
 	query(message: ChatMessage): boolean {
 		return this.data.has(this.messageId(message) ?? "");
 	}
 
+	/**
+	 * Renders a message by mounting a vue app to its content
+	 * @param message - The message being rendered
+	 * @param html - The html of the message
+	 */
 	render(message: ChatMessage, html: HTMLElement) {
+		rpgm.logger.debug("rendering", message);
 		const app = createApp(this.renderer);
 		const mount = html.querySelector<HTMLElement>(`.${this.moduleId}-${this.key}`)!;
 		app.provide("message", message);
@@ -48,29 +72,38 @@ export class ChatDatabase<T extends object> {
 
 	/** Reduce data to only those in chat */
 	prune() {
+		const oldLength = this.data.size;
 		this.data = Array.from(this.data).reduce((obj, [key, value]) => {
 			if (ui.chat.collection.has(key)) obj.set(key, value);
 			return obj;
 		}, new Map<string, T>());
+		rpgm.logger.debug(`Pruned ${oldLength - this.data.size} entries from ${this.moduleId}.${this.key}`);
 		this.save();
 	}
 
+	/** Retrieves all data for this database */
 	load() {
 		const dataString = localStorage.getItem(`${this.moduleId}.${this.key}`);
-		if (!dataString) return void (this.data = new Map());
+		if (!dataString) { void (this.data = new Map()); return; };
 		this.data = new Map(Object.entries(JSON.parse(dataString) as { [key: string]: T }));
 		rpgm.chat.registerMessageHandler(this);
 	}
 
+	/** Sync this database's data to localStorage */
 	private save() {
 		localStorage.setItem(`${this.moduleId}.${this.key}`, JSON.stringify(Object.fromEntries(this.data)));
 	}
 
-	useChatDatabase() {
+	/**
+	 * A vue composable for grabbing a reactive reference to a message's data
+	 * @param debounce - How often to save data when it gets changed
+	 * @returns A reactive reference to the message's data, along with the original message
+	 */
+	useChatDatabase(debounce: number = 1000) {
 		const message = inject<T>("message") as ChatMessage;
 		const data = inject<T>("data") as T;
 		const rData = reactive(data);
-		watchDebounced(rData, () => this.save(), { debounce: 1000 });
+		watchDebounced(rData, () => this.save(), { debounce });
 		return { data: rData, message };
 	}
 }

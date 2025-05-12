@@ -1,9 +1,17 @@
 import { resolve } from 'path';
 import { loadEnv, type UserConfig } from 'vite';
-import { GenerateI18n, Versioning } from '.';
+import { GenerateI18n } from './localize';
+import { Versioning } from './versioning';
 import AutoImport from 'unplugin-auto-import/vite';
 import vue from '@vitejs/plugin-vue';
 
+/**
+ * @param id - The module id
+ * @param mode - The build mode
+ * @param dirname - The current directory
+ * @param version - The module version
+ * @returns Default Vite config
+ */
 export default function defaultConfig(id: string, mode: string, dirname: string, version: string): UserConfig {
 	const env = loadEnv(mode, dirname);
 

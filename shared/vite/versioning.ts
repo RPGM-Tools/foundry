@@ -7,7 +7,11 @@
 import type { PluginOption, ResolvedConfig } from "vite";
 import { existsSync, readFile, writeFile } from 'node:fs';
 
-/** Set version number in module.json */
+/**
+ * Set version number in module.json
+ * @param version - What version to use when versioning this module
+ * @returns Versioning plugin
+ */
 export function Versioning(version: string): PluginOption {
 	let config: ResolvedConfig;
 	const moduleFile = () => `${config.build.outDir}/module.json`;

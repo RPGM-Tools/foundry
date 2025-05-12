@@ -6,6 +6,10 @@ declare global {
 
 	interface RPGM extends object { }
 
+	/**
+	 * Our global singleton object
+	 * Essentially the static instance of {@link RpgmModule}
+	 */
 	var rpgm: Partial<RPGM> & typeof RpgmModule;
 	var game: ReadyGame;
 
@@ -16,7 +20,7 @@ declare global {
 	namespace Hooks {
 		interface StaticCallbacks {
 			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement>, app: Application) => void
-			renderChatMessageHTML: (message: ChatMessage, html: HTMLElement) => void
+			renderChatMessageHTML: (message: ChatMessage, html: HTMLElement, context: object) => void
 			"rpgm-init": () => void
 		}
 	}

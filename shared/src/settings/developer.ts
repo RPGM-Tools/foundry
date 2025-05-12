@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 import { type Component } from "vue";
 import { RPGMSettingsMenu } from "./index";
 import DeveloperForm from "#/forms/DeveloperForm.vue";
@@ -15,7 +16,7 @@ export class DeveloperSettings extends RPGMSettingsMenu {
 	static icon: string = "fas fa-key";
 	override type = DeveloperForm as Component;
 	override get title(): string {
-	    return `RPGM Tools - ${rpgm.localize("RPGM_TOOLS.CONFIG.DEVELOPER_SETTINGS")}`;
+		return `RPGM Tools - ${rpgm.localize("RPGM_TOOLS.CONFIG.DEVELOPER_SETTINGS")}`;
 	}
 	static override registerMenu(id: string) {
 		game.settings.registerMenu(id, this.DEFAULT_OPTIONS.id!, {

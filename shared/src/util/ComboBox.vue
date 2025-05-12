@@ -19,6 +19,10 @@ const filtered = computed(() => {
 	return values.filter(v => filter(v, input.value)).slice(0, max);
 });
 
+/**
+ * A selection was made, now update the value and close the input
+ * @param t - The item that was selected
+ */
 function select(t: T) {
 	value.value = assign ? assign(t) : t;
 	input.value = display(t);
@@ -27,6 +31,9 @@ function select(t: T) {
 	isOpen.value = false;
 }
 
+/**
+ * @param k - Keyboard event
+ */
 function keyDown(k: KeyboardEvent) {
 	if (k.key == "Enter") {
 		if (input.value.length == 0) return;

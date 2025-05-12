@@ -6,7 +6,10 @@ const rpgm = globalThis.rpgm;
 const radialMenuEnabled = useSetting("rpgm-tools.radial_menu_enabled");
 const app = inject<RadialMenuSettings>("app")!;
 
-const submit = () => {
+/**
+ Saves changed settings
+ */
+function submit() {
 	radialMenuEnabled.apply();
 	rpgm.radialMenu.update();
 	void app.close();

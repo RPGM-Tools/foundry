@@ -6,10 +6,14 @@ import { RPGMTokenHUD } from './hud';
 export * from './heuristics';
 export * from './funcs';
 
+/**
+ * Manages all radial menu instances 
+ */
 export class RadialMenuRegister {
 	elements = new Map<HTMLElement, { vueApp: App, injectedEl: HTMLElement }>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
 	private _categories: Record<keyof RadialMenuCategories, RadialMenuCategoryOptions> = {} as any;
+	/** @returns The categories registered that can be used */
 	get categories(): Readonly<typeof this._categories> { return this._categories; }
 	buttons: RadialButton<InputContext>[] = [];
 	tokenHudButtons: RadialButton<TokenHudContext>[] = [];
@@ -35,6 +39,9 @@ export class RadialMenuRegister {
 		});
 	}
 
+	/**
+	 * @param el - Mount a radial menu to the top-right of {@link el}
+	 */
 	private createRadialMenu(el: HTMLElement) {
 		const vueApp = createApp(RadialMenu as Component, { element: el });
 		const appContainer = document.createElement('div');
@@ -65,6 +72,10 @@ export class RadialMenuRegister {
 		this.elements.set(el, { vueApp, injectedEl: appContainer });
 		vueApp.mount(appContainer, true);
 	}
+
+	/**
+	 * @param el - Deletes a radial menu mounted to {@link el}
+	 */
 	private deleteRadialMenu(el: HTMLElement): void {
 		if (!this.elements.has(el)) return;
 		const { vueApp, injectedEl } = this.elements.get(el) as { vueApp: App, injectedEl: HTMLElement };
@@ -73,6 +84,9 @@ export class RadialMenuRegister {
 		this.elements.delete(el);
 	}
 
+	/**
+	 * @param root - Scans for added nodes that can be injected
+	 */
 	recursivelyWatch(root: ParentNode): void {
 		const selectors = [
 			'input[type="text"][inputmode="text"]:not(.rpgm-radial-ignore):not([disabled])',
@@ -91,6 +105,7 @@ export class RadialMenuRegister {
 		);
 	}
 
+	/** Matches functionality of the radial menu with the user's setting */
 	update() {
 		if (game.settings.get("rpgm-tools", "radial_menu_enabled") === true)
 			this.startWatching();
@@ -98,6 +113,7 @@ export class RadialMenuRegister {
 			this.stopWatching();
 	}
 
+	/** Activate watcher */
 	startWatching() {
 		this.inputObserver.observe(document.body, {
 			childList: true,
@@ -106,6 +122,7 @@ export class RadialMenuRegister {
 		this.recursivelyWatch(document.body);
 	}
 
+	/** Deactivate watcher */
 	stopWatching() {
 		this.inputObserver.disconnect();
 		this.elements.forEach((value, key) => {
@@ -115,16 +132,26 @@ export class RadialMenuRegister {
 		});
 	}
 
+	/**
+	 * @param id - The id this category is registered to
+	 * @param category - Options for this category
+	 */
 	registerCategory<T extends keyof RadialMenuCategories>(id: T, category: RadialMenuCategoryOptions) {
 		rpgm.logger.debug(`Registering radial menu category: ${id}`);
 		this._categories[id] = category;
 	}
 
+	/**
+	 * @param button - The input button to register
+	 */
 	registerInputButton(button: RadialButton<InputContext>) {
 		rpgm.logger.debug(`Registering radial menu button: ${rpgm.localize(button.tooltip)}`);
 		this.buttons.push(button);
 	}
 
+	/**
+	 * @param button - The hud button to register
+	 */
 	registerTokenHudButton(button: RadialButton<TokenHudContext>) {
 		rpgm.logger.debug(`Registering radial menu button: ${rpgm.localize(button.tooltip)}`);
 		this.tokenHudButtons.push(button);
