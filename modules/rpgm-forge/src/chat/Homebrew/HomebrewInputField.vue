@@ -199,11 +199,11 @@ function startEdit() {
 
 .rpgm-homebrew-field-value {
 	background: #ffffffaa;
+	margin-bottom: 3px;
 }
 
 .rpgm-homebrew-field-description {
 	font-style: italic;
-	padding-bottom: 4px;
 }
 
 .rpgm-homebrew-field-value:focus::placeholder {

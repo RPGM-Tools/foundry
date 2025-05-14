@@ -15,7 +15,6 @@ export class ChatCommands {
 	private chatlog?: HTMLElement;
 
 	constructor() {
-		Hooks.on("chatMessage", (...args) => this.handleMessage(...args));
 		// renderChatMessage is deprecated in v13+
 		if (rpgm.majorGameVersion <= 12)
 			Hooks.on("renderChatMessage", (message, html) => {
@@ -112,23 +111,4 @@ export class ChatCommands {
 		this.chatPanel.mount(panelContainer);
 	}
 
-	/**
-	 * Attempt to execute a message as a command
-	 * @param _log - (unused)
-	 * @param message - The message string to attempt to execute
-	 * @param _chatData - (unused)
-	 * @param _chatData.user - (unused)
-	 * @param _chatData.speaker - (unused)
-	 * @returns True if the command was executed, else void
-	 */
-	handleMessage(_log: ChatLog, message: string, _chatData: { user: string, speaker: ReturnType<ChatMessage.ImplementationClass["getSpeaker"]> }): boolean | void {
-		if (message.startsWith('*')) {
-			try {
-				rpgm.chat.execute(message.slice(1));
-			} catch {
-				rpgm.logger.errorU("An error occured when executing the command!");
-			}
-			return false;
-		}
-	}
 }

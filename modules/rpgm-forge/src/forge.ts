@@ -1,5 +1,5 @@
 import { RpgmModule } from "#/module";
-import { literal, argument, string } from "brigadier-ts-lite";
+import { literal, argument, string, choice } from "brigadier-ts-lite";
 import { chatDescription, chatTokenNames, getSelectedToken, applyTokenName } from "./util/token";
 import { hudHeuristics, inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
 import { shimmerToken } from "./util/shimmer";
@@ -53,6 +53,7 @@ export class RpgmForge extends RpgmModule {
 		command();
 		game.settings.register("rpgm-forge", "names", { default: {} });
 		game.settings.register("rpgm-forge", "description", { default: {} });
+		rpgm.chat.registerCommand(literal("hometime").then(argument("things", choice(["thing1", "thing2", "this other thing"])).executes((c) => this.logger.logU(c.get("things")))));
 		rpgm.chat.registerCommand(literal("name")
 			.then(argument("prompt", string("greedy_phrase")).executes(c => {
 				void chatTokenNames(c.get<string>("prompt"));
@@ -185,12 +186,6 @@ export class RpgmForge extends RpgmModule {
 		this.homebrewChats.load();
 	}
 
-	/**
-	 * Currently used for pruning chat databases
-	 */
-	override rpgmReady(): Promise<void> | void {
-		this.namesChats.prune();
-		this.descriptionsChats.prune();
-		this.homebrewChats.prune();
-	}
+	/** (unused) */
+	override rpgmReady(): Promise<void> | void { }
 }

@@ -24,7 +24,9 @@ export class ChatDatabase<T extends object> {
 	async newMessage(data: T) {
 		// Set render to false to try and delay the first message render by the time we set the data
 		const id = foundry.utils.randomID();
+		rpgm.logger.debug(Object.fromEntries(this.data));
 		this.data.set(id, data);
+		rpgm.logger.debug(Object.fromEntries(this.data));
 		await ChatMessage.create({
 			speaker: { alias: this.title },
 			whisper: game.userId,
@@ -42,8 +44,6 @@ export class ChatDatabase<T extends object> {
 	 */
 	private messageId(message: ChatMessage): string {
 		//@ts-expect-error Types broken for flags
-		rpgm.logger.log(message.getFlag(this.moduleId, this.key));
-		//@ts-expect-error Types broken for flags
 		return message.getFlag(this.moduleId, this.key);
 	}
 
@@ -53,6 +53,7 @@ export class ChatDatabase<T extends object> {
 	 * @returns Whether or not this message should be rendered with this database
 	 */
 	query(message: ChatMessage): boolean {
+		rpgm.logger.log(Object.fromEntries(this.data));
 		return this.data.has(this.messageId(message) ?? "");
 	}
 
@@ -68,24 +69,31 @@ export class ChatDatabase<T extends object> {
 		app.provide("message", message);
 		app.provide("data", reactive(this.data.get(this.messageId(message))!));
 		app.mount(mount);
+
+		// Inject delete handler to remove this data from localStorage
+		const del = message["delete"].bind(message);
+		const delData = this.delete.bind(this);
+		message["delete"] = (function(operation: never) {
+			delData(message);
+			return del(operation);
+		}).bind(message);
 	}
 
-	/** Reduce data to only those in chat */
-	prune() {
-		const oldLength = this.data.size;
-		this.data = Array.from(this.data).reduce((obj, [key, value]) => {
-			if (ui.chat.collection.has(key)) obj.set(key, value);
-			return obj;
-		}, new Map<string, T>());
-		rpgm.logger.debug(`Pruned ${oldLength - this.data.size} entries from ${this.moduleId}.${this.key}`);
+	/**
+	 * @param message - The message to delete
+	 */
+	delete(message: ChatMessage) {
+		this.data.delete(this.messageId(message));
 		this.save();
 	}
 
 	/** Retrieves all data for this database */
 	load() {
 		const dataString = localStorage.getItem(`${this.moduleId}.${this.key}`);
-		if (!dataString) { void (this.data = new Map()); return; };
-		this.data = new Map(Object.entries(JSON.parse(dataString) as { [key: string]: T }));
+		if (!dataString) { this.data = new Map(); }
+		else {
+			this.data = new Map(Object.entries(JSON.parse(dataString) as { [key: string]: T }));
+		}
 		rpgm.chat.registerMessageHandler(this);
 	}
 

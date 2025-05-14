@@ -44,8 +44,6 @@ export function chatTokenNames(prompt?: string) {
 			const actor = token.actor;
 			if (!actor || !actor.name) return;
 			void rpgm.forge!.namesChats.newMessage({ tokenId: token.id, names: [], prompt: actor.name });
-		} else {
-			rpgm.forge!.logger.errorU("Select a token to generate names for");
 		}
 	}
 	// User has a name for us to use
