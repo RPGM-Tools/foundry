@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
-const { duration } = defineProps<{
+const { duration, enabled = true } = defineProps<{
 	duration: number
+	enabled?: boolean
 }>();
 
 let interval: number | null = null;
@@ -40,6 +41,7 @@ function commonPrefix(a: string, b: string) {
  * @param done - Callback when transition is finished
  */
 function onEnter(el: Element, done: () => void) {
+	if (!enabled) { return; }
 	const prefix = commonPrefix(fromText, toText);
 	const timePerChar = duration / ((toText.length - prefix + 1) + (fromText.length - prefix + 1));
 	el.classList.add("rpgm-write-on-transition");
@@ -98,7 +100,7 @@ async function writeOff(el: HTMLElement, duration: number, index: number = 0): P
 </script>
 
 <template>
-	<Transition :duration @before-leave="onBeforeLeave" @before-enter="onBeforeEnter" @enter="onEnter"
+	<Transition appear :duration @before-leave="onBeforeLeave" @before-enter="onBeforeEnter" @enter="onEnter"
 		name="rpgm-write-on-transition" :css="false">
 		<slot class="rpgm-write-on-transition" />
 	</Transition>

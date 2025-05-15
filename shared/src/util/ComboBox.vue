@@ -6,6 +6,7 @@ const { values, unique, filter, display, assign, max } = defineProps<{
 	display: (v: T) => string,
 	assign?: (v: T) => T,
 	max?: number,
+	placeholder?: string
 }>();
 
 const isOpen = ref(false);
@@ -53,7 +54,7 @@ function keyDown(k: KeyboardEvent) {
 
 <template>
 	<div class="rpgm-combobox" @focusin="isOpen = true">
-		<input v-model="input" class="rpgm-input" ref="inputRef" @keydown="keyDown" />
+		<input v-model="input" :placeholder class="rpgm-input" ref="inputRef" @keydown="keyDown" />
 		<div>
 			<ul class="rpgm-dropdown" :open="isOpen">
 				<li tabindex="0" class="rpgm-dropdown-item" v-for="value in filtered" :key="unique(value)"
@@ -77,11 +78,16 @@ function keyDown(k: KeyboardEvent) {
 	visibility: visible !important;
 }
 
-.rpgm-input {
-	width: 100%;
-	padding: 4px;
-	border-radius: 3px;
-	border: none;
+.rpgm-combobox .rpgm-input {
+	margin-left: 3px;
+	margin-right: 3px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+
+.rpgm-combobox .rpgm-input::placeholder {
+	opacity: 75%;
+	font-style: italic;
 }
 
 .rpgm-dropdown {

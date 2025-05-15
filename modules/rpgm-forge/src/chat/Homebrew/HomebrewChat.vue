@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { ForgeHomebrew } from "@rpgm/forge";
-import Homebrews from "@rpgm/forge/data/schemas.json?url";
 import ComboBox from "#/util/ComboBox.vue";
 import HomebrewInput from "./HomebrewInput.vue";
 import HomebrewDisplay from "./HomebrewDisplay.vue";
 import HomebrewTitle from "./HomebrewTitle.vue";
 
-const schemas = ref<HomebrewOptions[]>([]);
+const schemas = rpgm.forge!.homebrewSchemas;
 
 const modified = ref(false);
 const editing = ref(true);
 const currentTitle = computed<string>(() => {
 	if (editing.value)
 		return data.schema ?
-			modified.value ? `${data.schema?.name ?? "gak1"} *`
+			modified.value ? `${data.schema?.name ?? "gak1"}`
 				: `${data.schema?.name ?? "gak2"}`
 			: "";
 	else
@@ -26,15 +25,11 @@ const hasGenerated = computed(() => Object.keys(data.generations).length > 0);
 
 provide("data", data);
 
-onMounted(async () => {
-	schemas.value = await (await fetch(Homebrews)).json() as unknown as HomebrewOptions[];
+onMounted(() => {
 	if (data.activeGeneration && data.generations[data.activeGeneration]) {
 		editing.value = false;
-	}
-	// If the homebrew was just created
-	if (!data.schema) {
-		data.schema = schemas.value[Math.random() * schemas.value.length | 0];
-		rpgm.chat.updateScroll(true);
+	} else if (!data.schema) {
+		data.schema = structuredClone(schemas[Math.floor(Math.random() * schemas.length)]);
 	}
 });
 
@@ -44,11 +39,21 @@ function newSelection() {
 	rpgm.chat.updateScroll();
 }
 
+/** @param generation - The generation to delete */
+function deleteGeneration(generation: string) {
+	delete data.generations[generation];
+	if (Object.entries(data.generations).length > 0) {
+		cycleGenerations();
+	} else {
+		editing.value = true;
+	}
+}
+
 /**
  * Generates the homebrew
  */
 async function generate() {
-	if (!data.schema) return;
+	if (!data.schema?.fields.length) return;
 	loading.value = true;
 	const response = await ForgeHomebrew.fromOptions(data.schema).generate({
 		auth_token: game.settings.get("rpgm-tools", "api_key")
@@ -95,6 +100,18 @@ function gotoGenerations() {
 	editing.value = false;
 }
 
+/**
+ * Copies a generation to the clipboard
+ * @param generation - The generation to copy
+ */
+function copyGeneration(generation: string) {
+	try {
+		const gen = data.generations[generation];
+		void navigator.clipboard.writeText(`# ${gen.custom_name}\n## ${gen.flavor_text}\n${gen.fields.map(f => `### ${f.name}\n${f.value}`).join('\n')}`);
+		rpgm.forge!.logger.logU(`Copied "${gen.custom_name}" to clipboard!`);
+	} catch { return; }
+}
+
 /** Switches the wizard to the editing view, creating an empty schema from the active generation */
 function restoreSchemaFromActiveGeneration() {
 	if (editing.value) return;
@@ -111,10 +128,12 @@ function restoreSchemaFromActiveGeneration() {
 </script>
 
 <template>
-	<HomebrewTitle @cycle="cycleGenerations" :can-goto-generations="hasGenerated" @goto-generations="gotoGenerations"
-		@click="restoreSchemaFromActiveGeneration" :editing :current-title="currentTitle" />
-	<ComboBox @update:model-value="newSelection" v-model="data.schema" v-if="!hasGenerated" :values="schemas"
-		:unique="v => v.name" :display="v => v.name" :assign
+	<HomebrewTitle @cycle="cycleGenerations" @copy="copyGeneration(data.activeGeneration)"
+		@delete="deleteGeneration(data.activeGeneration)" :modified="modified && editing"
+		:can-goto-generations="hasGenerated" @goto-generations="gotoGenerations" @click="restoreSchemaFromActiveGeneration"
+		:editing :current-title="currentTitle" />
+	<ComboBox @update:model-value="newSelection" placeholder="Preset" v-model="data.schema" v-if="!hasGenerated"
+		:values="schemas" :unique="v => v.name" :display="v => v.name" :assign
 		:filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())" />
 	<div class="rpgm-homebrew-content">
 		<Transition name="rpgm-homebrew-main">
@@ -123,7 +142,7 @@ function restoreSchemaFromActiveGeneration() {
 			</div>
 			<div v-else-if="!editing">
 				<Transition name="rpgm-homebrew-main">
-					<HomebrewDisplay :key="data.activeGeneration" :generation="data.generations[data.activeGeneration]" />
+					<HomebrewDisplay :key="data.activeGeneration" :generation="data.activeGeneration" />
 				</Transition>
 			</div>
 		</Transition>

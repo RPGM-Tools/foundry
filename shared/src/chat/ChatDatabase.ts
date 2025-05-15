@@ -35,6 +35,7 @@ export class ChatDatabase<T extends object> {
 			flags: { [this.moduleId]: { [this.key]: id } }
 		}, { broadcast: false });
 		this.save();
+		rpgm.chat.updateScroll(true);
 	}
 
 	/**

@@ -145,7 +145,8 @@ function onFocusOut(e: FocusEvent) {
 		if (!commandListRef.value?.contains(e.relatedTarget as Node)) {
 			hasFocus.value = false;
 		}
-	}
+	} else
+		hasFocus.value = false;
 }
 
 onMounted(() => {

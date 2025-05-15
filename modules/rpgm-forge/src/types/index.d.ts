@@ -25,7 +25,7 @@ declare global {
 	type ForgeChatHomebrew = {
 		schema: HomebrewOptions | undefined
 		activeGeneration: string
-		generations: { [id: string]: Homebrew }
+		generations: Record<string, Homebrew>
 	}
 }
 

@@ -4,6 +4,8 @@ import HomebrewInputField from './HomebrewInputField.vue';
 const modified = defineModel<boolean>("modified");
 const emit = defineEmits<{ generate: [] }>();
 
+const fieldsContainer = useTemplateRef("fieldsContainer");
+
 const data = inject<ForgeChatHomebrew>("data")!;
 
 const { loading } = defineProps<{ loading: boolean }>();
@@ -13,6 +15,19 @@ const _renaming = ref(false);
 function renaming() {
 	_renaming.value = true;
 	setTimeout(() => _renaming.value = false, 10);
+}
+
+function newField() {
+	data.schema?.fields.push({
+		name: "[Name]",
+		description: "[Description]",
+		type: "string",
+	});
+	// Gross scroll down hack
+	setTimeout(() => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+		fieldsContainer.value?.parentElement?.parentElement?.scrollBy({ top: 9999, behavior: "smooth" });
+	}, 100);
 }
 
 /** 
@@ -25,12 +40,13 @@ function buttonIndex(i: number): -1 | 0 | 1 {
 </script>
 
 <template>
-	<div class="rpgm-homebrew-fields-container">
+	<div ref="fieldsContainer" class="rpgm-homebrew-fields-container">
 		<template v-if="data.schema?.fields.length">
 			<TransitionGroup :css="!_renaming" name="rpgm-homebrew-field-container">
 				<HomebrewInputField v-model="field.value" v-for="(field, i) in data.schema.fields" :i="buttonIndex(i)" :field
 					@modified="modified = true" @renaming="renaming" :key="field.name" />
 			</TransitionGroup>
+			<div class="rpgm-homebrew-field-add rpgm-icons"><a @click="newField"><i class="fa-solid fa-plus"></i></a></div>
 			<button class="rpgm-button" :class="{ 'rpgm-active': loading }" @click="emit('generate')"
 				:disabled="(data.schema.fields.length ?? 0) == 0 || loading">Generate</button>
 		</template>
@@ -54,6 +70,22 @@ function buttonIndex(i: number): -1 | 0 | 1 {
 .rpgm-homebrew-field-container-leave-to {
 	opacity: 0;
 	left: 10px;
+}
+
+.rpgm-homebrew-field-add.rpgm-icons {
+	position: relative;
+	opacity: 1;
+	filter: blur(0px);
+	visibility: visible;
+	pointer-events: all;
+	border-radius: 6px;
+	cursor: pointer;
+
+	a {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+	}
 }
 
 .rpgm-homebrew-field-container-enter-to {

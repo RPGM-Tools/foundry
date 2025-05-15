@@ -85,6 +85,7 @@ function redescription(force: boolean = false) {
 	if (!descriptionRef.value) return;
 	if (force)
 		editing.value = false;
+	window.getSelection()?.removeAllRanges();
 	const newText = descriptionRef.value.innerText as string;
 	const success = validateNewDescription(newText.trim());
 	if (success) {
@@ -141,11 +142,28 @@ function startEdit() {
 		nameRef.value.focus();
 		const range = document.createRange();
 		range.selectNodeContents(nameRef.value);
-		range.collapse();
+		// range.collapse();
 		const sel = window.getSelection();
 		sel?.removeAllRanges();
 		sel?.addRange(range);
 	});
+}
+
+/**
+ * Override tab functionality to select contents of element
+ * @param e - Keyboard event
+ * @param element - The element to select
+ */
+function selectElement(e: KeyboardEvent, element: HTMLElement) {
+	if (!editing.value) return;
+	e.preventDefault();
+	element.focus();
+	const range = document.createRange();
+	range.selectNodeContents(element);
+	// range.collapse();
+	const sel = window.getSelection();
+	sel?.removeAllRanges();
+	sel?.addRange(range);
 }
 </script>
 
@@ -153,20 +171,22 @@ function startEdit() {
 	<div ref="fieldContainer" class="rpgm-homebrew-field-container" @keydown.escape.prevent="editing = false"
 		:editing="editing" :key="field.name" @focusout="tryBlur">
 		<div class="rpgm-icons">
-			<a @click="remove"><i class="fa-solid fa-circle-xmark"></i></a>
+			<a @click="remove" placeholder="Remove"><i class="fa-solid fa-trash"></i></a>
+			<a @click="startEdit"><i class="fa-solid fa-feather"></i></a>
 			<a @click="move(-1)" v-if="i != -1"><i class="fa-solid fa-circle-up"></i></a>
 			<a @click="move(1)" v-if="i != 1"><i class="fa-solid fa-circle-down"></i></a>
-			<a @click="startEdit"><i class="fa-solid fa-feather"></i></a>
 		</div>
 		<h3 ref="name" class="rpgm-homebrew-field-name rpgm-radial-ignore" :contenteditable="editing"
-			@keydown.enter.prevent="rename(true)" @blur="rename(false)" @keydown.escape="restore(nameRef, field.name)">{{
+			@keydown.enter.prevent="rename(true)" @keydown.tab.exact="e => selectElement(e, descriptionRef!)"
+			@blur="rename(false)" @keydown.escape="restore(nameRef, field.name)">{{
 				field.name }}</h3>
 		<div ref="description" v-show="editing || field.description.length > 0"
 			class="rpgm-homebrew-field-description rpgm-radial-ignore" :contenteditable="editing"
-			@keydown.enter.exact.prevent="redescription(true)" @blur="redescription(false)"
-			@keydown.escape="restore(descriptionRef, field.description)">{{
+			@keydown.enter.exact.prevent="redescription(true)" @keydown.tab.shift="e => selectElement(e, nameRef!)"
+			@blur="redescription(false)" @keydown.escape="restore(descriptionRef, field.description)">{{
 				field.description }}</div>
-		<input class="rpgm-homebrew-field-value rpgm-input rpgm-radial-ignore" v-model="fieldValue"
+		<input class="rpgm-homebrew-field-value rpgm-input rpgm-radial-ignore"
+			@keydown.tab.shift="e => selectElement(e, descriptionRef!)" v-model="fieldValue"
 			:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')" />
 	</div>
 </template>
@@ -221,6 +241,7 @@ function startEdit() {
 .rpgm-homebrew-field-container .rpgm-icons {
 	direction: rtl;
 	right: 0;
+	margin-right: 4px;
 }
 
 .rpgm-homebrew-field-icons {

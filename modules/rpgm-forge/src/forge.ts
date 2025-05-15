@@ -10,6 +10,7 @@ import { RPGMLogger } from "#/util/logging";
 import { ChatDatabase } from "#/chat/ChatDatabase";
 import { command } from "./util/homebrew";
 import HomebrewChat from "./chat/Homebrew/HomebrewChat.vue";
+import Homebrews from "@rpgm/forge/data/schemas.json?url";
 
 /**
  * {@link RpgmForge} stores chat databases for forge wizards
@@ -36,13 +37,15 @@ export class RpgmForge extends RpgmModule {
 		HomebrewChat as Component,
 		this.name
 	);
+	homebrewSchemas: HomebrewOptions[] = [];
 
 	/**
 	 * Called before everything else
 	 * Not much goes on in here
 	 */
-	override init(): Promise<void> | void {
+	override async init(): Promise<void> {
 		rpgm.forge = this;
+		this.homebrewSchemas = await (await fetch(Homebrews)).json() as HomebrewOptions[];
 	}
 
 	/**
@@ -53,7 +56,6 @@ export class RpgmForge extends RpgmModule {
 		command();
 		game.settings.register("rpgm-forge", "names", { default: {} });
 		game.settings.register("rpgm-forge", "description", { default: {} });
-		rpgm.chat.registerCommand(literal("hometime").then(argument("things", choice(["thing1", "thing2", "this other thing"])).executes((c) => this.logger.logU(c.get("things")))));
 		rpgm.chat.registerCommand(literal("name")
 			.then(argument("prompt", string("greedy_phrase")).executes(c => {
 				void chatTokenNames(c.get<string>("prompt"));
