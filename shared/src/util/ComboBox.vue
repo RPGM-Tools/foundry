@@ -53,7 +53,8 @@ function keyDown(k: KeyboardEvent) {
 
 <template>
 	<div class="rpgm-combobox" @focusin="isOpen = true">
-		<input ref="inputRef" v-model="input" :placeholder class="rpgm-input" @keydown="keyDown">
+		<input ref="inputRef" v-model="input" :placeholder class="rpgm-input rpgm-radial-ignore" type="text"
+			@keydown="keyDown">
 		<div>
 			<ul class="rpgm-dropdown" :open="isOpen">
 				<li v-for="v in filtered" :key="unique(v)" tabindex="0" class="rpgm-dropdown-item" @click="select(v)"

@@ -105,10 +105,6 @@ onMounted(() => {
 	transform: translateX(4px);
 }
 
-.rpgm-forge-name-enter-active {
-	transition-delay: 750ms !important;
-}
-
 .rpgm-forge-name-enter-active,
 .rpgm-forge-name-leave-active {
 	transition-property: all !important;
@@ -131,7 +127,7 @@ onMounted(() => {
 .rpgm-forge-name-enter-to,
 .rpgm-forge-name-leave-from {
 	opacity: 1;
-	max-height: 100px;
+	max-height: 50px;
 	left: 0px;
 }
 </style>

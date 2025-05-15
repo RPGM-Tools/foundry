@@ -32,12 +32,23 @@
 	background-color: #6633cc;
 }
 
+.rpgm-textarea {
+	resize: none;
+}
+
 .rpgm-input {
 	width: 100%;
 	padding: 4px;
 	border-radius: 3px;
 	border: solid 1px #00000033;
 	outline: none;
+}
+
+.rpgm-button:focus,
+.rpgm-checkbox:focus,
+.rpgm-textarea:focus,
+.rpgm-input:focus {
+	box-shadow: 0 0 5px #6633cc !important;
 }
 
 .rpgm-icons {
@@ -53,9 +64,8 @@
 .rpgm-icons a {
 	padding: 4px;
 	pointer-events: all;
-	transition-property: opacity, filter, text-shadow;
+	transition-property: opacity, text-shadow;
 	transition-duration: 150ms;
-	filter: drop-shadow(1px 1px 0px #00000088);
 }
 
 .rpgm-icons a:focus,

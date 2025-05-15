@@ -1,4 +1,4 @@
-import { ForgeNames } from '@rpgm/forge';
+import { ForgeNames } from "@rpgm/forge";
 import { shimmerToken } from './shimmer';
 
 /**

@@ -62,6 +62,16 @@ function move(by: number) {
 }
 
 /**
+ * Only allow numbers
+ * @param e - Keyboard event
+ */
+function filterNumbers(e: KeyboardEvent) {
+	if (e.key.length > 1 || e.metaKey) return;
+	if (Number(e.key) || e.key === ".") return;
+	e.preventDefault();
+}
+
+/**
  * Ignore focus changes within the field, else disable editing mode
  * @param e - The {@link FocusEvent} to detect the target of blur
  */
@@ -69,6 +79,15 @@ function tryBlur(e: FocusEvent) {
 	if (fieldContainer.value?.contains(e.relatedTarget as HTMLElement)) return;
 	window.getSelection()?.removeAllRanges();
 	editing.value = false;
+}
+
+/**
+ * Change type
+ * @param type - New type
+ */
+function changeType(type: "short" | "long" | "boolean" | "number") {
+	field.value.value = undefined;
+	field.value.type = type;
 }
 </script>
 
@@ -83,32 +102,86 @@ function tryBlur(e: FocusEvent) {
 		</div>
 		<ContentEditable v-slot="{ contenteditable, onBlur, onFocus, onKeydown, ref }" v-model:editing="editing"
 			:model-value="field.name" :should-blur="false" :multiline="false" @update:model-value="validateNewName">
-			<h3 :ref class="rpgm-homebrew-field-name rpgm-radial-ignore" :contenteditable @blur="onBlur" @focus="onFocus"
-				@keydown="onKeydown">
+			<h3 :ref class="rpgm-homebrew-field-name rpgm-radial-ignore" :contenteditable :tabindex="contenteditable ? 0 : -1"
+				@blur="onBlur" @focus="onFocus" @keydown="onKeydown">
 				{{ field.name }}
 			</h3>
 		</ContentEditable>
 		<ContentEditable v-slot="{ contenteditable, onBlur, onFocus, onKeydown, ref }" v-model:editing="editing"
 			v-model="field.description" :should-blur="false" :should-focus="false">
-			<div v-show="editing || field.description.length > 0" :ref :contenteditable
+			<div v-show="editing || field.description.length > 0" :ref :contenteditable :tabindex="contenteditable ? 0 : -1"
 				class="rpgm-homebrew-field-description rpgm-radial-ignore" @blur="onBlur" @focus="onFocus" @keydown="onKeydown">
 				{{ field.description }}
 			</div>
 		</ContentEditable>
-		<input v-model="field.value" class="rpgm-homebrew-field-value rpgm-input rpgm-radial-ignore"
-			:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')">
+		<ul v-show="editing" class="rpgm-homebrew-field-types">
+			<li v-for="type in [
+				{ label: 'Short', value: 'short' as const, icon: 'fa-solid fa-grip-lines' },
+				{ label: 'Long', value: 'long' as const, icon: 'fa-solid fa-align-left' },
+				{ label: 'Check', value: 'boolean' as const, icon: 'fa-solid fa-square-check' },
+				{ label: 'Number', value: 'number' as const, icon: 'fa-solid fa-hashtag' },
+			]" :key="type.value" tabindex="0" :class="{ selected: field.type === type.value }" @click="changeType(type.value)"
+				@keydown.space.enter.prevent="changeType(type.value)">
+				<i :class="type.icon" />{{ type.label }}
+			</li>
+		</ul>
+		<Transition v-show="!editing" name="rpgm-homebrew-field-container">
+			<textarea v-if="field.type === 'long'" v-model="field.value" class="rpgm-radial-ignore rpgm-textarea" />
+			<input v-else-if="field.type === 'boolean'" v-model="field.value" class="rpgm-checkbox" type="checkbox">
+			<input v-else-if="field.type === 'number'" v-model="field.value"
+				class="rpgm-input rpgm-homebrew-field-value rpgm-radial-ignore" type="number"
+				:placeholder="`# ${localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')}`" @keydown="filterNumbers">
+			<input v-else v-model="field.value" class="rpgm-homebrew-field-value rpgm-input rpgm-radial-ignore" type="text"
+				:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')">
+		</Transition>
 	</div>
 </template>
 
 <style>
+.rpgm-homebrew-field-types {
+	list-style: none;
+	width: 100%;
+	display: flex;
+	justify-content: space-evenly;
+	border-radius: 3px;
+	flex-wrap: nowrap;
+	margin: 0;
+	padding: 2px;
+
+	li {
+		transition: all 200ms;
+		width: 100%;
+		text-align: center;
+		cursor: pointer;
+		white-space: nowrap;
+		border-radius: 3px;
+		padding: 2px;
+		outline: none;
+
+		i {
+			margin-right: 2px;
+		}
+	}
+
+	li.selected {
+		text-shadow: 0 0 8px #6633cc !important;
+	}
+
+	li:focus,
+	li:hover {
+		background-color: #00000044;
+	}
+}
+
 .rpgm-homebrew-field-container {
 	position: relative;
-	padding-top: 6px;
-	padding-top: 6px;
-	padding-left: 3px;
-	padding-right: 3px;
+	padding-bottom: 6px;
 	transition: all 0.2s ease;
 	border-radius: 6px;
+}
+
+.rpgm-homebrew-field-container:not(:first-child) {
+	padding-top: 6px;
 }
 
 .rpgm-homebrew-field-name {
@@ -118,7 +191,7 @@ function tryBlur(e: FocusEvent) {
 }
 
 .rpgm-homebrew-field-container[editing="true"] {
-	backdrop-filter: brightness(0.75);
+	background-color: #00000044;
 }
 
 .rpgm-homebrew-field-container[editing="true"] [contenteditable="true"] {
@@ -140,6 +213,7 @@ function tryBlur(e: FocusEvent) {
 
 .rpgm-homebrew-field-value::placeholder {
 	opacity: 0;
+	font-style: italic;
 }
 
 .rpgm-homebrew-field-container h3 {

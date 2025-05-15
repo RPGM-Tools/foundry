@@ -64,7 +64,8 @@ function keyDown(e: KeyboardEvent) {
 
 /** Called when focus is passed to this element */
 function focus() {
-	selectAll();
+	if (editing.value)
+		selectAll();
 }
 
 /** Saves value and clears the selection */

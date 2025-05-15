@@ -153,6 +153,7 @@ function restoreSchemaFromActiveGeneration() {
 .rpgm-homebrew-content {
 	position: relative;
 	max-height: 40vh;
+	margin-top: 5px;
 	overflow-y: auto;
 	overflow-x: hidden;
 	padding-bottom: 10px;

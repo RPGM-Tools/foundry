@@ -21,7 +21,7 @@ function newField() {
 	data.schema?.fields.push({
 		name: "[Name]",
 		description: "[Description]",
-		type: "string",
+		type: "short",
 	});
 	// Gross scroll down hack
 	setTimeout(() => {
@@ -60,6 +60,10 @@ function buttonIndex(i: number): -1 | 0 | 1 {
 </template>
 
 <style>
+.rpgm-homebrew-fields-container {
+	padding: 5px;
+}
+
 .rpgm-homebrew-field-container-move {
 	transition-duration: 0.2s !important;
 }
