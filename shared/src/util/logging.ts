@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-type Msg = any
+type Msg = unknown
 
 /**
  * Logger with style and prefix capabilities
@@ -112,7 +110,7 @@ export class RPGMLogger {
 	 * @param messages - The messages to log.
 	 */
 	private sendMessage(method: "log" | "warn" | "error", style: string, prefix = `${this.prefix} | `, ...messages: Msg[]): void {
-		const { strings, objects } = messages.reduce<{ strings: string[], objects: any[] }>(
+		const { strings, objects } = messages.reduce<{ strings: string[], objects: unknown[] }>(
 			(acc, msg) => {
 				if (typeof msg === "string")
 					acc.strings.push(msg);

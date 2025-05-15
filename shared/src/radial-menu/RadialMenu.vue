@@ -1,15 +1,15 @@
 <template>
-	<div v-if="Items.length > 0" @focusout="focusOut" class="radial-menu-container" ref="root" :open="isOpen"
-		:style="[rootStyle, radialFloater.floatingStyles.value]">
-		<button class="radial-menu-center" ref="center" :style="{ width: `${centerSize}px`, height: `${centerSize}px` }"
+	<div v-if="Items.length > 0" ref="root" class="radial-menu-container" :open="isOpen" :style="[rootStyle, radialFloater.floatingStyles.value]"
+		@focusout="focusOut">
+		<button ref="center" class="radial-menu-center" :style="{ width: `${centerSize}px`, height: `${centerSize}px` }"
 			:class="{ pressed: centerPressed }" @keydown.space="centerPressed = true" @keyup.space="centerPressed = false"
 			@click.prevent="toggleOpen">
 			<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
 		</button>
 
 		<div class="submenu-group">
-			<DiceButton v-for="(button, index) in Items" @click="onSubClick" :key="button.callback.toString()"
-				:item="menuContext" :button :index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" />
+			<DiceButton v-for="(button, index) in Items" :key="button.callback.toString()" :item="menuContext"
+				:button :index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" @click="onSubClick" />
 		</div>
 	</div>
 </template>
@@ -35,8 +35,7 @@ const center = useTemplateRef('center');
 
 const Items = computed(() => {
 	// Update items each time the menu is opened 
-	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-	isOpen.value;
+	isOpen.value = Boolean(isOpen.value);
 	return items.filter(value => value.detective(menuContext));
 });
 
@@ -104,7 +103,6 @@ const radialFloater = useFloating(toRef(menuContext.element), root, {
 /** Close radial menu */
 function onSubClick() {
 	isOpen.value = false;
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	center.value?.blur();
 }
 
@@ -112,11 +110,9 @@ function onSubClick() {
 function toggleOpen() {
 	if (menuContext.loading) return;
 	isOpen.value = !isOpen.value;
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	center.value?.focus();
 	// Fix overlap of subsequent radial menus
 	if (root.value?.parentElement)
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		root.value.parentElement.style.zIndex = isOpen.value ? "999" : "99";
 }
 
@@ -125,7 +121,6 @@ function toggleOpen() {
  * @param event - The {@link FocusEvent} to detect the target of blur
  */
 function focusOut(event: FocusEvent) {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	if (root.value?.contains(event.relatedTarget as HTMLElement)) return;
 	isOpen.value = false;
 }

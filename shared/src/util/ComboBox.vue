@@ -27,7 +27,6 @@ const filtered = computed(() => {
 function select(t: T) {
 	value.value = assign ? assign(t) : t;
 	input.value = display(t);
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	inputRef.value?.blur();
 	isOpen.value = false;
 }
@@ -54,12 +53,12 @@ function keyDown(k: KeyboardEvent) {
 
 <template>
 	<div class="rpgm-combobox" @focusin="isOpen = true">
-		<input v-model="input" :placeholder class="rpgm-input" ref="inputRef" @keydown="keyDown" />
+		<input ref="inputRef" v-model="input" :placeholder class="rpgm-input" @keydown="keyDown">
 		<div>
 			<ul class="rpgm-dropdown" :open="isOpen">
-				<li tabindex="0" class="rpgm-dropdown-item" v-for="value in filtered" :key="unique(value)"
-					@click="select(value)" @keydown.space.enter.prevent="select(value)">
-					{{ display(value) }}
+				<li v-for="v in filtered" :key="unique(v)" tabindex="0" class="rpgm-dropdown-item" @click="select(v)"
+					@keydown.space.enter.prevent="select(v)">
+					{{ display(v) }}
 				</li>
 			</ul>
 		</div>
@@ -86,7 +85,6 @@ function keyDown(k: KeyboardEvent) {
 }
 
 .rpgm-combobox .rpgm-input::placeholder {
-	opacity: 75%;
 	font-style: italic;
 }
 

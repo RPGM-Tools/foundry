@@ -1,5 +1,5 @@
 import { RpgmModule } from "#/module";
-import { literal, argument, string, choice } from "brigadier-ts-lite";
+import { literal, argument, string } from "brigadier-ts-lite";
 import { chatDescription, chatTokenNames, getSelectedToken, applyTokenName } from "./util/token";
 import { hudHeuristics, inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
 import { shimmerToken } from "./util/shimmer";

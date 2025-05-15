@@ -8,9 +8,9 @@ export default tslint.config([
 		ignores: ["**/.dist/"],
 		extends: [
 			eslint.configs.recommended,
-			...tslint.configs.recommendedTypeChecked,
+			...tslint.configs.recommended,
 			jsdoclint.configs['flat/recommended-typescript'],
-			...vuelint.configs['flat/essential'],
+			...vuelint.configs['flat/recommended'],
 		],
 		files: ["**/*.{ts,vue}"],
 		languageOptions: {
@@ -28,6 +28,8 @@ export default tslint.config([
 			"prefer-const": "error",
 			"@typescript-eslint/no-empty-object-type": ["error", { allowInterfaces: 'with-single-extends' }],
 			"@typescript-eslint/consistent-type-imports": "warn",
+			"@typescript-eslint/no-unsafe-call": "off",
+			"@typescript-eslint/no-unsafe-member-access": "off",
 			"jsdoc/require-jsdoc": ["warn", {
 				require: {
 					ClassDeclaration: true,
@@ -46,7 +48,13 @@ export default tslint.config([
 				"destructuredArrayIgnorePattern": "^_",
 				"varsIgnorePattern": "^_",
 				"ignoreRestSiblings": true
-			}]
+			}],
+			"vue/html-indent": "off",
+			"vue/html-closing-bracket-newline": "off",
+			"vue/first-attribute-linebreak": "off",
+			"vue/max-attributes-per-line": "off",
+			"vue/multiline-html-element-content-newline": "off",
+			"vue/singleline-html-element-content-newline": "off",
 		}
 	},
 ]);

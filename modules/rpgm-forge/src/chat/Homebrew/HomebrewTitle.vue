@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import WriteOnTransition from "#/util/WriteOnTransition.vue";
+import ContentEditable from "#/util/ContentEditable.vue";
 
 const data = inject<ForgeChatHomebrew>("data")!;
-const titleRef = useTemplateRef("title");
 const isSecure = ref(window.isSecureContext);
 
-const { currentTitle } = defineProps<{
-	currentTitle: string
+const currentTitle = defineModel<string>({ required: true });
+
+defineProps<{
 	editing: boolean
 	canGotoGenerations: boolean
-	modified?: boolean
 }>();
 
 const emit = defineEmits<{
@@ -22,58 +22,47 @@ const emit = defineEmits<{
 
 const editingTitle = ref(false);
 
+/**
+ * Deletes a generation if shift is pressed
+ * @param e - Mouse event
+ */
 function tryDelete(e: MouseEvent) {
 	if (!e.shiftKey) return;
 	emit("delete");
 }
 
-function startEditTitle() {
-	editingTitle.value = true;
-	void nextTick(() => {
-		if (!titleRef.value) return;
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		titleRef.value.focus();
-		const range = document.createRange();
-		range.selectNodeContents(titleRef.value);
-		const sel = window.getSelection();
-		sel?.removeAllRanges();
-		sel?.addRange(range);
-	});
-}
-
-function blur() {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-	data.schema!.name = titleRef.value!.innerText!;
-	void nextTick(() => {
-		editingTitle.value = false;
-		window.getSelection()?.removeAllRanges();
-	});
-}
+const rename = (n: string) => {
+	if (n.trim().length == 0) return;
+	if (data.schema)
+		data.schema.name = n;
+};
 </script>
 
 <template>
-	<div class="rpgm-homebrew-title-container" @click="emit('click', $event)" :editing>
-		<WriteOnTransition :enabled="!editingTitle" :duration="400">
-			<h1 :key="currentTitle" :title="!editing ? 'Click to edit' : ''" :contenteditable="editingTitle"
-				@keydown.enter.prevent="blur" @blur="blur" ref="title" v-if="currentTitle" :modified
-				class="rpgm-homebrew-title rpgm-radial-ignore">
-				{{ currentTitle }}
-			</h1>
-		</WriteOnTransition>
+	<div class="rpgm-homebrew-title-container" :editing @click="emit('click', $event)">
+		<ContentEditable v-slot="config" v-model:editing="editingTitle" :model-value="currentTitle" :multiline="false"
+			@update:model-value="rename">
+			<WriteOnTransition :enabled="!editingTitle" :duration="400">
+				<h1 :key="currentTitle" :ref="config.ref" :contenteditable="config.contenteditable"
+					class="rpgm-homebrew-title rpgm-radial-ignore" @keydown="config.onKeydown" @blur="config.onBlur">
+					{{ currentTitle }}
+				</h1>
+			</WriteOnTransition>
+		</ContentEditable>
 		<div v-show="!editing && currentTitle.length > 0" class="rpgm-icons">
-			<a @click.stop="emit('cycle', -1)" v-show="Object.keys(data.generations).length > 1"
-				title="Previous generation"><i class="fa-solid fa-circle-left" /></a>
-			<a @click.stop="emit('copy')" style="margin-right: auto;" v-if="isSecure" title="Copy to clipboard"><i
+			<a v-show="Object.keys(data.generations).length > 1" title="Previous generation"
+				@click.stop="emit('cycle', -1)"><i class="fa-solid fa-circle-left" /></a>
+			<a v-if="isSecure" style="margin-right: auto;" title="Copy to clipboard" @click.stop="emit('copy')"><i
 					class="fa-solid fa-copy" /></a>
-			<a @click.stop="tryDelete" class="trash-hide" :title="'Delete generation\n(Hold shift)'"><i
+			<a class="trash-hide" :title="'Delete generation\n(Hold shift)'" @click.stop="tryDelete"><i
 					class="fa-solid fa-trash" /></a>
-			<a @click.stop="emit('cycle', 1)" v-show="Object.keys(data.generations).length > 1" title="Next generation"><i
+			<a v-show="Object.keys(data.generations).length > 1" title="Next generation" @click.stop="emit('cycle', 1)"><i
 					class="fa-solid fa-circle-right" /></a>
 		</div>
 		<div v-show="editing && currentTitle.length > 0" class="rpgm-icons">
-			<a @click.stop="startEditTitle" title="Edit Type"><i class="fa-solid fa-feather" /></a>
-			<a @click.stop="emit('gotoGenerations')" v-if="canGotoGenerations" style="margin-left: auto;"
-				title="View all generations"><i class="fa-solid fa-cubes-stacked" /></a>
+			<a v-if="!editingTitle" title="Edit Type" @click.stop="editingTitle = true"><i class="fa-solid fa-feather" /></a>
+			<a v-if="canGotoGenerations" style="margin-left: auto;" title="View all generations"
+				@click.stop="emit('gotoGenerations')"><i class="fa-solid fa-cubes-stacked" /></a>
 		</div>
 	</div>
 </template>
@@ -112,10 +101,6 @@ function blur() {
 	padding-right: 20px;
 	outline: none;
 	transition: color 0.5s;
-}
-
-.rpgm-homebrew-title[modified="true"] {
-	color: #444;
 }
 
 #chat-log:not([data-modifier-shift]) .trash-hide {

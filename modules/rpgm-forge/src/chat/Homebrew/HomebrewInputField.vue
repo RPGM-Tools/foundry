@@ -1,100 +1,51 @@
 <script setup lang="ts">
+import ContentEditable from "#/util/ContentEditable.vue";
 
 const data = inject<ForgeChatHomebrew>("data")!;
 
-const fieldValue = defineModel<string | number | boolean | undefined>({ required: true });
-const { field, i } = defineProps<{ field: HomebrewField, i: -1 | 0 | 1 }>();
+const { i } = defineProps<{ i: -1 | 0 | 1 }>();
+
+const field = defineModel<HomebrewField>({ required: true });
+
 const emit = defineEmits<{
 	renaming: []
-	modified: []
 }>();
 
 const localize = rpgm.localize;
 const editing = ref(false);
 const fieldContainer = useTemplateRef("fieldContainer");
-const nameRef = useTemplateRef("name");
-const descriptionRef = useTemplateRef("description");
 
 /**
  * Checks to see if a field can be renamed to {@link n} 
  * @param n - The name to validate
- * @returns Whether or not this name is valid
  */
-function validateNewName(n: string): boolean {
-	if (n === field.name) return false;
-	if (n.length == 0) {
-		rpgm.forge!.logger.errorU("Homebrew field cannot be empty!");
-		return false;
-	}
-	for (const f of data.schema!.fields) {
-		if (f === field) continue;
-		if (f.name.slugify({ strict: true, replacement: "_" })
-			=== n.slugify({ strict: true, replacement: "_" })) {
-			rpgm.forge!.logger.errorU(`"${f.name}" already exists!`);
+function validateNewName(n: string) {
+	rpgm.logger.log(`"${n}"`);
+	const valid = (() => {
+		if (n === field.value.name) return false;
+		if (n.trim().length == 0) {
+			rpgm.forge!.logger.errorU("Homebrew field cannot be empty!");
 			return false;
 		}
+		for (const f of data.schema!.fields) {
+			if (f === field.value) continue;
+			if (f.name.slugify({ strict: true, replacement: "_" })
+				=== n.slugify({ strict: true, replacement: "_" })) {
+				rpgm.forge!.logger.errorU(`"${f.name}" already exists!`);
+				return false;
+			}
+		}
+		return true;
+	})();
+	if (valid) {
+		field.value.name = n.trim();
+		emit("renaming");
 	}
-	return true;
 }
 
 /** Deletes this field from the schema */
 function remove() {
-	data.schema!.fields.splice(data.schema!.fields.indexOf(field), 1);
-	emit("modified");
-}
-
-/** 
- * Renames this field in the schema
- * @param force - Whether or not to exit out of editing mode
- */
-function rename(force: boolean = false) {
-	if (!nameRef.value) return;
-	if (force)
-		editing.value = false;
-	window.getSelection()?.removeAllRanges();
-	const newText = nameRef.value.innerText as string;
-	const success = validateNewName(newText.trim());
-	if (success) {
-		emit("renaming");
-		emit("modified");
-		void nextTick(() => {
-			if (!nameRef.value) return;
-			nameRef.value.innerText = newText.trim();
-			// eslint-disable-next-line vue/no-mutating-props
-			field.name = newText.trim();
-		});
-	} else {
-		nameRef.value.innerText = field.name;
-	}
-}
-
-/** 
- * Checks to see if a field can be redescribed to {@link _d} 
- * @param _d - The description to validate
- * @returns Whether or not this name is valid
- */
-function validateNewDescription(_d: string): boolean {
-	return true;
-}
-
-/**
- * Redescribes this field in the schema
- * @param force - Whether or not to exit out of editing mode
- */
-function redescription(force: boolean = false) {
-	if (!descriptionRef.value) return;
-	if (force)
-		editing.value = false;
-	window.getSelection()?.removeAllRanges();
-	const newText = descriptionRef.value.innerText as string;
-	const success = validateNewDescription(newText.trim());
-	if (success) {
-		emit("modified");
-		// eslint-disable-next-line vue/no-mutating-props
-		field.description = newText.trim();
-	}
-	else
-		descriptionRef.value.innerText = field.description;
+	data.schema!.fields.splice(data.schema!.fields.indexOf(field.value), 1);
 }
 
 /** 
@@ -102,13 +53,12 @@ function redescription(force: boolean = false) {
  * @param by - How many fields to move forwards or backwards
  */
 function move(by: number) {
-	const idx = data.schema!.fields.indexOf(field);
+	const idx = data.schema!.fields.indexOf(field.value);
 	const clippedIdx = Math.max(0, Math.min(data.schema!.fields.length - 1, idx + by));
 	if (clippedIdx === idx) return;
 
 	data.schema!.fields.splice(idx, 1);
-	data.schema!.fields.splice(clippedIdx, 0, field);
-	emit("modified");
+	data.schema!.fields.splice(clippedIdx, 0, field.value);
 }
 
 /**
@@ -116,78 +66,37 @@ function move(by: number) {
  * @param e - The {@link FocusEvent} to detect the target of blur
  */
 function tryBlur(e: FocusEvent) {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	if (fieldContainer.value?.contains(e.relatedTarget as HTMLElement)) return;
+	window.getSelection()?.removeAllRanges();
 	editing.value = false;
-}
-
-/**
- * Cancel editing this field
- * @param element - The element to restore text to
- * @param value - The value to restore to this 
- */
-function restore(element: HTMLElement | null, value: string) {
-	if (element)
-		element.innerText = value;
-}
-
-/**
- * Enables editing of name and description divs and moves the cursor to the end of the name div
- */
-function startEdit() {
-	editing.value = true;
-	void nextTick(() => {
-		if (!nameRef.value) return;
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		nameRef.value.focus();
-		const range = document.createRange();
-		range.selectNodeContents(nameRef.value);
-		// range.collapse();
-		const sel = window.getSelection();
-		sel?.removeAllRanges();
-		sel?.addRange(range);
-	});
-}
-
-/**
- * Override tab functionality to select contents of element
- * @param e - Keyboard event
- * @param element - The element to select
- */
-function selectElement(e: KeyboardEvent, element: HTMLElement) {
-	if (!editing.value) return;
-	e.preventDefault();
-	element.focus();
-	const range = document.createRange();
-	range.selectNodeContents(element);
-	// range.collapse();
-	const sel = window.getSelection();
-	sel?.removeAllRanges();
-	sel?.addRange(range);
 }
 </script>
 
 <template>
-	<div ref="fieldContainer" class="rpgm-homebrew-field-container" @keydown.escape.prevent="editing = false"
-		:editing="editing" :key="field.name" @focusout="tryBlur">
+	<div ref="fieldContainer" :key="field.name" class="rpgm-homebrew-field-container" :editing="editing"
+		@keydown.escape.prevent="editing = false" @focusout="tryBlur">
 		<div class="rpgm-icons">
-			<a @click="remove" placeholder="Remove"><i class="fa-solid fa-trash"></i></a>
-			<a @click="startEdit"><i class="fa-solid fa-feather"></i></a>
-			<a @click="move(-1)" v-if="i != -1"><i class="fa-solid fa-circle-up"></i></a>
-			<a @click="move(1)" v-if="i != 1"><i class="fa-solid fa-circle-down"></i></a>
+			<a placeholder="Remove" @click="remove"><i class="fa-solid fa-trash" /></a>
+			<a @click="editing = !editing"><i class="fa-solid fa-feather" /></a>
+			<a v-if="i != -1" @click="move(-1)"><i class="fa-solid fa-circle-up" /></a>
+			<a v-if="i != 1" @click="move(1)"><i class="fa-solid fa-circle-down" /></a>
 		</div>
-		<h3 ref="name" class="rpgm-homebrew-field-name rpgm-radial-ignore" :contenteditable="editing"
-			@keydown.enter.prevent="rename(true)" @keydown.tab.exact="e => selectElement(e, descriptionRef!)"
-			@blur="rename(false)" @keydown.escape="restore(nameRef, field.name)">{{
-				field.name }}</h3>
-		<div ref="description" v-show="editing || field.description.length > 0"
-			class="rpgm-homebrew-field-description rpgm-radial-ignore" :contenteditable="editing"
-			@keydown.enter.exact.prevent="redescription(true)" @keydown.tab.shift="e => selectElement(e, nameRef!)"
-			@blur="redescription(false)" @keydown.escape="restore(descriptionRef, field.description)">{{
-				field.description }}</div>
-		<input class="rpgm-homebrew-field-value rpgm-input rpgm-radial-ignore"
-			@keydown.tab.shift="e => selectElement(e, descriptionRef!)" v-model="fieldValue"
-			:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')" />
+		<ContentEditable v-slot="{ contenteditable, onBlur, onFocus, onKeydown, ref }" v-model:editing="editing"
+			:model-value="field.name" :should-blur="false" :multiline="false" @update:model-value="validateNewName">
+			<h3 :ref class="rpgm-homebrew-field-name rpgm-radial-ignore" :contenteditable @blur="onBlur" @focus="onFocus"
+				@keydown="onKeydown">
+				{{ field.name }}
+			</h3>
+		</ContentEditable>
+		<ContentEditable v-slot="{ contenteditable, onBlur, onFocus, onKeydown, ref }" v-model:editing="editing"
+			v-model="field.description" :should-blur="false" :should-focus="false">
+			<div v-show="editing || field.description.length > 0" :ref :contenteditable
+				class="rpgm-homebrew-field-description rpgm-radial-ignore" @blur="onBlur" @focus="onFocus" @keydown="onKeydown">
+				{{ field.description }}
+			</div>
+		</ContentEditable>
+		<input v-model="field.value" class="rpgm-homebrew-field-value rpgm-input rpgm-radial-ignore"
+			:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')">
 	</div>
 </template>
 
@@ -218,7 +127,6 @@ function selectElement(e: KeyboardEvent, element: HTMLElement) {
 }
 
 .rpgm-homebrew-field-value {
-	background: #ffffffaa;
 	margin-bottom: 3px;
 }
 
@@ -227,7 +135,7 @@ function selectElement(e: KeyboardEvent, element: HTMLElement) {
 }
 
 .rpgm-homebrew-field-value:focus::placeholder {
-	opacity: 0.75;
+	opacity: 1;
 }
 
 .rpgm-homebrew-field-value::placeholder {

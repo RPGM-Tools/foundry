@@ -1,7 +1,7 @@
 import type { App, Component } from 'vue';
 import { createApp, type Reactive, shallowReactive } from 'vue';
 import RadialMenu from './RadialMenu.vue';
-import { RPGMTokenHUD } from './hud';
+import { injectTokenHUD } from './hud';
 
 export * from './heuristics';
 export * from './funcs';
@@ -11,8 +11,7 @@ export * from './funcs';
  */
 export class RadialMenuRegister {
 	elements = new Map<HTMLElement, { vueApp: App, injectedEl: HTMLElement }>();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-	private _categories: Record<keyof RadialMenuCategories, RadialMenuCategoryOptions> = {} as any;
+	private _categories = {} as Record<keyof RadialMenuCategories, RadialMenuCategoryOptions>;
 	/** @returns The categories registered that can be used */
 	get categories(): Readonly<typeof this._categories> { return this._categories; }
 	buttons: RadialButton<InputContext>[] = [];
@@ -20,7 +19,8 @@ export class RadialMenuRegister {
 	inputObserver: MutationObserver;
 
 	constructor() {
-		CONFIG.Token.hudClass = RPGMTokenHUD;
+		// CONFIG.Token.hudClass = RPGMTokenHUD;
+		injectTokenHUD();
 		this.inputObserver = new MutationObserver(mutations => {
 			mutations.forEach(mutation => {
 				mutation.removedNodes.forEach(node => {

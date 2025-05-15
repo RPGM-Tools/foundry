@@ -16,7 +16,7 @@ function submit() {
 </script>
 
 <template>
-	<form @submit.prevent="submit" class="rpgm-app-inner standard-form flexcol">
+	<form class="rpgm-app-inner standard-form flexcol" @submit.prevent="submit">
 		<div class="scrollable tab">
 			<h2>{{ SecretsSettings.name }}</h2>
 			<i>{{ SecretsSettings.subtitle }}</i>

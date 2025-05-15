@@ -1,5 +1,6 @@
 /* eslint-disable no-var */
 import type { RpgmModule } from "#/module";
+import type { App } from "vue";
 
 declare global {
 	declare const __MODULE_VERSION__: string;
@@ -23,6 +24,18 @@ declare global {
 			renderChatMessageHTML: (message: ChatMessage, html: HTMLElement, context: object) => void
 			"rpgm-init": () => void
 		}
+	}
+
+	/**
+	 * Override for injecting the Radial Menu into TokenHUD
+	 */
+	class TokenHUD<Options extends Application.Options = Application.Options> extends BasePlaceableHUD<
+		Token.Object,
+		Options
+	> {
+		menuApp: App;
+		/** Make _replaceHTML public to monkey-patch it */
+		public _replaceHTML(element: JQuery, html: JQuery): void;
 	}
 }
 

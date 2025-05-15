@@ -2,7 +2,7 @@
 	<button class="dice-button" :class="{ pressed }" @click.prevent="onClick" @keydown.space="pressed = true"
 		@keyup.space="pressed = false">
 		<img :src="buttonImage" :style="[colorStyle, rotationStyle]" class="button-image">
-		<i class="button-icon" :class="button.icon"></i>
+		<i class="button-icon" :class="button.icon" />
 		<span v-if="button.tooltip" class="radial-menu-tooltip">{{ rpgm.localize(button.tooltip) }}</span>
 	</button>
 </template>

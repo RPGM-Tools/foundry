@@ -21,7 +21,6 @@ export function GenerateI18n(langGlob: string): Plugin {
 	async function getLangs() {
 		const files = fs.globSync(resolve(__dirname, SHARED_LANG));
 		for (const file of files) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			const { default: m }: { default: LanguageSchema } = await import(file);
 			langs[basename(file).split('.')[0]] = m;
 		}
@@ -60,7 +59,6 @@ export function GenerateI18n(langGlob: string): Plugin {
 			for (const file of files) {
 				const name = basename(file).split('.')[0];
 
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				const m: LanguageModule = await import(file);
 				const merged = mergeDeep(langs[name], m.default);
 				fs.mkdirSync(`${config.build.outDir}/lang`);

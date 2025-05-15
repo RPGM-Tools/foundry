@@ -100,8 +100,8 @@ async function writeOff(el: HTMLElement, duration: number, index: number = 0): P
 </script>
 
 <template>
-	<Transition appear :duration @before-leave="onBeforeLeave" @before-enter="onBeforeEnter" @enter="onEnter"
-		name="rpgm-write-on-transition" :css="false">
+	<Transition appear :duration name="rpgm-write-on-transition" :css="false" @before-leave="onBeforeLeave"
+		@before-enter="onBeforeEnter" @enter="onEnter">
 		<slot class="rpgm-write-on-transition" />
 	</Transition>
 </template>

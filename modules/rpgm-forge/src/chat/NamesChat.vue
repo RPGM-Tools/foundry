@@ -69,8 +69,8 @@ onMounted(() => {
 	<h3>{{ data.prompt }}</h3>
 	<SkeletonParagraph :loading="false" width="100%" height="400px">
 		<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">
-			<li @click="assign(name)" :title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')" class="rpgm-forge-name"
-				v-for="name in data.names" :key="name">
+			<li v-for="name in data.names" :key="name" :title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')"
+				class="rpgm-forge-name" @click="assign(name)">
 				{{ name }}
 			</li>
 		</TransitionGroup>

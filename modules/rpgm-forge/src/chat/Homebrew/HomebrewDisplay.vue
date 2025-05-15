@@ -19,10 +19,10 @@ function copy(field: HomebrewField) {
 <template>
 	<div class="rpgm-homebrew-field-container">
 		<h3 class="rpgm-homebrew-field-flavor-text">{{ generations[generation]?.flavor_text }}</h3>
-		<div class="rpgm-homebrew-display-fields" v-if="generation">
-			<div class="rpgm-homebrew-display-field" v-for="field in generations[generation].fields" :key="field.name">
+		<div v-if="generation" class="rpgm-homebrew-display-fields">
+			<div v-for="field in generations[generation].fields" :key="field.name" class="rpgm-homebrew-display-field">
 				<div class="rpgm-icons">
-					<a @click="copy(field)" v-if="isSecure" title="Copy to clipboard"><i class="fa-solid fa-copy"></i></a>
+					<a v-if="isSecure" title="Copy to clipboard" @click="copy(field)"><i class="fa-solid fa-copy" /></a>
 				</div>
 				<h3 class="rpgm-homebrew-field-name">{{ field.name }}</h3>
 				<p>{{ field.value }}</p>

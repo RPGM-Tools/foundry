@@ -194,11 +194,11 @@ onUnmounted(() => {
 
 <template>
 	<div ref="" v-follow="CHAT_MESSAGE" style="position: relative">
-		<div :open="isOpen" ref="command-list" class="rpgm-chat-commands-container">
+		<div ref="command-list" :open="isOpen" class="rpgm-chat-commands-container">
 			<div :style="statusStyle" class="rpgm-chat-commands-status" />
 			<TransitionGroup name="rpgm-chat-command" reversed tag="ul" class="rpgm-chat-commands">
-				<li :style="commandStyles[i]" v-for="(completion, i) in suggestions.suggestions"
-					@click="fillInSuggestion(completion, true)" :key="`${completion.text}`" class="rpgm-chat-command">
+				<li v-for="(completion, i) in suggestions.suggestions" :key="`${completion.text}`"
+					:style="commandStyles[i]" class="rpgm-chat-command" @click="fillInSuggestion(completion, true)">
 					{{ completion.tooltip }}
 				</li>
 			</TransitionGroup>

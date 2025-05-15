@@ -37,6 +37,7 @@
 	padding: 4px;
 	border-radius: 3px;
 	border: solid 1px #00000033;
+	outline: none;
 }
 
 .rpgm-icons {
@@ -46,7 +47,7 @@
 	transition: opacity 150ms ease, filter 150ms ease;
 	position: absolute;
 	pointer-events: none;
-	color: var(--color-text-dark-secondary);
+	color: var(--color-dark-4);
 }
 
 .rpgm-icons a {

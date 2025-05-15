@@ -128,17 +128,17 @@ function restoreSchemaFromActiveGeneration() {
 </script>
 
 <template>
-	<HomebrewTitle @cycle="cycleGenerations" @copy="copyGeneration(data.activeGeneration)"
-		@delete="deleteGeneration(data.activeGeneration)" :modified="modified && editing"
-		:can-goto-generations="hasGenerated" @goto-generations="gotoGenerations" @click="restoreSchemaFromActiveGeneration"
-		:editing :current-title="currentTitle" />
-	<ComboBox @update:model-value="newSelection" placeholder="Preset" v-model="data.schema" v-if="!hasGenerated"
-		:values="schemas" :unique="v => v.name" :display="v => v.name" :assign
-		:filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())" />
+	<HomebrewTitle v-model="currentTitle" :modified="modified && editing" :can-goto-generations="hasGenerated" :editing
+		@cycle="cycleGenerations" @copy="copyGeneration(data.activeGeneration)"
+		@delete="deleteGeneration(data.activeGeneration)" @goto-generations="gotoGenerations"
+		@click="restoreSchemaFromActiveGeneration" />
+	<ComboBox v-if="!hasGenerated" v-model="data.schema" placeholder="Preset" :values="schemas" :unique="v => v.name"
+		:display="v => v.name" :assign :filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())"
+		@update:model-value="newSelection" />
 	<div class="rpgm-homebrew-content">
 		<Transition name="rpgm-homebrew-main">
 			<div v-if="editing">
-				<HomebrewInput v-model:modified="modified" :loading v-model="data.schema" @generate="generate" />
+				<HomebrewInput v-model:modified="modified" v-model="data.schema" :loading @generate="generate" />
 			</div>
 			<div v-else-if="!editing">
 				<Transition name="rpgm-homebrew-main">
