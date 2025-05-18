@@ -8,6 +8,10 @@ declare global {
 				REGENERATE_BUTTON
 				ASSIGN_TOOLTIP
 			}
+			CONFIG: {
+				AUTO_NAME
+				AUTO_NAME_HINT
+			}
 			DESCRIPTION: {
 				REGENERATE_BUTTON
 			}
@@ -28,6 +32,7 @@ declare global {
 				DELETE
 				COPY
 				SEND_TO_JOURNAL
+				OPEN_JOURNAL
 			}
 		}
 	}

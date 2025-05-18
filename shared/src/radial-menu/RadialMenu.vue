@@ -4,7 +4,7 @@
 			:style="[rootStyle, radialFloater.floatingStyles.value]" @focusout="focusOut">
 			<button ref="center" class="radial-menu-center" :style="{ width: `${centerSize}px`, height: `${centerSize}px` }"
 				:class="{ pressed: centerPressed }" @keydown.space="centerPressed = true" @keyup.space="centerPressed = false"
-				@click.prevent="toggleOpen">
+				@click.prevent.stop="toggleOpen">
 				<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
 			</button>
 
@@ -108,7 +108,7 @@ const radialFloater = useFloating(toRef(menuContext.value.element), root, {
 		shift({ crossAxis: true, boundary: document.body, altBoundary: true, rootBoundary: 'document' }),
 	],
 	whileElementsMounted(reference, floating, update) {
-		return autoUpdate(reference, floating, update);
+		return autoUpdate(reference, floating, update, { ancestorScroll: true });
 	},
 });
 

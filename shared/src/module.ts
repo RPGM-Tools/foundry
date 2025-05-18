@@ -74,13 +74,13 @@ export abstract class RpgmModule {
 	 * Called before everything else
 	 * Not much goes on in here
 	 */
-	abstract init(): Promise<void> | void
+	init(): Promise<void> | void { }
 
 	/**
 	 * Register module-specific settings here
 	 * Also where Radial Menu buttons and RP-Commands are registered (might change)
 	 */
-	abstract registerSettings(): Promise<void> | void
+	registerSettings(): Promise<void> | void { }
 
 	/**
 	 * Private caller of {@link i18nInit}
@@ -92,7 +92,7 @@ export abstract class RpgmModule {
 	/**
 	 * Called after localizations have initialized
 	 */
-	abstract i18nInit(): Promise<void> | void
+	i18nInit(): Promise<void> | void { }
 
 	/**
 	 * Private caller of {@link rpgmReady}
@@ -106,7 +106,7 @@ export abstract class RpgmModule {
 	/**
 	 * Called when everything else in Foundry is loaded
 	 */
-	abstract rpgmReady(): Promise<void> | void
+	rpgmReady(): Promise<void> | void { }
 
 	/** 
 	 * Called once when everything else in Foundry is loaded

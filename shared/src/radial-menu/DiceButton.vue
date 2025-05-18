@@ -42,6 +42,7 @@ async function onClick(event: MouseEvent) {
 	context.value.loading = true;
 	context.value.shift = event.shiftKey;
 	await button.callback(context.value);
+	context.value.element.focus();
 	context.value.loading = false;
 }
 </script>
@@ -73,6 +74,7 @@ async function onClick(event: MouseEvent) {
 	translate: -50% -50%;
 }
 
+:not(.submenu-group)>.dice-button:hover:not(:active),
 .submenu-group:not(:focus-within) .dice-button:hover,
 .dice-button:focus:not(:active) {
 	opacity: 1;
@@ -129,9 +131,9 @@ async function onClick(event: MouseEvent) {
 	margin: 0;
 	top: 0;
 	left: 0;
-	translate: -50%, -50%;
 	object-fit: cover;
 	pointer-events: none;
+	border: none !important;
 	width: 100% !important;
 	height: 100% !important;
 }

@@ -10,6 +10,10 @@ export default {
 		HOMEBREW: {
 			PLACEHOLDER: "Leave blank to let AI decide"
 		},
+		CONFIG: {
+			AUTO_NAME: "Auto Name Tokens",
+			AUTO_NAME_HINT: "Whether to automatically name tokens when they are placed. You can hold shift to bypass this feature.",
+		},
 		RADIAL_MENU: {
 			D4: "Roll a D4",
 			D6: "Roll a D6",
@@ -21,6 +25,7 @@ export default {
 			DELETE: "Delete",
 			COPY: "Copy",
 			SEND_TO_JOURNAL: "Send to Jounal",
+			OPEN_JOURNAL: "Open Journal",
 		},
 		ERORRS: {
 			TOKEN_SELECT: "Please select a token on the board"

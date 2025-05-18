@@ -100,8 +100,19 @@ export async function applyTokenName(tokenDocument: TokenDocument) {
 		await tokenDocument.update({ name: result.output[0] }, {});
 }
 
+let shift = false;
+
 /** Setup the functionality for detecting when a token has been placed */
 export function registerTokenCreate() {
-	// Hooks.on("createToken", async (tokenDocument: TokenDocument) => renameToken(tokenDocument)
-	// );
+	document.addEventListener("keydown", (k) => {
+		if (k.key == "Shift") { shift = true; }
+	});
+	document.addEventListener("keyup", (k) => {
+		if (k.key == "Shift") { shift = false; }
+	});
+	Hooks.on("createToken", async (tokenDocument: TokenDocument, options) => {
+		if (options.parent !== canvas.scene) return;
+		if (shift || !game.settings.get("rpgm-forge", "auto_name")) return;
+		applyTokenName(tokenDocument);
+	});
 }

@@ -11,12 +11,6 @@ export class RpgmVault extends RpgmModule {
 	override readonly logger = new RPGMLogger("🗃️ RPGM Vault");
 
 	/**
-	 * Called before everything else
-	 * Not much goes on in here
-	 */
-	override init(): Promise<void> | void { }
-
-	/**
 	 * Register module-specific settings here
 	 * Also where Radial Menu buttons and RP-Commands are registered (might change)
 	 */
@@ -39,10 +33,4 @@ export class RpgmVault extends RpgmModule {
 			callback: () => rpgm.logger.logU("Analyzing this value...")
 		});
 	}
-
-	/** (unused) */
-	override i18nInit(): Promise<void> | void { }
-
-	/** (unused) */
-	override rpgmReady(): Promise<void> | void { }
 }

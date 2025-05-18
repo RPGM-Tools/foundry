@@ -1,6 +1,6 @@
 import { RpgmModule } from "#/module";
 import { literal, argument, string } from "brigadier-ts-lite";
-import { chatDescription, chatTokenNames, getSelectedToken, applyTokenName } from "./util/token";
+import { chatDescription, chatTokenNames, getSelectedToken, applyTokenName, registerTokenCreate } from "./util/token";
 import { hudHeuristics, inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
 import { shimmerToken } from "./util/shimmer";
 import type { Component } from "vue";
@@ -54,8 +54,13 @@ export class RpgmForge extends RpgmModule {
 	 */
 	override registerSettings(): Promise<void> | void {
 		command();
-		game.settings.register("rpgm-forge", "names", { default: {} });
-		game.settings.register("rpgm-forge", "description", { default: {} });
+		game.settings.register("rpgm-forge", "auto_name", {
+			name: rpgm.localize("RPGM_FORGE.CONFIG.AUTO_NAME"),
+			hint: rpgm.localize("RPGM_FORGE.CONFIG.AUTO_NAME_HINT"),
+			default: true,
+			type: Boolean,
+			config: true,
+		});
 		rpgm.chat.registerCommand(literal("name")
 			.then(argument("prompt", string("greedy_phrase")).executes(c => {
 				void chatTokenNames(c.get<string>("prompt"));
@@ -184,6 +189,7 @@ export class RpgmForge extends RpgmModule {
 		this.namesChats.load();
 		this.descriptionsChats.load();
 		this.homebrewChats.load();
+		registerTokenCreate();
 	}
 
 	/** (unused) */

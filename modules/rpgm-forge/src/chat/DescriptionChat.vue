@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { ForgeDescription } from '@rpgm/forge';
+import DiceButton from '#/radial-menu/DiceButton.vue';
 
 const { data } = rpgm.forge!.descriptionsChats.useChatDatabase();
 const loading = ref(false);
+
+const contentRef = useTemplateRef("content");
+watch(contentRef, (c) => context.value.element = c!, { once: true });
 
 /**
  * Generates the description
@@ -30,6 +34,19 @@ async function generate() {
 	loading.value = false;
 }
 
+const button: RadialButton<ButtonContext> = {
+	category: rpgm.radialMenu.categories.rpgm_forge,
+	callback: copy,
+	icon: "fa fa-copy",
+	tooltip: "RPGM_FORGE.RADIAL_MENU.COPY",
+};
+
+const context = ref<ButtonContext>({
+	loading: false,
+	element: contentRef.value!,
+	shift: false
+});
+
 /**
  * Copies the description to clipboard
  */
@@ -46,11 +63,13 @@ onMounted(() => {
 </script>
 
 <template>
+	<div style="max-height: 40px; position: absolute; left: 95%;">
+		<DiceButton v-model="context" :index="1" :button="button" />
+	</div>
 	<h3>{{ data.name ? `${data.name} - ` : "" }}{{ data.type }}</h3>
 	<Transition name="forge-description">
-		<p v-if="data.description" class="forge-description">{{ data.description }}</p>
+		<p v-if="data.description" ref="content" tabindex="0" class="forge-description">{{ data.description }}</p>
 	</Transition>
-	<button class="rpgm-button" @click="copy">Copy to Clipboard</button>
 	<button :disabled="loading" class="rpgm-button" @click="generate">Regenerate</button>
 </template>
 

@@ -23,6 +23,7 @@ declare global {
 			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement>, app: Application) => void
 			renderChatMessageHTML: (message: ChatMessage, html: HTMLElement, context: object) => void
 			"rpgm-init": () => void
+			createToken(tokenDocument: TokenDocument, scene: foundry.abstract.types.DatabaseUpdateOperation, userId: string): void
 		}
 	}
 

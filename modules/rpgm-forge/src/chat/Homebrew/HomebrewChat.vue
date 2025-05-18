@@ -5,6 +5,7 @@ import HomebrewInput from "./HomebrewInput.vue";
 import HomebrewDisplay from "./HomebrewDisplay.vue";
 import HomebrewTitle from "./HomebrewTitle.vue";
 import RadialMenu from "#/radial-menu/RadialMenu.vue";
+import { inputHeuristics } from "#/radial-menu";
 
 const schemas = rpgm.forge!.homebrewSchemas;
 
@@ -41,20 +42,50 @@ const buttons = computed<RadialButton[]>(() =>
 				category: rpgm.radialMenu.categories.rpgm_forge,
 				icon: "fa-solid fa-copy",
 				tooltip: "RPGM_FORGE.RADIAL_MENU.COPY",
+				detective() { return window.isSecureContext; },
 				callback() { copyGeneration(data.activeGeneration); },
 			},
 			{
 				category: rpgm.radialMenu.categories.rpgm_forge,
 				icon: "fa-solid fa-trash",
 				tooltip: "RPGM_FORGE.RADIAL_MENU.DELETE",
-				detective() { return window.isSecureContext; },
 				callback() { deleteGeneration(data.activeGeneration); },
 			},
 			{
 				category: rpgm.radialMenu.categories.rpgm_forge,
 				icon: "fas fa-book-open",
 				tooltip: "RPGM_FORGE.RADIAL_MENU.SEND_TO_JOURNAL",
-				callback() { sendToJournal(data.activeGeneration); },
+				detective() {
+					//@ts-expect-error Flags broken
+					return game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id)
+						//@ts-expect-error Flags broken
+						?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration) === undefined;
+				},
+				callback(c) { sendToJournal(data.activeGeneration, c.shift); },
+			},
+			{
+				category: rpgm.radialMenu.categories.rpgm_forge,
+				icon: "fas fa-book-open",
+				tooltip: "RPGM_FORGE.RADIAL_MENU.OPEN_JOURNAL",
+				detective() {
+					//@ts-expect-error Flags broken
+					return game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id)
+						//@ts-expect-error Flags broken
+						?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration) !== undefined;
+				},
+				callback() {
+					//@ts-expect-error Flags broken
+					const entry = game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id);
+					//@ts-expect-error Flags broken
+					entry?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration)?.sheet.render(true);
+				},
+			},
+			{
+				category: rpgm.radialMenu.categories.rpgm_debug,
+				icon: "fa-solid fa-info",
+				tooltip: "RPGM_TOOLS.RADIAL_MENU.INFO",
+				detective(c) { return inputHeuristics(c as InputContext).isDebug().result; },
+				callback() { rpgm.logger.debug(data, id); },
 			},
 		]);
 
@@ -68,8 +99,11 @@ onMounted(() => {
 	}
 });
 
-/** @param generation - The generation to send to journal */
-async function sendToJournal(generation: string) {
+/**
+ * @param generation - The generation to send to journal
+ * @param open - Whether or not to show the entry after creating it
+ */
+async function sendToJournal(generation: string, open: boolean = false) {
 	const gen = data.generations[generation];
 
 	//@ts-expect-error Flags broken
@@ -88,12 +122,17 @@ async function sendToJournal(generation: string) {
 		page = (await JournalEntryPage.create({
 			name: gen.custom_name,
 			text: {
-				markdown: `*${gen.flavor_text}*\n${gen.fields.map(f => `### ${f.name}\n${f.value}`).join('\n')}`,
+				markdown: `*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`,
 				format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.MARKDOWN,
 			},
 			//@ts-expect-error Flags broken
 			flags: { "rpgm-forge": { "homebrew": generation } }
 		}, { parent: entry }))!;
+		if (open)
+			page.sheet?.render(true);
+		rpgm.logger.logU(`Journal Entry created for "${gen.custom_name}"`,);
+	} else {
+		rpgm.logger.errorU(`Journal Entry for "${gen.custom_name}" already exists!`);
 	}
 }
 
@@ -171,7 +210,7 @@ function gotoGenerations() {
 function copyGeneration(generation: string) {
 	try {
 		const gen = data.generations[generation];
-		void navigator.clipboard.writeText(`${gen.custom_name}\n## ${gen.flavor_text}\n${gen.fields.map(f => `### ${f.name}\n${f.value}`).join('\n')}`);
+		void navigator.clipboard.writeText(`# ${gen.custom_name}\n*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`);
 		rpgm.forge!.logger.logU(`Copied "${gen.custom_name}" to clipboard!`);
 	} catch { return; }
 }
