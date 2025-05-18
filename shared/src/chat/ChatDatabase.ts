@@ -65,10 +65,12 @@ export class ChatDatabase<T extends object> {
 	 */
 	render(message: ChatMessage, html: HTMLElement) {
 		rpgm.logger.debug("rendering", message);
+		const id = this.messageId(message);
 		const app = createApp(this.renderer);
 		const mount = html.querySelector<HTMLElement>(`.${this.moduleId}-${this.key}`)!;
 		app.provide("message", message);
-		app.provide("data", reactive(this.data.get(this.messageId(message))!));
+		app.provide("id", id);
+		app.provide("data", reactive(this.data.get(id)!));
 		app.mount(mount);
 
 		// Inject delete handler to remove this data from localStorage
@@ -111,8 +113,9 @@ export class ChatDatabase<T extends object> {
 	useChatDatabase(debounce: number = 1000) {
 		const message = inject<T>("message") as ChatMessage;
 		const data = inject<T>("data") as T;
+		const id = inject<string>("id") as string;
 		const rData = reactive(data);
 		watchDebounced(rData, () => this.save(), { debounce });
-		return { data: rData, message };
+		return { data: rData, message, id };
 	}
 }

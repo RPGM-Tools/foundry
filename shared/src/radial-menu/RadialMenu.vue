@@ -1,17 +1,19 @@
 <template>
-	<div v-if="Items.length > 0" ref="root" class="radial-menu-container" :open="isOpen" :style="[rootStyle, radialFloater.floatingStyles.value]"
-		@focusout="focusOut">
-		<button ref="center" class="radial-menu-center" :style="{ width: `${centerSize}px`, height: `${centerSize}px` }"
-			:class="{ pressed: centerPressed }" @keydown.space="centerPressed = true" @keyup.space="centerPressed = false"
-			@click.prevent="toggleOpen">
-			<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
-		</button>
+	<Transition name="radial-menu-fade">
+		<div v-if="Items.length > 0" ref="root" class="radial-menu-container" :open="isOpen"
+			:style="[rootStyle, radialFloater.floatingStyles.value]" @focusout="focusOut">
+			<button ref="center" class="radial-menu-center" :style="{ width: `${centerSize}px`, height: `${centerSize}px` }"
+				:class="{ pressed: centerPressed }" @keydown.space="centerPressed = true" @keyup.space="centerPressed = false"
+				@click.prevent="toggleOpen">
+				<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
+			</button>
 
-		<div class="submenu-group">
-			<DiceButton v-for="(button, index) in Items" :key="button.callback.toString()" :item="menuContext"
-				:button :index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" @click="onSubClick" />
+			<div class="submenu-group">
+				<DiceButton v-for="(button, index) in Items" :key="button.callback.toString()" v-model="menuContext" :button
+					:index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" @click="onSubClick" />
+			</div>
 		</div>
-	</div>
+	</Transition>
 </template>
 
 <script setup lang="ts">
@@ -24,8 +26,13 @@ import { shift } from '@floating-ui/vue';
 const ANIMATION_DURATION = 0.2;
 const MAX_CENTER_SIZE = 35;
 
-const items = inject<RadialButton<ButtonContext>[]>('items', []);
-const menuContext = inject<ButtonContext>('context') as ButtonContext;
+const menuContext = defineModel<ButtonContext>({ required: true });
+
+const { buttons, top = false, padding = { top: 0, right: 0 } } = defineProps<{
+	buttons: RadialButton[]
+	top?: boolean
+	padding?: { top: number, right: number }
+}>();
 
 // States for menu open/close and hover
 const isOpen = ref(false);
@@ -33,18 +40,23 @@ const centerPressed = ref(false);
 const root = useTemplateRef('root');
 const center = useTemplateRef('center');
 
+const observer = ref(new ResizeObserver(() => setTimeout(() => { _updateSize.value++; radialFloater.update(); }, 1)));
+watch(() => menuContext.value.element, (e) => {
+	observer.value!.observe(e);
+}, { immediate: true });
+
 const Items = computed(() => {
-	// Update items each time the menu is opened 
+	// Update buttons each time the menu is opened 
 	isOpen.value = Boolean(isOpen.value);
-	return items.filter(value => value.detective(menuContext));
+	return buttons.filter(value => value.detective ? value.detective(menuContext.value) : true);
 });
 
 const anchor = computed((): 'right' | 'right-start' => {
 	// If element has multiple lines, anchor to right-start
-	if (menuContext.element instanceof HTMLInputElement) {
+	if (menuContext.value.element instanceof HTMLInputElement) {
 		return 'right';
-	} else if (menuContext.element instanceof HTMLTextAreaElement) {
-		return menuContext.element.rows > 1 ? 'right-start' : 'right';
+	} else if (menuContext.value.element instanceof HTMLTextAreaElement) {
+		return menuContext.value.element.rows > 1 ? 'right-start' : 'right';
 	}
 	return 'right-start';
 });
@@ -60,22 +72,21 @@ _updateSize is a hack to fix the radial menu not updating
 its dimensions when its parent input element becomes visible
 */
 const _updateSize = ref(0);
-onMounted(() => {
-	new ResizeObserver(() => setTimeout(() => { _updateSize.value++; radialFloater.update(); }, 1)).observe(menuContext.element);
-});
 
 const centerSize = computed(() => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	_updateSize.value;
-	return Math.min(menuContext.element.scrollHeight, MAX_CENTER_SIZE);
+	return Math.min(menuContext.value.element.scrollHeight, MAX_CENTER_SIZE);
 });
 
-const padding = () =>
+const paddingOffset = () =>
 	offset(() => {
-		const padding = parseInt(document.defaultView?.getComputedStyle(menuContext.element).padding || '0');
+		const style = document.defaultView!.getComputedStyle(menuContext.value.element);
+		const _padding = parseInt(style.padding || '0');
+		const _margin = parseInt(style.margin || '0');
 		return {
-			mainAxis: -padding / 2,
-			crossAxis: anchor.value === 'right-start' ? padding / 2 : 0,
+			mainAxis: -(_padding + _margin + padding.right) / 2,
+			crossAxis: anchor.value === 'right-start' ? (_padding + _margin + padding.top) / 2 : 0,
 		};
 	});
 
@@ -83,20 +94,21 @@ const widthOffset = () =>
 	offset(({ rects }) => {
 		return {
 			// Keep the menu in the top right
-			mainAxis: anchor.value === 'right-start' ? -rects.floating.width / 2 - centerSize.value / 2 : -rects.floating.width / 2 - centerSize.value / 2,
-			crossAxis: anchor.value === 'right-start' ? -rects.floating.height / 2 + centerSize.value / 2 : 0,
+			mainAxis: -rects.floating.width / 2 - centerSize.value / 2,
+			crossAxis: !top && anchor.value === 'right-start' ?
+				-rects.floating.height / 2 + centerSize.value / 2 : 0
 		};
 	});
 
-const radialFloater = useFloating(toRef(menuContext.element), root, {
+const radialFloater = useFloating(toRef(menuContext.value.element), root, {
 	placement: anchor.value,
 	middleware: [
-		padding(),
+		paddingOffset(),
 		widthOffset(),
 		shift({ crossAxis: true, boundary: document.body, altBoundary: true, rootBoundary: 'document' }),
 	],
 	whileElementsMounted(reference, floating, update) {
-		return autoUpdate(reference, floating, update, { animationFrame: true });
+		return autoUpdate(reference, floating, update);
 	},
 });
 
@@ -108,7 +120,7 @@ function onSubClick() {
 
 /** Toggle radial menu */
 function toggleOpen() {
-	if (menuContext.loading) return;
+	if (menuContext.value.loading) return;
 	isOpen.value = !isOpen.value;
 	center.value?.focus();
 	// Fix overlap of subsequent radial menus
@@ -149,7 +161,7 @@ function getSubButtonStyle(index: number): StyleValue {
 	const angle = index * anglePerItem - 45;
 	const radians = (Math.PI / 180) * angle;
 
-	// Calculate the radius from how many items such that they don't overlap
+	// Calculate the radius from how many buttons such that they don't overlap
 	// Final X, Y offset if open
 	const finalX = Math.cos(radians) * radius.value;
 	const finalY = Math.sin(radians) * radius.value;
@@ -178,12 +190,23 @@ function getSubButtonStyle(index: number): StyleValue {
 </script>
 
 <style>
+.radial-menu-fade-enter-to,
+.radial-menu-fade-leave-from {
+	opacity: 1;
+}
+
+.radial-menu-fade-leave-to,
+.radial-menu-fade-enter-from {
+	opacity: 0;
+}
+
 .radial-menu-container {
-	transition: width 0.2s ease, height 0.2s ease !important;
+	transition: width 0.2s ease, height 0.2s ease, opacity 0.2s !important;
 	pointer-events: none;
 	overflow: visible;
 	margin: 0;
 	padding: 0;
+	z-index: 1;
 }
 
 #chat-notifications:has(.radial-menu-container[open="true"]),

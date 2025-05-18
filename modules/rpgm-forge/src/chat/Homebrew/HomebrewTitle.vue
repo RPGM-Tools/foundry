@@ -3,7 +3,6 @@ import WriteOnTransition from "#/util/WriteOnTransition.vue";
 import ContentEditable from "#/util/ContentEditable.vue";
 
 const data = inject<ForgeChatHomebrew>("data")!;
-const isSecure = ref(window.isSecureContext);
 
 const currentTitle = defineModel<string>({ required: true });
 
@@ -15,21 +14,10 @@ defineProps<{
 const emit = defineEmits<{
 	cycle: [by: number]
 	click: [event: MouseEvent]
-	delete: []
-	copy: []
 	gotoGenerations: []
 }>();
 
 const editingTitle = ref(false);
-
-/**
- * Deletes a generation if shift is pressed
- * @param e - Mouse event
- */
-function tryDelete(e: MouseEvent) {
-	if (!e.shiftKey) return;
-	emit("delete");
-}
 
 const rename = (n: string) => {
 	if (n.trim().length == 0) return;
@@ -52,12 +40,8 @@ const rename = (n: string) => {
 		<div v-show="!editing && currentTitle.length > 0" class="rpgm-icons">
 			<a v-show="Object.keys(data.generations).length > 1" title="Previous generation"
 				@click.stop="emit('cycle', -1)"><i class="fa-solid fa-circle-left" /></a>
-			<a v-if="isSecure" style="margin-right: auto;" title="Copy to clipboard" @click.stop="emit('copy')"><i
-					class="fa-solid fa-copy" /></a>
-			<a class="trash-hide" :title="'Delete generation\n(Hold shift)'" @click.stop="tryDelete"><i
-					class="fa-solid fa-trash" /></a>
-			<a v-show="Object.keys(data.generations).length > 1" title="Next generation" @click.stop="emit('cycle', 1)"><i
-					class="fa-solid fa-circle-right" /></a>
+			<a v-show="Object.keys(data.generations).length > 1" title="Next generation" style="margin-left: auto;"
+				@click.stop="emit('cycle', 1)"><i class="fa-solid fa-circle-right" /></a>
 		</div>
 		<div v-show="editing && currentTitle.length > 0" class="rpgm-icons">
 			<a v-if="!editingTitle" title="Edit Type" @click.stop="editingTitle = true"><i class="fa-solid fa-feather" /></a>

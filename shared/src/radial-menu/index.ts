@@ -1,6 +1,6 @@
 import type { App, Component } from 'vue';
 import { createApp, type Reactive, shallowReactive } from 'vue';
-import RadialMenu from './RadialMenu.vue';
+import RadialMenuFloating from './RadialMenuFloating.vue';
 import { injectTokenHUD } from './hud';
 
 export * from './heuristics';
@@ -43,7 +43,7 @@ export class RadialMenuRegister {
 	 * @param el - Mount a radial menu to the top-right of {@link el}
 	 */
 	private createRadialMenu(el: HTMLElement) {
-		const vueApp = createApp(RadialMenu as Component, { element: el });
+		const vueApp = createApp(RadialMenuFloating as Component, { element: el });
 		const appContainer = document.createElement('div');
 		appContainer.style.position = 'fixed';
 		appContainer.style.zIndex = '99';
@@ -61,7 +61,7 @@ export class RadialMenuRegister {
 			setValue = () => { };
 		}
 		vueApp.provide('element', el);
-		vueApp.provide<RadialButton<InputContext>[]>('items', rpgm.radialMenu.buttons);
+		vueApp.provide<RadialButton<InputContext>[]>('buttons', rpgm.radialMenu.buttons);
 		vueApp.provide<Reactive<InputContext>>('context', shallowReactive({
 			shift: false,
 			loading: false,

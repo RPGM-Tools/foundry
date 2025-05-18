@@ -67,7 +67,7 @@ function move(by: number) {
  */
 function filterNumbers(e: KeyboardEvent) {
 	if (e.key.length > 1 || e.metaKey) return;
-	if (Number(e.key) || e.key === ".") return;
+	if (!isNaN(Number(e.key)) || e.key === ".") return;
 	e.preventDefault();
 }
 
@@ -176,12 +176,13 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 .rpgm-homebrew-field-container {
 	position: relative;
 	padding-bottom: 6px;
+	padding-top: 6px;
 	transition: all 0.2s ease;
 	border-radius: 6px;
 }
 
 .rpgm-homebrew-field-container:not(:first-child) {
-	padding-top: 6px;
+	margin-top: 6px;
 }
 
 .rpgm-homebrew-field-name {

@@ -12,7 +12,7 @@ declare global {
 		category: RadialMenuCategoryOptions
 		icon: string
 		tooltip: RpgmLangs
-		detective: (context: T) => boolean
+		detective?: (context: T) => boolean
 		callback: (context: T) => Promise<void> | void
 	}
 

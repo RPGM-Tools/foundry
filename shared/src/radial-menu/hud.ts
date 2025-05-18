@@ -1,5 +1,5 @@
 import type { Reactive, Component } from 'vue';
-import RadialMenu from './RadialMenu.vue';
+import RadialMenuFloating from './RadialMenuFloating.vue';
 
 /** Injects code to render the dice hud */
 export function injectTokenHUD() {
@@ -29,9 +29,9 @@ function renderTokenHUD(this: TokenHUD, _element: JQuery, html: JQuery | HTMLEle
 	appContainer.style.height = '100%';
 	appContainer.style.zIndex = '99';
 	htmlElement.appendChild(appContainer);
-	this.menuApp = createApp(RadialMenu as Component);
+	this.menuApp = createApp(RadialMenuFloating as Component);
 	this.menuApp.provide<HTMLElement>('element', htmlElement);
-	this.menuApp.provide<RadialButton<TokenHudContext>[]>('items', rpgm.radialMenu.tokenHudButtons);
+	this.menuApp.provide<RadialButton<TokenHudContext>[]>('buttons', rpgm.radialMenu.tokenHudButtons);
 	this.menuApp.provide<Reactive<TokenHudContext>>('context', shallowReactive({
 		loading: false,
 		shift: false,

@@ -4,6 +4,7 @@ import ComboBox from "#/util/ComboBox.vue";
 import HomebrewInput from "./HomebrewInput.vue";
 import HomebrewDisplay from "./HomebrewDisplay.vue";
 import HomebrewTitle from "./HomebrewTitle.vue";
+import RadialMenu from "#/radial-menu/RadialMenu.vue";
 
 const schemas = rpgm.forge!.homebrewSchemas;
 
@@ -18,10 +19,44 @@ const currentTitle = computed<string>(() => {
 	else
 		return data.generations[data.activeGeneration]?.custom_name ?? "gak4";
 });
-const { data } = rpgm.forge!.homebrewChats.useChatDatabase();
+const { data, id } = rpgm.forge!.homebrewChats.useChatDatabase();
 const loading = ref(false);
 
 const hasGenerated = computed(() => Object.keys(data.generations).length > 0);
+
+const buttonAnchor = useTemplateRef("buttonAnchor");
+
+watch(buttonAnchor, (r) => { buttonContext.element = r!.closest(".chat-message")!; });
+
+const buttonContext = shallowReactive({
+	element: buttonAnchor.value!,
+	loading: false,
+	shift: false,
+});
+
+const buttons = computed<RadialButton[]>(() =>
+	editing.value ? [] :
+		[
+			{
+				category: rpgm.radialMenu.categories.rpgm_forge,
+				icon: "fa-solid fa-copy",
+				tooltip: "RPGM_FORGE.RADIAL_MENU.COPY",
+				callback() { copyGeneration(data.activeGeneration); },
+			},
+			{
+				category: rpgm.radialMenu.categories.rpgm_forge,
+				icon: "fa-solid fa-trash",
+				tooltip: "RPGM_FORGE.RADIAL_MENU.DELETE",
+				detective() { return window.isSecureContext; },
+				callback() { deleteGeneration(data.activeGeneration); },
+			},
+			{
+				category: rpgm.radialMenu.categories.rpgm_forge,
+				icon: "fas fa-book-open",
+				tooltip: "RPGM_FORGE.RADIAL_MENU.SEND_TO_JOURNAL",
+				callback() { sendToJournal(data.activeGeneration); },
+			},
+		]);
 
 provide("data", data);
 
@@ -32,6 +67,35 @@ onMounted(() => {
 		data.schema = structuredClone(schemas[Math.floor(Math.random() * schemas.length)]);
 	}
 });
+
+/** @param generation - The generation to send to journal */
+async function sendToJournal(generation: string) {
+	const gen = data.generations[generation];
+
+	//@ts-expect-error Flags broken
+	let entry = game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id) as JournalEntry;
+	if (!entry) {
+		entry = (await JournalEntry.create({
+			name: gen.name,
+			//@ts-expect-error Flags broken
+			flags: { "rpgm-forge": { "homebrew": id } }
+		}))!;
+	}
+
+	//@ts-expect-error Flags broken
+	let page = entry.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === generation) as JournalEntryPage;
+	if (!page) {
+		page = (await JournalEntryPage.create({
+			name: gen.custom_name,
+			text: {
+				markdown: `*${gen.flavor_text}*\n${gen.fields.map(f => `### ${f.name}\n${f.value}`).join('\n')}`,
+				format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.MARKDOWN,
+			},
+			//@ts-expect-error Flags broken
+			flags: { "rpgm-forge": { "homebrew": generation } }
+		}, { parent: entry }))!;
+	}
+}
 
 /** Reset modified status, scroll down if necessary */
 function newSelection() {
@@ -107,7 +171,7 @@ function gotoGenerations() {
 function copyGeneration(generation: string) {
 	try {
 		const gen = data.generations[generation];
-		void navigator.clipboard.writeText(`# ${gen.custom_name}\n## ${gen.flavor_text}\n${gen.fields.map(f => `### ${f.name}\n${f.value}`).join('\n')}`);
+		void navigator.clipboard.writeText(`${gen.custom_name}\n## ${gen.flavor_text}\n${gen.fields.map(f => `### ${f.name}\n${f.value}`).join('\n')}`);
 		rpgm.forge!.logger.logU(`Copied "${gen.custom_name}" to clipboard!`);
 	} catch { return; }
 }
@@ -128,24 +192,27 @@ function restoreSchemaFromActiveGeneration() {
 </script>
 
 <template>
-	<HomebrewTitle v-model="currentTitle" :modified="modified && editing" :can-goto-generations="hasGenerated" :editing
-		@cycle="cycleGenerations" @copy="copyGeneration(data.activeGeneration)"
-		@delete="deleteGeneration(data.activeGeneration)" @goto-generations="gotoGenerations"
-		@click="restoreSchemaFromActiveGeneration" />
-	<ComboBox v-if="!hasGenerated" v-model="data.schema" placeholder="Preset" :values="schemas" :unique="v => v.name"
-		:display="v => v.name" :assign :filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())"
-		@update:model-value="newSelection" />
-	<div class="rpgm-homebrew-content">
-		<Transition name="rpgm-homebrew-main">
-			<div v-if="editing">
-				<HomebrewInput v-model:modified="modified" v-model="data.schema" :loading @generate="generate" />
-			</div>
-			<div v-else-if="!editing">
-				<Transition name="rpgm-homebrew-main">
-					<HomebrewDisplay :key="data.activeGeneration" :generation="data.activeGeneration" />
-				</Transition>
-			</div>
-		</Transition>
+	<div>
+		<RadialMenu v-if="buttonContext.element" v-model="buttonContext" :buttons :top="true"
+			:padding="{ top: 40, right: 0 }" />
+		<HomebrewTitle ref="titleRef" v-model="currentTitle" :modified="modified && editing"
+			:can-goto-generations="hasGenerated" :editing @cycle="cycleGenerations" @goto-generations="gotoGenerations"
+			@click="restoreSchemaFromActiveGeneration" />
+		<ComboBox v-if="!hasGenerated" v-model="data.schema" placeholder="Preset" :values="schemas" :unique="v => v.name"
+			:display="v => v.name" :assign :filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())"
+			@update:model-value="newSelection" />
+		<div ref="buttonAnchor" class="rpgm-homebrew-content">
+			<Transition name="rpgm-homebrew-main">
+				<div v-if="editing">
+					<HomebrewInput v-model:modified="modified" v-model="data.schema" :loading @generate="generate" />
+				</div>
+				<div v-else-if="!editing">
+					<Transition name="rpgm-homebrew-main">
+						<HomebrewDisplay :key="data.activeGeneration" :generation="data.activeGeneration" />
+					</Transition>
+				</div>
+			</Transition>
+		</div>
 	</div>
 </template>
 

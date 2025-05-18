@@ -15,7 +15,7 @@ const rpgm = globalThis.rpgm;
 const pressed = ref(false);
 
 const emit = defineEmits(['click']);
-const menuContext = inject<ButtonContext>('context') as ButtonContext;
+const context = defineModel<ButtonContext>({ required: true });
 const { button, rotation = "uniform" } = defineProps<{
 	button: RadialButton<ButtonContext>,
 	index: number,
@@ -39,12 +39,11 @@ const rotationStyle = computed<StyleValue>(() =>
  */
 async function onClick(event: MouseEvent) {
 	emit('click');
-	menuContext.loading = true;
-	menuContext.shift = event.shiftKey;
-	await button.callback(menuContext);
-	menuContext.loading = false;
+	context.value.loading = true;
+	context.value.shift = event.shiftKey;
+	await button.callback(context.value);
+	context.value.loading = false;
 }
-
 </script>
 
 <style>
@@ -100,11 +99,14 @@ async function onClick(event: MouseEvent) {
 
 .radial-menu-tooltip {
 	position: absolute;
-	bottom: 30px;
-	left: 50%;
-	padding: 2px;
+	right: 120%;
+	top: 50%;
+	transform: translateY(-50%);
+	padding-left: 4px;
+	padding-right: 4px;
+	padding-top: 2px;
+	padding-bottom: 2px;
 	line-height: 1.2;
-	translate: -50% 0;
 	white-space: nowrap;
 	pointer-events: none;
 	background: #6633cc;

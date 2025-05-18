@@ -1,0 +1,4 @@
+function newEntry() {
+	JournalEntry.create({
+	})
+}

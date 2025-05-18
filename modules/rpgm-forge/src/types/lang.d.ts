@@ -25,6 +25,9 @@ declare global {
 				LOREM_IPSUM
 				START_SHIMMER
 				STOP_SHIMMER
+				DELETE
+				COPY
+				SEND_TO_JOURNAL
 			}
 		}
 	}

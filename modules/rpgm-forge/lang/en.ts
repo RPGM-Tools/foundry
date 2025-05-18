@@ -18,6 +18,9 @@ export default {
 			STOP_SHIMMER: "Stop Shimmer",
 			NAMES: "Generate Name",
 			DESCRIPTION: "Generate Description",
+			DELETE: "Delete",
+			COPY: "Copy",
+			SEND_TO_JOURNAL: "Send to Jounal",
 		},
 		ERORRS: {
 			TOKEN_SELECT: "Please select a token on the board"

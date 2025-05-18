@@ -21,9 +21,9 @@ export function command() {
  */
 function getSchema(name?: string): ForgeChatHomebrew {
 	return {
-		schema: rpgm.forge!.homebrewSchemas.find((v) => {
+		schema: structuredClone(rpgm.forge!.homebrewSchemas.find((v) => {
 			return v.name.toLowerCase().trim() === name?.toLowerCase().trim();
-		}) ?? undefined,
+		})) ?? undefined,
 		activeGeneration: "",
 		generations: {}
 	};

@@ -131,7 +131,6 @@ export class RpgmForge extends RpgmModule {
 			category: rpgm.radialMenu.categories.rpgm_forge,
 			icon: 'fa fa-signature',
 			tooltip: "RPGM_FORGE.RADIAL_MENU.NAMES",
-			detective: () => true,
 			callback: async (context) => {
 				if (!context.token) return rpgm.logger.logU("No token selected");
 				if (context.shift)
@@ -144,7 +143,6 @@ export class RpgmForge extends RpgmModule {
 			category: rpgm.radialMenu.categories.rpgm_forge,
 			icon: 'fa fa-align-left',
 			tooltip: "RPGM_FORGE.RADIAL_MENU.DESCRIPTION",
-			detective: () => true,
 			callback: (context) => {
 				const token = context.token;
 				if (!token) return rpgm.logger.log("No token selected");
