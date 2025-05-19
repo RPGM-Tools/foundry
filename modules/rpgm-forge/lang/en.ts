@@ -13,6 +13,8 @@ export default {
 		CONFIG: {
 			AUTO_NAME: "Auto Name Tokens",
 			AUTO_NAME_HINT: "Whether to automatically name tokens when they are placed. You can hold shift to bypass this feature.",
+			RENAME_ACTORS: "Rename Actors",
+			RENAME_ACTORS_HINT: "Whether to change a token actor's name when renaming the token."
 		},
 		RADIAL_MENU: {
 			D4: "Roll a D4",

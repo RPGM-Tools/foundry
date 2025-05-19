@@ -11,6 +11,8 @@ declare global {
 			CONFIG: {
 				AUTO_NAME
 				AUTO_NAME_HINT
+				RENAME_ACTORS
+				RENAME_ACTORS_HINT
 			}
 			DESCRIPTION: {
 				REGENERATE_BUTTON

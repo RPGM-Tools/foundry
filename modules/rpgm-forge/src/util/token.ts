@@ -34,16 +34,18 @@ export function chatDescription(prompt?: { type: string, name?: string }) {
 
 /**
  * Creates a Names Wizard for the given prompt, or uses the selected token's name
+ * @param token - The token to rename, if omitted finds the current selected token
  * @param prompt - The prompt for what to generate, eg "Goblin", "Legendary Sword"
  */
-export function chatTokenNames(prompt?: string) {
+export function chatTokenNames(token: Token | undefined, prompt?: string) {
 	// User wants a token for the selected token
 	if (!prompt) {
-		const token = getSelectedToken();
+		token ??= getSelectedToken();
 		if (token) {
-			const actor = token.actor;
-			if (!actor || !actor.name) return;
-			void rpgm.forge!.namesChats.newMessage({ tokenId: token.id, names: [], prompt: actor.name });
+			const protoToken = token.actor?.prototypeToken;
+			rpgm.forge?.logger.debug(protoToken);
+			if (!protoToken?.name) { rpgm.forge?.logger.errorU("Token has no name!"); return; }
+			void rpgm.forge!.namesChats.newMessage({ tokenId: token.id, names: [], prompt: protoToken.name });
 		}
 	}
 	// User has a name for us to use
@@ -59,8 +61,8 @@ export function chatTokenNames(prompt?: string) {
  * @returns The names generated
  */
 export async function generateTokenNames(tokenDocument: TokenDocument, type?: string): Promise<ForgeResponse<Names>> {
-	const actor = tokenDocument.actor;
-	if (!actor?.name) return { success: false, error: "Token has no name!" };
+	const protoToken = tokenDocument.actor?.prototypeToken;
+	if (!protoToken?.name) return { success: false, error: "Token has no name!" };
 
 	/** @todo Less hardcoding of values */
 	const options: NamesOptions = {
@@ -68,7 +70,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 		gender: "random",
 		genre: "Fantasy",
 		method: "ai",
-		type: type ?? actor.name
+		type: type ?? protoToken.name
 	};
 
 	const token = canvas.tokens?.get(tokenDocument._id ?? "");
@@ -93,11 +95,24 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
  * Generates names and renames a token
  * @param tokenDocument - The token to rename
  */
-export async function applyTokenName(tokenDocument: TokenDocument) {
+export async function quickNameToken(tokenDocument: TokenDocument) {
 	const result = await generateTokenNames(tokenDocument);
 	if (result.success)
-		//@ts-expect-error Unsafe updating of tokenDocument
-		await tokenDocument.update({ name: result.output[0] }, {});
+		await nameToken(tokenDocument, result.output[0]);
+}
+
+/**
+ * Updates a token with provided data
+ * @param tokenDocument - The token document to update
+ * @param name - The name to apply to the token
+ */
+export async function nameToken(tokenDocument: TokenDocument, name: string) {
+	//@ts-expect-error Unsafe updating of tokenDocument
+	await tokenDocument.update({ name }, {});
+	if (game.settings.get("rpgm-forge", "rename_actors")) {
+		//@ts-expect-error Unsafe updating of tokenDocument.actor
+		await tokenDocument.actor?.update({ name }, {});
+	}
 }
 
 let shift = false;
@@ -113,6 +128,6 @@ export function registerTokenCreate() {
 	Hooks.on("createToken", async (tokenDocument: TokenDocument, options) => {
 		if (options.parent !== canvas.scene) return;
 		if (shift || !game.settings.get("rpgm-forge", "auto_name")) return;
-		applyTokenName(tokenDocument);
+		quickNameToken(tokenDocument);
 	});
 }

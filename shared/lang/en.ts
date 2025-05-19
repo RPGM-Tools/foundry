@@ -26,7 +26,7 @@ export default {
 			RADIAL_MENU_DEBUG_HINT: "Shows options in the radial menu related to debugging."
 		},
 		RADIAL_MENU: {
-			INFO: "Token Info",
+			INFO: "Info",
 			COMMAND: "Command"
 		},
 	}

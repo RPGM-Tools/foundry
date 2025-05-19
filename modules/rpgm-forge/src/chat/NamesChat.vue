@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ForgeNames } from '@rpgm/forge';
-import { getSelectedToken } from '@/util/token';
+import { getSelectedToken, nameToken } from '@/util/token';
 import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
 
 const { data } = rpgm.forge!.namesChats.useChatDatabase();
@@ -55,8 +55,7 @@ function assign(name: string) {
 	const token = getSelectedToken();
 	if (!token) return;
 	const oldName = token.name;
-	//@ts-expect-error Unsafe updating of tokenDocument
-	void token.document.update({ name }, {});
+	nameToken(token.document, name);
 	rpgm.forge!.logger.logU(`Renamed ${oldName} to ${name}`);
 }
 
@@ -97,6 +96,7 @@ onMounted(() => {
 	scale: 1;
 	transition: transform 150ms ease-in-out, color 150ms, scale 150ms !important;
 	transform-origin: left;
+	cursor: pointer;
 }
 
 .rpgm-forge-name:hover {

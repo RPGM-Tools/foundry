@@ -133,9 +133,9 @@
 }
 
 /* Prevent clipping on foundry AppV2 pages */
-.application {
-	overflow: visible !important;
-}
+/* .application { */
+/* 	overflow: visible !important; */
+/* } */
 
 @keyframes moveBackground {
 

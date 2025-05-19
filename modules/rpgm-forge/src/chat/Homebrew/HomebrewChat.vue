@@ -122,9 +122,12 @@ async function sendToJournal(generation: string, open: boolean = false) {
 		page = (await JournalEntryPage.create({
 			name: gen.custom_name,
 			text: {
+				content: `*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`,
 				markdown: `*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`,
 				format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.MARKDOWN,
 			},
+			// Puts the newest entry on top, may change later
+			sort: entry.pages.reduce((m, e) => { return e.sort < m ? (m = e.sort) : m; }, 0) - 1,
 			//@ts-expect-error Flags broken
 			flags: { "rpgm-forge": { "homebrew": generation } }
 		}, { parent: entry }))!;
@@ -232,8 +235,8 @@ function restoreSchemaFromActiveGeneration() {
 
 <template>
 	<div>
-		<RadialMenu v-if="buttonContext.element" v-model="buttonContext" :buttons :top="true"
-			:padding="{ top: 40, right: 0 }" />
+		<RadialMenu v-if="buttonContext.element" v-model="buttonContext" :buttons :pad-document="false" :right="true"
+			:top="true" :padding="{ top: 40, right: 0 }" />
 		<HomebrewTitle ref="titleRef" v-model="currentTitle" :modified="modified && editing"
 			:can-goto-generations="hasGenerated" :editing @cycle="cycleGenerations" @goto-generations="gotoGenerations"
 			@click="restoreSchemaFromActiveGeneration" />

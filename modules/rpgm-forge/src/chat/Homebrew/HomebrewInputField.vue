@@ -20,7 +20,6 @@ const fieldContainer = useTemplateRef("fieldContainer");
  * @param n - The name to validate
  */
 function validateNewName(n: string) {
-	rpgm.logger.log(`"${n}"`);
 	const valid = (() => {
 		if (n === field.value.name) return false;
 		if (n.trim().length == 0) {

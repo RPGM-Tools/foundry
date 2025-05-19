@@ -60,10 +60,12 @@ function copy() {
 onMounted(() => {
 	if (!data.description && !loading.value) void generate();
 });
+
+const secure = window.isSecureContext;
 </script>
 
 <template>
-	<div style="max-height: 40px; position: absolute; left: 95%;">
+	<div v-if="secure" style="max-height: 40px; position: absolute; left: 95%;">
 		<DiceButton v-model="context" :index="1" :button="button" />
 	</div>
 	<h3>{{ data.name ? `${data.name} - ` : "" }}{{ data.type }}</h3>

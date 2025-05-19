@@ -24,9 +24,7 @@ export class ChatDatabase<T extends object> {
 	async newMessage(data: T) {
 		// Set render to false to try and delay the first message render by the time we set the data
 		const id = foundry.utils.randomID();
-		rpgm.logger.debug(Object.fromEntries(this.data));
 		this.data.set(id, data);
-		rpgm.logger.debug(Object.fromEntries(this.data));
 		await ChatMessage.create({
 			speaker: { alias: this.title },
 			whisper: game.userId,
@@ -34,6 +32,7 @@ export class ChatDatabase<T extends object> {
 			//@ts-expect-error Types broken for flags
 			flags: { [this.moduleId]: { [this.key]: id } }
 		}, { broadcast: false });
+		ui.chat.activate();
 		this.save();
 		rpgm.chat.updateScroll(true);
 	}
@@ -54,7 +53,6 @@ export class ChatDatabase<T extends object> {
 	 * @returns Whether or not this message should be rendered with this database
 	 */
 	query(message: ChatMessage): boolean {
-		rpgm.logger.log(Object.fromEntries(this.data));
 		return this.data.has(this.messageId(message) ?? "");
 	}
 
@@ -64,7 +62,6 @@ export class ChatDatabase<T extends object> {
 	 * @param html - The html of the message
 	 */
 	render(message: ChatMessage, html: HTMLElement) {
-		rpgm.logger.debug("rendering", message);
 		const id = this.messageId(message);
 		const app = createApp(this.renderer);
 		const mount = html.querySelector<HTMLElement>(`.${this.moduleId}-${this.key}`)!;

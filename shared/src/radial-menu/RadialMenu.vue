@@ -28,9 +28,11 @@ const MAX_CENTER_SIZE = 35;
 
 const menuContext = defineModel<ButtonContext>({ required: true });
 
-const { buttons, top = false, padding = { top: 0, right: 0 } } = defineProps<{
+const { buttons, padDocument = true, top = false, right = false, padding = { top: 0, right: 0 } } = defineProps<{
 	buttons: RadialButton[]
 	top?: boolean
+	right?: boolean
+	padDocument?: boolean
 	padding?: { top: number, right: number }
 }>();
 
@@ -63,8 +65,8 @@ const anchor = computed((): 'right' | 'right-start' => {
 
 /** Expand radial menu when open, used for overflow protection */
 const rootStyle = computed(() => ({
-	width: `${isOpen.value ? radius.value * 2 + centerSize.value : 30}px`,
-	height: `${isOpen.value ? radius.value * 2 + centerSize.value : 30}px`,
+	width: `${isOpen.value ? radius.value * 1.7 + centerSize.value : 30}px`,
+	height: `${isOpen.value ? radius.value * 1.7 + centerSize.value : 30}px`,
 }));
 
 /* 
@@ -94,7 +96,7 @@ const widthOffset = () =>
 	offset(({ rects }) => {
 		return {
 			// Keep the menu in the top right
-			mainAxis: -rects.floating.width / 2 - centerSize.value / 2,
+			mainAxis: !right ? -rects.floating.width / 2 - centerSize.value / 2 : -rects.floating.width,
 			crossAxis: !top && anchor.value === 'right-start' ?
 				-rects.floating.height / 2 + centerSize.value / 2 : 0
 		};
@@ -105,7 +107,7 @@ const radialFloater = useFloating(toRef(menuContext.value.element), root, {
 	middleware: [
 		paddingOffset(),
 		widthOffset(),
-		shift({ crossAxis: true, boundary: document.body, altBoundary: true, rootBoundary: 'document' }),
+		...padDocument ? [shift({ crossAxis: true, boundary: document.body, altBoundary: true, rootBoundary: 'document' })] : [],
 	],
 	whileElementsMounted(reference, floating, update) {
 		return autoUpdate(reference, floating, update, { ancestorScroll: true });
@@ -123,6 +125,7 @@ function toggleOpen() {
 	if (menuContext.value.loading) return;
 	isOpen.value = !isOpen.value;
 	center.value?.focus();
+	radialFloater.update();
 	// Fix overlap of subsequent radial menus
 	if (root.value?.parentElement)
 		root.value.parentElement.style.zIndex = isOpen.value ? "999" : "99";
