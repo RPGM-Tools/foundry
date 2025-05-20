@@ -1,8 +1,7 @@
 import { RpgmModule } from "#/module";
 import { literal, argument, string } from "brigadier-ts-lite";
 import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, registerTokenCreate } from "./util/token";
-import { hudHeuristics, inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
-import { shimmerToken } from "./util/shimmer";
+import { inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
 import type { Component } from "vue";
 import NamesChat from "./chat/NamesChat.vue";
 import DescriptionChat from "./chat/DescriptionChat.vue";
@@ -18,7 +17,8 @@ import Homebrews from "@rpgm/forge/data/schemas.json?url";
 export class RpgmForge extends RpgmModule {
 	override id: string = "rpgm-forge";
 	override name: string = "RPGM Forge";
-	override readonly logger = new RPGMLogger("🎲 RPGM Forge");
+	override icon: string = "🎲";
+	override readonly logger = new RPGMLogger(`${this.icon} ${this.name}`);
 	namesChats = new ChatDatabase<ForgeChatNames>(
 		this.id,
 		"names",
@@ -110,35 +110,6 @@ export class RpgmForge extends RpgmModule {
 				shimmer();
 			}
 		});
-		rpgm.radialMenu.registerInputButton({
-			category: rpgm.radialMenu.categories.rpgm_forge,
-			icon: 'fa fa-comment',
-			tooltip: "RPGM_FORGE.RADIAL_MENU.LOREM_IPSUM",
-			detective: (context) => inputHeuristics(context).isChat().noNumber().result,
-			callback: async (context) => {
-				const shimmer = shimmerInput(context);
-				await writeOn(context, "Hello, World! Here is some lorem ipsum for you to consider.", 500);
-				shimmer();
-			}
-		});
-		rpgm.radialMenu.registerInputButton({
-			category: rpgm.radialMenu.categories.rpgm_debug,
-			icon: 'fa fa-sparkles',
-			tooltip: "RPGM_FORGE.RADIAL_MENU.START_SHIMMER",
-			detective: (context) => inputHeuristics(context).isChat().noNumber().result,
-			callback: (context) => {
-				shimmerInput(context);
-			}
-		});
-		rpgm.radialMenu.registerInputButton({
-			category: rpgm.radialMenu.categories.rpgm_debug,
-			icon: 'fa-regular fa-sparkle',
-			tooltip: "RPGM_FORGE.RADIAL_MENU.STOP_SHIMMER",
-			detective: (context) => inputHeuristics(context).isChat().noNumber().result,
-			callback: (context) => {
-				shimmerInput(context)();
-			}
-		});
 		rpgm.radialMenu.registerTokenHudButton({
 			category: rpgm.radialMenu.categories.rpgm_forge,
 			icon: 'fa fa-signature',
@@ -163,37 +134,6 @@ export class RpgmForge extends RpgmModule {
 					// Don't include name if it's the default actor name
 					name: token.name ? token.name !== token.actor!.name ? token.name : "" : ""
 				});
-			}
-		});
-		rpgm.radialMenu.registerTokenHudButton({
-			category: rpgm.radialMenu.categories.rpgm_debug,
-			icon: 'fa fa-sparkles',
-			tooltip: "RPGM_FORGE.RADIAL_MENU.START_SHIMMER",
-			detective: context => hudHeuristics(context).isDebug().result,
-			callback: async (context) => {
-				if (!context.token) return;
-				const filter = await shimmerToken(context.token);
-				return filter.fadeIn(500);
-			}
-		});
-		rpgm.radialMenu.registerTokenHudButton({
-			category: rpgm.radialMenu.categories.rpgm_debug,
-			icon: 'fa-regular fa-sparkle',
-			tooltip: "RPGM_FORGE.RADIAL_MENU.STOP_SHIMMER",
-			detective: context => hudHeuristics(context).isDebug().result,
-			callback: async (context) => {
-				if (!context.token) return;
-				const filter = await shimmerToken(context.token);
-				return filter.fadeOut(500);
-			}
-		});
-		rpgm.radialMenu.registerTokenHudButton({
-			category: rpgm.radialMenu.categories.rpgm_forge,
-			icon: 'fa-regular fa-info',
-			tooltip: "RPGM_TOOLS.RADIAL_MENU.INFO",
-			detective: context => hudHeuristics(context).isDebug().result,
-			callback: async (context) => {
-				this.logger.log(context.token?.document.actor?.prototypeToken.name);
 			}
 		});
 	}

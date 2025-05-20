@@ -69,6 +69,7 @@ async function onClick(event: MouseEvent) {
 	transition-duration: 0.2s !important;
 	width: 30px !important;
 	height: 30px !important;
+	filter: drop-shadow(2px 2px 0px #00000044);
 	top: 50%;
 	left: 50%;
 	translate: -50% -50%;

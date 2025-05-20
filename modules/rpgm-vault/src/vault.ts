@@ -8,7 +8,8 @@ import { RPGMLogger } from "#/util/logging";
 export class RpgmVault extends RpgmModule {
 	override id: string = "rpgm-vault";
 	override name: string = "RPGM Vault";
-	override readonly logger = new RPGMLogger("🗃️ RPGM Vault");
+	override icon: string = "🗃️";
+	override readonly logger = new RPGMLogger(`${this.icon} ${this.name}`);
 
 	/**
 	 * Register module-specific settings here

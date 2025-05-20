@@ -107,8 +107,9 @@ export class RadialMenuRegister {
 
 	/** Matches functionality of the radial menu with the user's setting */
 	update() {
-		if (game.settings.get("rpgm-tools", "radial_menu_enabled") === true)
+		if (game.settings.get("rpgm-tools", "radial_menu_input") === true) {
 			this.startWatching();
+		}
 		else
 			this.stopWatching();
 	}
@@ -145,7 +146,7 @@ export class RadialMenuRegister {
 	 * @param button - The input button to register
 	 */
 	registerInputButton(button: RadialButton<InputContext>) {
-		rpgm.logger.debug(`Registering radial menu button: ${rpgm.localize(button.tooltip)}`);
+		rpgm.logger.debug(`Registering radial menu button: ${button.tooltip}`);
 		this.buttons.push(button);
 	}
 
@@ -153,7 +154,7 @@ export class RadialMenuRegister {
 	 * @param button - The hud button to register
 	 */
 	registerTokenHudButton(button: RadialButton<TokenHudContext>) {
-		rpgm.logger.debug(`Registering radial menu button: ${rpgm.localize(button.tooltip)}`);
+		rpgm.logger.debug(`Registering radial menu button: ${button.tooltip}`);
 		this.tokenHudButtons.push(button);
 	}
 }

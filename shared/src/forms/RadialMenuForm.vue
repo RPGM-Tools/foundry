@@ -3,14 +3,16 @@ import { RadialMenuSettings } from '#/settings/radialMenu';
 import { useSetting } from '#/util';
 
 const rpgm = globalThis.rpgm;
-const radialMenuEnabled = useSetting("rpgm-tools.radial_menu_enabled");
+const radialMenuInput = useSetting("rpgm-tools.radial_menu_input");
+const radialMenuHUD = useSetting("rpgm-tools.radial_menu_hud");
 const app = inject<RadialMenuSettings>("app")!;
 
 /**
  Saves changed settings
  */
 function submit() {
-	radialMenuEnabled.apply();
+	radialMenuInput.apply();
+	radialMenuHUD.apply();
 	rpgm.radialMenu.update();
 	void app.close();
 };
@@ -22,12 +24,20 @@ function submit() {
 			<h2>{{ RadialMenuSettings.name }}</h2>
 			<i>{{ RadialMenuSettings.subtitle }}</i>
 			<div class="form-group">
-				<label>{{ radialMenuEnabled.name }}</label>
+				<label>{{ radialMenuInput.name }}</label>
 				<div class="form-fields">
-					<input v-model="radialMenuEnabled.value" type="checkbox">
+					<input v-model="radialMenuInput.value" type="checkbox">
 				</div>
 				<p class="hint notes">
-					{{ radialMenuEnabled.hint }}
+					{{ radialMenuInput.hint }} </p>
+			</div>
+			<div class="form-group">
+				<label>{{ radialMenuHUD.name }}</label>
+				<div class="form-fields">
+					<input v-model="radialMenuHUD.value" type="checkbox">
+				</div>
+				<p class="hint notes">
+					{{ radialMenuHUD.hint }}
 				</p>
 			</div>
 		</div>

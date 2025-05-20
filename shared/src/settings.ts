@@ -1,4 +1,4 @@
-import { hudHeuristics, inputHeuristics } from "./radial-menu";
+import { hudHeuristics } from "./radial-menu";
 import { DeveloperSettings } from "./settings/developer";
 import { RadialMenuSettings } from "./settings/radialMenu";
 import { SecretsSettings } from "./settings/secrets";
@@ -10,9 +10,14 @@ export function GlobalSettings() {
 		hint: rpgm.localize("RPGM_TOOLS.CONFIG.API_KEY_HINT"),
 		type: String,
 	});
-	game.settings.register("rpgm-tools", "radial_menu_enabled", {
-		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_ENABLED"),
-		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_ENABLED_HINT"),
+	game.settings.register("rpgm-tools", "radial_menu_input", {
+		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_INPUT"),
+		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_INPUT_HINT"),
+		default: false,
+	});
+	game.settings.register("rpgm-tools", "radial_menu_hud", {
+		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_HUD"),
+		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_HUD_HINT"),
 		default: true,
 	});
 	game.settings.register("rpgm-tools", "radial_menu_debug", {
@@ -32,17 +37,6 @@ export function GlobalSettings() {
 		tooltip: "RPGM_TOOLS.RADIAL_MENU.INFO",
 		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
 		callback: (context) => rpgm.logger.log(context.token)
-	});
-	rpgm.radialMenu.registerInputButton({
-		category: rpgm.radialMenu.categories.rpgm_debug,
-		icon: 'fa fa-terminal',
-		tooltip: "RPGM_TOOLS.RADIAL_MENU.COMMAND",
-		detective: (context) => inputHeuristics(context).isChat().isGM().isDebug().result,
-		callback: (context) => {
-			context.element.focus();
-			context.setValue('*');
-			context.element.dispatchEvent(new KeyboardEvent("keyup", { key: "*" }));
-		}
 	});
 }
 

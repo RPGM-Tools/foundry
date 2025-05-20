@@ -25,7 +25,7 @@ export default {
 			NAMES: "Generate Name",
 			DESCRIPTION: "Generate Description",
 			DELETE: "Delete",
-			COPY: "Copy",
+			COPY: "Copy to clipboard",
 			SEND_TO_JOURNAL: "Send to Jounal",
 			OPEN_JOURNAL: "Open Journal",
 		},

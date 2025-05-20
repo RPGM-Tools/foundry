@@ -24,8 +24,10 @@ declare global {
 				DEVELOPER_SETTINGS_HINT
 				DEVELOPER_SETTINGS_LABEL
 				DEVELOPER_SETTINGS_SUBTITLE
-				RADIAL_MENU_ENABLED
-				RADIAL_MENU_ENABLED_HINT
+				RADIAL_MENU_INPUT
+				RADIAL_MENU_INPUT_HINT
+				RADIAL_MENU_HUD
+				RADIAL_MENU_HUD_HINT
 				RADIAL_MENU_DEBUG
 				RADIAL_MENU_DEBUG_HINT
 				API_KEY
@@ -41,8 +43,8 @@ declare global {
 	}
 
 	type ToString<T> =
-	IsAnyOr<T, string> extends true ? string
-	: { [K in keyof T]: ToString<T[K]> }
+		IsAnyOr<T, string> extends true ? string
+		: { [K in keyof T]: ToString<T[K]> }
 }
 
 type IsAnyOr<T, U> = 0 extends (1 & T) | (1 & U) ? true : false;
@@ -56,33 +58,33 @@ type BreakDownObject<O, R = void> = {
 }
 
 type ObjectDotNotation<O, R = void> =
-(O extends string
-? (R extends string
-? R
-: never)
-: BreakDownObject<O, R>[keyof BreakDownObject<O, R>])
+	(O extends string
+		? (R extends string
+			? R
+			: never)
+		: BreakDownObject<O, R>[keyof BreakDownObject<O, R>])
 
 type DeepMerge<A, B> =
-A extends object
-? B extends object
-? {
-	[K in keyof A | keyof B]:
-	K extends keyof B
-	? K extends keyof A
-	? DeepMerge<A[K], B[K]>
-	: B[K]
-	: K extends keyof A
-	? A[K]
-	: never
-}
-: B
-: B
+	A extends object
+	? B extends object
+	? {
+		[K in keyof A | keyof B]:
+		K extends keyof B
+		? K extends keyof A
+		? DeepMerge<A[K], B[K]>
+		: B[K]
+		: K extends keyof A
+		? A[K]
+		: never
+	}
+	: B
+	: B
 
 type DeepMergeAll<T extends []> =
-T extends [infer A, ...infer B]
-? B extends []
-? ToString<A>
-: DeepMerge<ToString<A>, DeepMergeAll<B>>
-: unknown
+	T extends [infer A, ...infer B]
+	? B extends []
+	? ToString<A>
+	: DeepMerge<ToString<A>, DeepMergeAll<B>>
+	: unknown
 
 export { };

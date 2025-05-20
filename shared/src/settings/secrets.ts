@@ -6,14 +6,17 @@ import type { DeepPartial } from "fvtt-types/utils";
 type DefaultOptions = DeepPartial<foundry.applications.api.ApplicationV2.Configuration>
 
 export class SecretsSettings extends RPGMSettingsMenu {
+	static icon: string = "fas fa-key";
 	static override DEFAULT_OPTIONS: DefaultOptions = {
-		id: "rpgm-secrets"
+		id: "rpgm-secrets",
+		window: {
+			icon: this.icon
+		}
 	};
 	static override get name(): string { return rpgm.localize("RPGM_TOOLS.CONFIG.SECRETS_SETTINGS"); };
 	static get hint(): string { return rpgm.localize("RPGM_TOOLS.CONFIG.SECRETS_SETTINGS_HINT"); };
 	static get label(): string { return rpgm.localize("RPGM_TOOLS.CONFIG.SECRETS_SETTINGS_LABEL"); };
 	static get subtitle(): string { return rpgm.localize("RPGM_TOOLS.CONFIG.SECRETS_SETTINGS_SUBTITLE"); };
-	icon: string = "fas fa-key";
 	override type = SecretsForm as Component;
 	override get title(): string {
 		return `RPGM Tools - ${rpgm.localize("RPGM_TOOLS.CONFIG.SECRETS_SETTINGS")}`;
@@ -23,7 +26,7 @@ export class SecretsSettings extends RPGMSettingsMenu {
 			name: SecretsSettings.name,
 			label: SecretsSettings.label,
 			hint: SecretsSettings.hint,
-			icon: "fas fa-key",
+			icon: this.icon,
 			type: this
 		});
 	}

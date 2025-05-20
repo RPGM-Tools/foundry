@@ -35,7 +35,7 @@ export class RPGMLogger {
 	 */
 	debug(...msgs: Msg[]) {
 		if (game.settings.get("rpgm-tools", "verbose-logs"))
-			this.sendMessage("log", "color: #dddddd; font-weight: bold;", undefined, ...msgs);
+			this.sendMessage("debug", "color: #dddddd; font-weight: bold;", undefined, ...msgs);
 	}
 
 	/**
@@ -99,7 +99,7 @@ export class RPGMLogger {
 	 */
 	debugF(style: string, prefix: string | undefined, ...msgs: Msg[]) {
 		if (game.settings.get("rpgm-tools", "verbose-logs"))
-			this.sendMessage("log", style, prefix, ...msgs);
+			this.sendMessage("debug", style, prefix, ...msgs);
 	}
 
 	/**
@@ -109,7 +109,7 @@ export class RPGMLogger {
 	 * @param prefix - The prefix to show before a message
 	 * @param messages - The messages to log.
 	 */
-	private sendMessage(method: "log" | "warn" | "error", style: string, prefix = `${this.prefix} | `, ...messages: Msg[]): void {
+	private sendMessage(method: "log" | "warn" | "error" | "debug", style: string, prefix = `${this.prefix} | `, ...messages: Msg[]): void {
 		const { strings, objects } = messages.reduce<{ strings: string[], objects: unknown[] }>(
 			(acc, msg) => {
 				if (typeof msg === "string")

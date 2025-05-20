@@ -26,6 +26,7 @@ export abstract class RpgmModule {
 	abstract readonly id: string;
 	/** Display name for this module */
 	abstract readonly name: string;
+	abstract readonly icon: string;
 	abstract readonly logger: RPGMLogger;
 	/** 
 	 * Version of this module 
@@ -50,7 +51,7 @@ export abstract class RpgmModule {
 	private async _init() {
 		if (!globalThis.rpgm)
 			this.initGlobal();
-		this.logger.logF("color: #ad8cef; font-weight: bold;", "", `${this.name} joined the game`);
+		this.logger.logF("color: #ad8cef; font-weight: bold;", "", `${this.icon} ${this.name} joined the game`);
 		rpgm.modules[this.id] = this;
 		await this.init();
 		await this.registerSettings();
@@ -67,6 +68,23 @@ export abstract class RpgmModule {
 		RpgmModule.logger = new RPGMLogger("🛠️ RPGM Tools");
 		RpgmModule.radialMenu = new RadialMenuRegister();
 		RpgmModule.chat = new ChatCommands();
+		RpgmModule.logger.logF("color: #ad8cef; font-weight: bold;", "", `🛠️ RPGM Tools joined the game`);
+		Hooks.on("renderSettingsConfig", (_, html) => {
+			Object.keys(RpgmModule.modules).forEach(k => {
+				const settingsHtml = html instanceof HTMLElement ? html : html[0];
+				const screen = settingsHtml.querySelector(`[data-category="${k}"]`) as HTMLElement;
+				screen.style.height = "100%";
+				screen.style.display = "flex";
+				screen.style.flexDirection = "column";
+				// Move all menus to the bottom of the page
+				screen?.querySelectorAll(`.form-group.submenu,.form-group:has([data-action="openSubmenu"])`).forEach(s => screen.appendChild(s));
+				const copyright = document.createElement("i");
+				copyright.style.marginTop = "auto";
+				copyright.style.textAlign = "center";
+				copyright.innerText = "© 2025 RPGM Tools, LLC";
+				screen?.appendChild(copyright);
+			});
+		});
 		GlobalSettings();
 	}
 
@@ -120,7 +138,7 @@ export abstract class RpgmModule {
 |  _ <|  __/| |_| | |  | || || (_) | (_) | \__ \
 |_| \_\_|    \____|_|  |_(_)__\___/ \___/|_|___/
 ————————————————————————————————————————————————
-${Object.values(rpgm.modules).map(m => `‣ ${m.name} - v${m.version}`).join('\n')}`).slice(1);
+${Object.values(rpgm.modules).map(m => `‣ ${m.icon} ${m.name} – v${m.version}`).join('\n')}`).slice(1);
 
 		rpgm.logger.logF("color: #d44e7b; font-weight: bold;", "", asciiArt);
 	}

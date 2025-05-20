@@ -17,7 +17,7 @@ function copy(field: HomebrewField) {
 </script>
 
 <template>
-	<div class="rpgm-homebrew-field-container">
+	<div class="rpgm-homebrew-display-container">
 		<h3 class="rpgm-homebrew-field-flavor-text">{{ generations[generation]?.flavor_text }}</h3>
 		<div v-if="generation" class="rpgm-homebrew-display-fields">
 			<div v-for="field in generations[generation].fields" :key="field.name" class="rpgm-homebrew-display-field">
@@ -36,11 +36,22 @@ function copy(field: HomebrewField) {
 .rpgm-homebrew-field-flavor-text {
 	font-style: italic;
 	font-size: 17px;
-	border-bottom: 4px solid black;
+	border-bottom: 2px solid black;
 }
 
 .rpgm-homebrew-display-fields {
 	font-style: italic;
+	cursor: text;
+}
+
+.rpgm-homebrew-field-name {
+	margin: 0 0 4px;
+}
+
+.rpgm-homebrew-display-fields .rpgm-icons {
+	direction: rtl;
+	right: 0;
+	margin-right: 4px;
 }
 
 .rpgm-homebrew-field-flavor-text,

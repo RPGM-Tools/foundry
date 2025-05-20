@@ -267,13 +267,13 @@ function getSubButtonStyle(index: number): StyleValue {
 	width: 100% !important;
 	border: none !important;
 	transition: filter 0.1s, scale 0.1s ease !important;
-	filter: drop-shadow(2px 2px 2px #00000044);
+	filter: drop-shadow(2px 2px 0px #00000044);
 	margin: 0 !important;
 }
 
 .radial-menu-center:hover>.center-image,
 .radial-menu-center:focus>.center-image {
-	filter: drop-shadow(2px 2px 2px #6633ccaa);
+	filter: drop-shadow(0px 0px 2px #6633cc);
 }
 
 .submenu-group {

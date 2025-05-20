@@ -79,7 +79,7 @@ const rename = (n: string) => {
 	font-size: 20px;
 	text-align: center;
 	font-weight: bolder;
-	margin-top: 8px;
+	margin-top: 2px;
 	margin-bottom: 0px;
 	padding-left: 20px;
 	padding-right: 20px;

@@ -52,7 +52,7 @@ const context = ref<ButtonContext>({
  */
 function copy() {
 	try {
-		void navigator.clipboard.writeText(data.description);
+		void navigator.clipboard.writeText(`# ${data.name ? `${data.name} – ` : ''}${data.type}\n${data.description}`);
 		rpgm.forge!.logger.logU("Copied description to clipboard!");
 	} catch { return; }
 }
@@ -68,7 +68,7 @@ const secure = window.isSecureContext;
 	<div v-if="secure" style="max-height: 40px; position: absolute; left: 95%;">
 		<DiceButton v-model="context" :index="1" :button="button" />
 	</div>
-	<h3>{{ data.name ? `${data.name} - ` : "" }}{{ data.type }}</h3>
+	<h3>{{ data.name ? `${data.name} – ` : "" }}{{ data.type }}</h3>
 	<Transition name="forge-description">
 		<p v-if="data.description" ref="content" tabindex="0" class="forge-description">{{ data.description }}</p>
 	</Transition>
@@ -86,6 +86,7 @@ const secure = window.isSecureContext;
 	overflow-y: scroll;
 	user-select: text;
 	margin: 0 !important;
+	cursor: text;
 }
 
 .forge-description-leave-active,

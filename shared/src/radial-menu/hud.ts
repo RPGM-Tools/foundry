@@ -16,7 +16,7 @@ export function injectTokenHUD() {
  * @param html - The token hud element to modify
  */
 function renderTokenHUD(this: TokenHUD, _element: JQuery, html: JQuery | HTMLElement) {
-	if (game.settings.get("rpgm-tools", "radial_menu_enabled") !== true) return;
+	if (game.settings.get("rpgm-tools", "radial_menu_hud") !== true) return;
 	/**
 	 * Workaround for differences between Foundry 12 and 13 
 	 * {@link html} is of type JQuery in 12, HTMLElement in 13
