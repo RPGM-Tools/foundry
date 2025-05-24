@@ -3,7 +3,7 @@ import { ForgeNames } from '@rpgm/forge';
 import { getSelectedToken, nameToken } from '@/util/token';
 import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
 
-const { data } = rpgm.forge!.namesChats.useChatDatabase();
+const { data } = rpgm.forge!.namesChats.useChat();
 const localize = rpgm.localize;
 const loading = ref(false);
 

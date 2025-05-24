@@ -68,6 +68,7 @@ export class ChatDatabase<T extends object> {
 		app.provide("message", message);
 		app.provide("id", id);
 		app.provide("data", reactive(this.data.get(id)!));
+		app.provide("element", html);
 		app.mount(mount);
 
 		// Inject delete handler to remove this data from localStorage
@@ -87,13 +88,12 @@ export class ChatDatabase<T extends object> {
 		this.save();
 	}
 
-	/** Retrieves all data for this database */
+	/**
+	 * Retrieves all data for this database, creating it if it doesn't exist
+	 */
 	load() {
-		const dataString = localStorage.getItem(`${this.moduleId}.${this.key}`);
-		if (!dataString) { this.data = new Map(); }
-		else {
-			this.data = new Map(Object.entries(JSON.parse(dataString) as { [key: string]: T }));
-		}
+		const data = localStorage.getItem(`${this.moduleId}.${this.key}`);
+		this.data = data ? new Map(Object.entries(JSON.parse(data) as { [key: string]: T })) : new Map();
 		rpgm.chat.registerMessageHandler(this);
 	}
 
@@ -107,12 +107,13 @@ export class ChatDatabase<T extends object> {
 	 * @param debounce - How often to save data when it gets changed
 	 * @returns A reactive reference to the message's data, along with the original message
 	 */
-	useChatDatabase(debounce: number = 1000) {
+	useChat(debounce: number = 1000) {
 		const message = inject<T>("message") as ChatMessage;
 		const data = inject<T>("data") as T;
 		const id = inject<string>("id") as string;
+		const element = inject<HTMLElement>("element") as HTMLElement;
 		const rData = reactive(data);
 		watchDebounced(rData, () => this.save(), { debounce });
-		return { data: rData, message, id };
+		return { data: rData, message, id, element };
 	}
 }

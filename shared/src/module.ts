@@ -126,6 +126,16 @@ export abstract class RpgmModule {
 	 */
 	rpgmReady(): Promise<void> | void { }
 
+	/**
+	 * Unwraps a JQuery object
+	 * Foundry 13 drops JQuery, so this is necessary
+	 * @param el - JQuery or HTMLElement
+	 * @returns The unwrapped HTMLElement
+	 */
+	static j(el: JQuery<HTMLElement> | HTMLElement): HTMLElement {
+		return el instanceof HTMLElement ? el : el[0];
+	}
+
 	/** 
 	 * Called once when everything else in Foundry is loaded
 	 */

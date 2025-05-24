@@ -20,7 +20,7 @@ const currentTitle = computed<string>(() => {
 	else
 		return data.generations[data.activeGeneration]?.custom_name ?? "gak4";
 });
-const { data, id } = rpgm.forge!.homebrewChats.useChatDatabase();
+const { data, id } = rpgm.forge!.homebrewChats.useChat();
 const loading = ref(false);
 
 const hasGenerated = computed(() => Object.keys(data.generations).length > 0);
@@ -44,12 +44,6 @@ const buttons = computed<RadialButton[]>(() =>
 				tooltip: "RPGM_FORGE.RADIAL_MENU.COPY",
 				detective() { return window.isSecureContext; },
 				callback() { copyGeneration(data.activeGeneration); },
-			},
-			{
-				category: rpgm.radialMenu.categories.rpgm_forge,
-				icon: "fa-solid fa-trash",
-				tooltip: "RPGM_FORGE.RADIAL_MENU.DELETE",
-				callback() { deleteGeneration(data.activeGeneration); },
 			},
 			{
 				category: rpgm.radialMenu.categories.rpgm_forge,
@@ -79,6 +73,12 @@ const buttons = computed<RadialButton[]>(() =>
 					//@ts-expect-error Flags broken
 					entry?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration)?.sheet.render(true);
 				},
+			},
+			{
+				category: rpgm.radialMenu.categories.rpgm_forge,
+				icon: "fa-solid fa-trash",
+				tooltip: "RPGM_FORGE.RADIAL_MENU.DELETE",
+				callback() { deleteGeneration(data.activeGeneration); },
 			},
 			{
 				category: rpgm.radialMenu.categories.rpgm_debug,
@@ -261,8 +261,8 @@ function restoreSchemaFromActiveGeneration() {
 <style>
 .rpgm-homebrew-content {
 	position: relative;
-	max-height: 40vh;
 	margin-top: 5px;
+	max-height: 50vh;
 	overflow-y: auto;
 	overflow-x: hidden;
 	padding-bottom: 10px;

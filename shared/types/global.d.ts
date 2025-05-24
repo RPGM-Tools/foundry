@@ -37,7 +37,7 @@ declare global {
 	> {
 		menuApp: App;
 		/** Make _replaceHTML public to monkey-patch it */
-		public _replaceHTML(element: JQuery, html: JQuery): void;
+		public _replaceHTML(element: JQuery<HTMLElement> | HTMLElement, html: JQuery): void;
 	}
 }
 

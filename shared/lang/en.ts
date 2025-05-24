@@ -22,8 +22,6 @@ export default {
 			RADIAL_MENU_HUD_HINT: "Enable the radial menu on the token hud.",
 			API_KEY: "Api Key",
 			API_KEY_HINT: "Enter your key here to sign in to RPGM Tools and unlock full functionality.",
-			VERBOSE_LOGS: "Verbose Logs",
-			VERBOSE_LOGS_HINT: "Turning this on will just make more console logs appear. You probably don't want this on unless you're a developer or trying to help us troubleshoot a problem.",
 			RADIAL_MENU_DEBUG: "Radial Menu Debug Mode",
 			RADIAL_MENU_DEBUG_HINT: "Shows options in the radial menu related to debugging."
 		},

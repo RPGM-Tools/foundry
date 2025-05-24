@@ -21,7 +21,7 @@ function renderTokenHUD(this: TokenHUD, _element: JQuery, html: JQuery | HTMLEle
 	 * Workaround for differences between Foundry 12 and 13 
 	 * {@link html} is of type JQuery in 12, HTMLElement in 13
 	 */
-	const htmlElement = html instanceof HTMLElement ? html : html[0];
+	const htmlElement = rpgm.j(html);
 	this.menuApp?.unmount();
 	const appContainer = document.createElement('div');
 	appContainer.style.position = 'absolute';

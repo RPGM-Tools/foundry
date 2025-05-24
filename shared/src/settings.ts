@@ -25,11 +25,6 @@ export function GlobalSettings() {
 		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG_HINT"),
 		default: false,
 	});
-	game.settings.register("rpgm-tools", "verbose-logs", {
-		name: rpgm.localize("RPGM_TOOLS.CONFIG.VERBOSE_LOGS"),
-		hint: rpgm.localize("RPGM_TOOLS.CONFIG.VERBOSE_LOGS_HINT"),
-		default: false,
-	});
 	rpgm.radialMenu.registerCategory("rpgm_debug", { color: '60deg' });
 	rpgm.radialMenu.registerTokenHudButton({
 		category: rpgm.radialMenu.categories.rpgm_debug,

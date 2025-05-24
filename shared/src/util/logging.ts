@@ -34,8 +34,7 @@ export class RPGMLogger {
 	 * @param msgs - The message(s) to log
 	 */
 	debug(...msgs: Msg[]) {
-		if (game.settings.get("rpgm-tools", "verbose-logs"))
-			this.sendMessage("debug", "color: #dddddd; font-weight: bold;", undefined, ...msgs);
+		this.sendMessage("debug", "color: #dddddd; font-weight: bold;", undefined, ...msgs);
 	}
 
 	/**
@@ -98,8 +97,7 @@ export class RPGMLogger {
 	 * @param msgs - The message(s) to log
 	 */
 	debugF(style: string, prefix: string | undefined, ...msgs: Msg[]) {
-		if (game.settings.get("rpgm-tools", "verbose-logs"))
-			this.sendMessage("debug", style, prefix, ...msgs);
+		this.sendMessage("debug", style, prefix, ...msgs);
 	}
 
 	/**

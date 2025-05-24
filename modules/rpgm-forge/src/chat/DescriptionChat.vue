@@ -2,7 +2,7 @@
 import { ForgeDescription } from '@rpgm/forge';
 import DiceButton from '#/radial-menu/DiceButton.vue';
 
-const { data } = rpgm.forge!.descriptionsChats.useChatDatabase();
+const { data } = rpgm.forge!.descriptionsChats.useChat();
 const loading = ref(false);
 
 const contentRef = useTemplateRef("content");

@@ -32,8 +32,6 @@ declare global {
 				RADIAL_MENU_DEBUG_HINT
 				API_KEY
 				API_KEY_HINT
-				VERBOSE_LOGS
-				VERBOSE_LOGS_HINT
 			},
 			RADIAL_MENU: {
 				INFO

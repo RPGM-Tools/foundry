@@ -2,7 +2,6 @@
 import { DeveloperSettings } from '#/settings/developer';
 import { useSetting } from '#/util';
 
-const verboseLogs = useSetting("rpgm-tools.verbose-logs");
 const radialMenuDebug = useSetting("rpgm-tools.radial_menu_debug");
 const app = inject<DeveloperSettings>("app")!;
 
@@ -10,7 +9,6 @@ const app = inject<DeveloperSettings>("app")!;
  Saves changed settings
  */
 function submit() {
-	verboseLogs.apply();
 	radialMenuDebug.apply();
 	void app.close();
 };
@@ -21,15 +19,6 @@ function submit() {
 		<div class="scrollable tab">
 			<h2>{{ DeveloperSettings.name }}</h2>
 			<i>{{ DeveloperSettings.subtitle }}</i>
-			<div class="form-group">
-				<label>{{ verboseLogs.name }}</label>
-				<div class="form-fields">
-					<input v-model="verboseLogs.value" type="checkbox">
-				</div>
-				<p class="hint notes">
-					{{ verboseLogs.hint }}
-				</p>
-			</div>
 			<div class="form-group">
 				<label>{{ radialMenuDebug.name }}</label>
 				<div class="form-fields">
