@@ -66,7 +66,8 @@ export class ChatCommands {
 	 * @param command - The command to register
 	 */
 	registerCommand(command: LiteralArgumentBuilder) {
-		this.commands.register(command);
+		if (game.user.isGM)
+			this.commands.register(command);
 	}
 
 	/**

@@ -7,6 +7,17 @@ const { data } = rpgm.forge!.namesChats.useChat();
 const localize = rpgm.localize;
 const loading = ref(false);
 
+const insertValues = (values: string[]) => {
+	values.forEach((v, i) => {
+		setTimeout(() => {
+			data.names.push(v);
+			setTimeout(() => {
+				rpgm.chat.updateScroll();
+			}, 400);
+		}, i * 100);
+	});
+};
+
 /**
  * Generates the name
  * @param regenerate - Whether or not to delete the old names
@@ -14,11 +25,17 @@ const loading = ref(false);
  */
 async function generate(regenerate: boolean = false) {
 	loading.value = true;
-	if (regenerate)
-		for (let i = 0; i < data.names.length; i++)
-			setTimeout(() => {
-				data.names.pop();
-			}, 20 * i);
+	const oldNames = [...data.names];
+	const fadeOut = new Promise<void>(p => {
+		if (regenerate) {
+			const l = data.names.length;
+			for (let i = 0; i < l; i++)
+				setTimeout(() => {
+					data.names.shift();
+				}, 20 * i);
+			setTimeout(p, 20 * l + 1000);
+		} else p();
+	});
 
 	const options: NamesOptions = {
 		quantity: 4,
@@ -32,19 +49,10 @@ async function generate(regenerate: boolean = false) {
 		auth_token: game.settings.get("rpgm-tools", "api_key")
 	});
 
-	if (!result.success) return;
-
-	result.output.forEach((v, i) => {
-		loading.value = false;
-		setTimeout(() => {
-			data.names.push(v);
-			// Force scroll if this is the initial generation
-			if (i == result.output.length - 1)
-				setTimeout(() => {
-					rpgm.chat.updateScroll();
-				}, 400);
-		}, i * 100);
-	});
+	loading.value = false;
+	await fadeOut;
+	if (!result.success) rpgm.forge?.logger.errorU(result.error);
+	insertValues(result.success ? result.output : oldNames);
 }
 
 /** 

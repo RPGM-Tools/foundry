@@ -14,6 +14,7 @@ watch(contentRef, (c) => context.value.element = c!, { once: true });
  */
 async function generate() {
 	loading.value = true;
+	const oldDesc = data.description;
 	data.description = "";
 	const options: DescriptionOptions = {
 		name: data.name ?? "",
@@ -27,9 +28,9 @@ async function generate() {
 		auth_token: game.settings.get("rpgm-tools", "api_key")
 	});
 
-	if (!result.success) return;
+	if (!result.success) rpgm.forge?.logger.errorU(result.error);
 
-	data.description = result.output;
+	data.description = result.success ? result.output : oldDesc;
 	rpgm.chat.updateScroll();
 	loading.value = false;
 }

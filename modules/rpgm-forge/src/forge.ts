@@ -82,9 +82,9 @@ export class RpgmForge extends RpgmModule {
 				if (!token) return;
 				void chatDescription(
 					{
-						type: token.actor!.name,
+						type: token.actor!.prototypeToken.name,
 						// Don't include name if it's the default actor name
-						name: token.name ? token.name !== token.actor!.name ? token.name : "" : ""
+						name: token.name ? token.name !== token.actor!.prototypeToken.name ? token.name : "" : ""
 					});
 			}));
 		rpgm.radialMenu.registerCategory("rpgm_forge", { color: "276deg" });
@@ -136,12 +136,6 @@ export class RpgmForge extends RpgmModule {
 				});
 			}
 		});
-	}
-
-	/**
-	 * Currently used for loading chat databases
-	 */
-	override i18nInit(): Promise<void> | void {
 		this.namesChats.load();
 		this.descriptionsChats.load();
 		this.homebrewChats.load();

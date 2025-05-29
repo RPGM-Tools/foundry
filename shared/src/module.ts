@@ -1,5 +1,6 @@
 import { GlobalMenus, GlobalSettings } from "#/settings";
 import { ChatCommands } from "./chat";
+import { registerRpgmCommands } from "./chat/commands";
 import { RadialMenuRegister } from "./radial-menu";
 import { localize } from "./util/localize";
 import { RPGMLogger } from "./util/logging";
@@ -38,8 +39,7 @@ export abstract class RpgmModule {
 	private first = false;
 
 	constructor() {
-		Hooks.once("init", () => void this._init());
-		Hooks.once("i18nInit", () => void this._i18nInit());
+		Hooks.once("setup", () => void this._init());
 		Hooks.once("ready", () => void this._ready());
 	}
 
@@ -54,6 +54,8 @@ export abstract class RpgmModule {
 		this.logger.logF("color: #ad8cef; font-weight: bold;", "", `${this.icon} ${this.name} joined the game`);
 		rpgm.modules[this.id] = this;
 		await this.init();
+		if (this.first)
+			registerRpgmCommands();
 		await this.registerSettings();
 		GlobalMenus(this.id);
 	}
@@ -71,15 +73,12 @@ export abstract class RpgmModule {
 		RpgmModule.logger.logF("color: #ad8cef; font-weight: bold;", "", `🛠️ RPGM Tools joined the game`);
 		Hooks.on("renderSettingsConfig", (_, html) => {
 			Object.keys(RpgmModule.modules).forEach(k => {
-				const settingsHtml = html instanceof HTMLElement ? html : html[0];
+				const settingsHtml = rpgm.j(html);
 				const screen = settingsHtml.querySelector(`[data-category="${k}"]`) as HTMLElement;
-				screen.style.height = "100%";
-				screen.style.display = "flex";
-				screen.style.flexDirection = "column";
 				// Move all menus to the bottom of the page
 				screen?.querySelectorAll(`.form-group.submenu,.form-group:has([data-action="openSubmenu"])`).forEach(s => screen.appendChild(s));
-				const copyright = document.createElement("i");
-				copyright.style.marginTop = "auto";
+				const copyright = document.createElement("div");
+				copyright.style.fontStyle = "italic";
 				copyright.style.textAlign = "center";
 				copyright.innerText = "© 2025 RPGM Tools, LLC";
 				screen?.appendChild(copyright);
@@ -99,18 +98,6 @@ export abstract class RpgmModule {
 	 * Also where Radial Menu buttons and RP-Commands are registered (might change)
 	 */
 	registerSettings(): Promise<void> | void { }
-
-	/**
-	 * Private caller of {@link i18nInit}
-	 */
-	private async _i18nInit() {
-		await this.i18nInit();
-	}
-
-	/**
-	 * Called after localizations have initialized
-	 */
-	i18nInit(): Promise<void> | void { }
 
 	/**
 	 * Private caller of {@link rpgmReady}
