@@ -94,10 +94,13 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 	<div ref="fieldContainer" :key="field.name" class="rpgm-homebrew-field-container" :editing="editing"
 		@keydown.escape.prevent="editing = false" @focusout="tryBlur">
 		<div class="rpgm-icons">
-			<a placeholder="Remove" @click="remove"><i class="fa-solid fa-trash" /></a>
-			<a @click="editing = !editing"><i class="fa-solid fa-feather" /></a>
-			<a v-if="i != -1" @click="move(-1)"><i class="fa-solid fa-circle-up" /></a>
-			<a v-if="i != 1" @click="move(1)"><i class="fa-solid fa-circle-down" /></a>
+			<template v-if="!editing">
+				<a title="Remove" @click="remove"><i class="fa-solid fa-trash" /></a>
+				<a title="Edit" @click="editing = !editing"><i class="fa-solid fa-feather" /></a>
+				<a v-if="i != -1" title="Move Up" @click="move(-1)"><i class="fa-solid fa-circle-up" /></a>
+				<a v-if="i != 1" title="Move Down" @click="move(1)"><i class="fa-solid fa-circle-down" /></a>
+			</template>
+			<a v-if="editing" title="Save"><i class="fa-solid fa-save" /></a>
 		</div>
 		<ContentEditable v-slot="{ contenteditable, onBlur, onFocus, onKeydown, ref }" v-model:editing="editing"
 			:model-value="field.name" :should-blur="false" :multiline="false" @update:model-value="validateNewName">
@@ -239,7 +242,7 @@ Hide icons if...
 - Name input is focused
 - Editing field
 */
-.rpgm-homebrew-field-container[editing="false"]:hover:not(.rpgm-homebrew-field-container-move):not(:has(.rpgm-homebrew-field-name:focus)) .rpgm-icons {
+.rpgm-homebrew-field-container:hover:not(.rpgm-homebrew-field-container-move) .rpgm-icons {
 	opacity: 1;
 	filter: blur(0px);
 	visibility: visible;
