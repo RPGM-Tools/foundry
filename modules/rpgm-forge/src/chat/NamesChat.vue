@@ -64,6 +64,7 @@ function assign(name: string) {
 	if (!token) return;
 	const oldName = token.name;
 	nameToken(token.document, name);
+	data.names[data.names.indexOf(name)] = oldName;
 	rpgm.forge!.logger.logU(`Renamed ${oldName} to ${name}`);
 }
 

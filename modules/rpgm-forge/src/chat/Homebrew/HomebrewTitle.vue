@@ -46,7 +46,7 @@ const rename = (n: string) => {
 		<div v-show="editing && currentTitle.length > 0" class="rpgm-icons">
 			<a v-if="!editingTitle" title="Edit Type" @click.stop="editingTitle = true"><i class="fa-solid fa-feather" /></a>
 			<a v-if="canGotoGenerations" style="margin-left: auto;" title="View all generations"
-				@click.stop="emit('gotoGenerations')"><i class="fa-solid fa-cubes-stacked" /></a>
+				@click.stop="emit('gotoGenerations')"><i class="fa-solid fa-list-ul" /></a>
 		</div>
 	</div>
 </template>
