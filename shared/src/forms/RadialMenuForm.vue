@@ -11,8 +11,8 @@ const app = inject<RadialMenuSettings>("app")!;
  Saves changed settings
  */
 function submit() {
-	radialMenuInput.apply();
-	radialMenuHUD.apply();
+	radialMenuInput.save();
+	radialMenuHUD.save();
 	rpgm.radialMenu.update();
 	void app.close();
 };

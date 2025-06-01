@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ForgeDescription } from '@rpgm/forge';
 import DiceButton from '#/radial-menu/DiceButton.vue';
+import SavedCheck from "./SavedCheck.vue";
 
-const { data } = rpgm.forge!.descriptionsChats.useChat();
+const { data, saved } = rpgm.forge!.descriptionsChats.useChatWizard();
 const loading = ref(false);
 
 const contentRef = useTemplateRef("content");
@@ -66,6 +67,7 @@ const secure = window.isSecureContext;
 </script>
 
 <template>
+	<SavedCheck :saved />
 	<div v-if="secure" style="max-height: 40px; position: absolute; left: 95%;">
 		<DiceButton v-model="context" :index="1" :button="button" />
 	</div>

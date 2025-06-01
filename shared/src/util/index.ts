@@ -9,7 +9,7 @@ type SettingsRef<T> = {
 	/** The value of the setting, not applied until calling apply() */
 	value: T
 	/** Saves this setting's value */
-	apply(): void
+	save(): void
 }
 
 /**
@@ -33,7 +33,7 @@ export function useSetting<
 		get hint() { return game.i18n.localize(setting.hint ?? ""); },
 		initial: value,
 		value: value,
-		apply() {
+		save() {
 			void game.settings.set(namespace, key, this.value);
 		}
 	}) as SettingsRef<V>;

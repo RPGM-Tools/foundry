@@ -4,15 +4,30 @@ declare global {
 	}
 	interface ForgeI18n {
 		RPGM_FORGE: {
-			NAMES: {
-				REGENERATE_BUTTON
-				ASSIGN_TOOLTIP
-			}
 			CONFIG: {
 				AUTO_NAME
 				AUTO_NAME_HINT
 				RENAME_ACTORS
 				RENAME_ACTORS_HINT
+				LANGUAGE
+				LANGUAGE_HINT
+				SYSTEM
+				SYSTEM_HINT
+				GENRE
+				GENRE_HINT
+				METHOD
+				METHOD_HINT
+			}
+			INIT: {
+				TITLE
+				PROMPT
+				PROMPT2
+				SAVE
+				SAVED
+			}
+			NAMES: {
+				REGENERATE_BUTTON
+				ASSIGN_TOOLTIP
 			}
 			DESCRIPTION: {
 				REGENERATE_BUTTON

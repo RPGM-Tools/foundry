@@ -6,32 +6,39 @@ import type { Component } from "vue";
 import NamesChat from "./chat/NamesChat.vue";
 import DescriptionChat from "./chat/DescriptionChat.vue";
 import { RPGMLogger } from "#/util/logging";
-import { ChatDatabase } from "#/chat/ChatDatabase";
+import { ChatWizard } from "#/chat/ChatWizard";
 import { command } from "./util/homebrew";
 import HomebrewChat from "./chat/Homebrew/HomebrewChat.vue";
 import Homebrews from "@rpgm/forge/data/schemas.json?url";
+import InitPrompt from "./chat/InitPrompt.vue";
 
 /**
  * {@link RpgmForge} stores chat databases for forge wizards
  */
 export class RpgmForge extends RpgmModule {
-	override id: string = "rpgm-forge";
+	override id: ClientSettings.Namespace = "rpgm-forge";
 	override name: string = "RPGM Forge";
 	override icon: string = "🎲";
 	override readonly logger = new RPGMLogger(`${this.icon} ${this.name}`);
-	namesChats = new ChatDatabase<ForgeChatNames>(
+	initPrompts = new ChatWizard(
+		this.id,
+		"init",
+		InitPrompt as Component,
+		this.name
+	);
+	namesChats = new ChatWizard<ForgeChatNames>(
 		this.id,
 		"names",
 		NamesChat as Component,
 		this.name
 	);
-	descriptionsChats = new ChatDatabase<ForgeChatDescription>(
+	descriptionsChats = new ChatWizard<ForgeChatDescription>(
 		this.id,
 		"description",
 		DescriptionChat as Component,
 		this.name
 	);
-	homebrewChats = new ChatDatabase<ForgeChatHomebrew>(
+	homebrewChats = new ChatWizard<ForgeChatHomebrew>(
 		this.id,
 		"homebrew",
 		HomebrewChat as Component,
@@ -65,8 +72,46 @@ export class RpgmForge extends RpgmModule {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.RENAME_ACTORS"),
 			hint: rpgm.localize("RPGM_FORGE.CONFIG.RENAME_ACTORS_HINT"),
 			default: false,
+			scope: "world",
 			type: Boolean,
 			config: true,
+		});
+		game.settings.register("rpgm-forge", "has_been_prompted", {
+			default: false,
+			scope: "world",
+			type: Boolean,
+		});
+		game.settings.register("rpgm-forge", "language", {
+			name: rpgm.localize("RPGM_FORGE.CONFIG.LANGUAGE"),
+			hint: rpgm.localize("RPGM_FORGE.CONFIG.LANGUAGE_HINT"),
+			default: "English",
+			scope: "world",
+			type: String,
+			config: true,
+		});
+		game.settings.register("rpgm-forge", "system", {
+			name: rpgm.localize("RPGM_FORGE.CONFIG.SYSTEM"),
+			hint: rpgm.localize("RPGM_FORGE.CONFIG.SYSTEM_HINT"),
+			default: game.system.title,
+			scope: "world",
+			type: String,
+			config: true,
+		});
+		game.settings.register("rpgm-forge", "genre", {
+			name: rpgm.localize("RPGM_FORGE.CONFIG.GENRE"),
+			hint: rpgm.localize("RPGM_FORGE.CONFIG.GENRE_HINT"),
+			default: "",
+			scope: "world",
+			type: String,
+			config: true
+		});
+		game.settings.register("rpgm-forge", "method", {
+			name: rpgm.localize("RPGM_FORGE.CONFIG.METHOD"),
+			hint: rpgm.localize("RPGM_FORGE.CONFIG.METHOD_HINT"),
+			default: "AI",
+			scope: "world",
+			type: String,
+			config: true
 		});
 		rpgm.chat.registerCommand(literal("name")
 			.then(argument("prompt", string("greedy_phrase")).executes(c => {
@@ -136,6 +181,7 @@ export class RpgmForge extends RpgmModule {
 				});
 			}
 		});
+		this.initPrompts.load();
 		this.namesChats.load();
 		this.descriptionsChats.load();
 		this.homebrewChats.load();
@@ -143,5 +189,8 @@ export class RpgmForge extends RpgmModule {
 	}
 
 	/** (unused) */
-	override rpgmReady(): Promise<void> | void { }
+	override rpgmReady(): Promise<void> | void {
+		if (this.initPrompts.data.size === 0 && !game.settings.get("rpgm-forge", "has_been_prompted"))
+			this.initPrompts.newMessage({});
+	}
 }

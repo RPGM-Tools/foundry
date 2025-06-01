@@ -6,7 +6,7 @@ import { RPGMLogger } from "#/util/logging";
  * @todo Store generated lore objects
  */
 export class RpgmVault extends RpgmModule {
-	override id: string = "rpgm-vault";
+	override id: ClientSettings.Namespace = "rpgm-vault";
 	override name: string = "RPGM Vault";
 	override icon: string = "🗃️";
 	override readonly logger = new RPGMLogger(`${this.icon} ${this.name}`);

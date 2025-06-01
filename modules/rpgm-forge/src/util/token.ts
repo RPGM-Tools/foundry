@@ -67,7 +67,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 	/** @todo Less hardcoding of values */
 	const options: NamesOptions = {
 		quantity: 4,
-		gender: "random",
+		gender: "neutral",
 		genre: "Fantasy",
 		method: "ai",
 		type: type ?? protoToken.name

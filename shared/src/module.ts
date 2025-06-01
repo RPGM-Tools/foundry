@@ -24,7 +24,7 @@ export abstract class RpgmModule {
 	static localize = localize;
 
 	/** Slug id for this module, equal to this module's id */
-	abstract readonly id: string;
+	abstract readonly id: ClientSettings.Namespace;
 	/** Display name for this module */
 	abstract readonly name: string;
 	abstract readonly icon: string;
@@ -81,6 +81,8 @@ export abstract class RpgmModule {
 				copyright.style.fontStyle = "italic";
 				copyright.style.textAlign = "center";
 				copyright.innerText = "© 2025 RPGM Tools, LLC";
+				screen.querySelectorAll("input").forEach(i => i.classList.add("rpgm-input"));
+				screen.querySelectorAll("button").forEach(i => i.classList.add("rpgm-button"));
 				screen?.appendChild(copyright);
 			});
 		});

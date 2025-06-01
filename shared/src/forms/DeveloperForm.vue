@@ -9,7 +9,7 @@ const app = inject<DeveloperSettings>("app")!;
  Saves changed settings
  */
 function submit() {
-	radialMenuDebug.apply();
+	radialMenuDebug.save();
 	void app.close();
 };
 </script>

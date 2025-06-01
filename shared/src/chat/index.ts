@@ -2,7 +2,7 @@ import type { LiteralArgumentBuilder, ParseResults } from "brigadier-ts-lite";
 import { CommandDispatcher } from "brigadier-ts-lite";
 import { type App, type Component, createApp } from 'vue';
 import AutoComplete from "./AutoComplete.vue";
-import type { ChatDatabase } from "./ChatDatabase";
+import type { ChatWizard } from "./ChatWizard";
 
 /**
  * ChatCommands stores all rp-commands and provides utility functions related to chat
@@ -11,7 +11,7 @@ export class ChatCommands {
 	chatPanel: App | undefined;
 	COMMAND_PREFIX = '*';
 	private commands = new CommandDispatcher();
-	private messageHandlers: ChatDatabase<object>[] = [];
+	private messageHandlers: ChatWizard<object>[] = [];
 	private chatlog?: HTMLElement;
 
 	constructor() {
@@ -21,8 +21,7 @@ export class ChatCommands {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
 					if (!shouldHandle) continue;
-					handler.render(message, html.get(0)!);
-					return true;
+					return handler.render(message, html.get(0)!);
 				}
 			});
 		else
@@ -30,8 +29,7 @@ export class ChatCommands {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
 					if (!shouldHandle) continue;
-					handler.render(message, html);
-					return true;
+					return handler.render(message, html);
 				}
 			});
 		Hooks.once("ready", () => { rpgm.chat.createChatPanel(); });
@@ -73,7 +71,7 @@ export class ChatCommands {
 	/**
 	 * @param handler - The chat database to register
 	 */
-	registerMessageHandler(handler: ChatDatabase<object>) {
+	registerMessageHandler(handler: ChatWizard<object>) {
 		this.messageHandlers.push(handler);
 	}
 

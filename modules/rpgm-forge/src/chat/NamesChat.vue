@@ -2,8 +2,9 @@
 import { ForgeNames } from '@rpgm/forge';
 import { getSelectedToken, nameToken } from '@/util/token';
 import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
+import SavedCheck from './SavedCheck.vue';
 
-const { data } = rpgm.forge!.namesChats.useChat();
+const { data, saved } = rpgm.forge!.namesChats.useChatWizard();
 const localize = rpgm.localize;
 const loading = ref(false);
 
@@ -39,7 +40,7 @@ async function generate(regenerate: boolean = false) {
 
 	const options: NamesOptions = {
 		quantity: 4,
-		gender: "random",
+		gender: "neutral",
 		genre: "Fantasy",
 		method: "ai",
 		type: data.prompt
@@ -74,6 +75,7 @@ onMounted(() => {
 </script>
 
 <template>
+	<SavedCheck :saved />
 	<h3>{{ data.prompt }}</h3>
 	<SkeletonParagraph :loading="false" width="100%" height="400px">
 		<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">

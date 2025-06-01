@@ -5,6 +5,7 @@ import HomebrewInput from "./HomebrewInput.vue";
 import HomebrewDisplay from "./HomebrewDisplay.vue";
 import HomebrewTitle from "./HomebrewTitle.vue";
 import RadialMenu from "#/radial-menu/RadialMenu.vue";
+import SavedCheck from "../SavedCheck.vue";
 import { inputHeuristics } from "#/radial-menu";
 
 const schemas = rpgm.forge!.homebrewSchemas;
@@ -20,7 +21,7 @@ const currentTitle = computed<string>(() => {
 	else
 		return data.generations[data.activeGeneration]?.custom_name ?? "gak4";
 });
-const { data, id } = rpgm.forge!.homebrewChats.useChat();
+const { data, id, saved } = rpgm.forge!.homebrewChats.useChatWizard();
 const loading = ref(false);
 
 const hasGenerated = computed(() => Object.keys(data.generations).length > 0);
@@ -235,6 +236,7 @@ function restoreSchemaFromActiveGeneration() {
 
 <template>
 	<div>
+		<SavedCheck :saved />
 		<RadialMenu v-if="buttonContext.element" v-model="buttonContext" :buttons :pad-document="false" :right="true"
 			:top="true" :padding="{ top: 40, right: 0 }" />
 		<HomebrewTitle ref="titleRef" v-model="currentTitle" :modified="modified && editing"
