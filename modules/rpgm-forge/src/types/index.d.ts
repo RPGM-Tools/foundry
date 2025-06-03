@@ -1,5 +1,7 @@
 import type { RpgmForge } from "@/forge";
 
+type Optional<T, K extends keyof T> = { [K in keyof T]: T[K] | undefined } & Omit<T, K>;
+
 declare global {
 	interface RPGM {
 		forge: RpgmForge
@@ -23,7 +25,7 @@ declare global {
 	}
 
 	type ForgeChatHomebrew = {
-		schema: HomebrewOptions | undefined
+		options: Optional<HomebrewOptions, "schema">
 		activeGeneration: string
 		generations: Record<string, Homebrew>
 	}

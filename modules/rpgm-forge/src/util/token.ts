@@ -68,8 +68,9 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 	const options: NamesOptions = {
 		quantity: 4,
 		gender: "neutral",
-		genre: "Fantasy",
-		method: "ai",
+		genre: rpgm.forge!.genre,
+		method: rpgm.forge!.method,
+		language: rpgm.forge!.language,
 		type: type ?? protoToken.name
 	};
 
@@ -80,9 +81,8 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 		void shimmerFilter.fadeIn(500);
 	}
 
-	const result = await ForgeNames.fromOptions(options).generate({
-		auth_token: game.settings.get("rpgm-tools", "api_key")
-	});
+	const result = await rpgm.forge!.queue.generate(ForgeNames, options);
+
 	if (!result.success)
 		rpgm.forge!.logger.errorU(result.error);
 

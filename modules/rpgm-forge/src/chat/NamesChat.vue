@@ -2,9 +2,11 @@
 import { ForgeNames } from '@rpgm/forge';
 import { getSelectedToken, nameToken } from '@/util/token';
 import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
-import SavedCheck from './SavedCheck.vue';
+import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 
-const { data, saved } = rpgm.forge!.namesChats.useChatWizard();
+const NAMES_PER_GENERATION = 4;
+
+const names = rpgm.forge!.namesChats.useChatWizard(), { data } = names;
 const localize = rpgm.localize;
 const loading = ref(false);
 
@@ -38,16 +40,13 @@ async function generate(regenerate: boolean = false) {
 		} else p();
 	});
 
-	const options: NamesOptions = {
-		quantity: 4,
+	const result = await rpgm.forge!.queue.generate(ForgeNames, {
+		quantity: NAMES_PER_GENERATION,
 		gender: "neutral",
-		genre: "Fantasy",
-		method: "ai",
+		genre: rpgm.forge!.genre,
+		language: rpgm.forge!.language,
+		method: rpgm.forge!.method,
 		type: data.prompt
-	};
-
-	const result = await ForgeNames.fromOptions(options).generate({
-		auth_token: game.settings.get("rpgm-tools", "api_key")
 	});
 
 	loading.value = false;
@@ -75,18 +74,19 @@ onMounted(() => {
 </script>
 
 <template>
-	<SavedCheck :saved />
-	<h3>{{ data.prompt }}</h3>
-	<SkeletonParagraph :loading="false" width="100%" height="400px">
-		<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">
-			<li v-for="name in data.names" :key="name" :title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')"
-				class="rpgm-forge-name" @click="assign(name)">
-				{{ name }}
-			</li>
-		</TransitionGroup>
-	</SkeletonParagraph>
-	<button :disabled="loading" :class="{ 'rpgm-button': true, 'rpgm-active': loading }"
-		@click="generate(true)">Regenerate</button>
+	<ChatWizardContainer :wizard="names">
+		<h2>{{ data.prompt }}</h2>
+		<SkeletonParagraph :loading="false" width="100%" height="400px">
+			<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">
+				<li v-for="name in data.names" :key="name" :title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')"
+					class="rpgm-forge-name" @click="assign(name)">
+					{{ name }}
+				</li>
+			</TransitionGroup>
+		</SkeletonParagraph>
+		<button :disabled="loading" :class="{ 'rpgm-button': true, 'rpgm-active': loading }"
+			@click="generate(true)">Regenerate</button>
+	</ChatWizardContainer>
 </template>
 
 <style>

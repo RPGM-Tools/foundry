@@ -1,31 +1,54 @@
 import { watchDebounced } from "@vueuse/core";
-import type { App, Component } from "vue";
+import type { App, Component, Reactive } from "vue";
+
+export type WizardData<T extends object = object> = {
+	/** The data for this message */
+	data: Reactive<T>,
+	/** The {@link ChatMessage} document */
+	message: ChatMessage,
+	/** A unique identifier for this message */
+	id: string,
+	/** The html element for this message */
+	element: HTMLElement,
+	/** Whether or not the data has been saved */
+	saved: Ref<boolean>,
+	/** Closes the message and deletes it */
+	close: () => void
+};
 
 /**
- *
+ * Represents a chat wizard
+ * Wizards are saved in world settings, specific to each user and wizard
  */
-export class ChatWizard<T extends object> {
+export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	data: Map<string, T> = new Map();
 	apps: Map<string, App> = new Map();
 	/** @returns Placeholder content for when a module isn't installed */
 	get placeholder() { return `<div class="${this.moduleId}-${this.key}">If you are seeing this, please install ${this.moduleId}</div>`; }
-	readonly key: ClientSettings.KeyFor<typeof this.moduleId>;
+	readonly _key: string;
+	/** @returns The unique key for this wizard and user */
+	get key(): ClientSettings.KeyFor<typeof this.moduleId> { return `${this._key}-${game.userId?.toLowerCase()}` as unknown as ClientSettings.KeyFor<typeof this.moduleId>; }
 
+	/**
+	 * Creates a new ChatWizard
+	 * @param moduleId - The namespace of this wizard
+	 * @param key - The key of this wizard
+	 * @param renderer - The component to render for this wizard
+	 * @param title - The title of this wizard, to be rendered as the title of the message
+	 */
 	constructor(
 		readonly moduleId: ClientSettings.Namespace,
 		key: string,
 		readonly renderer: Component,
 		readonly title: string,
-	) {
-		this.key = key as unknown as ClientSettings.KeyFor<typeof moduleId>;
-	}
+	) { this._key = key; }
 
 	/**
 	 * Creates a message and saves it to the database
 	 * @param data - The data to store to this message
 	 */
-	async newMessage(data: T) {
-		rpgm.logger.log(data);
+	async newMessage(data?: T) {
+		if (!data) data = {} as T;
 		// Set render to false to try and delay the first message render by the time we set the data
 		const id = foundry.utils.randomID();
 		this.data.set(id, data);
@@ -84,14 +107,6 @@ export class ChatWizard<T extends object> {
 		app.provide("data", reactive(data));
 		app.provide("element", html);
 		app.mount(mount);
-
-		// Inject delete handler to remove this data from localStorage
-		const del = message["delete"].bind(message);
-		const delData = this.delete.bind(this);
-		message["delete"] = (function(operation: never) {
-			delData(message);
-			return del(operation);
-		}).bind(message);
 		return true;
 	}
 
@@ -101,6 +116,8 @@ export class ChatWizard<T extends object> {
 	delete(message: ChatMessage) {
 		this.data.delete(this.messageId(message));
 		this.save();
+		// @ts-expect-error This is fine
+		message.delete({});
 	}
 
 	/**
@@ -126,15 +143,16 @@ export class ChatWizard<T extends object> {
 	 * @param debounce - How often to save data when it gets changed
 	 * @returns A reactive reference to the message's data, along with the original message
 	 */
-	useChatWizard(debounce: number = 1000) {
-		const message = inject<T>("message") as ChatMessage;
-		const data = inject<T>("data") as T;
-		const id = inject<string>("id") as string;
-		const element = inject<HTMLElement>("element") as HTMLElement;
+	useChatWizard(debounce: number = 1000): WizardData<T> {
+		const message = inject("message") as ChatMessage;
+		const data = inject("data") as T;
+		const id = inject("id") as string;
+		const element = inject("element") as HTMLElement;
 		const rData = reactive(data);
 		const saved = ref(true);
+		const close = () => this.delete(message);
 		watch(rData, () => { saved.value = false; });
 		watchDebounced(rData, () => { this.save(); saved.value = true; }, { debounce });
-		return { data: rData, message, id, element, saved };
+		return { data: rData, message, id, element, saved, close };
 	}
 }

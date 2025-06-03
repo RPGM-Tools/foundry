@@ -20,7 +20,7 @@
 import DiceButton from './DiceButton.vue';
 import type { StyleValue } from 'vue';
 import { autoUpdate, offset, useFloating } from '@floating-ui/vue';
-import diceImage from '../../assets/d20-128x128.png';
+import diceImage from '../../assets/d20-512x512.webp';
 import { shift } from '@floating-ui/vue';
 
 const ANIMATION_DURATION = 0.2;

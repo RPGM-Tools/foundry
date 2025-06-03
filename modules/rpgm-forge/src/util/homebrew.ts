@@ -21,9 +21,14 @@ export function command() {
  */
 function getSchema(name?: string): ForgeChatHomebrew {
 	return {
-		schema: structuredClone(rpgm.forge!.homebrewSchemas.find((v) => {
-			return v.name.toLowerCase().trim() === name?.toLowerCase().trim();
-		})) ?? undefined,
+		options: {
+			genre: rpgm.forge!.genre,
+			system: rpgm.forge!.system,
+			language: rpgm.forge!.language,
+			schema: structuredClone(rpgm.forge!.homebrewSchemas.find((v) => {
+				return v.name.toLowerCase().trim() === name?.toLowerCase().trim();
+			}))
+		},
 		activeGeneration: "",
 		generations: {}
 	};

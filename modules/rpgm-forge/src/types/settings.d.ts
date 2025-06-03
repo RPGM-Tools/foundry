@@ -7,7 +7,7 @@ declare global {
 		"rpgm-forge.language": string
 		"rpgm-forge.system": string
 		"rpgm-forge.genre": string
-		"rpgm-forge.method": string
+		"rpgm-forge.method": NamesOptions["method"]
 		"rpgm-forge.has_been_prompted": boolean
 	}
 }

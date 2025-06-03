@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ForgeDescription } from '@rpgm/forge';
 import DiceButton from '#/radial-menu/DiceButton.vue';
-import SavedCheck from "./SavedCheck.vue";
+import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 
-const { data, saved } = rpgm.forge!.descriptionsChats.useChatWizard();
+const description = rpgm.forge!.descriptionsChats.useChatWizard(), { data } = description;
 const loading = ref(false);
 
 const contentRef = useTemplateRef("content");
@@ -17,16 +17,15 @@ async function generate() {
 	loading.value = true;
 	const oldDesc = data.description;
 	data.description = "";
-	const options: DescriptionOptions = {
+
+	const result = await rpgm.forge!.queue.generate(ForgeDescription, {
 		name: data.name ?? "",
 		type: data.type,
-		style: 'Fantasy',
+		system: rpgm.forge!.system,
+		language: rpgm.forge!.language,
+		genre: rpgm.forge!.genre,
 		length: 'short',
 		notes: ''
-	};
-
-	const result = await ForgeDescription.fromOptions(options).generate({
-		auth_token: game.settings.get("rpgm-tools", "api_key")
 	});
 
 	if (!result.success) rpgm.forge?.logger.errorU(result.error);
@@ -67,15 +66,16 @@ const secure = window.isSecureContext;
 </script>
 
 <template>
-	<SavedCheck :saved />
-	<div v-if="secure" style="max-height: 40px; position: absolute; left: 95%;">
-		<DiceButton v-model="context" :index="1" :button="button" />
-	</div>
-	<h3>{{ data.name ? `${data.name} – ` : "" }}{{ data.type }}</h3>
-	<Transition name="forge-description">
-		<p v-if="data.description" ref="content" tabindex="0" class="forge-description">{{ data.description }}</p>
-	</Transition>
-	<button :disabled="loading" class="rpgm-button" @click="generate">Regenerate</button>
+	<ChatWizardContainer :wizard="description">
+		<div v-if="secure" style="max-height: 40px; position: absolute; left: 95%;">
+			<DiceButton v-model="context" :index="1" :button="button" />
+		</div>
+		<h2>{{ data.name ? `${data.name} – ` : "" }}{{ data.type }}</h2>
+		<Transition name="forge-description">
+			<p v-if="data.description" ref="content" tabindex="0" class="forge-description">{{ data.description }}</p>
+		</Transition>
+		<button :disabled="loading" class="rpgm-button" @click="generate">Regenerate</button>
+	</ChatWizardContainer>
 </template>
 
 <style>

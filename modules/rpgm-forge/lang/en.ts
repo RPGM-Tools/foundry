@@ -22,7 +22,9 @@ export default {
 			GENRE: "Genre",
 			GENRE_HINT: "The genre to base AI-generated content on.",
 			METHOD: "Method",
-			METHOD_HINT: "Whether to use offline generation when available.",
+			METHOD_HINT: "Whether to use AI generation when available.",
+			METHOD_AI: "AI",
+			METHOD_SIMPLE: "Manual",
 		},
 		RADIAL_MENU: {
 			D4: "Roll a D4",

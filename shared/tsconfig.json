@@ -10,6 +10,14 @@
 		"types": [
 			"vite/client",
 			"fvtt-types/lenient"
-		]
+		],
+		"plugins": [
+			{
+				"name": "typescript-vue-plugin",
+			}
+		],
 	},
+	"include": [
+		"**/*.ts",
+	]
 }

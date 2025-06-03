@@ -2,11 +2,13 @@ import { shallowReactive } from 'vue';
 
 /** An object related to various information about a setting */
 type SettingsRef<T> = {
+	/** The name of the setting */
 	name: string
+	/** The hint of the setting */
 	hint: string
 	/** The initial value of the setting when queried */
 	readonly initial: T
-	/** The value of the setting, not applied until calling apply() */
+	/** The value of the setting, not applied until calling {@link SettingsRef.save()} */
 	value: T
 	/** Saves this setting's value */
 	save(): void

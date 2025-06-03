@@ -5,8 +5,8 @@ import HomebrewInput from "./HomebrewInput.vue";
 import HomebrewDisplay from "./HomebrewDisplay.vue";
 import HomebrewTitle from "./HomebrewTitle.vue";
 import RadialMenu from "#/radial-menu/RadialMenu.vue";
-import SavedCheck from "../SavedCheck.vue";
 import { inputHeuristics } from "#/radial-menu";
+import ChatWizardContainer from "#/chat/ChatWizardContainer.vue";
 
 const schemas = rpgm.forge!.homebrewSchemas;
 
@@ -14,21 +14,18 @@ const modified = ref(false);
 const editing = ref(true);
 const currentTitle = computed<string>(() => {
 	if (editing.value)
-		return data.schema ?
-			modified.value ? `${data.schema?.name ?? "gak1"}`
-				: `${data.schema?.name ?? "gak2"}`
-			: "";
+		return data.options.schema?.name ?? "";
 	else
-		return data.generations[data.activeGeneration]?.custom_name ?? "gak4";
+		return data.generations[data.activeGeneration]?.custom_name ?? "";
 });
-const { data, id, saved } = rpgm.forge!.homebrewChats.useChatWizard();
+const homebrew = rpgm.forge!.homebrewChats.useChatWizard(), { data, id } = homebrew;
 const loading = ref(false);
 
 const hasGenerated = computed(() => Object.keys(data.generations).length > 0);
 
 const buttonAnchor = useTemplateRef("buttonAnchor");
 
-watch(buttonAnchor, (r) => { buttonContext.element = r!.closest(".chat-message")!; });
+watch(buttonAnchor, (r) => { if (r) buttonContext.element = r.closest(".chat-message")!; });
 
 const buttonContext = shallowReactive({
 	element: buttonAnchor.value!,
@@ -95,8 +92,8 @@ provide("data", data);
 onMounted(() => {
 	if (data.activeGeneration && data.generations[data.activeGeneration]) {
 		editing.value = false;
-	} else if (!data.schema) {
-		data.schema = structuredClone(schemas[Math.floor(Math.random() * schemas.length)]);
+	} else if (!data.options.schema) {
+		data.options.schema = structuredClone(schemas[Math.floor(Math.random() * schemas.length)]);
 	}
 });
 
@@ -160,22 +157,22 @@ function deleteGeneration(generation: string) {
  * Generates the homebrew
  */
 async function generate() {
-	if (!data.schema?.fields.length) return;
+	if (!data.options.schema) return;
+	if (!data.options.schema?.fields.length) return;
 	loading.value = true;
-	const response = await ForgeHomebrew.fromOptions(data.schema).generate({
-		auth_token: game.settings.get("rpgm-tools", "api_key")
-	});
 
-	if (response.success) {
+	const result = await rpgm.forge!.queue.generate(ForgeHomebrew, data.options as HomebrewOptions);
+
+	if (result.success) {
 		rpgm.chat.updateScroll();
 
 		const id = foundry.utils.randomID();
-		data.generations[id] = response.output;
+		data.generations[id] = result.output;
 		data.activeGeneration = id;
 		editing.value = false;
 	}
 	else
-		rpgm.forge?.logger.errorU(response.error);
+		rpgm.forge?.logger.errorU(result.error);
 	loading.value = false;
 }
 
@@ -184,7 +181,7 @@ async function generate() {
  * @param v - The schema to select
  * @returns The new schema
  */
-function assign(v: HomebrewOptions): HomebrewOptions {
+function assign(v: HomebrewSchema): HomebrewSchema {
 	return structuredClone(toRaw(v));
 }
 
@@ -215,18 +212,23 @@ function copyGeneration(generation: string) {
 	try {
 		const gen = data.generations[generation];
 		void navigator.clipboard.writeText(`# ${gen.custom_name}\n*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`);
-		rpgm.forge!.logger.logU(`Copied "${gen.custom_name}" to clipboard!`);
+		rpgm.forge!.logger.logU(`Copied ${gen.name} to clipboard`);
 	} catch { return; }
 }
 
 /** Switches the wizard to the editing view, creating an empty schema from the active generation */
 function restoreSchemaFromActiveGeneration() {
 	if (editing.value) return;
-	data.schema = {
-		name: data.generations[data.activeGeneration].name,
-		fields: [
-			...data.generations[data.activeGeneration].fields.map(f => ({ name: f.name, type: f.type, description: f.description })),
-		],
+	data.options = {
+		system: rpgm.forge!.system,
+		genre: rpgm.forge!.genre,
+		language: rpgm.forge!.language,
+		schema: {
+			name: data.generations[data.activeGeneration].name,
+			fields: [
+				...data.generations[data.activeGeneration].fields.map(f => ({ name: f.name, type: f.type, description: f.description })),
+			]
+		},
 	};
 	modified.value = true;
 	editing.value = true;
@@ -235,20 +237,19 @@ function restoreSchemaFromActiveGeneration() {
 </script>
 
 <template>
-	<div>
-		<SavedCheck :saved />
+	<ChatWizardContainer :wizard="homebrew">
 		<RadialMenu v-if="buttonContext.element" v-model="buttonContext" :buttons :pad-document="false" :right="true"
 			:top="true" :padding="{ top: 40, right: 0 }" />
 		<HomebrewTitle ref="titleRef" v-model="currentTitle" :modified="modified && editing"
 			:can-goto-generations="hasGenerated" :editing @cycle="cycleGenerations" @goto-generations="gotoGenerations"
 			@click="restoreSchemaFromActiveGeneration" />
-		<ComboBox v-if="!hasGenerated" v-model="data.schema" placeholder="Preset" :values="schemas" :unique="v => v.name"
-			:display="v => v.name" :assign :filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())"
-			@update:model-value="newSelection" />
+		<ComboBox v-if="!hasGenerated" v-model="data.options.schema" placeholder="Preset" :values="schemas"
+			:unique="v => v.name" :display="v => v.name" :assign
+			:filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())" @update:model-value="newSelection" />
 		<div ref="buttonAnchor" class="rpgm-homebrew-content">
 			<Transition name="rpgm-homebrew-main">
 				<div v-if="editing">
-					<HomebrewInput v-model:modified="modified" v-model="data.schema" :loading @generate="generate" />
+					<HomebrewInput v-model:modified="modified" v-model="data.options.schema" :loading @generate="generate" />
 				</div>
 				<div v-else-if="!editing">
 					<Transition name="rpgm-homebrew-main">
@@ -257,7 +258,7 @@ function restoreSchemaFromActiveGeneration() {
 				</div>
 			</Transition>
 		</div>
-	</div>
+	</ChatWizardContainer>
 </template>
 
 <style>

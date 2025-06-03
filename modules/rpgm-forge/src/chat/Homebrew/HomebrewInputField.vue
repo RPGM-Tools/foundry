@@ -26,7 +26,7 @@ function validateNewName(n: string) {
 			rpgm.forge!.logger.errorU("Homebrew field cannot be empty!");
 			return false;
 		}
-		for (const f of data.schema!.fields) {
+		for (const f of data.options.schema!.fields) {
 			if (f === field.value) continue;
 			if (f.name.slugify({ strict: true, replacement: "_" })
 				=== n.slugify({ strict: true, replacement: "_" })) {
@@ -44,7 +44,7 @@ function validateNewName(n: string) {
 
 /** Deletes this field from the schema */
 function remove() {
-	data.schema!.fields.splice(data.schema!.fields.indexOf(field.value), 1);
+	data.options.schema!.fields.splice(data.options.schema!.fields.indexOf(field.value), 1);
 }
 
 /** 
@@ -52,12 +52,12 @@ function remove() {
  * @param by - How many fields to move forwards or backwards
  */
 function move(by: number) {
-	const idx = data.schema!.fields.indexOf(field.value);
-	const clippedIdx = Math.max(0, Math.min(data.schema!.fields.length - 1, idx + by));
+	const idx = data.options.schema!.fields.indexOf(field.value);
+	const clippedIdx = Math.max(0, Math.min(data.options.schema!.fields.length - 1, idx + by));
 	if (clippedIdx === idx) return;
 
-	data.schema!.fields.splice(idx, 1);
-	data.schema!.fields.splice(clippedIdx, 0, field.value);
+	data.options.schema!.fields.splice(idx, 1);
+	data.options.schema!.fields.splice(clippedIdx, 0, field.value);
 }
 
 /**
@@ -104,8 +104,8 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 		</div>
 		<ContentEditable v-slot="{ contenteditable, onBlur, onFocus, onKeydown, ref }" v-model:editing="editing"
 			:model-value="field.name" :should-blur="false" :multiline="false" @update:model-value="validateNewName">
-			<h3 :ref class="rpgm-homebrew-field-name rpgm-radial-ignore" :contenteditable :tabindex="contenteditable ? 0 : -1"
-				@blur="onBlur" @focus="onFocus" @keydown="onKeydown">
+			<h3 :ref class="rpgm-radial-ignore" :contenteditable :tabindex="contenteditable ? 0 : -1" @blur="onBlur"
+				@focus="onFocus" @keydown="onKeydown">
 				{{ field.name }}
 			</h3>
 		</ContentEditable>
@@ -177,29 +177,20 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 
 .rpgm-homebrew-field-container {
 	position: relative;
-	padding-bottom: 6px;
-	padding-top: 6px;
 	transition: all 0.2s ease;
 	border-radius: 6px;
-}
 
-.rpgm-homebrew-field-container:not(:first-child) {
-	margin-top: 6px;
-}
-
-.rpgm-homebrew-field-name {
-	font-style: normal;
-	font-size: 15px;
-	border-bottom: 1px solid black;
+	* {
+		outline: none !important;
+	}
 }
 
 .rpgm-homebrew-field-container[editing="true"] {
 	background-color: #00000044;
-}
 
-.rpgm-homebrew-field-container[editing="true"] [contenteditable="true"] {
-	font-style: italic;
-	outline: none;
+	[contenteditable="true"] {
+		font-style: italic;
+	}
 }
 
 .rpgm-homebrew-field-value {
@@ -232,7 +223,6 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 .rpgm-homebrew-field-icons {
 	right: 0;
 	opacity: 0;
-	visibility: hidden;
 }
 
 /* o_O 

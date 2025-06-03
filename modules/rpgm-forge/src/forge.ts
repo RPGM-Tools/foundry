@@ -2,27 +2,43 @@ import { RpgmModule } from "#/module";
 import { literal, argument, string } from "brigadier-ts-lite";
 import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, registerTokenCreate } from "./util/token";
 import { inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
-import type { Component } from "vue";
-import NamesChat from "./chat/NamesChat.vue";
-import DescriptionChat from "./chat/DescriptionChat.vue";
 import { RPGMLogger } from "#/util/logging";
 import { ChatWizard } from "#/chat/ChatWizard";
 import { command } from "./util/homebrew";
+import type { Component } from "vue";
+import NamesChat from "./chat/NamesChat.vue";
+import DescriptionChat from "./chat/DescriptionChat.vue";
 import HomebrewChat from "./chat/Homebrew/HomebrewChat.vue";
-import Homebrews from "@rpgm/forge/data/schemas.json?url";
 import InitPrompt from "./chat/InitPrompt.vue";
+import Homebrews from "@rpgm/forge/data/schemas.json?url";
+import { ForgeQueue } from "@rpgm/forge";
 
 /**
  * {@link RpgmForge} stores chat databases for forge wizards
  */
 export class RpgmForge extends RpgmModule {
-	override id: ClientSettings.Namespace = "rpgm-forge";
-	override name: string = "RPGM Forge";
-	override icon: string = "🎲";
+	override readonly id: ClientSettings.Namespace = "rpgm-forge";
+	override readonly name: string = "RPGM Forge";
+	override readonly icon: string = "🎲";
 	override readonly logger = new RPGMLogger(`${this.icon} ${this.name}`);
-	initPrompts = new ChatWizard(
+
+	/** @returns The current genre setting */
+	get genre() { return game.settings.get("rpgm-forge", "genre"); }
+
+	/** @returns The current method setting */
+	get method() { return game.settings.get("rpgm-forge", "method"); }
+
+	/** @returns The current system setting */
+	get system() { return game.system.title; }
+
+	/** @returns The current language setting */
+	get language() { return game.settings.get("rpgm-forge", "language"); }
+
+	queue = new ForgeQueue(() => [{ auth_token: rpgm.api_key }]);
+
+	promptChats = new ChatWizard(
 		this.id,
-		"init",
+		"prompt",
 		InitPrompt as Component,
 		this.name
 	);
@@ -44,7 +60,7 @@ export class RpgmForge extends RpgmModule {
 		HomebrewChat as Component,
 		this.name
 	);
-	homebrewSchemas: HomebrewOptions[] = [];
+	homebrewSchemas: HomebrewSchema[] = [];
 
 	/**
 	 * Called before everything else
@@ -52,7 +68,7 @@ export class RpgmForge extends RpgmModule {
 	 */
 	override async init(): Promise<void> {
 		rpgm.forge = this;
-		this.homebrewSchemas = await (await fetch(Homebrews)).json() as HomebrewOptions[];
+		this.homebrewSchemas = await (await fetch(Homebrews)).json() as typeof this.homebrewSchemas;
 	}
 
 	/**
@@ -108,8 +124,12 @@ export class RpgmForge extends RpgmModule {
 		game.settings.register("rpgm-forge", "method", {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.METHOD"),
 			hint: rpgm.localize("RPGM_FORGE.CONFIG.METHOD_HINT"),
-			default: "AI",
+			default: "ai",
 			scope: "world",
+			choices: {
+				ai: rpgm.localize("RPGM_FORGE.CONFIG.METHOD_AI"),
+				simple: rpgm.localize("RPGM_FORGE.CONFIG.METHOD_SIMPLE")
+			},
 			type: String,
 			config: true
 		});
@@ -125,7 +145,7 @@ export class RpgmForge extends RpgmModule {
 			})).executes(() => {
 				const token = getSelectedToken();
 				if (!token) return;
-				void chatDescription(
+				chatDescription(
 					{
 						type: token.actor!.prototypeToken.name,
 						// Don't include name if it's the default actor name
@@ -175,22 +195,24 @@ export class RpgmForge extends RpgmModule {
 				const token = context.token;
 				if (!token) return rpgm.logger.log("No token selected");
 				chatDescription({
-					type: token.actor!.name,
+					type: token.actor!.prototypeToken.name,
 					// Don't include name if it's the default actor name
 					name: token.name ? token.name !== token.actor!.name ? token.name : "" : ""
 				});
 			}
 		});
-		this.initPrompts.load();
+		this.promptChats.load();
 		this.namesChats.load();
 		this.descriptionsChats.load();
 		this.homebrewChats.load();
 		registerTokenCreate();
 	}
 
-	/** (unused) */
+	/**
+	 * Called when everything else in Foundry is loaded
+	 */
 	override rpgmReady(): Promise<void> | void {
-		if (this.initPrompts.data.size === 0 && !game.settings.get("rpgm-forge", "has_been_prompted"))
-			this.initPrompts.newMessage({});
+		if (this.promptChats.data.size === 0 && !game.settings.get("rpgm-forge", "has_been_prompted"))
+			this.promptChats.newMessage();
 	}
 }

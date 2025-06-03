@@ -43,6 +43,9 @@ export abstract class RpgmModule {
 		Hooks.once("ready", () => void this._ready());
 	}
 
+	/** @returns The API key set by the user */
+	static get api_key() { return game.settings.get("rpgm-tools", "api_key") || ""; }
+
 	/** 
 	 * Very first code that gets run for a module
 	 * Calls {@link initGlobal} if this is our first module to be loaded
@@ -81,7 +84,7 @@ export abstract class RpgmModule {
 				copyright.style.fontStyle = "italic";
 				copyright.style.textAlign = "center";
 				copyright.innerText = "© 2025 RPGM Tools, LLC";
-				screen.querySelectorAll("input").forEach(i => i.classList.add("rpgm-input"));
+				screen.querySelectorAll("input,select").forEach(i => i.classList.add("rpgm-input"));
 				screen.querySelectorAll("button").forEach(i => i.classList.add("rpgm-button"));
 				screen?.appendChild(copyright);
 			});

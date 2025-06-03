@@ -11,7 +11,7 @@ export class ChatCommands {
 	chatPanel: App | undefined;
 	COMMAND_PREFIX = '*';
 	private commands = new CommandDispatcher();
-	private messageHandlers: ChatWizard<object>[] = [];
+	private messageHandlers: ChatWizard[] = [];
 	private chatlog?: HTMLElement;
 
 	constructor() {
@@ -71,7 +71,7 @@ export class ChatCommands {
 	/**
 	 * @param handler - The chat database to register
 	 */
-	registerMessageHandler(handler: ChatWizard<object>) {
+	registerMessageHandler(handler: ChatWizard) {
 		this.messageHandlers.push(handler);
 	}
 

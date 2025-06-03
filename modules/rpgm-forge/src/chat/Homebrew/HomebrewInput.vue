@@ -18,7 +18,7 @@ function pauseTransition() {
 
 /** Appends a field to the current schema */
 function newField() {
-	data.schema?.fields.push({
+	data.options.schema?.fields.push({
 		name: "[Name]",
 		description: "[Description]",
 		type: "short",
@@ -34,15 +34,15 @@ function newField() {
  * @returns -1 if first, 1 if last, 0 otherwise
  */
 function buttonIndex(i: number): -1 | 0 | 1 {
-	return i <= 0 ? -1 : i >= data.schema!.fields.length - 1 ? 1 : 0;
+	return i <= 0 ? -1 : i >= data.options.schema!.fields.length - 1 ? 1 : 0;
 }
 </script>
 
 <template>
 	<div ref="fieldsContainer" class="rpgm-homebrew-fields-container">
-		<template v-if="data.schema?.fields.length">
+		<template v-if="data.options.schema?.fields.length">
 			<TransitionGroup :css="!renaming" name="rpgm-homebrew-field-container">
-				<HomebrewInputField v-for="(field, i) in data.schema.fields" :key="field.name" :model-value="field"
+				<HomebrewInputField v-for="(field, i) in data.options.schema.fields" :key="field.name" :model-value="field"
 					:i="buttonIndex(i)" @renaming="pauseTransition" />
 			</TransitionGroup>
 			<div class="rpgm-homebrew-field-add rpgm-icons">
@@ -51,7 +51,7 @@ function buttonIndex(i: number): -1 | 0 | 1 {
 				</a>
 			</div>
 			<button class="rpgm-button" :class="{ 'rpgm-active': loading }"
-				:disabled="(data.schema.fields.length ?? 0) == 0 || loading" @click="emit('generate')">Generate</button>
+				:disabled="(data.options.schema.fields.length ?? 0) == 0 || loading" @click="emit('generate')">Generate</button>
 		</template>
 		<p v-else>
 			<i>Add some fields to get started</i>
@@ -62,6 +62,10 @@ function buttonIndex(i: number): -1 | 0 | 1 {
 <style>
 .rpgm-homebrew-fields-container {
 	padding: 5px;
+
+	>*:not(:first-child) {
+		margin-top: 8px;
+	}
 }
 
 .rpgm-homebrew-field-container-move {

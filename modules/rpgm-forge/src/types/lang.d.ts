@@ -17,6 +17,8 @@ declare global {
 				GENRE_HINT
 				METHOD
 				METHOD_HINT
+				METHOD_AI
+				METHOD_SIMPLE
 			}
 			INIT: {
 				TITLE

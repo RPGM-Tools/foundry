@@ -24,7 +24,7 @@ function copy(field: HomebrewField) {
 				<div class="rpgm-icons">
 					<a v-if="isSecure" title="Copy to clipboard" @click="copy(field)"><i class="fa-solid fa-copy" /></a>
 				</div>
-				<h3 class="rpgm-homebrew-field-name">{{ field.name }}</h3>
+				<h3>{{ field.name }}</h3>
 				<input v-if="field.type === 'boolean'" type="checkbox" :checked="field.value">
 				<p v-else>{{ field.value }}</p>
 			</div>
@@ -42,10 +42,6 @@ function copy(field: HomebrewField) {
 .rpgm-homebrew-display-fields {
 	font-style: italic;
 	cursor: text;
-}
-
-.rpgm-homebrew-field-name {
-	margin: 0 0 4px;
 }
 
 .rpgm-homebrew-display-fields .rpgm-icons {

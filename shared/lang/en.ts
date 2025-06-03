@@ -14,7 +14,7 @@ export default {
 			RADIAL_MENU_SETTINGS_SUBTITLE: "404: Witty remark not found",
 			DEVELOPER_SETTINGS: "Developer Settings",
 			DEVELOPER_SETTINGS_LABEL: "Configure Developer Settings",
-			DEVELOPER_SETTINGS_HINT: "Other settings for testing RPGM Tools",
+			DEVELOPER_SETTINGS_HINT: "Other settings for testing RPGM Tools.",
 			DEVELOPER_SETTINGS_SUBTITLE: "\"Developers, developers, developers, developers!\"",
 			RADIAL_MENU_INPUT: "Radial Menu Inputs",
 			RADIAL_MENU_INPUT_HINT: "Populate compatible input fields with a radial menu.",

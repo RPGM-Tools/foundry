@@ -21,8 +21,8 @@ const editingTitle = ref(false);
 
 const rename = (n: string) => {
 	if (n.trim().length == 0) return;
-	if (data.schema)
-		data.schema.name = n;
+	if (data.options.schema)
+		data.options.schema.name = n;
 };
 </script>
 
@@ -59,18 +59,17 @@ const rename = (n: string) => {
 	padding-top: 1px;
 	padding-left: 4px;
 	padding-right: 4px;
-	transition: all 0.2s ease;
+	transition: all 150ms ease;
 }
 
 .rpgm-homebrew-title-container[editing="false"]:hover:not(:has(.rpgm-icons:hover)) {
 	cursor: pointer;
-	backdrop-filter: brightness(0.75);
+	background: rgba(0, 0, 0, 0.2);
 }
 
 .rpgm-homebrew-title-container:hover {
 	.rpgm-icons {
 		opacity: 1;
-		visibility: visible;
 		filter: blur(0px);
 	}
 }

@@ -1,5 +1,5 @@
 {
-	"$schema": "https://json.schemastore.org/tsconfig.json",
+	"schema": "https://json.schemastore.org/tsconfig.json",
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"paths": {
@@ -19,13 +19,13 @@
 		"types": [
 			"vite/client",
 			"fvtt-types/lenient",
-			"@rpgm/forge/types",
+			"@rpgm/forge/types"
 		],
 		"plugins": [
 			{
-				"name": "typescript-vue-plugin",
+				"name": "typescript-vue-plugin"
 			}
-		],
+		]
 	},
 	"include": [
 		"./**/*.ts",
