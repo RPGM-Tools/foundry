@@ -1,0 +1,134 @@
+{
+	"a5e": {
+		"genre": "High Fantasy"
+	},
+	"alienrpg": {
+		"genre": "Ridley Scott Alien"
+	},
+	"band-of-blades": {
+		"genre": "Dark Fantasy/Alternate History"
+	},
+	"bitd": {
+		"genre": "Dark Fantasy/Noir"
+	},
+	"black-flag": {
+		"genre": "Nautical/Pirate Fantasy"
+	},
+	"CoC7": {
+		"genre": "Cosmic Horror"
+	},
+	"coriolis": {
+		"genre": "Scifi/Space Opera"
+	},
+	"crucible": {
+		"genre": "Fantasy"
+	},
+	"cyberpunk2020": {
+		"genre": "Cyberpunk"
+	},
+	"cyberpunk6": {
+		"genre": "Cyberpunk"
+	},
+	"dc20rpg": {
+		"genre": "Fantasy"
+	},
+	"dcc": {
+		"genre": "Fantasy"
+	},
+	"dnd5e": {
+		"genre": "Fantasy"
+	},
+	"dragonbane": {
+		"genre": "Fantasy"
+	},
+	"draw-steel": {
+		"genre": "Fantasy"
+	},
+	"dsa5": {
+		"genre": "The Dark Eye/High Fantasy"
+	},
+	"earthdawn4e": {
+		"genre": "Fantasy, Asian-inspired"
+	},
+	"fallout": {
+		"genre": "Post-apocalyptic"
+	},
+	"forbidden-lands": {
+		"genre": "Fantasy/Grimdark"
+	},
+	"fvtt-cthulhu-eternal": {
+		"genre": "Fantasy"
+	},
+	"gurps": {
+		"genre": "Fantasy"
+	},
+	"hero6efoundryvttv2": {
+		"genre": "Urban Fantasy/Horror"
+	},
+	"investigator": {
+		"genre": "Urban Fantasy/Horror"
+	},
+	"kamigakari": {
+		"genre": "Modern/Japanese Myth"
+	},
+	"mutants-and-masterminds-3e": {
+		"genre": "Superhero"
+	},
+	"ordemparanormal": {
+		"genre": "Urban Fantasy/Horror"
+	},
+	"pf1": {
+		"genre": "Fantasy"
+	},
+	"pf2e": {
+		"genre": "High Fantasy"
+	},
+	"pirateborg": {
+		"genre": "Fantasy/Nautical/Pirate"
+	},
+	"scum-and-villainy": {
+		"genre": "Sci-fi"
+	},
+	"sfrpg": {
+		"genre": "Sci-fi"
+	},
+	"shadowdark": {
+		"genre": "Dark Fantasy"
+	},
+	"shadowrun5e": {
+		"genre": "Cyberpunk"
+	},
+	"shadowrun6-eden": {
+		"genre": "Cyberpunk"
+	},
+	"starwarsffg": {
+		"genre": "Star Wars"
+	},
+	"sw5e": {
+		"genre": "Star Wars"
+	},
+	"swade": {
+		"genre": "Historical/Action"
+	},
+	"swnr": {
+		"genre": "Sci-fi"
+	},
+	"swords-wizardry": {
+		"genre": "Fantasy"
+	},
+	"t2k4e": {
+		"genre": "Modern/Alternate History"
+	},
+	"vtm5e": {
+		"genre": "Sci-fi"
+	},
+	"wfrp4e": {
+		"genre": "Fantasy"
+	},
+	"worldofdarkness": {
+		"genre": "Mystery/Gothic Horror"
+	},
+	"wwn": {
+		"genre": "Science Fantasy"
+	}
+}

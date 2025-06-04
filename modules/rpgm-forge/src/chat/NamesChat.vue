@@ -6,7 +6,7 @@ import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 
 const NAMES_PER_GENERATION = 4;
 
-const names = rpgm.forge!.namesChats.useChatWizard(), { data } = names;
+const names = rpgm.forge.namesChats.useChatWizard(), { data } = names;
 const localize = rpgm.localize;
 const loading = ref(false);
 
@@ -40,18 +40,18 @@ async function generate(regenerate: boolean = false) {
 		} else p();
 	});
 
-	const result = await rpgm.forge!.queue.generate(ForgeNames, {
+	const result = await rpgm.forge.queue.generate(ForgeNames, {
 		quantity: NAMES_PER_GENERATION,
 		gender: "neutral",
-		genre: rpgm.forge!.genre,
-		language: rpgm.forge!.language,
-		method: rpgm.forge!.method,
+		genre: rpgm.forge.genre,
+		language: rpgm.forge.language,
+		method: rpgm.forge.method,
 		type: data.prompt
 	});
 
 	loading.value = false;
 	await fadeOut;
-	if (!result.success) rpgm.forge?.logger.errorU(result.error);
+	if (!result.success) rpgm.forge.logger.visible.error(result.error);
 	insertValues(result.success ? result.output : oldNames);
 }
 
@@ -65,7 +65,7 @@ function assign(name: string) {
 	const oldName = token.name;
 	nameToken(token.document, name);
 	data.names[data.names.indexOf(name)] = oldName;
-	rpgm.forge!.logger.logU(`Renamed ${oldName} to ${name}`);
+	rpgm.forge.logger.visible.log(`Renamed ${oldName} to ${name}`);
 }
 
 onMounted(() => {

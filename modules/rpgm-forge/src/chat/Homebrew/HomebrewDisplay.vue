@@ -11,7 +11,7 @@ const isSecure = ref(window.isSecureContext);
 function copy(field: HomebrewField) {
 	try {
 		void navigator.clipboard.writeText(`### ${field.name}\n${field.value}`);
-		rpgm.forge!.logger.logU(`Copied "${field.name}" to clipboard!`);
+		rpgm.forge.logger.visible.log(`Copied "${field.name}" to clipboard!`);
 	} catch { return; }
 }
 </script>

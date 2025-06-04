@@ -23,14 +23,14 @@ function validateNewName(n: string) {
 	const valid = (() => {
 		if (n === field.value.name) return false;
 		if (n.trim().length == 0) {
-			rpgm.forge!.logger.errorU("Homebrew field cannot be empty!");
+			rpgm.forge.logger.visible.error("Homebrew field cannot be empty!");
 			return false;
 		}
 		for (const f of data.options.schema!.fields) {
 			if (f === field.value) continue;
 			if (f.name.slugify({ strict: true, replacement: "_" })
 				=== n.slugify({ strict: true, replacement: "_" })) {
-				rpgm.forge!.logger.errorU(`"${f.name}" already exists!`);
+				rpgm.forge.logger.visible.error(`"${f.name}" already exists!`);
 				return false;
 			}
 		}

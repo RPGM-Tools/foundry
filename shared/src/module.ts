@@ -3,7 +3,7 @@ import { ChatCommands } from "./chat";
 import { registerRpgmCommands } from "./chat/commands";
 import { RadialMenuRegister } from "./radial-menu";
 import { localize } from "./util/localize";
-import { RPGMLogger } from "./util/logging";
+import { RPGMLogger } from "./util/LoggingV2";
 
 /**
  * Abstract class for representing an RPGM Module
@@ -38,9 +38,13 @@ export abstract class RpgmModule {
 	/** Was this the module to initialize RPGM? */
 	private first = false;
 
+	/** Promise that ensures hooks are called in the correct order */
+	private setup = Promise.resolve();
+
 	constructor() {
-		Hooks.once("setup", () => void this._init());
-		Hooks.once("ready", () => void this._ready());
+		Hooks.once("init", () => this.setup = this.setup.then(this._init.bind(this)));
+		Hooks.once("setup", () => this.setup = this.setup.then(this._setup.bind(this)));
+		Hooks.once("ready", () => this.setup = this.setup.then(this._ready.bind(this)));
 	}
 
 	/** @returns The API key set by the user */
@@ -54,9 +58,13 @@ export abstract class RpgmModule {
 	private async _init() {
 		if (!globalThis.rpgm)
 			this.initGlobal();
-		this.logger.logF("color: #ad8cef; font-weight: bold;", "", `${this.icon} ${this.name} joined the game`);
+		this.logger.styled("color: #ad8cef; font-weight: bold;").prefixed("").log(`${this.icon} ${this.name} joined the game`);
 		rpgm.modules[this.id] = this;
 		await this.init();
+	}
+
+	/** Run after {@link init} */
+	private async _setup() {
 		if (this.first)
 			registerRpgmCommands();
 		await this.registerSettings();
@@ -68,12 +76,12 @@ export abstract class RpgmModule {
 	 */
 	private initGlobal() {
 		this.first = true;
-		globalThis.rpgm = RpgmModule;
+		globalThis.rpgm = RpgmModule as typeof globalThis.rpgm;
 		RpgmModule.majorGameVersion = game.data.release.generation;
-		RpgmModule.logger = new RPGMLogger("🛠️ RPGM Tools");
+		RpgmModule.logger = new RPGMLogger("🛠️ RPGM Tools | ");
 		RpgmModule.radialMenu = new RadialMenuRegister();
 		RpgmModule.chat = new ChatCommands();
-		RpgmModule.logger.logF("color: #ad8cef; font-weight: bold;", "", `🛠️ RPGM Tools joined the game`);
+		RpgmModule.logger.styled("color: #ad8cef; font-weight: bold;").prefixed("").log(`🛠️ RPGM Tools joined the game`);
 		Hooks.on("renderSettingsConfig", (_, html) => {
 			Object.keys(RpgmModule.modules).forEach(k => {
 				const settingsHtml = rpgm.j(html);
@@ -133,6 +141,7 @@ export abstract class RpgmModule {
 	 */
 	static globalReady() {
 		rpgm.radialMenu.update();
+		rpgm.chat.prune();
 		const asciiArt = (String.raw`
  ____  ____   ____ __  __  _              _     
 |  _ \|  _ \ / ___|  \/  || |_ ___   ___ | |___ 
@@ -142,6 +151,6 @@ export abstract class RpgmModule {
 ————————————————————————————————————————————————
 ${Object.values(rpgm.modules).map(m => `‣ ${m.icon} ${m.name} – v${m.version}`).join('\n')}`).slice(1);
 
-		rpgm.logger.logF("color: #d44e7b; font-weight: bold;", "", asciiArt);
+		rpgm.logger.styled("color: #d44e7b; font-weight: bold;").prefixed("").log(asciiArt);
 	}
 }

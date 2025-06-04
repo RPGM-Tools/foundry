@@ -8,7 +8,7 @@ import RadialMenu from "#/radial-menu/RadialMenu.vue";
 import { inputHeuristics } from "#/radial-menu";
 import ChatWizardContainer from "#/chat/ChatWizardContainer.vue";
 
-const schemas = rpgm.forge!.homebrewSchemas;
+const schemas = rpgm.forge.homebrewSchemas;
 
 const modified = ref(false);
 const editing = ref(true);
@@ -18,7 +18,7 @@ const currentTitle = computed<string>(() => {
 	else
 		return data.generations[data.activeGeneration]?.custom_name ?? "";
 });
-const homebrew = rpgm.forge!.homebrewChats.useChatWizard(), { data, id } = homebrew;
+const homebrew = rpgm.forge.homebrewChats.useChatWizard(), { data, id } = homebrew;
 const loading = ref(false);
 
 const hasGenerated = computed(() => Object.keys(data.generations).length > 0);
@@ -131,9 +131,9 @@ async function sendToJournal(generation: string, open: boolean = false) {
 		}, { parent: entry }))!;
 		if (open)
 			page.sheet?.render(true);
-		rpgm.logger.logU(`Journal Entry created for "${gen.custom_name}"`,);
+		rpgm.logger.visible.log(`Journal Entry created for "${gen.custom_name}"`,);
 	} else {
-		rpgm.logger.errorU(`Journal Entry for "${gen.custom_name}" already exists!`);
+		rpgm.logger.visible.error(`Journal Entry for "${gen.custom_name}" already exists!`);
 	}
 }
 
@@ -161,7 +161,7 @@ async function generate() {
 	if (!data.options.schema?.fields.length) return;
 	loading.value = true;
 
-	const result = await rpgm.forge!.queue.generate(ForgeHomebrew, data.options as HomebrewOptions);
+	const result = await rpgm.forge.queue.generate(ForgeHomebrew, data.options as HomebrewOptions);
 
 	if (result.success) {
 		rpgm.chat.updateScroll();
@@ -172,7 +172,7 @@ async function generate() {
 		editing.value = false;
 	}
 	else
-		rpgm.forge?.logger.errorU(result.error);
+		rpgm.forge.logger.visible.error(result.error);
 	loading.value = false;
 }
 
@@ -212,7 +212,7 @@ function copyGeneration(generation: string) {
 	try {
 		const gen = data.generations[generation];
 		void navigator.clipboard.writeText(`# ${gen.custom_name}\n*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`);
-		rpgm.forge!.logger.logU(`Copied ${gen.name} to clipboard`);
+		rpgm.forge.logger.visible.log(`Copied ${gen.name} to clipboard`);
 	} catch { return; }
 }
 
@@ -220,9 +220,9 @@ function copyGeneration(generation: string) {
 function restoreSchemaFromActiveGeneration() {
 	if (editing.value) return;
 	data.options = {
-		system: rpgm.forge!.system,
-		genre: rpgm.forge!.genre,
-		language: rpgm.forge!.language,
+		system: rpgm.forge.system,
+		genre: rpgm.forge.genre,
+		language: rpgm.forge.language,
 		schema: {
 			name: data.generations[data.activeGeneration].name,
 			fields: [

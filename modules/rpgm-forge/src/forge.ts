@@ -2,7 +2,7 @@ import { RpgmModule } from "#/module";
 import { literal, argument, string } from "brigadier-ts-lite";
 import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, registerTokenCreate } from "./util/token";
 import { inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
-import { RPGMLogger } from "#/util/logging";
+import { RPGMLogger } from "#/util/LoggingV2";
 import { ChatWizard } from "#/chat/ChatWizard";
 import { command } from "./util/homebrew";
 import type { Component } from "vue";
@@ -11,16 +11,18 @@ import DescriptionChat from "./chat/DescriptionChat.vue";
 import HomebrewChat from "./chat/Homebrew/HomebrewChat.vue";
 import InitPrompt from "./chat/InitPrompt.vue";
 import Homebrews from "@rpgm/forge/data/schemas.json?url";
+import Genres from "../assets/combined_systems.json?url";
 import { ForgeQueue } from "@rpgm/forge";
+import ISO639 from "iso-639-1";
 
 /**
- * {@link RpgmForge} stores chat databases for forge wizards
+ * RpgmForge stores chat databases for forge wizards
  */
 export class RpgmForge extends RpgmModule {
 	override readonly id: ClientSettings.Namespace = "rpgm-forge";
 	override readonly name: string = "RPGM Forge";
 	override readonly icon: string = "🎲";
-	override readonly logger = new RPGMLogger(`${this.icon} ${this.name}`);
+	override readonly logger = new RPGMLogger(`${this.icon} ${this.name} | `);
 
 	/** @returns The current genre setting */
 	get genre() { return game.settings.get("rpgm-forge", "genre"); }
@@ -61,6 +63,7 @@ export class RpgmForge extends RpgmModule {
 		this.name
 	);
 	homebrewSchemas: HomebrewSchema[] = [];
+	genres: Record<string, { genre: string }> = {};
 
 	/**
 	 * Called before everything else
@@ -69,13 +72,18 @@ export class RpgmForge extends RpgmModule {
 	override async init(): Promise<void> {
 		rpgm.forge = this;
 		this.homebrewSchemas = await (await fetch(Homebrews)).json() as typeof this.homebrewSchemas;
+		this.genres = await (await fetch(Genres)).json() as typeof this.genres;
+		this.promptChats.load();
+		this.namesChats.load();
+		this.descriptionsChats.load();
+		this.homebrewChats.load();
 	}
 
 	/**
 	 * Register module-specific settings here
 	 * Also where Radial Menu buttons and RP-Commands are registered (might change)
 	 */
-	override registerSettings(): Promise<void> | void {
+	override async registerSettings(): Promise<void> {
 		command();
 		game.settings.register("rpgm-forge", "auto_name", {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.AUTO_NAME"),
@@ -100,7 +108,7 @@ export class RpgmForge extends RpgmModule {
 		game.settings.register("rpgm-forge", "language", {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.LANGUAGE"),
 			hint: rpgm.localize("RPGM_FORGE.CONFIG.LANGUAGE_HINT"),
-			default: "English",
+			default: await getLanguage(game.i18n.lang),
 			scope: "world",
 			type: String,
 			config: true,
@@ -116,7 +124,7 @@ export class RpgmForge extends RpgmModule {
 		game.settings.register("rpgm-forge", "genre", {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.GENRE"),
 			hint: rpgm.localize("RPGM_FORGE.CONFIG.GENRE_HINT"),
-			default: "",
+			default: this.genres[game.system.id]["genre"] || "Fantasy",
 			scope: "world",
 			type: String,
 			config: true
@@ -180,7 +188,7 @@ export class RpgmForge extends RpgmModule {
 			icon: 'fa fa-signature',
 			tooltip: "RPGM_FORGE.RADIAL_MENU.NAMES",
 			callback: async (context) => {
-				if (!context.token) return rpgm.logger.logU("No token selected");
+				if (!context.token) return rpgm.logger.visible.log("No token selected");
 				if (context.shift)
 					void chatTokenNames(context.token, context.token.actor?.prototypeToken?.name);
 				else
@@ -201,10 +209,6 @@ export class RpgmForge extends RpgmModule {
 				});
 			}
 		});
-		this.promptChats.load();
-		this.namesChats.load();
-		this.descriptionsChats.load();
-		this.homebrewChats.load();
 		registerTokenCreate();
 	}
 
@@ -215,4 +219,13 @@ export class RpgmForge extends RpgmModule {
 		if (this.promptChats.data.size === 0 && !game.settings.get("rpgm-forge", "has_been_prompted"))
 			this.promptChats.newMessage();
 	}
+
+}
+
+/**
+ * @param code - The language code
+ * @returns The language name
+ */
+async function getLanguage(code: string) {
+	return ISO639.getName(code) || "English";
 }

@@ -11,7 +11,7 @@ declare global {
 	 * Our global singleton object
 	 * Essentially the static instance of {@link RpgmModule}
 	 */
-	var rpgm: Partial<RPGM> & typeof RpgmModule;
+	var rpgm: RPGM & typeof RpgmModule;
 	var game: ReadyGame;
 
 	interface CoreFlags {

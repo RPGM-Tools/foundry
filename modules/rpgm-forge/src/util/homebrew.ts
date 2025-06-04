@@ -7,10 +7,10 @@ export function command() {
 	rpgm.chat.registerCommand(literal("homebrew")
 		.then(argument("type", string("greedy_phrase"))
 			.executes(c => {
-				void rpgm.forge!.homebrewChats.newMessage(getSchema(c.get("type")));
+				void rpgm.forge.homebrewChats.newMessage(getSchema(c.get("type")));
 			}))
 		.executes(() => {
-			void rpgm.forge!.homebrewChats.newMessage(getSchema());
+			void rpgm.forge.homebrewChats.newMessage(getSchema());
 		}));
 }
 
@@ -22,10 +22,10 @@ export function command() {
 function getSchema(name?: string): ForgeChatHomebrew {
 	return {
 		options: {
-			genre: rpgm.forge!.genre,
-			system: rpgm.forge!.system,
-			language: rpgm.forge!.language,
-			schema: structuredClone(rpgm.forge!.homebrewSchemas.find((v) => {
+			genre: rpgm.forge.genre,
+			system: rpgm.forge.system,
+			language: rpgm.forge.language,
+			schema: structuredClone(rpgm.forge.homebrewSchemas.find((v) => {
 				return v.name.toLowerCase().trim() === name?.toLowerCase().trim();
 			}))
 		},

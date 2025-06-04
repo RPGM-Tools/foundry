@@ -37,7 +37,13 @@
 		"minimum": "12",
 		"verified": "13"
 	},
-	"media": [],
+	"media": [
+		{
+			"type": "setup",
+			"url": "modules/rpgm-forge/assets/d20-512x512.webp",
+			"thumbnail": "modules/rpgm-forge/assets/d20-512x512.webp"
+		}
+	],
 	"languages": [
 		{
 			"lang": "en",

@@ -110,4 +110,10 @@ export class ChatCommands {
 		this.chatPanel.mount(panelContainer);
 	}
 
+	/** Removes all messages that are no longer in the game */
+	prune() {
+		for (const handler of this.messageHandlers)
+			handler.prune();
+	}
+
 }

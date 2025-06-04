@@ -1,6 +1,6 @@
 import { RpgmModule } from "#/module";
 import { inputHeuristics } from "#/radial-menu";
-import { RPGMLogger } from "#/util/logging";
+import { RPGMLogger } from "#/util/LoggingV2";
 
 /**
  * @todo Store generated lore objects
@@ -23,7 +23,7 @@ export class RpgmVault extends RpgmModule {
 			tooltip: "RPGM_VAULT.RADIAL_MENU.SAVE",
 			detective: (context) => inputHeuristics(context).noNumber().result,
 			callback: () => {
-				rpgm.logger.logU("Saving this value...");
+				rpgm.logger.visible.log("Saving this value...");
 			}
 		});
 		rpgm.radialMenu.registerInputButton({
@@ -31,7 +31,7 @@ export class RpgmVault extends RpgmModule {
 			icon: 'fa fa-crosshairs-simple',
 			tooltip: "RPGM_VAULT.RADIAL_MENU.ANALYZE",
 			detective: (context) => inputHeuristics(context).noNumber().result,
-			callback: () => rpgm.logger.logU("Analyzing this value...")
+			callback: () => rpgm.logger.visible.log("Analyzing this value...")
 		});
 	}
 }

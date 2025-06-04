@@ -2,7 +2,7 @@
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 import { useSetting } from '#/util';
 
-const init = rpgm.forge!.promptChats.useChatWizard(), { close } = init;
+const init = rpgm.forge.promptChats.useChatWizard(), { close } = init;
 
 const localize = rpgm.localize;
 
@@ -17,7 +17,7 @@ const save = () => {
 	genre.save();
 	method.save();
 	game.settings.set("rpgm-forge", "has_been_prompted", true);
-	rpgm.forge?.logger.logU(rpgm.localize("RPGM_FORGE.INIT.SAVED"));
+	rpgm.forge.logger.visible.log(rpgm.localize("RPGM_FORGE.INIT.SAVED"));
 	close();
 };
 

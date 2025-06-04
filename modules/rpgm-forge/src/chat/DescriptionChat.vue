@@ -3,7 +3,7 @@ import { ForgeDescription } from '@rpgm/forge';
 import DiceButton from '#/radial-menu/DiceButton.vue';
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 
-const description = rpgm.forge!.descriptionsChats.useChatWizard(), { data } = description;
+const description = rpgm.forge.descriptionsChats.useChatWizard(), { data } = description;
 const loading = ref(false);
 
 const contentRef = useTemplateRef("content");
@@ -18,17 +18,17 @@ async function generate() {
 	const oldDesc = data.description;
 	data.description = "";
 
-	const result = await rpgm.forge!.queue.generate(ForgeDescription, {
+	const result = await rpgm.forge.queue.generate(ForgeDescription, {
 		name: data.name ?? "",
 		type: data.type,
-		system: rpgm.forge!.system,
-		language: rpgm.forge!.language,
-		genre: rpgm.forge!.genre,
+		system: rpgm.forge.system,
+		language: rpgm.forge.language,
+		genre: rpgm.forge.genre,
 		length: 'short',
 		notes: ''
 	});
 
-	if (!result.success) rpgm.forge?.logger.errorU(result.error);
+	if (!result.success) rpgm.forge.logger.visible.error(result.error);
 
 	data.description = result.success ? result.output : oldDesc;
 	rpgm.chat.updateScroll();
@@ -54,7 +54,7 @@ const context = ref<ButtonContext>({
 function copy() {
 	try {
 		void navigator.clipboard.writeText(`# ${data.name ? `${data.name} – ` : ''}${data.type}\n${data.description}`);
-		rpgm.forge!.logger.logU("Copied description to clipboard!");
+		rpgm.forge.logger.visible.log("Copied description to clipboard!");
 	} catch { return; }
 }
 

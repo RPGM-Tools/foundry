@@ -21,5 +21,11 @@ export default function() {
 					whisper: game.userId,
 					speaker: { alias: "RPGM Tools" },
 				});
-			})));
+			})).executes(() => {
+				ChatMessage.create({
+					content: "<h3>Hello, Topic 0!</h3>",
+					whisper: game.userId,
+					speaker: { alias: "RPGM Tools" },
+				});
+			}));
 }

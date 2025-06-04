@@ -71,7 +71,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	 */
 	private messageId(message: ChatMessage): string {
 		//@ts-expect-error Types broken for flags
-		return message.getFlag(this.moduleId, this.key);
+		return message.getFlag(this.moduleId, this.key) || "";
 	}
 
 	/**
@@ -90,7 +90,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	 * @returns Whether or not the message was rendered
 	 */
 	render(message: ChatMessage, html: HTMLElement): boolean {
-		const id = this.messageId(message);
+		const id = this.messageId(message)!;
 		const data = this.data.get(id);
 
 		if (!data) {
@@ -130,6 +130,18 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 		const data = game.settings.get(this.moduleId, this.key) as string;
 		this.data = data ? new Map(Object.entries(JSON.parse(data) as typeof this.data)) : new Map();
 		rpgm.chat.registerMessageHandler(this);
+		rpgm.logger.debug(`Loaded ${this.key} wizard with ${this.data.size} messages`);
+	}
+
+	/** Removes any messages that no longer exist */
+	prune() {
+		const old_length = this.data.size;
+		const message_ids = game.messages.map(m => this.messageId(m));
+		this.data = new Map([...this.data]
+			.filter(([id]) => message_ids.includes(id)));
+		this.save();
+		if (old_length > this.data.size)
+			rpgm.logger.debug(`Pruned ${this.key} wizard with ${old_length - this.data.size} messages`);
 	}
 
 	/** Sync this database's data to localStorage */

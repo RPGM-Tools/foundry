@@ -3,11 +3,7 @@ import RadialMenuFloating from './RadialMenuFloating.vue';
 
 /** Injects code to render the dice hud */
 export function injectTokenHUD() {
-	const func = TokenHUD.prototype["_replaceHTML"];
-	TokenHUD.prototype._replaceHTML = function(element: JQuery, html: JQuery) {
-		func.call(this, element, html);
-		renderTokenHUD.call(this, element, html);
-	};
+	Hooks.on("renderTokenHUD", renderTokenHUD);
 }
 
 /**

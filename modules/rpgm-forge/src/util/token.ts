@@ -9,7 +9,7 @@ export function getSelectedToken(): Token | undefined {
 	if (canvas.tokens!.controlled.length === 1) {
 		return canvas.tokens!.controlled[0];
 	} else {
-		rpgm.forge!.logger.errorU(rpgm.localize("RPGM_FORGE.ERORRS.TOKEN_SELECT"));
+		rpgm.forge.logger.visible.error(rpgm.localize("RPGM_FORGE.ERORRS.TOKEN_SELECT"));
 		return undefined;
 	}
 }
@@ -26,9 +26,9 @@ export function chatDescription(prompt?: { type: string, name?: string }) {
 		if (!token) return;
 		const actor = token.actor;
 		if (!actor || !actor.name) return;
-		void rpgm.forge!.descriptionsChats.newMessage({ name: "", tokenId: token.id, description: "", type: actor.name });
+		void rpgm.forge.descriptionsChats.newMessage({ name: "", tokenId: token.id, description: "", type: actor.name });
 	} else {
-		void rpgm.forge!.descriptionsChats.newMessage({ description: "", type: prompt.type, name: prompt.name });
+		void rpgm.forge.descriptionsChats.newMessage({ description: "", type: prompt.type, name: prompt.name });
 	}
 }
 
@@ -43,14 +43,14 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
 		token ??= getSelectedToken();
 		if (token) {
 			const protoToken = token.actor?.prototypeToken;
-			rpgm.forge?.logger.debug(protoToken);
-			if (!protoToken?.name) { rpgm.forge?.logger.errorU("Token has no name!"); return; }
-			void rpgm.forge!.namesChats.newMessage({ tokenId: token.id, names: [], prompt: protoToken.name });
+			rpgm.forge.logger.debug(protoToken);
+			if (!protoToken?.name) { rpgm.forge.logger.visible.error("Token has no name!"); return; }
+			void rpgm.forge.namesChats.newMessage({ tokenId: token.id, names: [], prompt: protoToken.name });
 		}
 	}
 	// User has a name for us to use
 	else {
-		void rpgm.forge!.namesChats.newMessage({ names: [], prompt });
+		void rpgm.forge.namesChats.newMessage({ names: [], prompt });
 	}
 }
 
@@ -68,9 +68,9 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 	const options: NamesOptions = {
 		quantity: 4,
 		gender: "neutral",
-		genre: rpgm.forge!.genre,
-		method: rpgm.forge!.method,
-		language: rpgm.forge!.language,
+		genre: rpgm.forge.genre,
+		method: rpgm.forge.method,
+		language: rpgm.forge.language,
 		type: type ?? protoToken.name
 	};
 
@@ -81,10 +81,10 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 		void shimmerFilter.fadeIn(500);
 	}
 
-	const result = await rpgm.forge!.queue.generate(ForgeNames, options);
+	const result = await rpgm.forge.queue.generate(ForgeNames, options);
 
 	if (!result.success)
-		rpgm.forge!.logger.errorU(result.error);
+		rpgm.forge.logger.error(result.error);
 
 	if (shimmerFilter)
 		void shimmerFilter.fadeOut(500);
