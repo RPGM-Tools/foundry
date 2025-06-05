@@ -30,7 +30,7 @@ const rename = (n: string) => {
 	<div class="rpgm-homebrew-title-container" :editing @click="emit('click', $event)">
 		<ContentEditable v-slot="config" v-model:editing="editingTitle" :model-value="currentTitle" :multiline="false"
 			@update:model-value="rename">
-			<WriteOnTransition :enabled="!editingTitle" :duration="400">
+			<WriteOnTransition :appear="true" :enabled="!editingTitle" :duration="400">
 				<h1 :key="currentTitle" :ref="config.ref" :contenteditable="config.contenteditable"
 					class="rpgm-homebrew-title rpgm-radial-ignore" @keydown="config.onKeydown" @blur="config.onBlur">
 					{{ currentTitle }}

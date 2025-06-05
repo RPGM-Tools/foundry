@@ -25,9 +25,18 @@ function getSchema(name?: string): ForgeChatHomebrew {
 			genre: rpgm.forge.genre,
 			system: rpgm.forge.system,
 			language: rpgm.forge.language,
-			schema: structuredClone(rpgm.forge.homebrewSchemas.find((v) => {
+			schema: name ? structuredClone(rpgm.forge.homebrewSchemas.find((v) => {
 				return v.name.toLowerCase().trim() === name?.toLowerCase().trim();
-			}))
+			})) ?? {
+				name,
+				fields: [
+					{
+						name: "[Name]",
+						type: "short",
+						description: "[Description]"
+					}
+				]
+			} : undefined
 		},
 		activeGeneration: "",
 		generations: {}

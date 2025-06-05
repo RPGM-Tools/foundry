@@ -27,6 +27,14 @@
 	flex: 1 1 100% !important;
 }
 
+.rpgm-help {
+	code {
+		background: #aaa;
+		border-radius: 3px;
+		padding: 1px 2px;
+	}
+}
+
 .rpgm-button {
 	margin-top: 2px;
 	transition: background 150ms ease;

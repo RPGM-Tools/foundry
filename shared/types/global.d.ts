@@ -20,7 +20,7 @@ declare global {
 
 	namespace Hooks {
 		interface StaticCallbacks {
-			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
+			// renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
 			renderSettingsConfig: (settingsConfig: SettingsConfig, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
 			renderChatMessageHTML: (message: ChatMessage, html: HTMLElement, context: object) => void
 			"rpgm-init": () => void

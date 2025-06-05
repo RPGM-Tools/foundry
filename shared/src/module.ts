@@ -142,6 +142,16 @@ export abstract class RpgmModule {
 	static globalReady() {
 		rpgm.radialMenu.update();
 		rpgm.chat.prune();
+
+		const center = (s: string) => {
+			return s.padStart(s.length + Math.floor((48 - s.length) / 2));
+		};
+
+		const splitJustify = (s: string) => {
+			const [left, right] = s.split("%s");
+			const spaces = Math.floor(48 - left.length);
+			return `${left}${right.padStart(spaces)}`;
+		};
 		const asciiArt = (String.raw`
  ____  ____   ____ __  __  _              _     
 |  _ \|  _ \ / ___|  \/  || |_ ___   ___ | |___ 
@@ -149,7 +159,8 @@ export abstract class RpgmModule {
 |  _ <|  __/| |_| | |  | || || (_) | (_) | \__ \
 |_| \_\_|    \____|_|  |_(_)__\___/ \___/|_|___/
 ————————————————————————————————————————————————
-${Object.values(rpgm.modules).map(m => `‣ ${m.icon} ${m.name} – v${m.version}`).join('\n')}`).slice(1);
+${center(`© 2025 RPGM Tools, LLC`)}
+${Object.values(rpgm.modules).map(m => splitJustify(` ${m.icon} ${m.name} %s v${m.version} `)).join('\n')}`).slice(1);
 
 		rpgm.logger.styled("color: #d44e7b; font-weight: bold;").prefixed("").log(asciiArt);
 	}

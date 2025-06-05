@@ -1,9 +1,40 @@
 import { argument, choice, literal } from "brigadier-ts-lite";
 
 const topics: Record<string, string> = {
-	"topic1": "<h3>Hello, Topic 1!</h3>",
-	"topic2": "<h3>Hello, Topic 2!</h3>",
-	"topic3": "<h3>Hello, Topic 3!</h3>"
+	"names": `
+<div class="rpgm-help">
+	<h3>Help - Names</h3>
+	<p>Names can be generated for the selected token by running <code>/names</code>.<p>
+	<p>Alternatively, names can be generated for a specific type by running <code>/names &lt;type&gt</code>.</p>
+	<p>Names can be generated offline by setting Method to "Simple" in the module settings.</p>
+</div>
+`.trim(),
+	"description": `
+<div class="rpgm-help">
+	<h3>Help - Description</h3>
+	<p>Descriptions can be generated for the selected token by running <code>/description</code>.</p>
+	<p>Alternatively, descriptions can be generated for a specific type by running <code>/description &lt;type&gt</code>.</p>
+</div>
+`.trim(),
+	"homebrew": `
+<div class="rpgm-help">
+	<h3>Help - Homebrew</h3>
+	<p>
+		Homebrew can be generated for the selected token by running <code>/homebrew &lt;type&gt</code>.
+		<br>
+		If no type is provided, one will be selected randomly.
+	</p>
+	<p>
+		Homebrew is generated via a list of fields. While on the edit page, you can add, remove, and reorder fields.
+		You can edit a field's name and description, as well as what type it represents.
+	</p>
+	<p>
+		After generating, you will see the homebrew in the viewer.
+		You can copy an individual field, or the entire homebrew in markdown format.
+		You can send the generation to journal for viewing later.
+	</p>
+</div>
+`.trim(),
 };
 
 export function registerHelpSubmenu(_options: {
@@ -23,7 +54,17 @@ export default function() {
 				});
 			})).executes(() => {
 				ChatMessage.create({
-					content: "<h3>Hello, Topic 0!</h3>",
+					content: `
+<div class="rpgm-help">
+	<h2>Help - Commands</h2>
+	<p>Run <code>/help &lt;topic&gt</code> to get help on a specific topic.</p>
+	<ul>
+		<li>names - generate names for tokens</li>
+		<li>description - generate descriptions for tokens</li>
+		<li>homebrew - generate anything</li>
+	</ul>
+</div>
+`.trim(),
 					whisper: game.userId,
 					speaker: { alias: "RPGM Tools" },
 				});

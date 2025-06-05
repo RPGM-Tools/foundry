@@ -99,6 +99,8 @@ export async function quickNameToken(tokenDocument: TokenDocument) {
 	const result = await generateTokenNames(tokenDocument);
 	if (result.success)
 		await nameToken(tokenDocument, result.output[0]);
+	else
+		rpgm.forge.logger.visible.error(result.error);
 }
 
 /**
@@ -107,11 +109,13 @@ export async function quickNameToken(tokenDocument: TokenDocument) {
  * @param name - The name to apply to the token
  */
 export async function nameToken(tokenDocument: TokenDocument, name: string) {
+	const oldName = tokenDocument.name;
 	//@ts-expect-error Unsafe updating of tokenDocument
 	await tokenDocument.update({ name }, {});
 	if (game.settings.get("rpgm-forge", "rename_actors")) {
 		//@ts-expect-error Unsafe updating of tokenDocument.actor
 		await tokenDocument.actor?.update({ name }, {});
+		rpgm.forge.logger.visible.log(`Renamed ${oldName} to ${name}`);
 	}
 }
 

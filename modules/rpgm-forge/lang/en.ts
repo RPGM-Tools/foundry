@@ -24,7 +24,7 @@ export default {
 			METHOD: "Method",
 			METHOD_HINT: "Whether to use AI generation when available.",
 			METHOD_AI: "AI",
-			METHOD_SIMPLE: "Manual",
+			METHOD_SIMPLE: "Simple",
 		},
 		RADIAL_MENU: {
 			D4: "Roll a D4",

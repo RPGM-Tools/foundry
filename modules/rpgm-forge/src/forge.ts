@@ -84,7 +84,6 @@ export class RpgmForge extends RpgmModule {
 	 * Also where Radial Menu buttons and RP-Commands are registered (might change)
 	 */
 	override async registerSettings(): Promise<void> {
-		command();
 		game.settings.register("rpgm-forge", "auto_name", {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.AUTO_NAME"),
 			hint: rpgm.localize("RPGM_FORGE.CONFIG.AUTO_NAME_HINT"),
@@ -141,7 +140,7 @@ export class RpgmForge extends RpgmModule {
 			type: String,
 			config: true
 		});
-		rpgm.chat.registerCommand(literal("name")
+		rpgm.chat.registerCommand(literal("names")
 			.then(argument("prompt", string("greedy_phrase")).executes(c => {
 				void chatTokenNames(undefined, c.get<string>("prompt"));
 			})).executes(() => {
@@ -160,6 +159,7 @@ export class RpgmForge extends RpgmModule {
 						name: token.name ? token.name !== token.actor!.prototypeToken.name ? token.name : "" : ""
 					});
 			}));
+		command();
 		rpgm.radialMenu.registerCategory("rpgm_forge", { color: "276deg" });
 		rpgm.radialMenu.registerInputButton({
 			category: rpgm.radialMenu.categories.rpgm_forge,

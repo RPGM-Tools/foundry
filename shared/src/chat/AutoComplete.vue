@@ -9,8 +9,6 @@ const CHAT_MESSAGE = '#chat-message';
 const messageHook = ref(-1);
 const chatInput = ref<HTMLTextAreaElement>();
 const chatValue = ref("");
-const commandListRef = useTemplateRef<HTMLElement>("command-list");
-const hasFocus = ref(false);
 const observer = ref<MutationObserver | null>();
 const targetParent = ref<HTMLElement | null>();
 const parseResult = ref<ParseResults>();
@@ -22,17 +20,15 @@ const Statuses = {
 	warn: "#ffae00",
 };
 
-const isOpen = computed(() => {
-	return hasFocus.value
-		&& chatValue.value.length > 0;
-});
-
 const suggestions = computed<Suggestions>(() => {
 	if (!parseResult.value) return Suggestions.EMPTY;
-	return rpgm.chat.getCompletionSuggestions(parseResult.value);
+	const completions = rpgm.chat.getCompletionSuggestions(parseResult.value);
+	// completions.suggestions.sort((a, b) => a.tooltip.localeCompare(b.tooltip)).reverse();
+	return completions;
 });
 
 const status = computed(() => {
+	if (completionIndex.value >= 0 && completionIndex.value < suggestions.value.suggestions.length) return Statuses.okay;
 	const errors = parseResult.value?.errors;
 	if (errors && errors.size > 0)
 		return Statuses.warn;
@@ -50,7 +46,6 @@ const statusStyle = computed<StyleValue>(() => {
  * @param e - Keyboard event
  */
 function onKeyDown(e: KeyboardEvent) {
-	hasFocus.value = true;
 	switch (e.key) {
 		case "Enter": {
 			break;
@@ -113,9 +108,12 @@ function fillInSuggestion(completion: typeof suggestions.value.suggestions['0'] 
  * @param _chatData.speaker - (unused)
  * @returns True if the command was executed, else void
  */
-function handleMessage(_log: ChatLog, message: string, _chatData: { user: string, speaker: ReturnType<ChatMessage.ImplementationClass["getSpeaker"]> }): boolean | void {
-	if (message.startsWith('*')) {
+function handleMessage(log: ChatLog, message: string, _chatData: { user: string, speaker: ReturnType<ChatMessage.ImplementationClass["getSpeaker"]> }): boolean | void {
+	if (message.trimStart().startsWith('*')) {
 		chatValue.value = "";
+		setTimeout(() => {
+			onInput();
+		}, 10)
 		try {
 			rpgm.chat.execute(message.slice(1));
 		} catch {
@@ -123,38 +121,32 @@ function handleMessage(_log: ChatLog, message: string, _chatData: { user: string
 		}
 		return false;
 	}
+	// Handle escaping commands
+	else if (message.startsWith('\\*')) {
+		setTimeout(() => {
+			log.collection.forEach(message => {
+				if (message.content.startsWith('\\*'))
+					// @ts-expect-error This is fine
+					message.update({ content: message.content.slice(1) }, {});
+			});
+		}, 100);
+	}
 }
 
 /** When a character is typed, parse the input */
 function onInput() {
-	hasFocus.value = true;
 	completionIndex.value = -1;
 	if (chatInput.value?.value === undefined) return;
 	chatValue.value = chatInput.value.value;
 	completionCursor.value = chatValue.value.length;
-	if (!chatValue.value.startsWith('*')) parseResult.value = undefined;
-	else parseResult.value = rpgm.chat.parse(chatValue.value.slice(1, completionCursor.value >= 0 ? completionCursor.value : undefined));
-}
-
-/**
- * Handle focus out, ignore when focus moves to commmand list
- * @param e - Focus event
- */
-function onFocusOut(e: FocusEvent) {
-	if (e.relatedTarget) {
-		if (!commandListRef.value?.contains(e.relatedTarget as Node)) {
-			hasFocus.value = false;
-		}
-	} else
-		hasFocus.value = false;
+	if (!chatValue.value.trimStart().startsWith('*')) parseResult.value = undefined;
+	else parseResult.value = rpgm.chat.parse(chatValue.value.trimStart().slice(1, completionCursor.value >= 0 ? completionCursor.value : undefined));
 }
 
 onMounted(() => {
 	chatInput.value = document.querySelector("#chat-message") as HTMLTextAreaElement;
 	chatInput.value?.addEventListener("input", onInput, true);
 	chatInput.value?.addEventListener("keydown", onKeyDown);
-	chatInput.value?.addEventListener("focusin", () => hasFocus.value = true);
-	chatInput.value?.addEventListener("focusout", onFocusOut);
 
 	observer.value = new MutationObserver(() => {
 		const newParent = chatInput.value?.parentElement;
@@ -186,15 +178,13 @@ const commandStyles = computed<StyleValue[]>(() => {
 onUnmounted(() => {
 	chatInput.value?.removeEventListener("input", onInput);
 	chatInput.value?.removeEventListener("keydown", onKeyDown);
-	chatInput.value?.removeEventListener("focusin", () => hasFocus.value = true);
-	chatInput.value?.removeEventListener("focusout", onFocusOut);
 	observer.value?.disconnect();
 });
 </script>
 
 <template>
-	<div ref="" v-follow="CHAT_MESSAGE" style="position: relative">
-		<div ref="command-list" :open="isOpen" class="rpgm-chat-commands-container">
+	<div v-follow="CHAT_MESSAGE" style="position: relative">
+		<div class="rpgm-chat-commands-container">
 			<div :style="statusStyle" class="rpgm-chat-commands-status" />
 			<TransitionGroup name="rpgm-chat-command" reversed tag="ul" class="rpgm-chat-commands">
 				<li v-for="(completion, i) in suggestions.suggestions" :key="`${completion.text}`" :style="commandStyles[i]"
@@ -227,9 +217,13 @@ onUnmounted(() => {
 	padding: 0;
 }
 
-.rpgm-chat-commands-container[open="true"]:has(.rpgm-chat-command) {
-	opacity: 1;
-	visibility: visible;
+/* Show commands on focus or when clicking the command list */
+.rpgm-chat-commands-container:focus-within,
+#chat-form:has(#chat-message:focus) {
+	.rpgm-chat-commands-container:has(.rpgm-chat-command) {
+		opacity: 1;
+		visibility: visible;
+	}
 }
 
 .rpgm-chat-commands-status {
