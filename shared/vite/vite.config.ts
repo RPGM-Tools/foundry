@@ -50,7 +50,6 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 			"**/*.glsl"
 		],
 		envPrefix: "RPGM_",
-		keepProcessEnv: false,
 		build: {
 			assetsInlineLimit: ((path: string) => [".glsl", ".png"].some(f => path.startsWith(f))),
 			outDir: resolve(dirname, ".dist"),

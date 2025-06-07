@@ -108,12 +108,12 @@ function fillInSuggestion(completion: typeof suggestions.value.suggestions['0'] 
  * @param _chatData.speaker - (unused)
  * @returns True if the command was executed, else void
  */
-function handleMessage(log: ChatLog, message: string, _chatData: { user: string, speaker: ReturnType<ChatMessage.ImplementationClass["getSpeaker"]> }): boolean | void {
+function handleMessage(_log: ChatLog, message: string, _chatData: { user: string, speaker: ReturnType<ChatMessage.ImplementationClass["getSpeaker"]> }): boolean | void {
 	if (message.trimStart().startsWith('*')) {
 		chatValue.value = "";
 		setTimeout(() => {
 			onInput();
-		}, 10)
+		}, 10);
 		try {
 			rpgm.chat.execute(message.slice(1));
 		} catch {
@@ -124,9 +124,8 @@ function handleMessage(log: ChatLog, message: string, _chatData: { user: string,
 	// Handle escaping commands
 	else if (message.startsWith('\\*')) {
 		setTimeout(() => {
-			log.collection.forEach(message => {
+			game.messages.forEach(message => {
 				if (message.content.startsWith('\\*'))
-					// @ts-expect-error This is fine
 					message.update({ content: message.content.slice(1) }, {});
 			});
 		}, 100);

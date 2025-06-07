@@ -31,13 +31,8 @@ declare global {
 	/**
 	 * Override for injecting the Radial Menu into TokenHUD
 	 */
-	class TokenHUD<Options extends Application.Options = Application.Options> extends BasePlaceableHUD<
-		Token.Object,
-		Options
-	> {
-		menuApp: App;
-		/** Make _replaceHTML public to monkey-patch it */
-		public _replaceHTML(element: JQuery<HTMLElement> | HTMLElement, html: JQuery): void;
+	interface TokenHUD {
+		menuApp: App
 	}
 }
 

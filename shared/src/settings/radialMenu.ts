@@ -24,6 +24,7 @@ export class RadialMenuSettings extends RPGMSettingsMenu {
 	static override registerMenu(id: string) {
 		game.settings.registerMenu(id, this.DEFAULT_OPTIONS.id!, {
 			name: RadialMenuSettings.name,
+			restricted: false,
 			label: RadialMenuSettings.label,
 			hint: RadialMenuSettings.hint,
 			icon: this.icon,

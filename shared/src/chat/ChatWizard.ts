@@ -56,7 +56,6 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 			speaker: { alias: this.title },
 			whisper: game.userId,
 			content: this.placeholder,
-			//@ts-expect-error Types broken for flags
 			flags: { [this.moduleId]: { [this.key]: id } }
 		}, { broadcast: false });
 		ui.chat.activate();
@@ -95,7 +94,6 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 
 		if (!data) {
 			rpgm.logger.warn(`No data found for ${this.key} wizard with id ${id}, deleting...`);
-			//@ts-expect-error Types broken
 			message.delete({});
 			return false;
 		}
@@ -116,7 +114,6 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	delete(message: ChatMessage) {
 		this.data.delete(this.messageId(message));
 		this.save();
-		// @ts-expect-error This is fine
 		message.delete({});
 	}
 

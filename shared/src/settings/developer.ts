@@ -24,6 +24,7 @@ export class DeveloperSettings extends RPGMSettingsMenu {
 	static override registerMenu(id: string) {
 		game.settings.registerMenu(id, this.DEFAULT_OPTIONS.id!, {
 			name: DeveloperSettings.name,
+			restricted: false,
 			label: DeveloperSettings.label,
 			hint: DeveloperSettings.hint,
 			icon: this.icon,

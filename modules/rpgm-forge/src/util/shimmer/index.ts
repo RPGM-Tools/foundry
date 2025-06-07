@@ -55,6 +55,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 		this.fadingOut = false;
 		this.token = token;
 		this.token.draw().then(t => {
+			if (!t.mesh) return;
 			if (t.mesh.filters)
 				t.mesh.filters.push(this);
 			else
@@ -111,8 +112,8 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 				this.uniforms.fade = 1 - progress;
 				if (progress >= 1) {
 					canvas.app?.ticker.remove(animate, this);
-					const i = this.token.mesh.filters?.indexOf(this) ?? -1;
-					this.token.mesh.filters?.splice(i, 1);
+					const i = this.token.mesh?.filters?.indexOf(this) ?? -1;
+					this.token.mesh?.filters?.splice(i, 1);
 					ShimmerFilter.shimmering.delete(this.token);
 					resolve();
 				}

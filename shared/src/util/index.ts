@@ -22,7 +22,7 @@ type SettingsRef<T> = {
 export function useSetting<
 	N extends ClientSettings.Namespace,
 	K extends ClientSettings.KeyFor<N>,
-	V extends ClientSettings.SettingAssignmentType<N, K>,
+	V extends ClientSettings.SettingCreateData<N, K>,
 	KV extends keyof SettingConfig>(
 		path: KV,
 	) {

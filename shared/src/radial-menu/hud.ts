@@ -1,4 +1,4 @@
-import type { Reactive, Component } from 'vue';
+import type { ShallowReactive, Component } from 'vue';
 import RadialMenuFloating from './RadialMenuFloating.vue';
 
 /** Injects code to render the dice hud */
@@ -29,7 +29,7 @@ function renderTokenHUD(_element: JQuery, html: JQuery | HTMLElement) {
 	hud.menuApp = createApp(RadialMenuFloating as Component);
 	hud.menuApp.provide<HTMLElement>('element', htmlElement);
 	hud.menuApp.provide<RadialButton<TokenHudContext>[]>('buttons', rpgm.radialMenu.tokenHudButtons);
-	hud.menuApp.provide<Reactive<TokenHudContext>>('context', shallowReactive({
+	hud.menuApp.provide<ShallowReactive<TokenHudContext>>('context', shallowReactive({
 		loading: false,
 		shift: false,
 		element: htmlElement,

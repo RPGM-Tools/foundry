@@ -24,6 +24,7 @@ export class SecretsSettings extends RPGMSettingsMenu {
 	static override registerMenu(id: string) {
 		game.settings.registerMenu(id, this.DEFAULT_OPTIONS.id!, {
 			name: SecretsSettings.name,
+			restricted: false,
 			label: SecretsSettings.label,
 			hint: SecretsSettings.hint,
 			icon: this.icon,

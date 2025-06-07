@@ -110,10 +110,8 @@ export async function quickNameToken(tokenDocument: TokenDocument) {
  */
 export async function nameToken(tokenDocument: TokenDocument, name: string) {
 	const oldName = tokenDocument.name;
-	//@ts-expect-error Unsafe updating of tokenDocument
 	await tokenDocument.update({ name }, {});
 	if (game.settings.get("rpgm-forge", "rename_actors")) {
-		//@ts-expect-error Unsafe updating of tokenDocument.actor
 		await tokenDocument.actor?.update({ name }, {});
 		rpgm.forge.logger.visible.log(`Renamed ${oldName} to ${name}`);
 	}

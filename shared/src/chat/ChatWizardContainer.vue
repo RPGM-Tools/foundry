@@ -10,7 +10,6 @@ onMounted(() => {
 		// Null check just in case
 		element?.classList.add("rpgm-close");
 		await new Promise(r => setTimeout(r, 200));
-		// @ts-expect-error This is fine
 		return del({});
 	};
 });

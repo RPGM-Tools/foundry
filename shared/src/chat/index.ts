@@ -17,7 +17,7 @@ export class ChatCommands {
 	constructor() {
 		// renderChatMessage is deprecated in v13+
 		if (rpgm.majorGameVersion <= 12)
-			Hooks.on("renderChatMessage", (message, html) => {
+			Hooks.on("renderChatMessage", (message: ChatMessage, html: JQuery) => {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
 					if (!shouldHandle) continue;
@@ -25,7 +25,7 @@ export class ChatCommands {
 				}
 			});
 		else
-			Hooks.on("renderChatMessageHTML", (message, html) => {
+			Hooks.on("renderChatMessageHTML", (message: ChatMessage, html: HTMLElement) => {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
 					if (!shouldHandle) continue;
