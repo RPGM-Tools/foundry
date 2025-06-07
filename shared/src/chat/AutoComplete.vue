@@ -218,6 +218,7 @@ onUnmounted(() => {
 
 /* Show commands on focus or when clicking the command list */
 .rpgm-chat-commands-container:focus-within,
+.chat-form:has(#chat-message:focus),
 #chat-form:has(#chat-message:focus) {
 	.rpgm-chat-commands-container:has(.rpgm-chat-command) {
 		opacity: 1;

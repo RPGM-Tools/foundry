@@ -94,7 +94,7 @@ export class RpgmForge extends RpgmModule {
 		game.settings.register("rpgm-forge", "rename_actors", {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.RENAME_ACTORS"),
 			hint: rpgm.localize("RPGM_FORGE.CONFIG.RENAME_ACTORS_HINT"),
-			default: false,
+			default: true,
 			scope: "world",
 			type: Boolean,
 			config: true,

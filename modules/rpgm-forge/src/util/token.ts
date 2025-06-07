@@ -113,7 +113,7 @@ export async function nameToken(tokenDocument: TokenDocument, name: string) {
 	await tokenDocument.update({ name }, {});
 	if (game.settings.get("rpgm-forge", "rename_actors")) {
 		await tokenDocument.actor?.update({ name }, {});
-		rpgm.forge.logger.visible.log(`Renamed ${oldName} to ${name}`);
+		rpgm.forge.logger.debug(`Renamed ${oldName} to ${name}`);
 	}
 }
 
