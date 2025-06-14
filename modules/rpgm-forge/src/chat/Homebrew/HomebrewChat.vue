@@ -83,7 +83,7 @@ const buttons = computed<RadialButton[]>(() =>
 				icon: "fa-regular fa-info-circle",
 				tooltip: "RPGM_TOOLS.RADIAL_MENU.INFO",
 				detective(c) { return inputHeuristics(c as InputContext).isDebug().result; },
-				callback() { rpgm.logger.debug(data, id); },
+				callback() { rpgm.logger.debug(toRaw(data), id); },
 			},
 		]);
 

@@ -182,7 +182,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div v-follow="CHAT_MESSAGE" style="position: relative">
+	<div id="rpgm-chat-command" v-follow="CHAT_MESSAGE" style="position: relative">
 		<div class="rpgm-chat-commands-container">
 			<div :style="statusStyle" class="rpgm-chat-commands-status" />
 			<TransitionGroup name="rpgm-chat-command" reversed tag="ul" class="rpgm-chat-commands">
@@ -219,7 +219,8 @@ onUnmounted(() => {
 /* Show commands on focus or when clicking the command list */
 .rpgm-chat-commands-container:focus-within,
 .chat-form:has(#chat-message:focus),
-#chat-form:has(#chat-message:focus) {
+#chat-form:has(#chat-message:focus),
+#chat-notifications:has(#chat-message:focus) {
 	.rpgm-chat-commands-container:has(.rpgm-chat-command) {
 		opacity: 1;
 		visibility: visible;

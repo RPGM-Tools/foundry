@@ -34,6 +34,15 @@ declare global {
 	interface TokenHUD {
 		menuApp: App
 	}
+
+	interface ChatLog {
+		_getEntryContextOptions(): {
+			name: string,
+			icon: string,
+			condition: (li: JQuery | HTMLElement) => boolean
+			callback: (message: ChatMessage) => void
+		}[]
+	}
 }
 
 export { };

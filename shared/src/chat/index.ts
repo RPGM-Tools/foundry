@@ -16,23 +16,38 @@ export class ChatCommands {
 
 	constructor() {
 		// renderChatMessage is deprecated in v13+
-		if (rpgm.majorGameVersion <= 12)
-			Hooks.on("renderChatMessage", (message: ChatMessage, html: JQuery) => {
+		Hooks.on(rpgm.majorGameVersion <= 12 ? "renderChatMessage" : "renderChatMessageHTML",
+			(message: ChatMessage, html: JQuery | HTMLElement) => {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
 					if (!shouldHandle) continue;
-					return handler.render(message, html.get(0)!);
-				}
-			});
-		else
-			Hooks.on("renderChatMessageHTML", (message: ChatMessage, html: HTMLElement) => {
-				for (const handler of this.messageHandlers) {
-					const shouldHandle = handler.query(message);
-					if (!shouldHandle) continue;
-					return handler.render(message, html);
+					rpgm.logger.debug(`Found ${message.id} to be rendered by ${handler.key} wizard`);
+					handler.render(message, rpgm.j(html));
+					return;
 				}
 			});
 		Hooks.once("ready", () => { rpgm.chat.createChatPanel(); });
+
+		// Patch chat context menu to not allow revealing wizards
+		const _getEntryContextOptions = ChatLog.prototype._getEntryContextOptions;
+		ChatLog.prototype._getEntryContextOptions = () => {
+			rpgm.logger.debug("Patching chat context menu");
+			const options = _getEntryContextOptions();
+			for (const option of options) {
+				if (option.name === "CHAT.RevealMessage") {
+					const condition = option.condition;
+					option.condition = (li: JQuery | HTMLElement) => {
+						const message = game.messages.get(rpgm.j(li).dataset.messageId!);
+						let wizard = false;
+						for (const handler of rpgm.chat.messageHandlers)
+							if (handler.query(message))
+								wizard = true;
+						return condition(li) && !wizard;
+					};
+				}
+			}
+			return options;
+		};
 	}
 
 	/**
@@ -115,5 +130,4 @@ export class ChatCommands {
 		for (const handler of this.messageHandlers)
 			handler.prune();
 	}
-
 }

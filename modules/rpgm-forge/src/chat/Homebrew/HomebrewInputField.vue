@@ -92,7 +92,7 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 
 <template>
 	<div ref="fieldContainer" :key="field.name" class="rpgm-homebrew-field-container" :editing="editing"
-		@keydown.escape.prevent="editing = false" @focusout="tryBlur">
+		@keydown.escape.capture.prevent="editing = false" @focusout="tryBlur">
 		<div class="rpgm-icons">
 			<template v-if="!editing">
 				<a title="Remove" @click="remove"><i class="fa-solid fa-trash" /></a>

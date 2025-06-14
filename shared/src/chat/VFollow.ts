@@ -1,14 +1,12 @@
 import type { Directive } from "vue";
 
-type HTMLElementO = HTMLElement & { _observer?: MutationObserver, _parent?: HTMLElement };
-
 /** Custom directive for following an html element based on a css selector, inserting itself before the target */
-export const vFollow: Directive<HTMLElementO, string> = {
+export const vFollow: Directive<HTMLElement & { _observer?: MutationObserver, _parent?: HTMLElement }, string> = {
 	mounted(el, { value: targetSelector }) {
 		el._parent = el.parentElement!;
-		const target = document.querySelector(targetSelector);
-		if (!target) return;
 		const observer = new MutationObserver(() => {
+			const target = document.querySelector(targetSelector);
+			if (!target) return;
 			const newParent = target.parentElement;
 			if (newParent !== el.parentElement) {
 				newParent?.insertBefore(el, target);
