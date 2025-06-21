@@ -28,11 +28,7 @@ declare global {
 				SAVED
 			}
 			NAMES: {
-				REGENERATE_BUTTON
 				ASSIGN_TOOLTIP
-			}
-			DESCRIPTION: {
-				REGENERATE_BUTTON
 			}
 			HOMEBREW: {
 				PLACEHOLDER
@@ -49,6 +45,7 @@ declare global {
 				START_SHIMMER
 				STOP_SHIMMER
 				DELETE
+				REGENERATE
 				COPY
 				SEND_TO_JOURNAL
 				OPEN_JOURNAL

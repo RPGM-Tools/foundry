@@ -3,24 +3,24 @@ import { argument, choice, literal } from "brigadier-ts-lite";
 const topics: Record<string, string> = {
 	"names": `
 <div class="rpgm-help">
-	<h3>Help - Names</h3>
-	<p>Names can be generated for the selected token by running <code>/names</code>.<p>
-	<p>Alternatively, names can be generated for a specific type by running <code>/names &lt;type&gt</code>.</p>
+	<h2>Help - Names</h2>
+	<p>Names can be generated for the selected token by running <code>*names</code>.<p>
+	<p>Alternatively, names can be generated for a specific type by running <code>*names &lt;type&gt</code>.</p>
 	<p>Names can be generated offline by setting Method to "Simple" in the module settings.</p>
 </div>
 `.trim(),
 	"description": `
 <div class="rpgm-help">
-	<h3>Help - Description</h3>
-	<p>Descriptions can be generated for the selected token by running <code>/description</code>.</p>
-	<p>Alternatively, descriptions can be generated for a specific type by running <code>/description &lt;type&gt</code>.</p>
+	<h2>Help - Description</h2>
+	<p>Descriptions can be generated for the selected token by running <code>*description</code>.</p>
+	<p>Alternatively, descriptions can be generated for a specific type by running <code>*description &lt;type&gt</code>.</p>
 </div>
 `.trim(),
 	"homebrew": `
 <div class="rpgm-help">
-	<h3>Help - Homebrew</h3>
+	<h2>Help - Homebrew</h2>
 	<p>
-		Homebrew can be generated for the selected token by running <code>/homebrew &lt;type&gt</code>.
+		Homebrew can be generated for the selected token by running <code>*homebrew &lt;type&gt</code>.
 		<br>
 		If no type is provided, one will be selected randomly.
 	</p>
@@ -57,7 +57,7 @@ export default function() {
 					content: `
 <div class="rpgm-help">
 	<h2>Help - Commands</h2>
-	<p>Run <code>/help &lt;topic&gt</code> to get help on a specific topic.</p>
+	<p>Run <code>*help &lt;topic&gt</code> to get help on a specific topic.</p>
 	<ul>
 		<li>names - generate names for tokens</li>
 		<li>description - generate descriptions for tokens</li>

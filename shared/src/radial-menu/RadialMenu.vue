@@ -1,17 +1,20 @@
 <template>
 	<Transition name="radial-menu-fade">
 		<div v-if="Items.length > 0" ref="root" class="radial-menu-container" :open="isOpen"
-			:style="[rootStyle, radialFloater.floatingStyles.value]" @focusout="focusOut">
-			<button ref="center" class="radial-menu-center" :style="{ width: `${centerSize}px`, height: `${centerSize}px` }"
-				:class="{ pressed: centerPressed }" @keydown.space="centerPressed = true" @keyup.space="centerPressed = false"
-				@click.prevent.stop="toggleOpen">
-				<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
-			</button>
+			:style="Items.length > 1 ? [rootStyle, radialFloater.floatingStyles.value] : ''" @focusout="focusOut">
+			<template v-if="Items.length > 1">
+				<button ref="center" :disabled="menuContext.loading" class="radial-menu-center"
+					:style="{ width: `${centerSize}px`, height: `${centerSize}px` }" :class="{ pressed: centerPressed }"
+					@keydown.space="centerPressed = true" @keyup.space="centerPressed = false" @click.prevent.stop="toggleOpen">
+					<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
+				</button>
 
-			<div class="submenu-group">
-				<DiceButton v-for="(button, index) in Items" :key="button.callback.toString()" v-model="menuContext" :button
-					:index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" @click="onSubClick" />
-			</div>
+				<div class="submenu-group">
+					<DiceButton v-for="(button, index) in Items" :key="button.callback.toString()" v-model="menuContext" :button
+						:index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" @click="onSubClick" />
+				</div>
+			</template>
+			<DiceButton v-else v-model="menuContext" :button="Items[0]" />
 		</div>
 	</Transition>
 </template>
@@ -37,19 +40,20 @@ const { buttons, padDocument = true, top = false, right = false, padding = { top
 }>();
 
 // States for menu open/close and hover
-const isOpen = ref(false);
+const open = ref(false);
+const isOpen = computed(() => Items.value.length == 1 || open.value);
 const centerPressed = ref(false);
 const root = useTemplateRef('root');
 const center = useTemplateRef('center');
 
 const observer = ref(new ResizeObserver(() => setTimeout(() => { _updateSize.value++; radialFloater.update(); }, 1)));
 watch(() => menuContext.value.element, (e) => {
-	observer.value!.observe(e);
+	observer.value?.observe(e);
 }, { immediate: true });
 
 const Items = computed(() => {
 	// Update buttons each time the menu is opened 
-	isOpen.value = Boolean(isOpen.value);
+	open.value = Boolean(open.value);
 	return buttons.filter(value => value.detective ? value.detective(menuContext.value) : true);
 });
 
@@ -116,14 +120,14 @@ const radialFloater = useFloating(toRef(menuContext.value.element), root, {
 
 /** Close radial menu */
 function onSubClick() {
-	isOpen.value = false;
+	open.value = false;
 	center.value?.blur();
 }
 
 /** Toggle radial menu */
 function toggleOpen() {
 	if (menuContext.value.loading) return;
-	isOpen.value = !isOpen.value;
+	open.value = !isOpen.value;
 	center.value?.focus();
 	radialFloater.update();
 	// Fix overlap of subsequent radial menus
@@ -137,7 +141,7 @@ function toggleOpen() {
  */
 function focusOut(event: FocusEvent) {
 	if (root.value?.contains(event.relatedTarget as HTMLElement)) return;
-	isOpen.value = false;
+	open.value = false;
 }
 
 /**

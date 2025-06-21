@@ -3,6 +3,7 @@ import { ForgeNames } from '@rpgm/forge';
 import { getSelectedToken, nameToken } from '@/util/token';
 import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
+import RadialMenu from '#/radial-menu/RadialMenu.vue';
 
 const NAMES_PER_GENERATION = 4;
 
@@ -55,6 +56,19 @@ async function generate(regenerate: boolean = false) {
 	insertValues(result.success ? result.output : oldNames);
 }
 
+const context = ref<ButtonContext>({
+	loading: false,
+	element: names.element,
+	shift: false,
+});
+
+const buttons: RadialButton[] = [{
+	category: rpgm.radialMenu.categories.rpgm_forge,
+	callback: async () => generate(true),
+	icon: "fa fa-refresh",
+	tooltip: "RPGM_FORGE.RADIAL_MENU.REGENERATE",
+}];
+
 /** 
  * Apply a name to the currently selected token
  * @param name - The name to apply
@@ -75,6 +89,10 @@ onMounted(() => {
 
 <template>
 	<ChatWizardContainer :wizard="names">
+		<div style="max-height: 40px; position: absolute; left: 95%;">
+			<RadialMenu v-model="context" :buttons :right="true" :left="true" :pad-document="false"
+				:padding="{ top: 40, right: 0 }" />
+		</div>
 		<h2>{{ data.prompt }}</h2>
 		<SkeletonParagraph :loading="false" width="100%" height="400px">
 			<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">
@@ -84,8 +102,6 @@ onMounted(() => {
 				</li>
 			</TransitionGroup>
 		</SkeletonParagraph>
-		<button :disabled="loading" :class="{ 'rpgm-button': true, 'rpgm-active': loading }"
-			@click="generate(true)">Regenerate</button>
 	</ChatWizardContainer>
 </template>
 

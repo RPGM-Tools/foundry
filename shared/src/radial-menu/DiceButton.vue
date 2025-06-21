@@ -1,6 +1,6 @@
 <template>
-	<button class="dice-button" :class="{ pressed }" @click.prevent="onClick" @keydown.space="pressed = true"
-		@keyup.space="pressed = false">
+	<button class="dice-button" :class="{ pressed, loading: context.loading }" @click.prevent="onClick"
+		@keydown.space="pressed = true" @keyup.space="pressed = false">
 		<img :src="buttonImage" :style="[colorStyle, rotationStyle]" class="button-image">
 		<i class="button-icon" :class="button.icon" />
 		<span v-if="button.tooltip" class="radial-menu-tooltip">{{ rpgm.localize(button.tooltip) }}</span>
@@ -18,7 +18,6 @@ const emit = defineEmits(['click']);
 const context = defineModel<ButtonContext>({ required: true });
 const { button, rotation = "uniform" } = defineProps<{
 	button: RadialButton<ButtonContext>,
-	index: number,
 	rotation?: "uniform" | "random"
 }>();
 
@@ -38,10 +37,12 @@ const rotationStyle = computed<StyleValue>(() =>
  * @param event - The {@link MouseEvent} used to detect the shift modifier
  */
 async function onClick(event: MouseEvent) {
+	if (context.value.loading) return;
 	emit('click');
 	context.value.loading = true;
 	context.value.shift = event.shiftKey;
 	await button.callback(context.value);
+	document.body.blur();
 	context.value.element.focus();
 	context.value.loading = false;
 }
@@ -75,9 +76,11 @@ async function onClick(event: MouseEvent) {
 	translate: -50% -50%;
 }
 
-:not(.submenu-group)>.dice-button:hover:not(:active),
-.submenu-group:not(:focus-within) .dice-button:hover,
-.dice-button:focus:not(:active) {
+/* Standalone button */
+:not(.submenu-group)>.dice-button:hover:not(:active):not(.loading),
+/* Submenu button */
+.dice-button:focus:not(.loading),
+.submenu-group:not(:focus-within) .dice-button:hover:not(.loading) {
 	opacity: 1;
 	z-index: 1;
 

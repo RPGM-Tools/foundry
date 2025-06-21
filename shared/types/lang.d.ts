@@ -8,6 +8,9 @@ declare global {
 	type LanguageSchema = { [key: string]: string | LanguageSchema }
 	export interface RpgmI18n {
 		RPGM_TOOLS: {
+			SIDEBAR: {
+				TITLE
+			},
 			LOGGING: {
 				READY
 			},

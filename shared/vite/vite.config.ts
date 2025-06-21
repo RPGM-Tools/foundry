@@ -24,6 +24,7 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 				overlay: false,
 			},
 			port: 30001,
+			allowedHosts: true,
 			proxy: {
 				[`^(?!/modules/${id})`]: `http://${env.VITE_FOUNDRY_URL}`,
 				[`^(/modules/${id}/lang)`]: `http://${env.VITE_FOUNDRY_URL}`,

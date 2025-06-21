@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { ForgeDescription } from '@rpgm/forge';
-import DiceButton from '#/radial-menu/DiceButton.vue';
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
+import RadialMenu from '#/radial-menu/RadialMenu.vue';
 
 const description = rpgm.forge.descriptionsChats.useChatWizard(), { data } = description;
 const loading = ref(false);
-
-const contentRef = useTemplateRef("content");
-watch(contentRef, (c) => context.value.element = c!, { once: true });
 
 /**
  * Generates the description
@@ -35,16 +32,25 @@ async function generate() {
 	loading.value = false;
 }
 
-const button: RadialButton<ButtonContext> = {
-	category: rpgm.radialMenu.categories.rpgm_forge,
-	callback: copy,
-	icon: "fa fa-copy",
-	tooltip: "RPGM_FORGE.RADIAL_MENU.COPY",
-};
+const buttons: RadialButton<ButtonContext>[] = [
+	{
+		category: rpgm.radialMenu.categories.rpgm_forge,
+		callback: copy,
+		detective: () => secure,
+		icon: "fa fa-copy",
+		tooltip: "RPGM_FORGE.RADIAL_MENU.COPY",
+	},
+	{
+		category: rpgm.radialMenu.categories.rpgm_forge,
+		callback: generate,
+		icon: "fa fa-refresh",
+		tooltip: "RPGM_FORGE.RADIAL_MENU.REGENERATE",
+	}
+];
 
 const context = ref<ButtonContext>({
 	loading: false,
-	element: contentRef.value!,
+	element: description.element,
 	shift: false
 });
 
@@ -67,14 +73,14 @@ const secure = window.isSecureContext;
 
 <template>
 	<ChatWizardContainer :wizard="description">
-		<div v-if="secure" style="max-height: 40px; position: absolute; left: 95%;">
-			<DiceButton v-model="context" :index="1" :button="button" />
+		<div style="max-height: 40px; position: absolute; left: 95%;">
+			<RadialMenu v-model="context" :buttons :pad-document="false" :right="true" :top="true"
+				:padding="{ top: 40, right: 0 }" />
 		</div>
 		<h2>{{ data.name ? `${data.name} – ` : "" }}{{ data.type }}</h2>
 		<Transition name="forge-description">
 			<p v-if="data.description" ref="content" tabindex="0" class="forge-description">{{ data.description }}</p>
 		</Transition>
-		<button :disabled="loading" class="rpgm-button" @click="generate">Regenerate</button>
 	</ChatWizardContainer>
 </template>
 

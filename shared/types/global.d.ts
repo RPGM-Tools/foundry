@@ -1,5 +1,6 @@
 /* eslint-disable no-var */
 import type { RpgmModule } from "#/module";
+import { MaybePromise } from "fvtt-types/utils";
 import type { App } from "vue";
 
 declare global {
@@ -28,11 +29,27 @@ declare global {
 		}
 	}
 
+	namespace CONFIG {
+		interface UI {
+			rpgm: foundry.applications.sidebar.AbstractSidebarTab
+		}
+	}
+
 	/**
 	 * Override for injecting the Radial Menu into TokenHUD
 	 */
 	interface TokenHUD {
 		menuApp: App
+	}
+
+	type RenderData = {
+		cssClass?: string,
+		cssId: string,
+		tabName?: string,
+	}
+
+	interface Application {
+		thing: number
 	}
 
 	interface ChatLog {

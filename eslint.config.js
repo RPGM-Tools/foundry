@@ -9,7 +9,7 @@ export default tslint.config([
 		extends: [
 			eslint.configs.recommended,
 			...tslint.configs.recommended,
-			jsdoclint.configs['flat/recommended-typescript'],
+			// jsdoclint.configs['flat/recommended-typescript'],
 			...vuelint.configs['flat/recommended'],
 		],
 		files: ["**/*.{ts,vue}"],
@@ -30,16 +30,16 @@ export default tslint.config([
 			"@typescript-eslint/consistent-type-imports": "warn",
 			"@typescript-eslint/no-unsafe-call": "off",
 			"@typescript-eslint/no-unsafe-member-access": "off",
-			"jsdoc/require-jsdoc": ["warn", {
-				require: {
-					ClassDeclaration: true,
-					FunctionDeclaration: true,
-					MethodDefinition: true,
-				},
-				checkConstructors: false,
-				enableFixer: false,
-			}],
-			"jsdoc/require-hyphen-before-param-description": "warn",
+			// "jsdoc/require-jsdoc": ["warn", {
+			// 	require: {
+			// 		ClassDeclaration: true,
+			// 		FunctionDeclaration: true,
+			// 		MethodDefinition: true,
+			// 	},
+			// 	checkConstructors: false,
+			// 	enableFixer: false,
+			// }],
+			// "jsdoc/require-hyphen-before-param-description": "warn",
 			"@typescript-eslint/no-unused-vars": ["error", {
 				"args": "all",
 				"argsIgnorePattern": "^_",

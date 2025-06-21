@@ -104,8 +104,8 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 		</div>
 		<ContentEditable v-slot="{ contenteditable, onBlur, onFocus, onKeydown, ref }" v-model:editing="editing"
 			:model-value="field.name" :should-blur="false" :multiline="false" @update:model-value="validateNewName">
-			<h3 :ref class="rpgm-radial-ignore" :contenteditable :tabindex="contenteditable ? 0 : -1" @blur="onBlur"
-				@focus="onFocus" @keydown="onKeydown">
+			<h3 :ref class="rpgm-radial-ignore" style="cursor: text;" :contenteditable :tabindex="contenteditable ? 0 : -1"
+				@blur="onBlur" @focus="onFocus" @keydown="onKeydown">
 				{{ field.name }}
 			</h3>
 		</ContentEditable>
@@ -199,6 +199,7 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 
 .rpgm-homebrew-field-description {
 	font-style: italic;
+	cursor: text;
 }
 
 .rpgm-homebrew-field-value:focus::placeholder {

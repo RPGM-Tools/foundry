@@ -16,7 +16,7 @@ onMounted(() => {
 </script>
 
 <template>
-	<div class="rpgm-app">
+	<div class="rpgm-app static">
 		<SavedCheck :saved />
 		<slot />
 	</div>

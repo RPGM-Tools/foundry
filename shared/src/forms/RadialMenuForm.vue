@@ -23,14 +23,14 @@ function submit() {
 		<div class="scrollable tab">
 			<h2>{{ RadialMenuSettings.name }}</h2>
 			<i>{{ RadialMenuSettings.subtitle }}</i>
-			<div class="form-group">
-				<label>{{ radialMenuInput.name }}</label>
-				<div class="form-fields">
-					<input v-model="radialMenuInput.value" type="checkbox">
-				</div>
-				<p class="hint notes">
-					{{ radialMenuInput.hint }} </p>
-			</div>
+			<!-- <div class="form-group"> -->
+			<!-- 	<label>{{ radialMenuInput.name }}</label> -->
+			<!-- 	<div class="form-fields"> -->
+			<!-- 		<input v-model="radialMenuInput.value" type="checkbox"> -->
+			<!-- 	</div> -->
+			<!-- 	<p class="hint notes"> -->
+			<!-- 		{{ radialMenuInput.hint }} </p> -->
+			<!-- </div> -->
 			<div class="form-group">
 				<label>{{ radialMenuHUD.name }}</label>
 				<div class="form-fields">

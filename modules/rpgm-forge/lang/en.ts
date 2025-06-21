@@ -2,10 +2,6 @@ export default {
 	RPGM_FORGE: {
 		NAMES: {
 			ASSIGN_TOOLTIP: "Click to assign this name to the selected token",
-			REGENERATE_BUTTON: "Regenerate",
-		},
-		DESCRIPTION: {
-			REGENERATE_BUTTON: "Regenerate",
 		},
 		HOMEBREW: {
 			PLACEHOLDER: "Leave blank to let AI decide"
@@ -35,6 +31,7 @@ export default {
 			NAMES: "Generate Name",
 			DESCRIPTION: "Generate Description",
 			DELETE: "Delete",
+			REGENERATE: "Regenerate",
 			COPY: "Copy to clipboard",
 			SEND_TO_JOURNAL: "Send to Jounal",
 			OPEN_JOURNAL: "Open Journal",

@@ -1,5 +1,8 @@
 export default {
 	RPGM_TOOLS: {
+		SIDEBAR: {
+			TITLE: "RPGM Tools"
+		},
 		LOGGING: {
 			READY: "RPGM Tools has finished loading!"
 		},
@@ -19,7 +22,7 @@ export default {
 			RADIAL_MENU_INPUT: "Radial Menu Inputs",
 			RADIAL_MENU_INPUT_HINT: "Populate compatible input fields with a radial menu.",
 			RADIAL_MENU_HUD: "Radial Menu Token HUD",
-			RADIAL_MENU_HUD_HINT: "Enable the radial menu on the token hud.",
+			RADIAL_MENU_HUD_HINT: "Enable the radial menu on the Token HUD.",
 			API_KEY: "Api Key",
 			API_KEY_HINT: "Enter your key here to sign in to RPGM Tools and unlock full functionality.",
 			RADIAL_MENU_DEBUG: "Radial Menu Debug Mode",
