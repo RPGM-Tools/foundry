@@ -3,7 +3,6 @@ import { ForgeNames } from '@rpgm/forge';
 import { getSelectedToken, nameToken } from '@/util/token';
 import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
-import RadialMenu from '#/radial-menu/RadialMenu.vue';
 
 const NAMES_PER_GENERATION = 4;
 
@@ -55,12 +54,6 @@ async function generate(regenerate: boolean = false) {
 	if (!result.success) rpgm.forge.logger.visible.error(result.error);
 	insertValues(result.success ? result.output : oldNames);
 }
-
-const context = ref<ButtonContext>({
-	loading: false,
-	element: names.element,
-	shift: false,
-});
 
 const buttons: RadialButton[] = [{
 	category: rpgm.radialMenu.categories.rpgm_forge,

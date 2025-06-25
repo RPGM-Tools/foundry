@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ForgeDescription } from '@rpgm/forge';
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
-import RadialMenu from '#/radial-menu/RadialMenu.vue';
 
 const description = rpgm.forge.descriptionsChats.useChatWizard(), { data } = description;
 const loading = ref(false);
@@ -47,12 +46,6 @@ const buttons: RadialButton<ButtonContext>[] = [
 		tooltip: "RPGM_FORGE.RADIAL_MENU.REGENERATE",
 	}
 ];
-
-const context = ref<ButtonContext>({
-	loading: false,
-	element: description.element,
-	shift: false
-});
 
 /**
  * Copies the description to clipboard
