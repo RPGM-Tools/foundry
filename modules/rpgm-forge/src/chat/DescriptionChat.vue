@@ -72,11 +72,7 @@ const secure = window.isSecureContext;
 </script>
 
 <template>
-	<ChatWizardContainer :wizard="description">
-		<div style="max-height: 40px; position: absolute; left: 95%;">
-			<RadialMenu v-model="context" :buttons :pad-document="false" :right="true" :top="true"
-				:padding="{ top: 40, right: 0 }" />
-		</div>
+	<ChatWizardContainer :wizard="description" :buttons>
 		<h2>{{ data.name ? `${data.name} – ` : "" }}{{ data.type }}</h2>
 		<Transition name="forge-description">
 			<p v-if="data.description" ref="content" tabindex="0" class="forge-description">{{ data.description }}</p>

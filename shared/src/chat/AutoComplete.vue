@@ -116,8 +116,9 @@ function handleMessage(_log: ChatLog, message: string, _chatData: { user: string
 		}, 10);
 		try {
 			rpgm.chat.execute(message.slice(1));
-		} catch {
+		} catch (e) {
 			rpgm.logger.visible.error("An error occured when executing the command!");
+			rpgm.logger.error((e as Error).message);
 		}
 		return false;
 	}

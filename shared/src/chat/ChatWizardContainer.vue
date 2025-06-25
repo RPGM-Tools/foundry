@@ -1,8 +1,18 @@
 <script setup lang="ts">
+import RadialMenu from '#/radial-menu/RadialMenu.vue';
 import SavedCheck from './SavedCheck.vue';
 import type { WizardData } from './ChatWizard';
 
-const { wizard } = defineProps<{ wizard: WizardData<object> }>(), { element, message, saved } = wizard;
+const { wizard, buttons = [] } = defineProps<{
+	wizard: WizardData<object>
+	buttons?: RadialButton[]
+}>(), { element, message, saved } = wizard;
+
+const context = ref<ButtonContext>({
+	loading: false,
+	element: wizard.element,
+	shift: false,
+});
 
 onMounted(() => {
 	const del = message["delete"].bind(message);
@@ -16,6 +26,8 @@ onMounted(() => {
 </script>
 
 <template>
+	<RadialMenu v-model="context" to=".chat-message" :buttons :top="true" :right="true" :pad-document="false"
+		:padding="{ top: 40, right: 0 }" />
 	<div class="rpgm-app static">
 		<SavedCheck :saved />
 		<slot />

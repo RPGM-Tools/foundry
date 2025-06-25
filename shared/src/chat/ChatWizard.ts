@@ -143,6 +143,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 
 	/** Sync this database's data to localStorage */
 	private save() {
+		if (!game.user.isGM) return;
 		game.settings.set(this.moduleId, this.key, JSON.stringify(Object.fromEntries(this.data)));
 		// localStorage.setItem(`${this.moduleId}.${this.key}`, JSON.stringify(Object.fromEntries(this.data)));
 	}

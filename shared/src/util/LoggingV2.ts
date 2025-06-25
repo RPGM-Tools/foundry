@@ -71,7 +71,6 @@ export class RPGMLogger<T extends keyof RPGMLogger<T> = never> {
 	 * @param formattedMessage - The message to display.
 	 */
 	private showNotification(method: "log" | "warn" | "error", formattedMessage: string) {
-		if (!game.user.isGM) return;
 		const uiMessage = formattedMessage.replace(/%c/g, "");
 		const notificationMethod = method === "log" ? "info" : method;
 		ui.notifications[notificationMethod](uiMessage, { console: false });

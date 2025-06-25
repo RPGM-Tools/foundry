@@ -88,11 +88,7 @@ onMounted(() => {
 </script>
 
 <template>
-	<ChatWizardContainer :wizard="names">
-		<div style="max-height: 40px; position: absolute; left: 95%;">
-			<RadialMenu v-model="context" :buttons :right="true" :left="true" :pad-document="false"
-				:padding="{ top: 40, right: 0 }" />
-		</div>
+	<ChatWizardContainer :wizard="names" :buttons>
 		<h2>{{ data.prompt }}</h2>
 		<SkeletonParagraph :loading="false" width="100%" height="400px">
 			<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">

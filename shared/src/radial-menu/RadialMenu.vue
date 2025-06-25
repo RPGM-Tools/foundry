@@ -1,22 +1,24 @@
 <template>
-	<Transition name="radial-menu-fade">
-		<div v-if="Items.length > 0" ref="root" class="radial-menu-container" :open="isOpen"
-			:style="Items.length > 1 ? [rootStyle, radialFloater.floatingStyles.value] : ''" @focusout="focusOut">
-			<template v-if="Items.length > 1">
-				<button ref="center" :disabled="menuContext.loading" class="radial-menu-center"
-					:style="{ width: `${centerSize}px`, height: `${centerSize}px` }" :class="{ pressed: centerPressed }"
-					@keydown.space="centerPressed = true" @keyup.space="centerPressed = false" @click.prevent.stop="toggleOpen">
-					<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
-				</button>
+	<Teleport :disabled="!teleportRef" :to="teleportRef">
+		<Transition name="radial-menu-fade">
+			<div v-if="Items.length > 0" ref="root" class="radial-menu-container" :open="isOpen"
+				:style="[rootStyle, radialFloater.floatingStyles.value]" @focusout="focusOut">
+				<template v-if="Items.length > 1">
+					<button ref="center" :disabled="menuContext.loading" class="radial-menu-center"
+						:style="{ width: `${centerSize}px`, height: `${centerSize}px` }" :class="{ pressed: centerPressed }"
+						@keydown.space="centerPressed = true" @keyup.space="centerPressed = false" @click.prevent.stop="toggleOpen">
+						<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
+					</button>
 
-				<div class="submenu-group">
-					<DiceButton v-for="(button, index) in Items" :key="button.callback.toString()" v-model="menuContext" :button
-						:index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" @click="onSubClick" />
-				</div>
-			</template>
-			<DiceButton v-else v-model="menuContext" :button="Items[0]" />
-		</div>
-	</Transition>
+					<div class="submenu-group">
+						<DiceButton v-for="(button, index) in Items" :key="button.callback.toString()" v-model="menuContext" :button
+							:index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" @click="onSubClick" />
+					</div>
+				</template>
+				<DiceButton v-else v-model="menuContext" :button="Items[0]" />
+			</div>
+		</Transition>
+	</Teleport>
 </template>
 
 <script setup lang="ts">
@@ -31,10 +33,13 @@ const MAX_CENTER_SIZE = 35;
 
 const menuContext = defineModel<ButtonContext>({ required: true });
 
-const { buttons, padDocument = true, top = false, right = false, padding = { top: 0, right: 0 } } = defineProps<{
+const teleportRef = ref<Element>();
+
+const { to = undefined, buttons, padDocument = true, top = false, right = false, padding = { top: 0, right: 0 } } = defineProps<{
 	buttons: RadialButton[]
 	top?: boolean
 	right?: boolean
+	to?: string
 	padDocument?: boolean
 	padding?: { top: number, right: number }
 }>();
@@ -49,6 +54,10 @@ const center = useTemplateRef('center');
 const observer = ref(new ResizeObserver(() => setTimeout(() => { _updateSize.value++; radialFloater.update(); }, 1)));
 watch(() => menuContext.value.element, (e) => {
 	observer.value?.observe(e);
+}, { immediate: true });
+watch(root, (v) => {
+	if (v && to)
+		teleportRef.value = v.closest(to) || undefined;
 }, { immediate: true });
 
 const Items = computed(() => {
@@ -67,10 +76,13 @@ const anchor = computed((): 'right' | 'right-start' => {
 	return 'right-start';
 });
 
-/** Expand radial menu when open, used for overflow protection */
+/**
+ * Expand radial menu when open, used for overflow protection 
+ * Forced always open when size == 1
+ */
 const rootStyle = computed(() => ({
-	width: `${isOpen.value ? radius.value * 1.7 + centerSize.value : 30}px`,
-	height: `${isOpen.value ? radius.value * 1.7 + centerSize.value : 30}px`,
+	width: `${isOpen.value && Items.value.length > 1 ? radius.value * 1.7 + centerSize.value : 30}px`,
+	height: `${isOpen.value && Items.value.length > 1 ? radius.value * 1.7 + centerSize.value : 30}px`,
 }));
 
 /* 

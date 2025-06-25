@@ -4,7 +4,6 @@ import ComboBox from "#/util/ComboBox.vue";
 import HomebrewInput from "./HomebrewInput.vue";
 import HomebrewDisplay from "./HomebrewDisplay.vue";
 import HomebrewTitle from "./HomebrewTitle.vue";
-import RadialMenu from "#/radial-menu/RadialMenu.vue";
 import { inputHeuristics } from "#/radial-menu";
 import ChatWizardContainer from "#/chat/ChatWizardContainer.vue";
 
@@ -237,9 +236,7 @@ function restoreSchemaFromActiveGeneration() {
 </script>
 
 <template>
-	<ChatWizardContainer :wizard="homebrew">
-		<RadialMenu v-if="buttonContext.element" v-model="buttonContext" :buttons :pad-document="false" :right="true"
-			:top="true" :padding="{ top: 40, right: 0 }" />
+	<ChatWizardContainer :wizard="homebrew" :buttons>
 		<HomebrewTitle ref="titleRef" v-model="currentTitle" :modified="modified && editing"
 			:can-goto-generations="hasGenerated" :editing @cycle="cycleGenerations" @goto-generations="gotoGenerations"
 			@click="restoreSchemaFromActiveGeneration" />

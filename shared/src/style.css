@@ -8,6 +8,7 @@ div#sidebar:has([data-tab="rpgm"]) {
 }
 
 .rpgm-app {
+	overflow: visible;
 	transform-origin: center;
 
 	h2 {

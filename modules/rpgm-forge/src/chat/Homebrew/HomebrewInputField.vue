@@ -85,7 +85,8 @@ function tryBlur(e: FocusEvent) {
  * @param type - New type
  */
 function changeType(type: "short" | "long" | "boolean" | "number") {
-	field.value.value = undefined;
+	if (type === "number" || type === "boolean" || field.value.type === "number" || field.value.type === "boolean")
+		field.value.value = undefined;
 	field.value.type = type;
 }
 </script>
@@ -216,8 +217,14 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 }
 
 .rpgm-homebrew-field-container .rpgm-icons {
+	background: #ffffffaa;
+	border-radius: 90px;
+	padding: 2px;
+	border: solid #dddddd 1px;
+	backdrop-filter: blur(1px);
 	direction: rtl;
 	right: 0;
+	margin-top: -4px;
 	margin-right: 4px;
 }
 
