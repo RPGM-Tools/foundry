@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ForgeHomebrew } from "@rpgm/forge";
-import ComboBox from "#/util/ComboBox.vue";
 import HomebrewInput from "./HomebrewInput.vue";
 import HomebrewDisplay from "./HomebrewDisplay.vue";
 import HomebrewTitle from "./HomebrewTitle.vue";
@@ -9,7 +8,6 @@ import ChatWizardContainer from "#/chat/ChatWizardContainer.vue";
 
 const schemas = rpgm.forge.homebrewSchemas;
 
-const modified = ref(false);
 const editing = ref(true);
 const currentTitle = computed<string>(() => {
 	if (editing.value)
@@ -19,8 +17,6 @@ const currentTitle = computed<string>(() => {
 });
 const homebrew = rpgm.forge.homebrewChats.useChatWizard(), { data, id } = homebrew;
 const loading = ref(false);
-
-const hasGenerated = computed(() => Object.keys(data.generations).length > 0);
 
 const buttonAnchor = useTemplateRef("buttonAnchor");
 
@@ -136,12 +132,6 @@ async function sendToJournal(generation: string, open: boolean = false) {
 	}
 }
 
-/** Reset modified status, scroll down if necessary */
-function newSelection() {
-	modified.value = false;
-	rpgm.chat.updateScroll();
-}
-
 /** @param generation - The generation to delete */
 function deleteGeneration(generation: string) {
 	delete data.generations[generation];
@@ -173,15 +163,6 @@ async function generate() {
 	else
 		rpgm.forge.logger.visible.error(result.error);
 	loading.value = false;
-}
-
-/**
- * Sets the active schema to a copy of {@link v}
- * @param v - The schema to select
- * @returns The new schema
- */
-function assign(v: HomebrewSchema): HomebrewSchema {
-	return structuredClone(toRaw(v));
 }
 
 /**
@@ -224,12 +205,12 @@ function restoreSchemaFromActiveGeneration() {
 		language: rpgm.forge.language,
 		schema: {
 			name: data.generations[data.activeGeneration].name,
+			custom_name: undefined,
 			fields: [
 				...data.generations[data.activeGeneration].fields.map(f => ({ name: f.name, type: f.type, description: f.description })),
 			]
 		},
 	};
-	modified.value = true;
 	editing.value = true;
 	rpgm.chat.updateScroll();
 }
@@ -237,16 +218,12 @@ function restoreSchemaFromActiveGeneration() {
 
 <template>
 	<ChatWizardContainer :wizard="homebrew" :buttons>
-		<HomebrewTitle ref="titleRef" v-model="currentTitle" :modified="modified && editing"
-			:can-goto-generations="hasGenerated" :editing @cycle="cycleGenerations" @goto-generations="gotoGenerations"
-			@click="restoreSchemaFromActiveGeneration" />
-		<ComboBox v-if="!hasGenerated" v-model="data.options.schema" placeholder="Preset" :values="schemas"
-			:unique="v => v.name" :display="v => v.name" :assign
-			:filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())" @update:model-value="newSelection" />
+		<HomebrewTitle ref="titleRef" v-model="currentTitle" :editing @cycle="cycleGenerations"
+			@goto-generations="gotoGenerations" @click="restoreSchemaFromActiveGeneration" />
 		<div ref="buttonAnchor" class="rpgm-homebrew-content">
 			<Transition name="rpgm-homebrew-main">
 				<div v-if="editing">
-					<HomebrewInput v-model:modified="modified" v-model="data.options.schema" :loading @generate="generate" />
+					<HomebrewInput v-model="data.options.schema" :loading @generate="generate" />
 				</div>
 				<div v-else-if="!editing">
 					<Transition name="rpgm-homebrew-main">

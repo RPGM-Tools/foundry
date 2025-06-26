@@ -10,16 +10,10 @@ let interval: number | null = null;
 let fromText = "";
 let toText = "";
 
-/**
- * @param el - Event Element
- */
 function onBeforeLeave(el: Element) {
 	fromText = (el as HTMLElement).innerText;
 }
 
-/**
- * @param el - Event Element
- */
 function onBeforeEnter(el: Element) {
 	toText = (el as HTMLElement).innerText;
 	(el as HTMLElement).innerText = fromText;
@@ -37,10 +31,6 @@ function commonPrefix(a: string, b: string) {
 	return i;
 }
 
-/**
- * @param el - Event Element
- * @param done - Callback when transition is finished
- */
 function onEnter(el: Element, done: () => void) {
 	if (!enabled) { return; }
 	const prefix = commonPrefix(fromText, toText);
@@ -110,6 +100,7 @@ async function writeOff(el: HTMLElement, duration: number, index: number = 0): P
 <style>
 .rpgm-write-on-transition::after {
 	content: "▮";
+	font-style: normal;
 	position: absolute;
 }
 </style>

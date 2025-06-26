@@ -29,6 +29,7 @@ function getSchema(name?: string): ForgeChatHomebrew {
 				return v.name.toLowerCase().trim() === name?.toLowerCase().trim();
 			})) ?? {
 				name,
+				custom_name: undefined,
 				fields: [
 					{
 						name: "[Name]",

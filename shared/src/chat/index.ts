@@ -21,7 +21,6 @@ export class ChatCommands {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
 					if (!shouldHandle) continue;
-					rpgm.logger.debug(`Found ${message.id} to be rendered by ${handler.key} wizard`);
 					handler.render(message, rpgm.j(html));
 					return;
 				}

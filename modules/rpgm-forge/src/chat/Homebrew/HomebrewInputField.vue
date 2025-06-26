@@ -65,7 +65,7 @@ function move(by: number) {
  * @param e - Keyboard event
  */
 function filterNumbers(e: KeyboardEvent) {
-	if (e.key.length > 1 || e.metaKey) return;
+	if (e.key.length > 1) return;
 	if (!isNaN(Number(e.key)) || e.key === ".") return;
 	e.preventDefault();
 }
@@ -112,10 +112,10 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 		</ContentEditable>
 		<ContentEditable v-slot="{ contenteditable, onBlur, onFocus, onKeydown, ref }" v-model:editing="editing"
 			v-model="field.description" :should-blur="false" :should-focus="false">
-			<div v-show="editing || field.description.length > 0" :ref :contenteditable :tabindex="contenteditable ? 0 : -1"
+			<p v-show="editing || field.description.length > 0" :ref :contenteditable :tabindex="contenteditable ? 0 : -1"
 				class="rpgm-homebrew-field-description rpgm-radial-ignore" @blur="onBlur" @focus="onFocus" @keydown="onKeydown">
 				{{ field.description }}
-			</div>
+			</p>
 		</ContentEditable>
 		<ul v-show="editing" class="rpgm-homebrew-field-types">
 			<li v-for="type in [
@@ -183,6 +183,11 @@ function changeType(type: "short" | "long" | "boolean" | "number") {
 
 	* {
 		outline: none !important;
+		user-select: text;
+	}
+
+	p {
+		margin: 0;
 	}
 }
 

@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import HomebrewInputField from './HomebrewInputField.vue';
+import WriteOnTransition from "#/util/WriteOnTransition.vue";
+import ComboBox from '#/util/ComboBox.vue';
+import { localize } from '#/util/localize';
+
+const schemas = rpgm.forge.homebrewSchemas;
+const hasGenerated = computed(() => Object.keys(data.generations).length > 0);
 
 const emit = defineEmits<{ generate: [] }>();
 
@@ -36,10 +42,42 @@ function newField() {
 function buttonIndex(i: number): -1 | 0 | 1 {
 	return i <= 0 ? -1 : i >= data.options.schema!.fields.length - 1 ? 1 : 0;
 }
+
+/**
+ * Sets the active schema to a copy of {@link v}
+ * @param v - The schema to select
+ * @returns The new schema
+ */
+function assign(v: HomebrewSchema): HomebrewSchema {
+	return structuredClone(toRaw(v));
+}
+
+/** Reset modified status, scroll down if necessary */
+function newSelection() {
+	rpgm.chat.updateScroll();
+}
+
+function changeName(n: Event) {
+	if (data.options.schema) {
+		data.options.schema.custom_name = (n.target as HTMLInputElement).value;
+	}
+}
 </script>
 
 <template>
 	<div ref="fieldsContainer" class="rpgm-homebrew-fields-container">
+		<ComboBox v-if="!hasGenerated" v-model="data.options.schema" placeholder="Preset" :values="schemas"
+			:unique="v => v.name" :display="v => v.name" :assign
+			:filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())" @update:model-value="newSelection" />
+		<div v-if="data.options.schema?.name" class="rpgm-homebrew-field-container">
+			<h3>Name</h3>
+			<WriteOnTransition :enabled="true" :duration="400">
+				<p :key="data.options.schema.name" class="rpgm-homebrew-field-description">The name for this {{
+					data.options.schema.name.toLowerCase() }}</p>
+			</WriteOnTransition>
+			<input class="rpgm-input rpgm-homebrew-field-value" type="text"
+				:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')" @input="changeName">
+		</div>
 		<template v-if="data.options.schema?.fields.length">
 			<TransitionGroup :css="!renaming" name="rpgm-homebrew-field-container">
 				<HomebrewInputField v-for="(field, i) in data.options.schema.fields" :key="field.name" :model-value="field"

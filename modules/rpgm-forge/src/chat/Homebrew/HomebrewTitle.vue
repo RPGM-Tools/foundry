@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import WriteOnTransition from "#/util/WriteOnTransition.vue";
 import ContentEditable from "#/util/ContentEditable.vue";
+import { vFitLines } from "#/util/VFitLines";
 
 const data = inject<ForgeChatHomebrew>("data")!;
+
+const canGotoGenerations = computed(() => Object.keys(data.generations).length > 0);
 
 const currentTitle = defineModel<string>({ required: true });
 
 defineProps<{
 	editing: boolean
-	canGotoGenerations: boolean
 }>();
 
 const emit = defineEmits<{
@@ -31,7 +33,7 @@ const rename = (n: string) => {
 		<ContentEditable v-slot="config" v-model:editing="editingTitle" :model-value="currentTitle" :multiline="false"
 			@update:model-value="rename">
 			<WriteOnTransition :appear="true" :enabled="!editingTitle" :duration="400">
-				<h1 :key="currentTitle" :ref="config.ref" :contenteditable="config.contenteditable"
+				<h1 :key="currentTitle" :ref="config.ref" v-fit-lines :contenteditable="config.contenteditable"
 					class="rpgm-homebrew-title rpgm-radial-ignore" @keydown="config.onKeydown" @blur="config.onBlur">
 					{{ currentTitle }}
 				</h1>
@@ -75,10 +77,9 @@ const rename = (n: string) => {
 }
 
 .rpgm-homebrew-title {
-	font-size: 20px;
+	overflow: hidden;
 	text-align: center;
 	font-weight: bolder;
-	margin-top: 2px;
 	margin-bottom: 0px;
 	padding-left: 20px;
 	padding-right: 20px;
