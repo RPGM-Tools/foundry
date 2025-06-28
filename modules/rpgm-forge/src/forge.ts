@@ -205,7 +205,7 @@ export class RpgmForge extends RpgmModule {
 				chatDescription({
 					type: token.actor!.prototypeToken.name,
 					// Don't include name if it's the default actor name
-					name: token.name ? token.name !== token.actor!.name ? token.name : "" : ""
+					name: token.name ? token.name !== token.actor!.prototypeToken.name ? token.name : "" : ""
 				});
 			}
 		});
