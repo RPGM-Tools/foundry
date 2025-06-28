@@ -1,7 +1,7 @@
 import type { App, Component } from 'vue';
 import { createApp, type Reactive, shallowReactive } from 'vue';
 import RadialMenuFloating from './RadialMenuFloating.vue';
-import { injectTokenHUD } from './HUD';
+import { injectTokenHUD } from './hud';
 
 export * from './heuristics';
 export * from './funcs';
