@@ -72,7 +72,7 @@ function changeName(n: Event) {
 		<div v-if="data.options.schema?.name" class="rpgm-homebrew-field-container">
 			<h3>Name</h3>
 			<WriteOnTransition :enabled="true" :duration="400">
-				<p :key="data.options.schema.name" class="rpgm-homebrew-field-description">The name for this {{
+				<p :key="data.options.schema.name.toLowerCase()" class="rpgm-homebrew-field-description">The name for this {{
 					data.options.schema.name.toLowerCase() }}</p>
 			</WriteOnTransition>
 			<input class="rpgm-input rpgm-homebrew-field-value" type="text"
