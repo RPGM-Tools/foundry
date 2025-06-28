@@ -6,7 +6,7 @@ async function onEnter(html: FitHTMLElement) {
 	await nextTick();
 	html.style.removeProperty("font-size");
 	const cStyle = window.getComputedStyle(html);
-	html._size = parseInt(cStyle.getPropertyValue("font-size")) + 1;
+	html._size = parseInt(cStyle.getPropertyValue("font-size"));
 	html._max = html._size - 1;
 	let tries = 0;
 	while (html.clientWidth < html.scrollWidth && tries < 99) {
@@ -14,7 +14,6 @@ async function onEnter(html: FitHTMLElement) {
 		html.style.fontSize = `${--html._size}px`;
 		await nextTick();
 	}
-	--html._size;
 	updateStyles(html);
 }
 
