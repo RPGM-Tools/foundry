@@ -1,18 +1,28 @@
 {
+	"id": "rpgm-forge",
 	"title": "RPGM Forge",
-	"description": "Enhance your Foundry VTT experience with an AI-assisted toolkit designed for GMs and players. Generate immersive descriptions, organize campaign assets, and receive real-time guidance to streamline storytelling and gameplay.",
+	"description": "Enhance your Foundry VTT experience with an AI-assisted toolkit designed for GMs and players. Generate immersive names, descriptions, and homebrew creations.",
 	"version": "{{RPGM_VERSION}}",
 	"url": "https://rpgm.tools",
+	"readme": "https://github.com/RPGM-Tools/foundry/blob/main/README.md",
 	"manifest": "https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge.json",
 	"download": "https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge-v{{RPGM_VERSION}}.zip",
+	"bugs": "https://github.com/RPGM-Tools/foundry/issues",
+	"roadmap": "https://github.com/RPGM-Tools/foundry/blob/main/roadmap.md",
+	"compatibility": {
+		"minimum": "12",
+		"verified": "13"
+	},
 	"esmodules": [
 		"init.js"
 	],
-	"styles": [
-		"assets/init.css"
-	],
-	"id": "rpgm-forge",
 	"authors": [
+		{
+			"name": "dallenb4",
+			"email": "dallenb4@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		},
 		{
 			"name": "Aragorn",
 			"email": "aragorn@rpgm.tools",
@@ -24,24 +34,18 @@
 			"email": "jack_indaboks@rpgm.tools",
 			"url": "https://rpgm.tools",
 			"flags": {}
-		},
-		{
-			"name": "dallenb4",
-			"email": "dallenb4@rpgm.tools",
-			"url": "https://rpgm.tools",
-			"flags": {}
 		}
 	],
+	"styles": [
+		"assets/init.css"
+	],
 	"persistentStorage": true,
-	"compatibility": {
-		"minimum": "12",
-		"verified": "13"
-	},
 	"media": [
 		{
 			"type": "setup",
 			"url": "modules/rpgm-forge/assets/d20-512x512.webp",
-			"thumbnail": "modules/rpgm-forge/assets/d20-512x512.webp"
+			"thumbnail": "modules/rpgm-forge/assets/d20-512x512.webp",
+			"caption": "RPGM Forge"
 		}
 	],
 	"languages": [
