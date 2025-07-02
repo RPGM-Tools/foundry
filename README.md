@@ -37,7 +37,9 @@
 2. Click **Install Module**.
 3. Paste the following Manifest URL into the field:
 
+```
 https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge.json
+```
 
 4. Click **Install**.
 
