@@ -63,13 +63,16 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
 export async function generateTokenNames(tokenDocument: TokenDocument, type?: string): Promise<ForgeResponse<Names>> {
 	const protoToken = tokenDocument.actor?.prototypeToken;
 	if (!protoToken?.name) return { success: false, error: "Token has no name!" };
+	const apiKey = game.settings.get("rpgm-tools", "api_key");
+	let method = rpgm.forge.method;
+	if (!apiKey.length) method = "simple";
 
 	/** @todo Less hardcoding of values */
 	const options: NamesOptions = {
 		quantity: 4,
 		gender: "neutral",
 		genre: rpgm.forge.genre,
-		method: rpgm.forge.method,
+		method: method,
 		language: rpgm.forge.language,
 		type: type ?? protoToken.name
 	};

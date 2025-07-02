@@ -51,6 +51,7 @@ export default tslint.config([
 			}],
 			"vue/html-indent": "off",
 			"vue/html-closing-bracket-newline": "off",
+			"vue/no-v-html": "off",
 			"vue/first-attribute-linebreak": "off",
 			"vue/max-attributes-per-line": "off",
 			"vue/multiline-html-element-content-newline": "off",

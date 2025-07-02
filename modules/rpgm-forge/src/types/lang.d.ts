@@ -22,10 +22,10 @@ declare global {
 			}
 			INIT: {
 				TITLE
-				PROMPT
+				PROMPT1
 				PROMPT2
-				SAVE
-				SAVED
+				PROMPT3
+				PROMPT4
 			}
 			NAMES: {
 				ASSIGN_TOOLTIP

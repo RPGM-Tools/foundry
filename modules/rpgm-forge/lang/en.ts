@@ -41,10 +41,10 @@ export default {
 		},
 		INIT: {
 			TITLE: "Welcome to RPGM Forge!",
-			PROMPT: "Please confirm these options:",
-			PROMPT2: "(You can change them later in settings)",
-			SAVE: "Save",
-			SAVED: "Saved settings!",
+			PROMPT1: "Get a free key to unlock AI generation by following RPGM Tools on Patreon at the link below.",
+			PROMPT2: "Use <code>*help</code> in chat to get started!",
+			PROMPT3: "Please confirm these options:",
+			PROMPT4: "(You can change them later in settings)",
 		}
 	}
 } satisfies ForgeI18n;

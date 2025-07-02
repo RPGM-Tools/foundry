@@ -36,42 +36,11 @@ declare global {
 				RADIAL_MENU_DEBUG_HINT
 				API_KEY
 				API_KEY_HINT,
-				API_KEY_PLACEHOLDER
 			},
 			RADIAL_MENU: {
 				INFO
 				COMMAND
 			},
-			SHARED: {
-				SAVE_CHANGES,
-				COPYRIGHT,
-				SAVED,
-				NOT_SAVED,
-			},
-			HELP: {
-				NAMES: {
-					TITLE,
-					BODY,
-				},
-				DESCRIPTION: {
-					TITLE,
-					BODY,
-				},
-				HOMEBREW: {
-					TITLE,
-					BODY,
-				},
-				COMMANDS: {
-					TITLE,
-					BODY,
-					NAMES,
-					DESCRIPTION,
-					HOMEBREW,
-				}
-			},
-			CHAT: {
-				INSTALL_MODULE
-			}
 		}
 	}
 

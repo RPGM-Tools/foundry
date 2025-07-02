@@ -30,13 +30,7 @@ function getSchema(name?: string): ForgeChatHomebrew {
 			})) ?? {
 				name,
 				custom_name: undefined,
-				fields: [
-					{
-						name: "[Name]",
-						type: "short",
-						description: "[Description]"
-					}
-				]
+				fields: []
 			} : undefined
 		},
 		activeGeneration: "",

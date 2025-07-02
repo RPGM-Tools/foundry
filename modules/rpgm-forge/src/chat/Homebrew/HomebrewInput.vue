@@ -78,7 +78,7 @@ function changeName(n: Event) {
 			<input class="rpgm-input rpgm-homebrew-field-value" type="text"
 				:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')" @input="changeName">
 		</div>
-		<template v-if="data.options.schema?.fields.length">
+		<template v-if="data.options.schema?.fields">
 			<TransitionGroup :css="!renaming" name="rpgm-homebrew-field-container">
 				<HomebrewInputField v-for="(field, i) in data.options.schema.fields" :key="field.name" :model-value="field"
 					:i="buttonIndex(i)" @renaming="pauseTransition" />
@@ -91,7 +91,7 @@ function changeName(n: Event) {
 			<button class="rpgm-button" :class="{ 'rpgm-active': loading }"
 				:disabled="(data.options.schema.fields.length ?? 0) == 0 || loading" @click="emit('generate')">Generate</button>
 		</template>
-		<p v-else>
+		<p v-if="data.options.schema?.fields?.length == 0">
 			<i>Add some fields to get started</i>
 		</p>
 	</div>

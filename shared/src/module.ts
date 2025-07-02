@@ -2,7 +2,7 @@ import { GlobalMenus, GlobalSettings } from "#/settings";
 import { ChatCommands } from "./chat";
 import { registerRpgmCommands } from "./chat/commands";
 import { RadialMenuRegister } from "./radial-menu";
-// import { initSidebar } from "./sidebar";
+// impot { initSidebar } from "./sidebar";
 import { localize } from "./util/localize";
 import { RPGMLogger } from "./util/LoggingV2";
 
