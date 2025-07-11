@@ -62,6 +62,7 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
  */
 export async function generateTokenNames(tokenDocument: TokenDocument, type?: string): Promise<ForgeResponse<Names>> {
 	const protoToken = tokenDocument.actor?.prototypeToken;
+	if (tokenDocument.isLinked) return { success: false, error: "This is a linked token." }; // Don't want to change the name of any linked token (or do we, with permission?)
 	if (!protoToken?.name) return { success: false, error: "Token has no name!" };
 	const apiKey = game.settings.get("rpgm-tools", "api_key");
 	let method = rpgm.forge.method;
@@ -70,7 +71,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 	/** @todo Less hardcoding of values */
 	const options: NamesOptions = {
 		quantity: 4,
-		gender: "neutral",
+		gender: "any", // Gender "neutral" might give the impression that we want names that can be used for either gender
 		genre: rpgm.forge.genre,
 		method: method,
 		language: rpgm.forge.language,
