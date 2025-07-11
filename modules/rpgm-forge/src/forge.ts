@@ -63,7 +63,7 @@ export class RpgmForge extends RpgmModule {
 		this.name
 	);
 	homebrewSchemas: HomebrewSchema[] = [];
-	genres: Record<string, { genre: string }> = {};
+	genres: Partial<Record<string, { genre: string }>> = {};
 
 	/**
 	 * Called before everything else
@@ -123,7 +123,7 @@ export class RpgmForge extends RpgmModule {
 		game.settings.register("rpgm-forge", "genre", {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.GENRE"),
 			hint: rpgm.localize("RPGM_FORGE.CONFIG.GENRE_HINT"),
-			default: this.genres[game.system.id]["genre"] || "Fantasy",
+			default: this.genres[game.system.id]?.["genre"] || "Fantasy",
 			scope: "world",
 			type: String,
 			config: true
