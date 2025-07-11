@@ -42,7 +42,7 @@ async function generate(regenerate: boolean = false) {
 
 	const result = await rpgm.forge.queue.generate(ForgeNames, {
 		quantity: NAMES_PER_GENERATION,
-		gender: "neutral",
+		gender: "any",
 		genre: rpgm.forge.genre,
 		language: rpgm.forge.language,
 		method: rpgm.forge.method,

@@ -70,7 +70,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 	/** @todo Less hardcoding of values */
 	const options: NamesOptions = {
 		quantity: 4,
-		gender: "neutral",
+		gender: "any",
 		genre: rpgm.forge.genre,
 		method: method,
 		language: rpgm.forge.language,
@@ -99,6 +99,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
  * @param tokenDocument - The token to rename
  */
 export async function quickNameToken(tokenDocument: TokenDocument) {
+	if (tokenDocument.isLinked) return;
 	const result = await generateTokenNames(tokenDocument);
 	if (result.success)
 		await nameToken(tokenDocument, result.output[0]);
