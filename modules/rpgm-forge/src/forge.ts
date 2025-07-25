@@ -1,78 +1,64 @@
-import { RpgmModule } from '#/module';
-import { literal, argument, string } from 'brigadier-ts-lite';
-import {
-  chatDescription,
-  chatTokenNames,
-  getSelectedToken,
-  quickNameToken,
-  registerTokenCreate,
-} from './util/token';
-import { inputHeuristics, shimmerInput, writeOn } from '#/radial-menu';
-import { RPGMLogger } from '#/util/LoggingV2';
-import { ChatWizard } from '#/chat/ChatWizard';
-import { command } from './util/homebrew';
-import type { Component } from 'vue';
-import NamesChat from './chat/NamesChat.vue';
-import DescriptionChat from './chat/DescriptionChat.vue';
-import HomebrewChat from './chat/Homebrew/HomebrewChat.vue';
-import InitPrompt from './chat/InitPrompt.vue';
-import Homebrews from '@rpgm/forge/data/schemas.json?url';
-import Genres from '../assets/combined_systems.json?url';
-import { ForgeQueue } from '@rpgm/forge';
-import ISO639 from 'iso-639-1';
+import { RpgmModule } from "#/module";
+import { literal, argument, string } from "brigadier-ts-lite";
+import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, registerTokenCreate } from "./util/token";
+import { inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
+import { RPGMLogger } from "#/util/LoggingV2";
+import { ChatWizard } from "#/chat/ChatWizard";
+import { command } from "./util/homebrew";
+import type { Component } from "vue";
+import NamesChat from "./chat/NamesChat.vue";
+import DescriptionChat from "./chat/DescriptionChat.vue";
+import HomebrewChat from "./chat/Homebrew/HomebrewChat.vue";
+import InitPrompt from "./chat/InitPrompt.vue";
+import Homebrews from "@rpgm/forge/data/schemas.json?url";
+import Genres from "../assets/combined_systems.json?url";
+import { ForgeQueue } from "@rpgm/forge";
+import ISO639 from "iso-639-1";
 
 /**
  * RpgmForge stores chat databases for forge wizards
  */
 export class RpgmForge extends RpgmModule {
-  override readonly id: ClientSettings.Namespace = 'rpgm-forge';
-  override readonly name: string = 'RPGM Forge';
-  override readonly icon: string = '🎲';
+  override readonly id: ClientSettings.Namespace = "rpgm-forge";
+  override readonly name: string = "RPGM Forge";
+  override readonly icon: string = "🎲";
   override readonly logger = new RPGMLogger(`${this.icon} ${this.name} | `);
 
   /** @returns The current genre setting */
-  get genre() {
-    return game.settings.get('rpgm-forge', 'genre');
-  }
+	get genre() { return game.settings.get("rpgm-forge", "genre"); }
 
-  /** @returns The current method setting */
-  get method() {
-    return game.settings.get('rpgm-forge', 'method');
-  }
+	/** @returns The current method setting */
+	get method() { return game.settings.get("rpgm-forge", "method"); }
 
-  /** @returns The current system setting */
-  get system() {
-    return game.system.title;
-  }
+	/** @returns The current system setting */
+	get system() { return game.system.title; }
 
-  /** @returns The current language setting */
-  get language() {
-    return game.settings.get('rpgm-forge', 'language');
-  }
+	/** @returns The current language setting */
+	get language() { return game.settings.get("rpgm-forge", "language"); }
 
   queue = new ForgeQueue(() => [{ auth_token: rpgm.api_key }]);
 
   promptChats = new ChatWizard(
     this.id,
-    'prompt',
+    "prompt",
     InitPrompt as Component,
     this.name
   );
   namesChats = new ChatWizard<ForgeChatNames>(
     this.id,
-    'names',
+    "names",
     NamesChat as Component,
     this.name
   );
   descriptionsChats = new ChatWizard<ForgeChatDescription>(
     this.id,
-    'description',
+    "description",
     DescriptionChat as Component,
     this.name
   );
   homebrewChats = new ChatWizard<ForgeChatHomebrew>(
     this.id,
-    'homebrew',
+    "homebrew",
     HomebrewChat as Component,
     this.name
   );
@@ -85,10 +71,8 @@ export class RpgmForge extends RpgmModule {
    */
   override async init(): Promise<void> {
     rpgm.forge = this;
-    this.homebrewSchemas = (await (
-      await fetch(Homebrews)
-    ).json()) as typeof this.homebrewSchemas;
-    this.genres = (await (await fetch(Genres)).json()) as typeof this.genres;
+		this.homebrewSchemas = await (await fetch(Homebrews)).json() as typeof this.homebrewSchemas;
+		this.genres = await (await fetch(Genres)).json() as typeof this.genres;
     this.promptChats.load();
     this.namesChats.load();
     this.descriptionsChats.load();
@@ -100,169 +84,138 @@ export class RpgmForge extends RpgmModule {
    * Also where Radial Menu buttons and RP-Commands are registered (might change)
    */
   override async registerSettings(): Promise<void> {
-    game.settings.register('rpgm-forge', 'auto_name', {
-      name: rpgm.localize('RPGM_FORGE.CONFIG.AUTO_NAME'),
-      hint: rpgm.localize('RPGM_FORGE.CONFIG.AUTO_NAME_HINT'),
+    game.settings.register("rpgm-forge", "auto_name", {
+      name: rpgm.localize("RPGM_FORGE.CONFIG.AUTO_NAME"),
+      hint: rpgm.localize("RPGM_FORGE.CONFIG.AUTO_NAME_HINT"),
       default: true,
       type: Boolean,
       config: true,
     });
-    game.settings.register('rpgm-forge', 'rename_actors', {
-      name: rpgm.localize('RPGM_FORGE.CONFIG.RENAME_ACTORS'),
-      hint: rpgm.localize('RPGM_FORGE.CONFIG.RENAME_ACTORS_HINT'),
+    game.settings.register("rpgm-forge", "rename_actors", {
+      name: rpgm.localize("RPGM_FORGE.CONFIG.RENAME_ACTORS"),
+      hint: rpgm.localize("RPGM_FORGE.CONFIG.RENAME_ACTORS_HINT"),
       default: true,
-      scope: 'world',
+      scope: "world",
       type: Boolean,
       config: true,
     });
-    game.settings.register('rpgm-forge', 'has_been_prompted', {
+    game.settings.register("rpgm-forge", "has_been_prompted", {
       default: false,
-      scope: 'world',
+      scope: "world",
       type: Boolean,
     });
-    game.settings.register('rpgm-forge', 'language', {
-      name: rpgm.localize('RPGM_FORGE.CONFIG.LANGUAGE'),
-      hint: rpgm.localize('RPGM_FORGE.CONFIG.LANGUAGE_HINT'),
+    game.settings.register("rpgm-forge", "language", {
+      name: rpgm.localize("RPGM_FORGE.CONFIG.LANGUAGE"),
+      hint: rpgm.localize("RPGM_FORGE.CONFIG.LANGUAGE_HINT"),
       default: await getLanguage(game.i18n.lang),
-      scope: 'world',
+      scope: "world",
       type: String,
       config: true,
     });
-    game.settings.register('rpgm-forge', 'system', {
-      name: rpgm.localize('RPGM_FORGE.CONFIG.SYSTEM'),
-      hint: rpgm.localize('RPGM_FORGE.CONFIG.SYSTEM_HINT'),
+    game.settings.register("rpgm-forge", "system", {
+      name: rpgm.localize("RPGM_FORGE.CONFIG.SYSTEM"),
+      hint: rpgm.localize("RPGM_FORGE.CONFIG.SYSTEM_HINT"),
       default: game.system.title,
-      scope: 'world',
+      scope: "world",
       type: String,
       config: true,
     });
-    game.settings.register('rpgm-forge', 'genre', {
-      name: rpgm.localize('RPGM_FORGE.CONFIG.GENRE'),
-      hint: rpgm.localize('RPGM_FORGE.CONFIG.GENRE_HINT'),
-      default: this.genres[game.system.id]?.['genre'] || 'Fantasy',
-      scope: 'world',
+    game.settings.register("rpgm-forge", "genre", {
+      name: rpgm.localize("RPGM_FORGE.CONFIG.GENRE"),
+      hint: rpgm.localize("RPGM_FORGE.CONFIG.GENRE_HINT"),
+      default: this.genres[game.system.id]?.["genre"] || "Fantasy",
+      scope: "world",
       type: String,
-      config: true,
+      config: true
     });
-    game.settings.register('rpgm-forge', 'method', {
-      name: rpgm.localize('RPGM_FORGE.CONFIG.METHOD'),
-      hint: rpgm.localize('RPGM_FORGE.CONFIG.METHOD_HINT'),
-      default: 'ai',
-      scope: 'world',
+    game.settings.register("rpgm-forge", "method", {
+      name: rpgm.localize("RPGM_FORGE.CONFIG.METHOD"),
+      hint: rpgm.localize("RPGM_FORGE.CONFIG.METHOD_HINT"),
+      default: "ai",
+      scope: "world",
       choices: {
-        ai: rpgm.localize('RPGM_FORGE.CONFIG.METHOD_AI'),
-        simple: rpgm.localize('RPGM_FORGE.CONFIG.METHOD_SIMPLE'),
+        ai: rpgm.localize("RPGM_FORGE.CONFIG.METHOD_AI"),
+        simple: rpgm.localize("RPGM_FORGE.CONFIG.METHOD_SIMPLE")
       },
       type: String,
-      config: true,
+      config: true
     });
-    rpgm.chat.registerCommand(
-      literal('names')
-        .then(
-          argument('prompt', string('greedy_phrase')).executes((c) => {
-            // Only the calling user executes this
-            void chatTokenNames(undefined, c.get<string>('prompt'));
-          })
-        )
-        .executes(() => {
+    rpgm.chat.registerCommand(literal("names")
+        .then(argument("prompt", string("greedy_phrase")).executes(c => {
+            void chatTokenNames(undefined, c.get<string>("prompt"));
+          })).executes(() => {
           void chatTokenNames(undefined);
-        })
-    );
-    rpgm.chat.registerCommand(
-      literal('description')
-        .then(
-          argument('prompt', string('greedy_phrase')).executes((c) => {
-            void chatDescription({ type: c.get<string>('prompt')! });
-          })
-        )
-        .executes(() => {
+        }));
+    rpgm.chat.registerCommand(literal("description")
+        .then(argument("prompt", string("greedy_phrase")).executes(c => {
+            void chatDescription({ type: c.get<string>("prompt")! });
+          })).executes(() => {
           const token = getSelectedToken();
           if (!token) return;
-          chatDescription({
+          chatDescription(
+            {
             type: token.actor!.prototypeToken.name,
             // Don't include name if it's the default actor name
-            name: token.name
-              ? token.name !== token.actor!.prototypeToken.name
-                ? token.name
-                : ''
-              : '',
+            name: token.name ? token.name !== token.actor!.prototypeToken.name ? token.name : "" : ""
           });
-        })
-    );
+        }));
     command();
-    rpgm.radialMenu.registerCategory('rpgm_forge', { color: '276deg' });
+    rpgm.radialMenu.registerCategory("rpgm_forge", { color: "276deg" });
     rpgm.radialMenu.registerInputButton({
       category: rpgm.radialMenu.categories.rpgm_forge,
       icon: 'fa fa-dice-d4',
-      tooltip: 'RPGM_FORGE.RADIAL_MENU.D4',
+      tooltip: "RPGM_FORGE.RADIAL_MENU.D4",
       detective: (context) => inputHeuristics(context).noNumber().result,
       callback: async (context) => {
         const shimmer = shimmerInput(context);
-        await writeOn(
-          context,
-          `Rolled a ${Math.floor(Math.random() * 4) + 1}`,
-          250
-        );
+        await writeOn(context, `Rolled a ${Math.floor(Math.random() * 4) + 1}`, 250);
         shimmer();
-      },
+      }
     });
     rpgm.radialMenu.registerInputButton({
       category: rpgm.radialMenu.categories.rpgm_forge,
       icon: 'fa fa-dice-d6',
-      tooltip: 'RPGM_FORGE.RADIAL_MENU.D6',
+      tooltip: "RPGM_FORGE.RADIAL_MENU.D6",
       detective: (context) => inputHeuristics(context).noNumber().result,
       callback: async (context) => {
         const shimmer = shimmerInput(context);
-        await writeOn(
-          context,
-          `Rolled a ${Math.floor(Math.random() * 6) + 1}`,
-          250
-        );
+        await writeOn(context, `Rolled a ${Math.floor(Math.random() * 6) + 1}`, 250);
         shimmer();
-      },
+      }
     });
     rpgm.radialMenu.registerTokenHudButton({
       category: rpgm.radialMenu.categories.rpgm_forge,
       icon: 'fa fa-signature',
-      tooltip: 'RPGM_FORGE.RADIAL_MENU.NAMES',
+      tooltip: "RPGM_FORGE.RADIAL_MENU.NAMES",
       callback: async (context) => {
-        if (!context.token) return rpgm.logger.visible.log('No token selected');
+        if (!context.token) return rpgm.logger.visible.log("No token selected");
         const tokenDocument = context.token.document;
         if (context.shift) {
           // Just generate names, no assignment, so no owner check needed
-          void chatTokenNames(
-            context.token,
-            context.token.actor?.prototypeToken?.name
-          );
+          void chatTokenNames(context.token, context.token.actor?.prototypeToken?.name);
         } else {
           // Assign name, so check owner
           if (!tokenDocument.isOwner) {
-            ui.notifications.warn(
-              'You must have owner permissions to rename this token.'
-            );
+            rpgm.logger.visible.warn("You must have owner permissions to rename this token.");
             return;
           }
           return quickNameToken(tokenDocument);
         }
-      },
+      }
     });
     rpgm.radialMenu.registerTokenHudButton({
       category: rpgm.radialMenu.categories.rpgm_forge,
       icon: 'fa fa-align-left',
-      tooltip: 'RPGM_FORGE.RADIAL_MENU.DESCRIPTION',
+      tooltip: "RPGM_FORGE.RADIAL_MENU.DESCRIPTION",
       callback: (context) => {
         const token = context.token;
-        if (!token) return rpgm.logger.log('No token selected');
+        if (!token) return rpgm.logger.log("No token selected");
         chatDescription({
           type: token.actor!.prototypeToken.name,
           // Don't include name if it's the default actor name
-          name: token.name
-            ? token.name !== token.actor!.prototypeToken.name
-              ? token.name
-              : ''
-            : '',
+          name: token.name ? token.name !== token.actor!.prototypeToken.name ? token.name : "" : ""
         });
-      },
+      }
     });
     registerTokenCreate();
   }
@@ -271,10 +224,7 @@ export class RpgmForge extends RpgmModule {
    * Called when everything else in Foundry is loaded
    */
   override rpgmReady(): Promise<void> | void {
-    if (
-      this.promptChats.data.size === 0 &&
-      !game.settings.get('rpgm-forge', 'has_been_prompted')
-    )
+    if (this.promptChats.data.size === 0 && !game.settings.get("rpgm-forge", "has_been_prompted"))
       this.promptChats.newMessage();
   }
 }
@@ -284,5 +234,5 @@ export class RpgmForge extends RpgmModule {
  * @returns The language name
  */
 async function getLanguage(code: string) {
-  return ISO639.getName(code) || 'English';
+  return ISO639.getName(code) || "English";
 }

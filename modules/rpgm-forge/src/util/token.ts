@@ -1,5 +1,5 @@
-import { ForgeNames } from '@rpgm/forge';
-import { shimmerToken } from './shimmer';
+import { ForgeNames } from "@rpgm/forge";
+import { shimmerToken } from "./shimmer";
 
 /**
  * Find the one and only selected token
@@ -9,9 +9,7 @@ export function getSelectedToken(): Token | undefined {
   if (canvas.tokens!.controlled.length === 1) {
     return canvas.tokens!.controlled[0];
   } else {
-    rpgm.forge.logger.visible.error(
-      rpgm.localize('RPGM_FORGE.ERORRS.TOKEN_SELECT')
-    );
+    rpgm.forge.logger.visible.error(rpgm.localize("RPGM_FORGE.ERORRS.TOKEN_SELECT"));
     return undefined;
   }
 }
@@ -22,24 +20,15 @@ export function getSelectedToken(): Token | undefined {
  * @param prompt.type - The type of "thing" to generate a description for
  * @param prompt.name - The optional name to give the generator for use in the description
  */
-export function chatDescription(prompt?: { type: string; name?: string }) {
+export function chatDescription(prompt?: { type: string, name?: string }) {
   if (!prompt) {
     const token = getSelectedToken();
     if (!token) return;
     const actor = token.actor;
     if (!actor || !actor.name) return;
-    void rpgm.forge.descriptionsChats.newMessage({
-      name: '',
-      tokenId: token.id,
-      description: '',
-      type: actor.name,
-    });
+    void rpgm.forge.descriptionsChats.newMessage({ name: "", tokenId: token.id, description: "", type: actor.name });
   } else {
-    void rpgm.forge.descriptionsChats.newMessage({
-      description: '',
-      type: prompt.type,
-      name: prompt.name,
-    });
+    void rpgm.forge.descriptionsChats.newMessage({ description: "", type: prompt.type, name: prompt.name });
   }
 }
 
@@ -55,16 +44,9 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
     if (token) {
       const protoToken = token.actor?.prototypeToken;
       rpgm.forge.logger.debug(protoToken);
-      if (!protoToken?.name) {
-        rpgm.forge.logger.visible.error('Token has no name!');
-        return;
-      }
-      void rpgm.forge.namesChats.newMessage({
-        tokenId: token.id,
-        names: [],
-        prompt: protoToken.name,
-      });
-    }
+			if (!protoToken?.name) { rpgm.forge.logger.visible.error("Token has no name!"); return; }
+			void rpgm.forge.namesChats.newMessage({ tokenId: token.id, names: [], prompt: protoToken.name });
+		}
   }
   // User has a name for us to use
   else {
@@ -78,27 +60,24 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
  * @param type - An optional type to pass to the renaming AI
  * @returns The names generated
  */
-export async function generateTokenNames(
-  tokenDocument: TokenDocument,
-  type?: string
-): Promise<ForgeResponse<Names>> {
+export async function generateTokenNames(tokenDocument: TokenDocument, type?: string): Promise<ForgeResponse<Names>> {
   const protoToken = tokenDocument.actor?.prototypeToken;
-  if (!protoToken?.name) return { success: false, error: 'Token has no name!' };
-  const apiKey = game.settings.get('rpgm-tools', 'api_key');
+  if (!protoToken?.name) return { success: false, error: "Token has no name!" };
+  const apiKey = game.settings.get("rpgm-tools", "api_key");
   let method = rpgm.forge.method;
-  if (!apiKey.length) method = 'simple';
+  if (!apiKey.length) method = "simple";
 
   /** @todo Less hardcoding of values */
   const options: NamesOptions = {
     quantity: 4,
-    gender: 'any',
+    gender: "any",
     genre: rpgm.forge.genre,
     method: method,
     language: rpgm.forge.language,
-    type: type ?? protoToken.name,
+    type: type ?? protoToken.name
   };
 
-  const token = canvas.tokens?.get(tokenDocument._id ?? '');
+  const token = canvas.tokens?.get(tokenDocument._id ?? "");
   let shimmerFilter;
   if (token) {
     shimmerFilter = await shimmerToken(token);
@@ -107,9 +86,11 @@ export async function generateTokenNames(
 
   const result = await rpgm.forge.queue.generate(ForgeNames, options);
 
-  if (!result.success) rpgm.forge.logger.error(result.error);
+  if (!result.success)
+    rpgm.forge.logger.error(result.error);
 
-  if (shimmerFilter) void shimmerFilter.fadeOut(500);
+  if (shimmerFilter)
+    void shimmerFilter.fadeOut(500);
   return result;
 }
 
@@ -120,14 +101,14 @@ export async function generateTokenNames(
 export async function quickNameToken(tokenDocument: TokenDocument) {
   // if (tokenDocument.isLinked) return; Allow linked tokens to be intentionally renamed
   if (!tokenDocument.isOwner) {
-    ui.notifications.warn(
-      'You must have owner permissions to rename this token.'
-    );
+    rpgm.forge.logger.visible.warn("You must have owner permissions to rename this token.");
     return;
   }
   const result = await generateTokenNames(tokenDocument);
-  if (result.success) await nameToken(tokenDocument, result.output[0]);
-  else rpgm.forge.logger.visible.error(result.error);
+  if (result.success)
+    await nameToken(tokenDocument, result.output[0]);
+  else
+    rpgm.forge.logger.visible.error(result.error);
 }
 
 /**
@@ -138,7 +119,7 @@ export async function quickNameToken(tokenDocument: TokenDocument) {
 export async function nameToken(tokenDocument: TokenDocument, name: string) {
   const oldName = tokenDocument.name;
   await tokenDocument.update({ name }, {});
-  if (game.settings.get('rpgm-forge', 'rename_actors')) {
+  if (game.settings.get("rpgm-forge", "rename_actors")) {
     await tokenDocument.actor?.update({ name }, {});
     rpgm.forge.logger.debug(`Renamed ${oldName} to ${name}`);
   }
@@ -148,20 +129,16 @@ let shift = false;
 
 /** Setup the functionality for detecting when a token has been placed */
 export function registerTokenCreate() {
-  document.addEventListener('keydown', (k) => {
-    if (k.key == 'Shift') {
-      shift = true;
-    }
+  document.addEventListener("keydown", (k) => {
+    if (k.key == "Shift") { shift = true; }
   });
-  document.addEventListener('keyup', (k) => {
-    if (k.key == 'Shift') {
-      shift = false;
-    }
+  document.addEventListener("keyup", (k) => {
+    if (k.key == "Shift") { shift = false; }
   });
-  Hooks.on('createToken', async (tokenDocument: TokenDocument, options) => {
+  Hooks.on("createToken", async (tokenDocument: TokenDocument, options) => {
     if (options.parent !== canvas.scene) return;
     if (tokenDocument.isLinked) return; // <-- Only auto-rename if not linked
-    if (shift || !game.settings.get('rpgm-forge', 'auto_name')) return;
+    if (shift || !game.settings.get("rpgm-forge", "auto_name")) return;
     quickNameToken(tokenDocument);
   });
 }
