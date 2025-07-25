@@ -118,7 +118,7 @@ export async function generateTokenNames(
  * @param tokenDocument - The token to rename
  */
 export async function quickNameToken(tokenDocument: TokenDocument) {
-  if (tokenDocument.isLinked) return;
+  // if (tokenDocument.isLinked) return; Allow linked tokens to be intentionally renamed
   if (!tokenDocument.isOwner) {
     ui.notifications.warn(
       'You must have owner permissions to rename this token.'
@@ -160,6 +160,7 @@ export function registerTokenCreate() {
   });
   Hooks.on('createToken', async (tokenDocument: TokenDocument, options) => {
     if (options.parent !== canvas.scene) return;
+    if (tokenDocument.isLinked) return; // <-- Only auto-rename if not linked
     if (shift || !game.settings.get('rpgm-forge', 'auto_name')) return;
     quickNameToken(tokenDocument);
   });
