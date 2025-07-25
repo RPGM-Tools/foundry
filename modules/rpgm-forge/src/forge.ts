@@ -199,7 +199,7 @@ export class RpgmForge extends RpgmModule {
             rpgm.logger.visible.warn("You must have owner permissions to rename this token.");
             return;
           }
-          return quickNameToken(tokenDocument);
+          return quickNameToken(context.token.document);
         }
       }
     });
