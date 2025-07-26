@@ -45,12 +45,12 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
 			const protoToken = token.actor?.prototypeToken;
 			rpgm.forge.logger.debug(protoToken);
 			if (!protoToken?.name) { rpgm.forge.logger.visible.error("Token has no name!"); return; }
-			void rpgm.forge.namesChats.newMessage({ tokenId: token.id, names: [], prompt: protoToken.name });
+			void rpgm.forge.nameChats.newMessage({ tokenId: token.id, names: [], prompt: protoToken.name });
 		}
 	}
 	// User has a name for us to use
 	else {
-		void rpgm.forge.namesChats.newMessage({ names: [], prompt });
+		void rpgm.forge.nameChats.newMessage({ names: [], prompt });
 	}
 }
 
@@ -63,9 +63,8 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
 export async function generateTokenNames(tokenDocument: TokenDocument, type?: string): Promise<ForgeResponse<Names>> {
 	const protoToken = tokenDocument.actor?.prototypeToken;
 	if (!protoToken?.name) return { success: false, error: "Token has no name!" };
-	const apiKey = game.settings.get("rpgm-tools", "api_key");
 	let method = rpgm.forge.method;
-	if (!apiKey.length) method = "simple";
+	if (!rpgm.loginToken.length) method = "simple";
 
 	/** @todo Less hardcoding of values */
 	const options: NamesOptions = {
@@ -99,7 +98,10 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
  * @param tokenDocument - The token to rename
  */
 export async function quickNameToken(tokenDocument: TokenDocument) {
-	if (tokenDocument.isLinked) return;
+	if (tokenDocument.isOwner) {
+		rpgm.forge.logger.visible.error(rpgm.localize("RPGM_FORGE.ERORRS.TOKEN_OWNER"));
+		return;
+	}
 	const result = await generateTokenNames(tokenDocument);
 	if (result.success)
 		await nameToken(tokenDocument, result.output[0]);
@@ -133,6 +135,7 @@ export function registerTokenCreate() {
 	});
 	Hooks.on("createToken", async (tokenDocument: TokenDocument, options) => {
 		if (options.parent !== canvas.scene) return;
+		if (tokenDocument.isLinked) return; // Ignore linked tokens
 		if (shift || !game.settings.get("rpgm-forge", "auto_name")) return;
 		quickNameToken(tokenDocument);
 	});
