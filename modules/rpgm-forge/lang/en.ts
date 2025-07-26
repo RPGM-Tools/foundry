@@ -37,7 +37,8 @@ export default {
 			OPEN_JOURNAL: "Open Journal",
 		},
 		ERORRS: {
-			TOKEN_SELECT: "Please select a token on the board"
+			TOKEN_SELECT: "Please select a token on the board.",
+			TOKEN_OWNER: "You must have ownership of the token to rename it.",
 		},
 		INIT: {
 			TITLE: "Welcome to RPGM Forge!",

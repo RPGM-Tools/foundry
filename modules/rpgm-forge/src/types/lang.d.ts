@@ -35,6 +35,7 @@ declare global {
 			}
 			ERORRS: {
 				TOKEN_SELECT
+				TOKEN_OWNER
 			}
 			RADIAL_MENU: {
 				NAMES

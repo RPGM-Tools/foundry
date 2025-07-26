@@ -98,7 +98,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
  * @param tokenDocument - The token to rename
  */
 export async function quickNameToken(tokenDocument: TokenDocument) {
-	if (tokenDocument.isOwner) {
+	if (!tokenDocument.isOwner) {
 		rpgm.forge.logger.visible.error(rpgm.localize("RPGM_FORGE.ERORRS.TOKEN_OWNER"));
 		return;
 	}
