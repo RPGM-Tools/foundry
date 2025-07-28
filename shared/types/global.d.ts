@@ -57,6 +57,11 @@ declare global {
 			documentClass: typeof RpgmSidebar
 		}
 	}
+	namespace CONFIG {
+		interface UI {
+			rpgm: foundry.applications.sidebar.AbstractSidebarTab
+		}
+	}
 
 	/**
 	 * Override for injecting the Radial Menu into TokenHUD

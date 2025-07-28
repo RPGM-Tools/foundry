@@ -1,0 +1,28 @@
+div#sidebar:has([data-tab="rpgm"]) {
+	width: calc(var(--sidebar-width) + 25px);
+}
+
+#rpgm-popout:has(.window-content) {
+	will-change: width, height, left, top !important;
+	transition: width 200ms ease, height 200ms ease, left 200ms ease, top 200ms ease;
+	overflow: hidden;
+}
+
+#rpgm-popout:has(.window-content) .window-content {
+	overflow: hidden;
+	padding: 0;
+}
+
+#rpgm-popout:has(.window-content) .window-content .sidebar-popout {
+	height: 100%;
+}
+
+.rpgm-open:not(.rpgm-close),
+.rpgm-app:not(.static) {
+	animation: enter 200ms cubic-bezier(0, .3, .5, 1) forwards !important;
+}
+
+.rpgm-close,
+.rpgm-app.closing {
+	animation: exit 200ms cubic-bezier(0, .3, .5, 1) forwards !important;
+}

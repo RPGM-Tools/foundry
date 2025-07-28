@@ -1,0 +1,126 @@
+.rpgm-app {
+	transform-origin: center;
+}
+
+.rpgm-app h2 {
+	font-size: 20px;
+	margin: 0 0 4px 0;
+}
+
+.rpgm-app h3 {
+	font-size: 15px;
+	border-bottom: solid 1px black;
+	margin: 4px 0 0 0;
+}
+
+.rpgm-app h4 {
+	font-size: 13px;
+	margin: 4px 0 0 0;
+}
+
+.rpgm-button {
+	margin-top: 2px;
+	transition: background 150ms ease;
+	box-shadow: none !important;
+	position: relative;
+	width: 100%;
+}
+
+.rpgm-button:hover {
+	background-color: rgba(200, 0, 255);
+}
+
+.rpgm-button:active {
+	background-color: #6633cc;
+}
+
+.rpgm-textarea {
+	resize: none;
+	width: 100%;
+}
+
+.rpgm-input {
+	width: 100%;
+	padding: 4px;
+	border-radius: 3px;
+	border: solid 1px #00000033 !important;
+	outline: none;
+}
+
+.rpgm-button:focus,
+.rpgm-checkbox:focus,
+.rpgm-textarea:focus,
+.rpgm-input:focus {
+	box-shadow: 0 0 5px #6633cc !important;
+}
+
+.rpgm-app p.notes {
+	flex: 1 1 100% !important;
+}
+
+.rpgm-help code {
+	background: #aaa;
+	border-radius: 3px;
+	padding: 1px 2px;
+}
+
+.rpgm-icons {
+	filter: blur(4px);
+	opacity: 0;
+	transition: opacity 150ms ease, filter 150ms ease;
+	position: absolute;
+	pointer-events: none;
+	color: var(--color-dark-4);
+}
+
+.rpgm-icons a {
+	padding: 4px;
+	pointer-events: all;
+	transition-property: opacity, text-shadow;
+	transition-duration: 150ms;
+}
+
+.rpgm-links a {
+	color: #6633cc !important;
+}
+
+.rpgm-links a:focus,
+.rpgm-links a:hover,
+.rpgm-icons a:focus,
+.rpgm-icons a:hover {
+	text-shadow: 0 0 8px #6633cc !important;
+}
+
+.rpgm-app-inner {
+	min-height: 400px;
+	max-height: 999px;
+	max-width: 600px;
+	position: relative;
+}
+
+.rpgm-app-inner .scrollable {
+	display: flex;
+	flex-grow: 1;
+	flex-direction: column;
+}
+
+.rpgm-app-inner footer {
+	flex-grow: 0;
+}
+
+.rpgm-app-inner .anchor-bottom {
+	margin-top: auto;
+}
+
+.rpgm-active {
+	box-shadow: #6633cc 0 0 4px;
+	background-image:
+		radial-gradient(circle, rgba(255, 0, 200, 0.5), transparent 70%),
+		radial-gradient(circle, rgba(200, 0, 200, 0.5), transparent 70%),
+		radial-gradient(circle, rgba(200, 0, 255, 0.5), transparent 70%),
+		radial-gradient(circle, #6633cc, transparent 70%) !important;
+	background-size: 250% 250% !important;
+	position: relative;
+	cursor: wait;
+	animation: moveBackground 4s ease infinite !important;
+}

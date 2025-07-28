@@ -1,0 +1,105 @@
+@keyframes enter {
+	from {
+		scale: 1.025;
+	}
+
+	to {
+		scale: 1;
+	}
+}
+
+@keyframes exit {
+	from {
+		scale: 1;
+	}
+
+	to {
+		scale: 1.025;
+		opacity: 0;
+	}
+}
+
+@keyframes moveBackground {
+	0%,
+	100% {
+		background-position: 0% 0%, 0% 100%, 100% 100%, 100% 0%;
+	}
+
+	25% {
+		background-position: 0% 100%, 100% 100%, 100% 0%, 0% 0%;
+	}
+
+	50% {
+		background-position: 100% 100%, 100% 0%, 0% 0%, 0% 100%;
+	}
+
+	75% {
+		background-position: 100% 0%, 0% 0%, 0% 100%, 100% 100%;
+	}
+}
+
+.rpgm-stagger-move,
+.rpgm-stagger-leave-active,
+.rpgm-stagger-enter-active {
+	transition: all 0.4s ease-out;
+}
+
+.rpgm-stagger-leave-active {
+	position: absolute;
+}
+
+.rpgm-stagger-enter-from,
+.rpgm-stagger-leave-to {
+	opacity: 0;
+	transform: translateX(40px);
+}
+
+.rpgm-stagger-enter-to,
+.rpgm-stagger-leave-from {
+	opacity: 1;
+	transform: translateX(0);
+}
+
+.rpgm-stagger-alternate-move,
+.rpgm-stagger-alternate-leave-active,
+.rpgm-stagger-alternate-enter-active {
+	transition: all 0.4s ease-out;
+}
+
+.rpgm-stagger-alternate-leave-active {
+	position: absolute;
+}
+
+.rpgm-stagger-alternate-enter-from:nth-child(odd),
+.rpgm-stagger-alternate-leave-to:nth-child(odd) {
+	opacity: 0;
+	transform: translateX(40px);
+}
+
+.rpgm-stagger-alternate-enter-from:nth-child(even),
+.rpgm-stagger-alternate-leave-to:nth-child(even) {
+	opacity: 0;
+	transform: translateX(-40px);
+}
+
+.rpgm-stagger-alternate-enter-to,
+.rpgm-stagger-alternate-leave-from {
+	opacity: 1;
+	transform: translateX(0);
+}
+
+.rpgm-fade-move,
+.rpgm-fade-leave-active,
+.rpgm-fade-enter-active {
+	transition: opacity 0.2s ease-out, scale 0.2s ease-out;
+}
+
+.rpgm-fade-leave-active {
+	position: absolute;
+}
+
+.rpgm-fade-enter-from,
+.rpgm-fade-leave-to {
+	opacity: 0;
+	scale: 0.95;
+}
