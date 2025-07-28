@@ -1,5 +1,12 @@
 import { argument, choice, literal } from "brigadier-ts-lite";
 
+/**
+ * Help topics for the RPGM Tools chat commands
+ * 
+ * This record defines the help content that is displayed when users run the *help command.
+ * Each key represents a topic that can be accessed with *help <topic>.
+ * The values are HTML strings that are displayed in a chat message to the user.
+ */
 const topics: Record<string, string> = {
 	"names": `
 <div class="rpgm-help">
@@ -37,6 +44,22 @@ const topics: Record<string, string> = {
 `.trim(),
 };
 
+/**
+ * Register a new help submenu topic
+ * 
+ * This function allows modules to register additional help topics that can be accessed
+ * through the *help command. Each topic should provide a name and HTML content to display.
+ * 
+ * @param options - The options for the help submenu
+ * @param options.name - The name of the help topic (used as the command argument)
+ * @param options.content - The HTML content to display when the topic is requested
+ * 
+ * @example
+ * registerHelpSubmenu({
+ *   name: "myfeature",
+ *   content: "<div><h2>My Feature</h2><p>Explanation of my feature</p></div>"
+ * });
+ */
 export function registerHelpSubmenu(_options: {
 	name: string,
 	content: string,

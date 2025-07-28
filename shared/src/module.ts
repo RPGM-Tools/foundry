@@ -157,9 +157,10 @@ export abstract class RpgmModule {
 	init(): Promise<void> | void { }
 
 	/**
-	 * Lifecycle method for registering module-specific settings, Radial Menu buttons, and RP-Commands.
+	 * Lifecycle method for registering module-specific settings, Radial Menu buttons, RP-Commands, and chat commands.
 	 * This method is called during the Foundry VTT `setup` hook.
 	 * Override this method in your module to define its configurations and custom interactions.
+	 * Use `rpgm.chat.registerCommand()` to register new chat commands with the system.
 	 */
 	registerSettings(): Promise<void> | void { }
 

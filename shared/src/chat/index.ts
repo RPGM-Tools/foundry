@@ -7,7 +7,35 @@ import AutoComplete from "./AutoComplete.vue";
 import type { ChatWizard } from "./ChatWizard";
 
 /**
- * ChatCommands stores all rp-commands and provides utility functions related to chat
+ * ChatCommands stores all chat commands and provides utility functions related to chat
+ * 
+ * The ChatCommands system provides a framework for creating custom chat commands that can be 
+ * executed by users in the chat interface. Commands are registered using the brigadier-ts-lite 
+ * library which provides a Minecraft-like command syntax with argument parsing and autocompletion.
+ * 
+ * Commands are prefixed with an asterisk (*) and can be registered by both the shared module 
+ * and individual modules like rpgm-forge.
+ * 
+ * Key Features:
+ * - Command registration with brigadier-ts-lite for argument parsing
+ * - Autocompletion support in the chat interface
+ * - Integration with the ChatWizards system for interactive command interfaces
+ * - Message handler registration for custom chat message rendering
+ * 
+ * Usage:
+ * 1. Register commands using `rpgm.chat.registerCommand()` in your module's registerSettings method
+ * 2. Use `literal()`, `argument()`, and `string()` functions from brigadier-ts-lite to define command structure
+ * 3. Implement command execution logic in the executes() callback
+ * 
+ * Example:
+ * ```typescript
+ * rpgm.chat.registerCommand(literal("mycommand")
+ *   .then(argument("param", string())
+ *     .executes(c => {
+ *       // Handle command execution
+ *       console.log("Command executed with param:", c.get("param"));
+ *     })));
+ * ```
  */
 export class ChatCommands {
 	chatPanel: App | undefined;
@@ -78,38 +106,100 @@ export class ChatCommands {
 	}
 
 	/**
-	 * @param command - The command to register
+	 * Register a new chat command with the system
+	 * 
+	 * This method registers a new command that can be executed by users in the chat interface.
+	 * Commands are defined using the brigadier-ts-lite library which provides a Minecraft-like 
+	 * command syntax with argument parsing and autocompletion.
+	 * 
+	 * @param command - The command to register, created using literal(), argument(), etc. from brigadier-ts-lite
+	 * 
+	 * @example
+	 * // Register a simple command without arguments
+	 * rpgm.chat.registerCommand(literal("help").executes(() => {
+	 *   // Show help text
+	 * }));
+	 * 
+	 * @example
+	 * // Register a command with arguments
+	 * rpgm.chat.registerCommand(literal("name")
+	 *   .then(argument("prompt", string("greedy_phrase")).executes(c => {
+	 *     // Handle command with prompt argument
+	 *     void chatTokenNames(undefined, c.get<string>("prompt"));
+	 *   }))
+	 *   .executes(() => {
+	 *     // Handle command without arguments
+	 *     void chatTokenNames(undefined);
+	 *   }));
 	 */
 	registerCommand(command: LiteralArgumentBuilder) {
 		this.commands.register(command);
 	}
 
 	/**
-	 * @param handler - The chat database to register
+	 * Register a new message handler with the system
+	 * 
+	 * This method registers a new ChatWizard handler that can render custom content in chat messages.
+	 * Message handlers are used by the ChatWizards system to create interactive, persistent chat interfaces.
+	 * 
+	 * @param handler - The ChatWizard instance to register for handling specific message types
+	 * 
+	 * @example
+	 * // Register a wizard for handling name generation
+	 * const nameChats = new ChatWizard<ForgeChatNames>(
+	 *   "rpgm-forge",
+	 *   "name",
+	 *   NamesChat as Component,
+	 *   "Name Generator"
+	 * );
+	 * rpgm.chat.registerMessageHandler(nameChats);
 	 */
 	registerMessageHandler(handler: ChatWizard) {
 		this.messageHandlers.push(handler);
 	}
 
 	/**
-	 * @param command - The command to execute
-	 * @returns The exit code of the command
+	 * Execute a chat command
+	 * 
+	 * This method executes a registered chat command with the provided command string.
+	 * The command string should not include the command prefix (*).
+	 * 
+	 * @param command - The command to execute (without the * prefix)
+	 * @returns The exit code of the command execution
+	 * 
+	 * @example
+	 * // Execute the "help" command
+	 * rpgm.chat.execute("help");
+	 * 
+	 * @example
+	 * // Execute the "name" command with arguments
+	 * rpgm.chat.execute("name dragon");
 	 */
 	execute(command: string) {
 		return this.commands.execute(command);
 	}
 
 	/**
-	 * @param command - The command to parse
-	 * @returns The parse results
+	 * Parse a chat command
+	 * 
+	 * This method parses a command string and returns the parse results.
+	 * This is primarily used internally for command autocompletion.
+	 * 
+	 * @param command - The command to parse (without the * prefix)
+	 * @returns The parse results containing information about the command structure
 	 */
 	parse(command: string) {
 		return this.commands.parse(command);
 	}
 
 	/**
+	 * Get command completion suggestions
+	 * 
+	 * This method returns completion suggestions for a parsed command.
+	 * This is used by the AutoComplete component to provide autocompletion in the chat interface.
+	 * 
 	 * @param parse - The parse results to interpret
-	 * @returns A list of completions
+	 * @returns A list of completion suggestions for the current command context
 	 */
 	getCompletionSuggestions(parse: ParseResults) {
 		return this.commands.getCompletionSuggestions(parse);

@@ -3,7 +3,7 @@ import { ForgeNames } from "@rpgm/forge";
 import { shimmerToken } from './shimmer';
 
 /**
- * Find the one and only selected token
+ * Find the one and only selected token.
  * @returns The currently selected token, or undefined if more than one or none
  */
 export function getSelectedToken(): Token | undefined {
@@ -16,7 +16,7 @@ export function getSelectedToken(): Token | undefined {
 }
 
 /**
- * Creates a Description Wizard for the given prompt, or uses the selected token's name
+ * Creates a Description Wizard for the given prompt, or uses the selected token's name.
  * @param prompt - Options for the description
  * @param prompt.type - The type of "thing" to generate a description for
  * @param prompt.name - The optional name to give the generator for use in the description
@@ -34,7 +34,7 @@ export function chatDescription(prompt?: { type: string, name?: string }) {
 }
 
 /**
- * Creates a Names Wizard for the given prompt, or uses the selected token's name
+ * Creates a Names Wizard for the given prompt, or uses the selected token's name.
  * @param token - The token to rename, if omitted finds the current selected token
  * @param prompt - The prompt for what to generate, eg "Goblin", "Legendary Sword"
  */
@@ -56,7 +56,7 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
 }
 
 /**
- * Generates names for a token and applys a shimmer effect while generation is in progress
+ * Generates names for a token and applys a shimmer effect while generation is in progress.
  * @param tokenDocument - The {@link TokenDocument} to rename
  * @param type - An optional type to pass to the renaming AI
  * @returns The names generated
@@ -67,7 +67,9 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 	let method = rpgm.forge.method;
 	if (!rpgm.loginToken.length) method = "simple";
 
-	/** @todo Less hardcoding of values */
+	/**
+	 * @todo Less hardcoding of values
+	 */
 	const options: NamesOptions = {
 		quantity: 4,
 		gender: "any",
@@ -95,7 +97,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 }
 
 /**
- * Generates names and renames a token
+ * Generates names and renames a token.
  * @param tokenDocument - The token to rename
  */
 export async function quickNameToken(tokenDocument: TokenDocument) {
@@ -111,7 +113,7 @@ export async function quickNameToken(tokenDocument: TokenDocument) {
 }
 
 /**
- * Updates a token with provided data
+ * Updates a token with provided data.
  * @param tokenDocument - The token document to update
  * @param name - The name to apply to the token
  */
@@ -126,7 +128,9 @@ export async function nameToken(tokenDocument: TokenDocument, name: string) {
 
 let shift = false;
 
-/** Setup the functionality for detecting when a token has been placed */
+/**
+ * Setup the functionality for detecting when a token has been placed.
+ */
 export function registerTokenCreate() {
 	document.addEventListener("keydown", (k) => {
 		if (k.key == "Shift") { shift = true; }

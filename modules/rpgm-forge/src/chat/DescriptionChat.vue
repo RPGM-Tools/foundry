@@ -7,7 +7,7 @@ const description = rpgm.forge.descriptionsChats.useChatWizard(), { data } = des
 const loading = ref(false);
 
 /**
- * Generates the description
+ * Generates the description.
  * @todo Less hardcoding
  */
 async function generate() {
@@ -49,7 +49,7 @@ const buttons: RadialButton<ButtonContext>[] = [
 ];
 
 /**
- * Copies the description to clipboard
+ * Copies the description to clipboard.
  */
 function copy() {
 	try {

@@ -68,8 +68,8 @@ export class RpgmForge extends RpgmModule {
 	genres: Partial<Record<string, { genre: string }>> = {};
 
 	/**
-	 * Called before everything else
-	 * Not much goes on in here
+	 * Called before everything else.
+	 * Not much goes on in here.
 	 */
 	override async init(): Promise<void> {
 		rpgm.forge = this;
@@ -82,8 +82,8 @@ export class RpgmForge extends RpgmModule {
 	}
 
 	/**
-	 * Register module-specific settings here
-	 * Also where Radial Menu buttons and RP-Commands are registered (might change)
+	 * Register module-specific settings here.
+	 * Also where Radial Menu buttons, RP-Commands, and chat commands are registered.
 	 */
 	override registerSettings(): void {
 		game.settings.register("rpgm-forge", "auto_name", {
@@ -221,7 +221,7 @@ export class RpgmForge extends RpgmModule {
 	}
 
 	/**
-	 * Called when everything else in Foundry is loaded
+	 * Called when everything else in Foundry is loaded.
 	 */
 	override rpgmReady(): Promise<void> | void {
 		if (this.promptChats.data.size === 0 && !game.settings.get("rpgm-forge", "has_been_prompted"))
@@ -231,7 +231,7 @@ export class RpgmForge extends RpgmModule {
 }
 
 /**
- * @param code - The language code
+ * @param code - The ISO 639 code of the language.
  * @returns The language name
  */
 function getLanguage(code: string) {

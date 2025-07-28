@@ -5,7 +5,7 @@ import { SecretsSettings } from "./settings/secrets";
 import RpgmSidebarAppHelp from "./sidebar/RpgmSidebarApp/RpgmSidebarAppHelp.vue";
 import RpgmSidebarAppShop from "./sidebar/RpgmSidebarApp/RpgmSidebarAppShop.vue";
 
-/** Register shared settings once */
+/** Register shared settings once. */
 export function GlobalSettings() {
 	game.settings.register("rpgm-tools", "radial_menu_input", {
 		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_INPUT"),
@@ -59,7 +59,7 @@ export function GlobalSettings() {
 }
 
 /**
- * Register shared settings menus on each module's settings page
+ * Register shared settings menus on each module's settings page.
  * @param id - The foundry module to register menus to
  */
 export function GlobalMenus(id: string) {

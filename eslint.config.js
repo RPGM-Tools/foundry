@@ -2,6 +2,7 @@ import eslint from '@eslint/js';
 import vuelint from 'eslint-plugin-vue'
 import tslint from "typescript-eslint";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
+import jsdoclint from "eslint-plugin-jsdoc";
 
 export default tslint.config([
 	{
@@ -9,8 +10,9 @@ export default tslint.config([
 		extends: [
 			eslint.configs.recommended,
 			...tslint.configs.recommended,
-			// jsdoclint.configs['flat/recommended-typescript'],
 			...vuelint.configs['flat/recommended'],
+			jsdoclint.configs['flat/stylistic-typescript'],
+			jsdoclint.configs['flat/contents-typescript'],
 		],
 		files: ["**/*.{ts,vue}"],
 		languageOptions: {
@@ -25,7 +27,7 @@ export default tslint.config([
 			},
 		},
 		plugins: {
-			"simple-import-sort": simpleImportSort
+			"simple-import-sort": simpleImportSort,
 		},
 		rules: {
 			semi: "warn",
@@ -53,7 +55,7 @@ export default tslint.config([
 			// 	checkConstructors: false,
 			// 	enableFixer: false,
 			// }],
-			// "jsdoc/require-hyphen-before-param-description": "warn",
+			"jsdoc/require-hyphen-before-param-description": ["warn", "always"],
 			"@typescript-eslint/no-unused-vars": ["error", {
 				"args": "all",
 				"argsIgnorePattern": "^_",

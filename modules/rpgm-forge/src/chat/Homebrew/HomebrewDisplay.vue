@@ -5,7 +5,7 @@ const { generations } = inject<ForgeChatHomebrew>("data")!;
 const isSecure = ref(window.isSecureContext);
 
 /**
- * Copies the description to clipboard
+ * Copies the description to clipboard.
  * @param field - The field to copy
  */
 function copy(field: HomebrewField) {

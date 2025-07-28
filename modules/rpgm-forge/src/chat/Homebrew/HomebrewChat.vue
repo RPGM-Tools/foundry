@@ -89,7 +89,7 @@ onMounted(() => {
 });
 
 /**
- * @param generation - The generation to send to journal
+ * @param generation - The generation name to send to journal
  * @param open - Whether or not to show the entry after creating it
  */
 async function sendToJournal(generation: string, open: boolean = false) {
@@ -135,7 +135,7 @@ function deleteGeneration(generation: string) {
 }
 
 /**
- * Generates the homebrew
+ * Generates the homebrew.
  */
 async function generate() {
 	if (!data.options.schema) return;
@@ -158,7 +158,7 @@ async function generate() {
 }
 
 /**
- * Select the next generation, wrapping if necessary
+ * Select the next generation, wrapping if necessary.
  * @param by - How many generations to move forwards or backwards
  */
 function cycleGenerations(by: number = 1) {
@@ -168,7 +168,7 @@ function cycleGenerations(by: number = 1) {
 	data.activeGeneration = keys[newIndex];
 }
 
-/** Switches the wizard to the generations view */
+/** Switches the wizard to the generations view. */
 function gotoGenerations() {
 	if (!data.generations[data.activeGeneration]) {
 		data.activeGeneration = Object.keys(data.generations)[0];
@@ -177,7 +177,7 @@ function gotoGenerations() {
 }
 
 /**
- * Copies a generation to the clipboard
+ * Copies a generation to the clipboard.
  * @param generation - The generation to copy
  */
 function copyGeneration(generation: string) {
@@ -188,7 +188,7 @@ function copyGeneration(generation: string) {
 	} catch { return; }
 }
 
-/** Switches the wizard to the editing view, creating an empty schema from the active generation */
+/** Switches the wizard to the editing view, creating an empty schema from the active generation. */
 function restoreSchemaFromActiveGeneration() {
 	if (editing.value) return;
 	data.options = {

@@ -2,7 +2,7 @@ import fragURL from './shimmer2.glsl?url';
 import vertexURL from './vertex.glsl?url';
 
 /**
- * Prepare a shimmer effect for a token
+ * Prepare a shimmer effect for a token.
  * @param token - The token to shimmer
  * @returns A unique shimmer object for this token
  */
@@ -33,7 +33,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 	active: boolean = false;
 	fadingOut: boolean;
 
-	/** Fetch the shader code once */
+	/** Fetch the shader code once. */
 	static async setShader(): Promise<void> {
 		await fetch(vertexURL).then(async (v) => {
 			if (v.ok) ShimmerFilter.vertex ??= await v.text();
@@ -66,7 +66,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 		this.startTime = performance.now();
 	}
 
-	/** Update shader uniforms */
+	/** Update shader uniforms. */
 	updateFn() {
 		const elapsed = (performance.now() - this.startTime) / 1000;
 		this.uniforms.iTime = elapsed;

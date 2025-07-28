@@ -4,33 +4,64 @@ import type { App, Component, Reactive } from "vue";
 export type WizardData<T extends object = object> = {
 	/** The data for this message */
 	data: Reactive<T>,
+
 	/** The {@link ChatMessage} document */
 	message: ChatMessage,
+
 	/** A unique identifier for this message */
 	id: string,
+
 	/** The html element for this message */
 	element: HTMLElement,
+
 	/** Whether or not the data has been saved */
 	saved: Ref<boolean>,
+
 	/** Closes the message and deletes it */
 	close: () => void
 };
 
 /**
- * Represents a chat wizard
- * Wizards are saved in world settings, specific to each user and wizard
+ * ChatWizards System
+ * 
+ * The ChatWizards system provides a framework for creating persistent, interactive chat-based interfaces
+ * within Foundry VTT. Each wizard is a specialized chat message that maintains its own state and can be
+ * interacted with through custom Vue components.
+ * 
+ * Key Features:
+ * - Persistent state management saved to world settings
+ * - User-specific data isolation
+ * - Automatic message creation and rendering
+ * - Built-in debounced auto-saving
+ * - Cleanup of orphaned messages
+ * - Placeholder content for missing modules
+ * 
+ * Usage:
+ * 1. Create a new wizard by extending ChatWizard class
+ * 2. Provide a Vue component for the interface
+ * 3. Register the wizard in your module's initialization
+ * 4. Use the provided composable for reactive data access
+ * 
+ * Example:
+ * ```typescript
+ * const myWizard = new ChatWizard("my-module", "my-wizard", MyComponent, "My Wizard Title");
+ * myWizard.load();
+ * await myWizard.newMessage({ initialData: "value" });
+ * ```
  */
 export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	data: Map<string, T> = new Map();
 	apps: Map<string, App> = new Map();
+
 	/** @returns Placeholder content for when a module isn't installed */
 	get placeholder() { return `<div class="${this.moduleId}-${this.key}">If you are seeing this, please install ${this.moduleId}</div>`; }
 	readonly _key: string;
+
 	/** @returns The unique key for this wizard and user */
 	get key(): ClientSettings.KeyFor<typeof this.moduleId> { return `${this._key}-${game.userId?.toLowerCase()}` as unknown as ClientSettings.KeyFor<typeof this.moduleId>; }
 
 	/**
-	 * Creates a new ChatWizard
+	 * Creates a new ChatWizard.
 	 * @param moduleId - The namespace of this wizard
 	 * @param key - The key of this wizard
 	 * @param renderer - The component to render for this wizard
@@ -44,7 +75,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	) { this._key = key; }
 
 	/**
-	 * Creates a message and saves it to the database
+	 * Creates a message and saves it to the database.
 	 * @param data - The data to store to this message
 	 */
 	async newMessage(data?: T) {
@@ -64,7 +95,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	}
 
 	/**
-	 * Extracts the unique key from the flags of a message
+	 * Extracts the unique key from the flags of a message.
 	 * @param message - The message to retrieve the id of
 	 * @returns A unique identifier extracted for this message if it exists
 	 */
@@ -73,7 +104,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	}
 
 	/**
-	 * Decides whether or not to handle rendering for a given message
+	 * Decides whether or not to handle rendering for a given message.
 	 * @param message - The message to query
 	 * @returns Whether or not this message should be rendered with this database
 	 */
@@ -82,7 +113,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	}
 
 	/**
-	 * Renders a message by mounting a vue app to its content
+	 * Renders a message by mounting a vue app to its content.
 	 * @param message - The message being rendered
 	 * @param html - The html of the message
 	 * @returns Whether or not the message was rendered
@@ -117,7 +148,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	}
 
 	/**
-	 * Retrieves all data for this database, creating it if it doesn't exist
+	 * Retrieves all data for this database, creating it if it doesn't exist.
 	 */
 	load() {
 		game.settings.register(this.moduleId, this.key, {
@@ -129,7 +160,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 		rpgm.logger.debug(`Loaded ${this.key} wizard with ${this.data.size} messages`);
 	}
 
-	/** Removes any messages that no longer exist */
+	/** Removes any messages that no longer exist. */
 	prune() {
 		const old_length = this.data.size;
 		const message_ids = game.messages.map(m => this.messageId(m));
@@ -140,7 +171,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 			rpgm.logger.debug(`Pruned ${this.key} wizard with ${old_length - this.data.size} messages`);
 	}
 
-	/** Sync this database's data to localStorage */
+	/** Sync this database's data to localStorage. */
 	private save() {
 		if (!game.user.isGM) return;
 		void game.settings.set(this.moduleId, this.key, JSON.stringify(Object.fromEntries(this.data)));
@@ -148,7 +179,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	}
 
 	/**
-	 * A vue composable for grabbing a reactive reference to a message's data
+	 * A vue composable for grabbing a reactive reference to a message's data.
 	 * @param debounce - How often to save data when it gets changed
 	 * @returns A reactive reference to the message's data, along with the original message
 	 */

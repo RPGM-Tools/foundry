@@ -23,7 +23,7 @@ const insertValues = (values: string[]) => {
 };
 
 /**
- * Generates the name
+ * Generates the name.
  * @param regenerate - Whether or not to delete the old names
  * @todo Less hardcoding
  */
@@ -64,7 +64,7 @@ const buttons: RadialButton[] = [{
 }];
 
 /** 
- * Apply a name to the currently selected token
+ * Apply a name to the currently selected token.
  * @param name - The name to apply
  */
 function assign(name: string) {

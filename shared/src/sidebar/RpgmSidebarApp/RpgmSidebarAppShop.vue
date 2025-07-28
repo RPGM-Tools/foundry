@@ -21,7 +21,8 @@ type Item = {
 	};
 };
 
-const { isFetching, data, error } = useFetch(`https://store.xsolla.com/api/v2/project/${__XSOLLA_PROJECT_ID__}/items/virtual_currency/package`).get().json<{ items: Item[] }>();
+const { data, error } = useFetch(`https://store.xsolla.com/api/v2/project/${__XSOLLA_PROJECT_ID__}/items/virtual_currency/package`)
+	.get().json<{ items: Item[] }>();
 
 const sortedItems = computed(() => {
 	onResize?.();
@@ -60,32 +61,29 @@ const openPurchase = (item: Item) => {
 
 <template>
 	<div style="min-height: 100vh;">
-		<p v-if="isFetching" style="text-align: center;">Loading...</p>
-		<template v-else>
-			<StaggeredTransitionGroup tag="div" name="rpgm-stagger" class="shop-items">
-				<div v-for="item in sortedItems" :key="item.item_id" style="padding: 2px" class="shop-item">
+		<StaggeredTransitionGroup tag="div" name="rpgm-stagger" class="shop-items">
+			<div v-for="item in sortedItems" :key="item.item_id" style="padding: 2px" class="shop-item">
+				<span>
+					<ProgressiveImage :src="item.image_url" />
+					<span class="shop-item-name">{{ item.name }}</span>
+					<br>
 					<span>
-						<ProgressiveImage :src="item.image_url" />
-						<span class="shop-item-name">{{ item.name }}</span>
-						<br>
-						<span>
-							{{ item.price.amount }}
-							<s v-if="item.price.amount_without_discount < item.price.amount">
-								{{ item.price.amount_without_discount }}
-							</s>
-							{{ item.price.currency }}
-						</span>
+						{{ item.price.amount }}
+						<s v-if="item.price.amount_without_discount < item.price.amount">
+							{{ item.price.amount_without_discount }}
+						</s>
+						{{ item.price.currency }}
 					</span>
-					<p class="shop-item-description" v-html="parseDescription(item.description)" />
-					<IsLoggedIn>
-						<button @click="openPurchase(item)">Buy</button>
-						<template #not-logged-in>
-							<button :disabled="true" style="pointer-events: none;"><i>Login to buy</i></button>
-						</template>
-					</IsLoggedIn>
-				</div>
-			</StaggeredTransitionGroup>
-		</template>
+				</span>
+				<p class="shop-item-description" v-html="parseDescription(item.description)" />
+				<IsLoggedIn>
+					<button @click="openPurchase(item)">Buy</button>
+					<template #not-logged-in>
+						<button :disabled="true" style="pointer-events: none;"><i>Login to buy</i></button>
+					</template>
+				</IsLoggedIn>
+			</div>
+		</StaggeredTransitionGroup>
 		<p v-if="error">Failed to load shop :/</p>
 	</div>
 </template>

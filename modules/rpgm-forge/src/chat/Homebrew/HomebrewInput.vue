@@ -17,13 +17,14 @@ const data = inject<ForgeChatHomebrew>("data")!;
 const { loading } = defineProps<{ loading: boolean }>();
 
 const renaming = ref(false);
-/** Disable css for 10ms when renaming a field */
+
+/** Disable css for 10ms when renaming a field.. */
 function pauseTransition() {
 	renaming.value = true;
 	setTimeout(() => renaming.value = false, 10);
 }
 
-/** Appends a field to the current schema */
+/** Appends a field to the current schema. */
 function newField() {
 	data.options.schema?.fields.push({
 		name: "[Name]",
@@ -45,7 +46,7 @@ function buttonIndex(i: number): -1 | 0 | 1 {
 }
 
 /**
- * Sets the active schema to a copy of {@link v}
+ * Sets the active schema to a copy of {@link v}.
  * @param v - The schema to select
  * @returns The new schema
  */
@@ -53,7 +54,7 @@ function assign(v: HomebrewSchema): HomebrewSchema {
 	return structuredClone(toRaw(v));
 }
 
-/** Reset modified status, scroll down if necessary */
+/** Reset modified status, scroll down if necessary. */
 function newSelection() {
 	rpgm.chat.updateScroll();
 }

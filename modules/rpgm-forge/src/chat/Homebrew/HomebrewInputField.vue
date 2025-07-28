@@ -16,7 +16,7 @@ const editing = ref(false);
 const fieldContainer = useTemplateRef("fieldContainer");
 
 /**
- * Checks to see if a field can be renamed to {@link n} 
+ * Checks to see if a field can be renamed to {@link n}.
  * @param n - The name to validate
  */
 function validateNewName(n: string) {
@@ -42,13 +42,13 @@ function validateNewName(n: string) {
 	}
 }
 
-/** Deletes this field from the schema */
+/** Deletes this field from the schema. */
 function remove() {
 	data.options.schema!.fields.splice(data.options.schema!.fields.indexOf(field.value), 1);
 }
 
 /** 
- * Reorders this field in the schema 
+ * Reorders this field in the schema .
  * @param by - How many fields to move forwards or backwards
  */
 function move(by: number) {
@@ -61,7 +61,7 @@ function move(by: number) {
 }
 
 /**
- * Only allow numbers
+ * Only allow numbers.
  * @param e - Keyboard event
  */
 function filterNumbers(e: KeyboardEvent) {
@@ -71,7 +71,7 @@ function filterNumbers(e: KeyboardEvent) {
 }
 
 /**
- * Ignore focus changes within the field, else disable editing mode
+ * Ignore focus changes within the field, else disable editing mode.
  * @param e - The {@link FocusEvent} to detect the target of blur
  */
 function tryBlur(e: FocusEvent) {
@@ -81,10 +81,10 @@ function tryBlur(e: FocusEvent) {
 }
 
 /**
- * Change type
- * @param type - New type
+ * Change the type of this field.
+ * @param type - The new type
  */
-function changeType(type: "short" | "long" | "boolean" | "number") {
+function changeType(type: HomebrewField["type"]) {
 	if (type === "number" || type === "boolean" || field.value.type === "number" || field.value.type === "boolean")
 		field.value.value = undefined;
 	field.value.type = type;
