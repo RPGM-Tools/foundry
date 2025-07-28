@@ -1,6 +1,10 @@
 import type { Directive } from "vue";
 
-type FitHTMLElement = HTMLElement & { _observer?: MutationObserver, _size?: number, _max?: number }
+type FitHTMLElement = HTMLElement & {
+	_mObserver?: MutationObserver,
+	_rObserver?: ResizeObserver,
+	_size?: number, _max?: number
+}
 
 async function onEnter(html: FitHTMLElement) {
 	await nextTick();
@@ -21,19 +25,22 @@ function updateStyles(html: FitHTMLElement) {
 	html.style.fontSize = `${html._size}px`;
 	html.style.height = `${html._max}px`;
 	html.style.lineHeight = `${html._max}px`;
-	html.style.overflowX = "hidden";
+	html.style.overflow = "hidden";
 	html.style.boxSizing = "content-box";
 	html.style.whiteSpace = "nowrap";
 }
 
 export const vFitLines: Directive<FitHTMLElement> = {
 	beforeMount(html) {
-		html._observer = new MutationObserver(e => onEnter(e[0].target as FitHTMLElement));
-		html._observer.observe(html, { childList: true });
-		onEnter(html);
+		html._mObserver = new MutationObserver(e => void onEnter(e[0].target as FitHTMLElement));
+		html._mObserver.observe(html, { childList: true });
+		html._rObserver = new ResizeObserver(e => void onEnter(e[0].target as FitHTMLElement));
+		html._rObserver.observe(html, { box: "border-box" });
+		void nextTick(() => onEnter(html));
 	},
-	updated: updateStyles,
+	updated: void onEnter,
 	beforeUnmount(el) {
-		el._observer?.disconnect();
+		el._mObserver?.disconnect();
+		el._rObserver?.disconnect();
 	}
 };

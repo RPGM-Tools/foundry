@@ -22,11 +22,12 @@
 </template>
 
 <script setup lang="ts">
-import DiceButton from './DiceButton.vue';
-import type { StyleValue } from 'vue';
 import { autoUpdate, offset, useFloating } from '@floating-ui/vue';
-import diceImage from '../../assets/d20-512x512.webp';
 import { shift } from '@floating-ui/vue';
+import type { StyleValue } from 'vue';
+
+import diceImage from '../../assets/d20-512x512.webp';
+import DiceButton from './DiceButton.vue';
 
 const ANIMATION_DURATION = 0.2;
 const MAX_CENTER_SIZE = 35;
@@ -302,7 +303,7 @@ function getSubButtonStyle(index: number): StyleValue {
 	overflow: visible;
 }
 
-.loading {
+.radial-menu-center.loading {
 	animation: jitter 0.5s infinite;
 	animation-delay: v-bind('`${ANIMATION_DURATION}s`');
 }

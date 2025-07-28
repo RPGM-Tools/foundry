@@ -57,12 +57,12 @@ async function writeOn(el: HTMLElement, duration: number, text: string, index: n
 		let i = index;
 		interval = window.setInterval(() => {
 			if (i === text.length + 1) {
-				el.innerText = text || "⠀";
+				el.innerText = text || "​";
 				clearInterval(interval!);
 				resolve();
 				return;
 			}
-			el.innerText = text.slice(0, i++) || "⠀";
+			el.innerText = text.slice(0, i++) || "​";
 		}, duration);
 	});
 }
@@ -80,7 +80,7 @@ async function writeOff(el: HTMLElement, duration: number, index: number = 0): P
 		const text = el.innerText;
 		let i = text.length;
 		interval = window.setInterval(() => {
-			el.innerText = text.slice(0, i--) || "⠀";
+			el.innerText = text.slice(0, i--) || "​";
 			if (i == index) {
 				clearInterval(interval!);
 				resolve();

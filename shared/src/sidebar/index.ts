@@ -1,6 +1,23 @@
-export async function initSidebar() {
-	const legacy = rpgm.majorGameVersion <= 12;
-	const RpgmSidebar: foundry.applications.sidebar.AbstractSidebarTab = (await import(legacy ? "./legacy.ts" : "./modern.ts")).default;
+export class RpgmSidebarManager {
+	get menus(): ReadonlyArray<SidebarMenu> { return this._menus; }
+	private _menus: SidebarMenu[] = [];
 
-	CONFIG.ui["rpgm"] = RpgmSidebar;
+	constructor() {
+		void this.initSidebar();
+	}
+
+	private async initSidebar() {
+		const legacy = rpgm.majorGameVersion <= 12;
+		const RpgmSidebar = (await import(legacy ? "./legacy.ts" : "./modern.ts"))
+			.default as foundry.applications.sidebar.AbstractSidebarTab;
+
+		CONFIG.ui["rpgm"] = RpgmSidebar;
+	}
+
+	registerSidebarMenu(options: SidebarMenu) {
+		if (this._menus.some(m => m.id === options.id)) {
+			rpgm.logger.error(`Sidebar menu '${options.id}' already registered`);
+		} else
+			this._menus.push(options);
+	}
 }

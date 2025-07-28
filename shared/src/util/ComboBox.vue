@@ -1,5 +1,13 @@
 <script setup lang="ts" generic="T">
-const { values, unique, filter, display, assign, max } = defineProps<{
+const {
+	values,
+	unique,
+	filter,
+	display,
+	assign = undefined,
+	max = undefined,
+	placeholder = undefined
+} = defineProps<{
 	values: T[],
 	unique: (v: T) => string | number | symbol,
 	filter: (v: T, t: string) => boolean,

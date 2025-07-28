@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import HomebrewInputField from './HomebrewInputField.vue';
-import WriteOnTransition from "#/util/WriteOnTransition.vue";
 import ComboBox from '#/util/ComboBox.vue';
 import { localize } from '#/util/localize';
+import WriteOnTransition from "#/util/WriteOnTransition.vue";
+
+import HomebrewInputField from './HomebrewInputField.vue';
 
 const schemas = rpgm.forge.homebrewSchemas;
 const hasGenerated = computed(() => Object.keys(data.generations).length > 0);

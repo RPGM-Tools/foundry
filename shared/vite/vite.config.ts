@@ -1,9 +1,10 @@
+import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
+import AutoImport from 'unplugin-auto-import/vite';
 import { loadEnv, type UserConfig } from 'vite';
+
 import { GenerateI18n } from './localize';
 import { Versioning } from './versioning';
-import AutoImport from 'unplugin-auto-import/vite';
-import vue from '@vitejs/plugin-vue';
 
 /**
  * @param id - The module id
@@ -45,6 +46,7 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 		define: {
 			"__MODULE_VERSION__": `"${version}"`,
 			"__API_URL__": JSON.stringify(env.VITE_RPGM_URL ?? "https://api.rpgm.tools"),
+			"__XSOLLA_PROJECT_ID__": JSON.stringify(env.VITE_XSOLLA_PROJECT_ID),
 			"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
 		},
 		assetsInclude: [
@@ -68,6 +70,7 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 					manualChunks: {
 						vue: ["vue"],
 						btsl: ["brigadier-ts-lite"],
+						showdown: ["showdown"],
 					},
 					assetFileNames: () => {
 						return `assets/[name][extname]`;

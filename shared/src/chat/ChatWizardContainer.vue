@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import RadialMenu from '#/radial-menu/RadialMenu.vue';
-import SavedCheck from './SavedCheck.vue';
+
 import type { WizardData } from './ChatWizard';
+import SavedCheck from './SavedCheck.vue';
 
 const { wizard, buttons = [] } = defineProps<{
 	wizard: WizardData<object>

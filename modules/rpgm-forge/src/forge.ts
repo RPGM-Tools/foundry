@@ -1,19 +1,21 @@
+import { ForgeQueue } from "@rpgm/forge";
+import Homebrews from "@rpgm/forge/data/schemas.json?url";
+import { argument, literal, string } from "brigadier-ts-lite";
+import ISO639 from "iso-639-1";
+import type { Component } from "vue";
+
+import { ChatWizard } from "#/chat/ChatWizard";
 import { RpgmModule } from "#/module";
-import { literal, argument, string } from "brigadier-ts-lite";
-import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, registerTokenCreate } from "./util/token";
 import { inputHeuristics, shimmerInput, writeOn } from "#/radial-menu";
 import { RPGMLogger } from "#/util/LoggingV2";
-import { ChatWizard } from "#/chat/ChatWizard";
-import { command } from "./util/homebrew";
-import type { Component } from "vue";
-import NamesChat from "./chat/NamesChat.vue";
+
+import Genres from "../assets/combined_systems.json?url";
 import DescriptionChat from "./chat/DescriptionChat.vue";
 import HomebrewChat from "./chat/Homebrew/HomebrewChat.vue";
 import InitPrompt from "./chat/InitPrompt.vue";
-import Homebrews from "@rpgm/forge/data/schemas.json?url";
-import Genres from "../assets/combined_systems.json?url";
-import { ForgeQueue } from "@rpgm/forge";
-import ISO639 from "iso-639-1";
+import NamesChat from "./chat/NamesChat.vue";
+import { command } from "./util/homebrew";
+import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, registerTokenCreate } from "./util/token";
 
 /**
  * RpgmForge stores chat databases for forge wizards
@@ -36,7 +38,7 @@ export class RpgmForge extends RpgmModule {
 	/** @returns The current language setting */
 	get language() { return game.settings.get("rpgm-forge", "language"); }
 
-	queue = new ForgeQueue(() => [{ auth_token: rpgm.api_key }]);
+	queue = new ForgeQueue(() => [{ auth_token: rpgm.loginToken }]);
 
 	promptChats = new ChatWizard(
 		this.id,
@@ -44,9 +46,9 @@ export class RpgmForge extends RpgmModule {
 		InitPrompt as Component,
 		this.name
 	);
-	namesChats = new ChatWizard<ForgeChatNames>(
+	nameChats = new ChatWizard<ForgeChatNames>(
 		this.id,
-		"names",
+		"name",
 		NamesChat as Component,
 		this.name
 	);
@@ -74,7 +76,7 @@ export class RpgmForge extends RpgmModule {
 		this.homebrewSchemas = await (await fetch(Homebrews)).json() as typeof this.homebrewSchemas;
 		this.genres = await (await fetch(Genres)).json() as typeof this.genres;
 		this.promptChats.load();
-		this.namesChats.load();
+		this.nameChats.load();
 		this.descriptionsChats.load();
 		this.homebrewChats.load();
 	}
@@ -83,7 +85,7 @@ export class RpgmForge extends RpgmModule {
 	 * Register module-specific settings here
 	 * Also where Radial Menu buttons and RP-Commands are registered (might change)
 	 */
-	override async registerSettings(): Promise<void> {
+	override registerSettings(): void {
 		game.settings.register("rpgm-forge", "auto_name", {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.AUTO_NAME"),
 			hint: rpgm.localize("RPGM_FORGE.CONFIG.AUTO_NAME_HINT"),
@@ -107,7 +109,7 @@ export class RpgmForge extends RpgmModule {
 		game.settings.register("rpgm-forge", "language", {
 			name: rpgm.localize("RPGM_FORGE.CONFIG.LANGUAGE"),
 			hint: rpgm.localize("RPGM_FORGE.CONFIG.LANGUAGE_HINT"),
-			default: await getLanguage(game.i18n.lang),
+			default: getLanguage(game.i18n.lang),
 			scope: "world",
 			type: String,
 			config: true,
@@ -140,7 +142,7 @@ export class RpgmForge extends RpgmModule {
 			type: String,
 			config: true
 		});
-		rpgm.chat.registerCommand(literal("names")
+		rpgm.chat.registerCommand(literal("name")
 			.then(argument("prompt", string("greedy_phrase")).executes(c => {
 				void chatTokenNames(undefined, c.get<string>("prompt"));
 			})).executes(() => {
@@ -209,6 +211,12 @@ export class RpgmForge extends RpgmModule {
 				});
 			}
 		});
+		rpgm.sidebar.registerSidebarMenu({
+			id: "rpgm-forge",
+			title: "Forge",
+			icon: "fas fa-dice-d12",
+			color: "#290b53"
+		});
 		registerTokenCreate();
 	}
 
@@ -217,7 +225,7 @@ export class RpgmForge extends RpgmModule {
 	 */
 	override rpgmReady(): Promise<void> | void {
 		if (this.promptChats.data.size === 0 && !game.settings.get("rpgm-forge", "has_been_prompted"))
-			this.promptChats.newMessage();
+			void this.promptChats.newMessage();
 	}
 
 }
@@ -226,6 +234,6 @@ export class RpgmForge extends RpgmModule {
  * @param code - The language code
  * @returns The language name
  */
-async function getLanguage(code: string) {
+function getLanguage(code: string) {
 	return ISO639.getName(code) || "English";
 }

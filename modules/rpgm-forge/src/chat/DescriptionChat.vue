@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ForgeDescription } from '@rpgm/forge';
+
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 
 const description = rpgm.forge.descriptionsChats.useChatWizard(), { data } = description;

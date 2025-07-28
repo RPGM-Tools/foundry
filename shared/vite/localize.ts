@@ -22,7 +22,7 @@ export function GenerateI18n(langGlob: string): Plugin {
 	async function getLangs() {
 		const files = fs.globSync(resolve(__dirname, SHARED_LANG));
 		for (const file of files) {
-			const { default: m }: { default: LanguageSchema } = await import(pathToFileURL(file).href);
+			const { default: m } = await import(pathToFileURL(file).href) as { default: LanguageSchema };
 			langs[basename(file).split('.')[0]] = m;
 		}
 	}
@@ -60,7 +60,7 @@ export function GenerateI18n(langGlob: string): Plugin {
 			for (const file of files) {
 				const name = basename(file).split('.')[0];
 
-				const m: LanguageModule = await import(pathToFileURL(file).href);
+				const m = await import(pathToFileURL(file).href) as LanguageModule;
 				const merged = mergeDeep(langs[name], m.default);
 				fs.mkdirSync(`${config.build.outDir}/lang`);
 				fs.writeFileSync(`${config.build.outDir}/lang/${name}.json`, JSON.stringify(merged, null, 4));

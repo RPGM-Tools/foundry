@@ -2,6 +2,7 @@
 import type { ParseResults } from 'brigadier-ts-lite';
 import { Suggestions } from 'brigadier-ts-lite';
 import type { StyleValue } from 'vue';
+
 import { vFollow } from './VFollow';
 
 const CHAT_MESSAGE = '#chat-message';
@@ -127,7 +128,7 @@ function handleMessage(_log: ChatLog, message: string, _chatData: { user: string
 		setTimeout(() => {
 			game.messages.forEach(message => {
 				if (message.content.startsWith('\\*'))
-					message.update({ content: message.content.slice(1) }, {});
+					void message.update({ content: message.content.slice(1) }, {});
 			});
 		}, 100);
 	}

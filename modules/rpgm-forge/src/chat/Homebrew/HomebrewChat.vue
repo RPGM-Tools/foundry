@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ForgeHomebrew } from "@rpgm/forge";
-import HomebrewInput from "./HomebrewInput.vue";
-import HomebrewDisplay from "./HomebrewDisplay.vue";
-import HomebrewTitle from "./HomebrewTitle.vue";
-import { inputHeuristics } from "#/radial-menu";
+
 import ChatWizardContainer from "#/chat/ChatWizardContainer.vue";
+import { inputHeuristics } from "#/radial-menu";
+
+import HomebrewDisplay from "./HomebrewDisplay.vue";
+import HomebrewInput from "./HomebrewInput.vue";
+import HomebrewTitle from "./HomebrewTitle.vue";
 
 const schemas = rpgm.forge.homebrewSchemas;
 
@@ -43,28 +45,22 @@ const buttons = computed<RadialButton[]>(() =>
 				icon: "fas fa-book-open",
 				tooltip: "RPGM_FORGE.RADIAL_MENU.SEND_TO_JOURNAL",
 				detective() {
-					//@ts-expect-error Flags broken
 					return game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id)
-						//@ts-expect-error Flags broken
 						?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration) === undefined;
 				},
-				callback(c) { sendToJournal(data.activeGeneration, c.shift); },
+				callback(c) { void sendToJournal(data.activeGeneration, c.shift); },
 			},
 			{
 				category: rpgm.radialMenu.categories.rpgm_forge,
 				icon: "fas fa-book-open",
 				tooltip: "RPGM_FORGE.RADIAL_MENU.OPEN_JOURNAL",
 				detective() {
-					//@ts-expect-error Flags broken
 					return game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id)
-						//@ts-expect-error Flags broken
 						?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration) !== undefined;
 				},
 				callback() {
-					//@ts-expect-error Flags broken
 					const entry = game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id);
-					//@ts-expect-error Flags broken
-					entry?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration)?.sheet.render(true);
+					void entry?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration)?.sheet?.render(true);
 				},
 			},
 			{
@@ -99,17 +95,14 @@ onMounted(() => {
 async function sendToJournal(generation: string, open: boolean = false) {
 	const gen = data.generations[generation];
 
-	//@ts-expect-error Flags broken
 	let entry = game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id) as JournalEntry;
 	if (!entry) {
 		entry = (await JournalEntry.create({
 			name: gen.name,
-			//@ts-expect-error Flags broken
 			flags: { "rpgm-forge": { "homebrew": id } }
 		}))!;
 	}
 
-	//@ts-expect-error Flags broken
 	let page = entry.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === generation) as JournalEntryPage;
 	if (!page) {
 		page = (await JournalEntryPage.create({
@@ -121,11 +114,10 @@ async function sendToJournal(generation: string, open: boolean = false) {
 			},
 			// Puts the newest entry on top, may change later
 			sort: entry.pages.reduce((m, e) => { return e.sort < m ? (m = e.sort) : m; }, 0) - 1,
-			//@ts-expect-error Flags broken
 			flags: { "rpgm-forge": { "homebrew": generation } }
 		}, { parent: entry }))!;
 		if (open)
-			page.sheet?.render(true);
+			void page.sheet?.render(true);
 		rpgm.logger.visible.log(`Journal Entry created for "${gen.custom_name}"`,);
 	} else {
 		rpgm.logger.visible.error(`Journal Entry for "${gen.custom_name}" already exists!`);

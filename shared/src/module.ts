@@ -1,8 +1,9 @@
 import { GlobalMenus, GlobalSettings } from "#/settings";
+
 import { ChatCommands } from "./chat";
 import { registerRpgmCommands } from "./chat/commands";
 import { RadialMenuRegister } from "./radial-menu";
-// impot { initSidebar } from "./sidebar";
+import { RpgmSidebarManager } from "./sidebar";
 import { localize } from "./util/localize";
 import { RPGMLogger } from "./util/LoggingV2";
 
@@ -31,6 +32,7 @@ export abstract class RpgmModule {
 	/** Utility function for localizing strings using Foundry's localization system. */
 	static localize = localize;
 
+	static sidebar: RpgmSidebarManager;
 	/**
 	 * The unique slug ID for this module, which also serves as its namespace for client settings.
 	 * This must be defined by the extending module.
@@ -75,16 +77,16 @@ export abstract class RpgmModule {
 	 * Each hook adds its corresponding private method (`_init`, `_setup`, `_ready`) to the `setup` promise chain.
 	 */
 	constructor() {
-		Hooks.once("init", () => this.setup = this.setup.then(this._init.bind(this)));
-		Hooks.once("setup", () => this.setup = this.setup.then(this._setup.bind(this)));
-		Hooks.once("ready", () => this.setup = this.setup.then(this._ready.bind(this)));
+		Hooks.once("init", () => { this.setup = this.setup.then(this._init.bind(this)); });
+		Hooks.once("setup", () => { this.setup = this.setup.then(this._setup.bind(this)); });
+		Hooks.once("ready", () => { this.setup = this.setup.then(this._ready.bind(this)); });
 	}
 
 	/** 
 	 * Retrieves the API key set by the user in the global RPGM Tools settings.
 	 * @returns The API key string, or an empty string if not set.
 	 */
-	static get api_key() { return game.settings.get("rpgm-tools", "api_key") || ""; }
+	static get loginToken() { return game.settings.get("rpgm-tools", "login-token") || ""; }
 
 	/** 
 	 * The initial asynchronous method called when the Foundry VTT `init` hook fires for this module.
@@ -129,6 +131,7 @@ export abstract class RpgmModule {
 		RpgmModule.radialMenu = new RadialMenuRegister();
 		RpgmModule.chat = new ChatCommands();
 		RpgmModule.logger.styled("color: #ad8cef; font-weight: bold;").prefixed("").log(`🛠️ RPGM Tools joined the game`);
+		RpgmModule.sidebar = new RpgmSidebarManager();
 		Hooks.on("renderSettingsConfig", (_, html) => {
 			Object.keys(RpgmModule.modules).forEach(k => {
 				const settingsHtml = rpgm.j(html);
@@ -145,7 +148,6 @@ export abstract class RpgmModule {
 			});
 		});
 		GlobalSettings();
-		// initSidebar();
 	}
 
 	/**
@@ -218,7 +220,6 @@ export abstract class RpgmModule {
 ————————————————————————————————————————————————
 ${center(`© 2025 RPGM Tools, LLC`)}
 ${Object.values(rpgm.modules).map(m => splitJustify(` ${m.icon} ${m.name} %s v${m.version} `)).join('\n')}`).slice(1);
-
 		rpgm.logger.styled("color: #d44e7b; font-weight: bold;").prefixed("").log(asciiArt);
 	}
 }

@@ -1,4 +1,3 @@
-/* eslint-disable jsdoc/require-jsdoc */
 type Msg = unknown[]
 
 type RPGMLogging<T extends keyof RPGMLogger<never>, K extends keyof RPGMLogger<never>> = Omit<RPGMLogger<T | K>, T | K>;

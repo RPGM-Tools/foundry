@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ForgeNames } from '@rpgm/forge';
+
 import { getSelectedToken, nameToken } from '@/util/token';
-import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
+import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
 
 const NAMES_PER_GENERATION = 4;
 
-const names = rpgm.forge.namesChats.useChatWizard(), { data } = names;
+const names = rpgm.forge.nameChats.useChatWizard(), { data } = names;
 const localize = rpgm.localize;
 const loading = ref(false);
 
@@ -70,7 +71,7 @@ function assign(name: string) {
 	const token = getSelectedToken();
 	if (!token) return;
 	const oldName = token.name;
-	nameToken(token.document, name);
+	void nameToken(token.document, name);
 	data.names[data.names.indexOf(name)] = oldName;
 	rpgm.forge.logger.visible.log(`Renamed ${oldName} to ${name}`);
 }

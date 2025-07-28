@@ -7,6 +7,15 @@ declare global {
 		forge: RpgmForge
 	}
 
+	interface FlagConfig {
+		JournalEntry: {
+			"rpgm-forge"
+		}
+		JournalEntryPage: {
+			"rpgm-forge"
+		}
+	}
+
 	interface RadialMenuCategories {
 		"rpgm_forge"
 	}

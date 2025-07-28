@@ -47,13 +47,13 @@ export default function() {
 	rpgm.chat.registerCommand(literal("help")
 		.then(argument("topic", choice(Object.keys(topics)))
 			.executes(c => {
-				ChatMessage.create({
+				void ChatMessage.create({
 					content: topics[c.get<string>("topic")!],
 					whisper: game.userId,
 					speaker: { alias: "RPGM Tools" },
 				});
 			})).executes(() => {
-				ChatMessage.create({
+				void ChatMessage.create({
 					content: `
 <div class="rpgm-help">
 	<h2>Help - Commands</h2>

@@ -1,6 +1,7 @@
-import { createApp, type App, type Component } from 'vue';
-import RpgmSidebarApp from "./RpgmSidebarApp.vue";
 import type { DeepPartial } from 'fvtt-types/utils';
+import { type App, type Component, createApp } from 'vue';
+
+import RpgmSidebarApp from "./RpgmSidebarApp";
 
 type ClosingOptions = foundry.applications.api.ApplicationV2.ClosingOptions;
 type Configuration = foundry.applications.api.ApplicationV2.Configuration;
@@ -9,40 +10,69 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 	app?: App;
 
 	constructor(options: DeepPartial<foundry.applications.api.ApplicationV2.Configuration>) {
-		//@ts-expect-error thing
 		CONFIG.RpgmSidebar = {
 			sidebarIcon: "rp-dice",
 			documentClass: RpgmSidebar,
 		};
 		foundry.applications.sidebar.Sidebar.TABS.rpgm = {
-			//@ts-expect-error thing
+			//@ts-expect-error TABS is not able to be overriden
 			documentName: "RpgmSidebar",
 			tooltip: "RPGM_TOOLS.SIDEBAR.TITLE",
 		};
-		rpgm.logger.log("New RpgmSidebar");
 		super(options);
 	}
 
 	static override tabName = "rpgm";
 
 	static override DEFAULT_OPTIONS: DeepPartial<Configuration> = {
-		classes: ["settings-sidebar", "rpgm-app"],
+		classes: ["rpgm-app"],
 		window: {
 			title: "RPGM Tools",
+			minimizable: false,
 			icon: "rp-dice"
 		},
 	};
 
-	override async _renderHTML() {
-		const mount = (this.element.querySelector(".window-content") ?? this.element) as HTMLElement;
+	override minimize(): Promise<void> {
+		return Promise.resolve();
+	}
+
+	override maximize(): Promise<void> {
+		return Promise.resolve();
+	}
+
+	override _renderHTML() {
+		const mount = (this.element.querySelector(".window-content") ?? this.element);
 		if (!this.popout) mount.classList.add("static");
-		return mount;
+		return Promise.resolve(mount);
 	}
 
 	override _replaceHTML(result: HTMLElement) {
 		if (this.app) return;
 		this.app = createApp(RpgmSidebarApp as Component);
+		this.app.provide("onResize", this.onResize.bind(this));
 		this.app.mount(result);
+		this.onResize(true);
+	}
+
+	/** Max content of the sidebar, up to document height - padding */
+	private onResize(forceCenter = false) {
+		void nextTick(() => {
+			const windowHeight = window.innerHeight;
+			const maxHeight = Math.min(windowHeight, parseInt(getComputedStyle(this.element).maxHeight) || 0);
+			const headerHeight = this.element.querySelector(".window-header")?.clientHeight ?? 0;
+			const innerHeight = this.element.querySelector(".sidebar-content")?.scrollHeight ?? 9999;
+
+			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 70);
+			const newTop = ((this.position.top ?? 0) + newHeight) > windowHeight || forceCenter ? (
+				Math.max(0, Math.min(windowHeight - newHeight, (windowHeight - newHeight) / 2))
+			) : this.position.top;
+
+			this.setPosition({
+				height: newHeight,
+				top: newTop
+			});
+		});
 	}
 
 	override async close(options?: DeepPartial<ClosingOptions>): Promise<this> {

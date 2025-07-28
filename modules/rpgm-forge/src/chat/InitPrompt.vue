@@ -3,7 +3,7 @@
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 import { useSetting } from '#/util';
 
-const init = rpgm.forge!.promptChats.useChatWizard();
+const init = rpgm.forge.promptChats.useChatWizard();
 
 const localize = rpgm.localize;
 
@@ -13,7 +13,7 @@ const genre = useSetting("rpgm-forge.genre", true);
 const method = useSetting("rpgm-forge.method", true);
 
 onMounted(() => {
-	game.settings.set("rpgm-forge", "has_been_prompted", true);
+	void game.settings.set("rpgm-forge", "has_been_prompted", true);
 });
 
 </script>

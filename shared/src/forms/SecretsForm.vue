@@ -1,40 +1,64 @@
 <script setup lang="ts">
-import { useSetting } from '#/util';
-import { SecretsSettings } from '#/settings/secrets';
+import SecretsFormLoggedIn from '#/forms/SecretsFormLoggedIn.vue';
+import SecretsFormLoggedOut from '#/forms/SecretsFormLoggedOut.vue';
+import { type SecretsSettings, useUser } from '#/settings/secrets';
 
-const api_key = useSetting("rpgm-tools.api_key");
-const app = inject<SecretsSettings>("app")!;
+const app = inject<SecretsSettings>("app")! as SecretsSettings;
+
+const user = ref<object>();
+
+async function refresh() {
+	user.value = await useUser();
+}
 
 /**
  Saves changed settings
  */
 function submit() {
-	api_key.save();
 	void app.close();
 };
+
+onMounted(() => {
+	void refresh();
+});
 </script>
 
 <template>
-	<form class="rpgm-app-inner standard-form flexcol" @submit.prevent="submit">
-		<div class="scrollable tab">
-			<h2>{{ SecretsSettings.name }}</h2>
-			<i>{{ SecretsSettings.subtitle }}</i>
-			<div class="form-group">
-				<label>{{ api_key.name }}</label>
-				<div class="form-fields">
-					<input v-model="api_key.value" placeholder="↑ ↑ ↓ ↓ ← → ← → B A ⏎" type="password" name="rpgm-tools.api_key"
-						data-dtype="String">
-				</div>
-				<p class="hint notes">
-					{{ api_key.hint }}
-				</p>
-			</div>
+	<form class="rpgm-app-inner standard-form flexcol" style="min-width: 400px;" @submit.prevent="submit">
+		<div class="scrollable tab" style="position: relative;">
+			<Transition name="fade">
+				<SecretsFormLoggedIn v-if="user" :user @logout="refresh" />
+				<SecretsFormLoggedOut v-else @login="refresh" />
+			</Transition>
 		</div>
 		<footer class="form-footer">
 			<button @click.prevent="submit">
-				<i class="fas fa-save" />
-				Save Changes
+				<i class="fas fa-x" />
+				Close
 			</button>
 		</footer>
 	</form>
 </template>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+	transition: opacity 0.5s ease;
+}
+
+.fade-leave-active {
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+	opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+	opacity: 1;
+}
+</style>

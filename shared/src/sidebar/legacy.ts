@@ -1,12 +1,13 @@
-import { createApp, type App, type Component } from 'vue';
-import RpgmSidebarApp from "./RpgmSidebarApp.vue";
+import { type App, type Component, createApp } from 'vue';
+
+import RpgmSidebarApp from "./RpgmSidebarApp";
 
 declare class SidebarTab extends Application { }
 
 declare global {
 	interface Sidebar {
-		/** @deprecated */
 		activeTab: string;
+		getData(options?: unknown): { tabs: Record<string, { tooltip: string; icon: string }> };
 	}
 }
 
@@ -14,9 +15,12 @@ export default class RpgmSidebar extends SidebarTab {
 	app?: App;
 
 	constructor(options: Partial<Application.Options>) {
-		//@ts-expect-error thing
-		const getData = Sidebar.prototype.getData;
-		//@ts-expect-error thing
+		const getData = Sidebar.prototype.getData as (options: unknown) => {
+			tabs: Record<string, {
+				tooltip: string;
+				icon: string;
+			}>
+		};
 		Sidebar.prototype.getData = function(options = {}) {
 			const { tabs } = getData(options);
 			tabs.rpgm = {
@@ -31,6 +35,8 @@ export default class RpgmSidebar extends SidebarTab {
 	static override get defaultOptions(): Application.Options {
 		return (foundry.utils.mergeObject(super.defaultOptions, {
 			id: "rpgm",
+			height: 1,
+			minimizable: false,
 			title: "RPGM Tools",
 		} satisfies Partial<Application.Options>));
 	};
@@ -45,21 +51,51 @@ export default class RpgmSidebar extends SidebarTab {
 		mount.className = data.cssClass ?? "";
 
 		this.app = createApp(RpgmSidebarApp as Component);
+		this.app.provide("onResize", this.onResize.bind(this));
 		this.app.mount(mount);
 
 		if (ui.sidebar?.activeTab === this.id) mount.classList.add("active");
 		if (this.popOut) {
 			mount.classList.remove("tab");
 		} else {
-			mount.classList.add("rpgm-app", "static");
+			mount.classList.add("rpgm-app", "static", "directory");
 		}
 
-		return $(mount);
+		return Promise.resolve($(mount));
+	}
+
+	override _injectHTML(html: JQuery) {
+		$("body").append(html);
+		this.onResize(true);
+		this._element = html;
+	}
+
+	/** Max content of the sidebar, up to document height - padding */
+	private onResize(forceCenter = false) {
+		void nextTick(() => {
+			const windowHeight = window.innerHeight;
+			const maxHeight = Math.min(windowHeight, parseInt(this.element.css("max-height")) || 0);
+			const headerHeight = this.element.find(".window-header").get(0)?.clientHeight ?? 0;
+			const innerHeight = this.element.find(".sidebar-content").get(0)?.scrollHeight ?? 9999;
+
+			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 70);
+			const newTop = ((this.position.top ?? 0) + newHeight) > windowHeight || forceCenter ? (
+				Math.max(0, Math.min(windowHeight - newHeight, (windowHeight - newHeight) / 2))
+			) : this.position.top;
+			this.element.css("height", `${newHeight}px`);
+			this.element.css("top", `${newTop}px`);
+			this.position = {
+				...this.position,
+				height: newHeight,
+				top: newTop
+			};
+		});
 	}
 
 	protected override async _renderOuter(): Promise<JQuery> {
 		const html = await super._renderOuter();
 		html.addClass("rpgm-app");
+		if (this.popOut) html.addClass("popout");
 		return html;
 	}
 

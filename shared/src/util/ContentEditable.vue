@@ -20,9 +20,9 @@ watch(editing, (v) => {
 /** Selects everything in the element */
 function selectAll() {
 	if (!slot.value) return;
-	slot.value!.focus();
+	slot.value.focus();
 	const range = document.createRange();
-	range.selectNodeContents(slot.value!);
+	range.selectNodeContents(slot.value);
 	const sel = window.getSelection();
 	sel?.removeAllRanges();
 	sel?.addRange(range);

@@ -34,8 +34,6 @@ declare global {
 				RADIAL_MENU_HUD_HINT
 				RADIAL_MENU_DEBUG
 				RADIAL_MENU_DEBUG_HINT
-				API_KEY
-				API_KEY_HINT,
 			},
 			RADIAL_MENU: {
 				INFO

@@ -1,12 +1,19 @@
 /* eslint-disable no-var */
-import type { RpgmModule } from "#/module";
-import { MaybePromise } from "fvtt-types/utils";
 import type { App } from "vue";
+
+import type { RpgmModule } from "#/module";
+import type RpgmSidebar from "#/sidebar/modern";
 
 declare global {
 	declare const __MODULE_VERSION__: string;
+	declare const __XSOLLA_PROJECT_ID__: string;
 
 	interface RPGM extends object { }
+
+	interface HookConfig {
+		renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
+		test: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
+	}
 
 	/**
 	 * Our global singleton object
@@ -15,23 +22,39 @@ declare global {
 	var rpgm: RPGM & typeof RpgmModule;
 	var game: ReadyGame;
 
-	interface CoreFlags {
-		"rpgm-forge": string
+	type SidebarMenu = {
+		id: string;
+		title: string;
+		color: string;
+		icon: string;
+		component?: Component;
+	}
+
+	interface FlagConfig {
+		ChatMessage: {
+			[key in foundry.helpers.ClientSettings.Namespace]
+		}
 	}
 
 	namespace Hooks {
 		interface StaticCallbacks {
-			// renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
+			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
 			renderSettingsConfig: (settingsConfig: SettingsConfig, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
 			renderChatMessageHTML: (message: ChatMessage, html: HTMLElement, context: object) => void
 			"rpgm-init": () => void
 			createToken(tokenDocument: TokenDocument, scene: foundry.abstract.types.DatabaseUpdateOperation, userId: string): void
 		}
+
+		interface AllHooks {
+			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
+			test: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
+		}
 	}
 
-	namespace CONFIG {
-		interface UI {
-			rpgm: foundry.applications.sidebar.AbstractSidebarTab
+	interface CONFIG {
+		RpgmSidebar: {
+			sidebarIcon: string
+			documentClass: typeof RpgmSidebar
 		}
 	}
 
@@ -46,10 +69,6 @@ declare global {
 		cssClass?: string,
 		cssId: string,
 		tabName?: string,
-	}
-
-	interface Application {
-		thing: number
 	}
 
 	interface ChatLog {

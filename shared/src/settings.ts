@@ -2,14 +2,11 @@ import { hudHeuristics } from "./radial-menu";
 import { DeveloperSettings } from "./settings/developer";
 import { RadialMenuSettings } from "./settings/radialMenu";
 import { SecretsSettings } from "./settings/secrets";
+import RpgmSidebarAppHelp from "./sidebar/RpgmSidebarApp/RpgmSidebarAppHelp.vue";
+import RpgmSidebarAppShop from "./sidebar/RpgmSidebarApp/RpgmSidebarAppShop.vue";
 
 /** Register shared settings once */
 export function GlobalSettings() {
-	game.settings.register("rpgm-tools", "api_key", {
-		name: rpgm.localize("RPGM_TOOLS.CONFIG.API_KEY"),
-		hint: rpgm.localize("RPGM_TOOLS.CONFIG.API_KEY_HINT"),
-		type: String,
-	});
 	game.settings.register("rpgm-tools", "radial_menu_input", {
 		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_INPUT"),
 		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_INPUT_HINT"),
@@ -25,6 +22,9 @@ export function GlobalSettings() {
 		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG_HINT"),
 		default: false,
 	});
+	game.settings.register("rpgm-tools", "login-token", {
+		default: "",
+	});
 	rpgm.radialMenu.registerCategory("rpgm_debug", { color: '60deg' });
 	rpgm.radialMenu.registerTokenHudButton({
 		category: rpgm.radialMenu.categories.rpgm_debug,
@@ -32,6 +32,29 @@ export function GlobalSettings() {
 		tooltip: "RPGM_TOOLS.RADIAL_MENU.INFO",
 		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
 		callback: (context) => rpgm.logger.log(context.token)
+	});
+
+	rpgm.sidebar.registerSidebarMenu({
+		id: "account",
+		title: "Account",
+		icon: "fa-solid fa-user",
+		color: "#c8016e",
+	});
+
+	rpgm.sidebar.registerSidebarMenu({
+		id: "shop",
+		title: "Shop",
+		icon: "fa-solid fa-store",
+		color: "#ff8000",
+		component: RpgmSidebarAppShop,
+	});
+
+	rpgm.sidebar.registerSidebarMenu({
+		id: "help",
+		title: "Help",
+		icon: "fa-solid fa-question-circle",
+		color: "#aaaaaa",
+		component: RpgmSidebarAppHelp,
 	});
 }
 

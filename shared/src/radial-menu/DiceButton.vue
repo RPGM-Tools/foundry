@@ -9,6 +9,7 @@
 
 <script setup lang="ts">
 import type { StyleValue } from 'vue';
+
 import buttonImage from '../../assets/d20.png';
 
 const rpgm = globalThis.rpgm;

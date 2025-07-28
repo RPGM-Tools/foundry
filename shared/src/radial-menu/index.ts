@@ -1,10 +1,12 @@
 import type { App, Component } from 'vue';
-import { createApp, type Reactive, shallowReactive } from 'vue';
-import RadialMenuFloating from './RadialMenuFloating.vue';
-import { injectTokenHUD } from './hud';
+import type { Reactive } from "vue";
+import { createApp, shallowReactive } from 'vue';
 
-export * from './heuristics';
+import { injectTokenHUD } from './hud';
+import RadialMenuFloating from './RadialMenuFloating.vue';
+
 export * from './funcs';
+export * from './heuristics';
 
 /**
  * Manages all radial menu instances 

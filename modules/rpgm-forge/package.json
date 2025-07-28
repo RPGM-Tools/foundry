@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "vite build --watch & vite",
 		"preview": "vite build --watch & vite preview",
-		"lint": "eslint",
+		"lint": "eslint; vue-tsc",
 		"build": "vue-tsc && vite build"
 	}
 }

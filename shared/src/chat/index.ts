@@ -1,6 +1,8 @@
 import type { LiteralArgumentBuilder, ParseResults } from "brigadier-ts-lite";
 import { CommandDispatcher } from "brigadier-ts-lite";
-import { type App, type Component, createApp } from 'vue';
+import type { App, Component } from 'vue';
+import { createApp } from 'vue';
+
 import AutoComplete from "./AutoComplete.vue";
 import type { ChatWizard } from "./ChatWizard";
 
@@ -16,7 +18,8 @@ export class ChatCommands {
 
 	constructor() {
 		// renderChatMessage is deprecated in v13+
-		Hooks.on(rpgm.majorGameVersion <= 12 ? "renderChatMessage" : "renderChatMessageHTML",
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		Hooks.on(rpgm.majorGameVersion <= 12 ? "renderChatMessage" : "renderChatMessageHTML" as any,
 			(message: ChatMessage, html: JQuery | HTMLElement) => {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
@@ -28,7 +31,7 @@ export class ChatCommands {
 		Hooks.once("ready", () => { rpgm.chat.createChatPanel(); });
 
 		// Patch chat context menu to not allow revealing wizards
-		const _getEntryContextOptions = ChatLog.prototype._getEntryContextOptions;
+		const _getEntryContextOptions = ChatLog.prototype._getEntryContextOptions.bind(ui.chat);
 		ChatLog.prototype._getEntryContextOptions = () => {
 			rpgm.logger.debug("Patching chat context menu");
 			const options = _getEntryContextOptions();
@@ -39,7 +42,7 @@ export class ChatCommands {
 						const message = game.messages.get(rpgm.j(li).dataset.messageId!);
 						let wizard = false;
 						for (const handler of rpgm.chat.messageHandlers)
-							if (handler.query(message))
+							if (handler.query(message!))
 								wizard = true;
 						return condition(li) && !wizard;
 					};
@@ -78,8 +81,7 @@ export class ChatCommands {
 	 * @param command - The command to register
 	 */
 	registerCommand(command: LiteralArgumentBuilder) {
-		if (game.user.isGM)
-			this.commands.register(command);
+		this.commands.register(command);
 	}
 
 	/**

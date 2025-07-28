@@ -69,7 +69,6 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	 * @returns A unique identifier extracted for this message if it exists
 	 */
 	private messageId(message: ChatMessage): string {
-		//@ts-expect-error Types broken for flags
 		return message.getFlag(this.moduleId, this.key) || "";
 	}
 
@@ -89,12 +88,12 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	 * @returns Whether or not the message was rendered
 	 */
 	render(message: ChatMessage, html: HTMLElement): boolean {
-		const id = this.messageId(message)!;
+		const id = this.messageId(message);
 		const data = this.data.get(id);
 
 		if (!data) {
 			rpgm.logger.warn(`No data found for ${this.key} wizard with id ${id}, deleting...`);
-			message.delete({});
+			void message.delete({});
 			return false;
 		}
 
@@ -114,7 +113,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	delete(message: ChatMessage) {
 		this.data.delete(this.messageId(message));
 		this.save();
-		message.delete({});
+		void message.delete({});
 	}
 
 	/**
@@ -125,7 +124,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 			scope: "world",
 		});
 		const data = game.settings.get(this.moduleId, this.key) as string;
-		this.data = data ? new Map(Object.entries(JSON.parse(data) as typeof this.data)) : new Map();
+		this.data = (data ? new Map(Object.entries(JSON.parse(data) as Record<string, T>)) : new Map<string, T>());
 		rpgm.chat.registerMessageHandler(this);
 		rpgm.logger.debug(`Loaded ${this.key} wizard with ${this.data.size} messages`);
 	}
@@ -144,7 +143,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	/** Sync this database's data to localStorage */
 	private save() {
 		if (!game.user.isGM) return;
-		game.settings.set(this.moduleId, this.key, JSON.stringify(Object.fromEntries(this.data)));
+		void game.settings.set(this.moduleId, this.key, JSON.stringify(Object.fromEntries(this.data)));
 		// localStorage.setItem(`${this.moduleId}.${this.key}`, JSON.stringify(Object.fromEntries(this.data)));
 	}
 

@@ -1,4 +1,5 @@
 import { ForgeNames } from "@rpgm/forge";
+
 import { shimmerToken } from './shimmer';
 
 /**
@@ -133,11 +134,11 @@ export function registerTokenCreate() {
 	document.addEventListener("keyup", (k) => {
 		if (k.key == "Shift") { shift = false; }
 	});
-	Hooks.on("createToken", async (tokenDocument: TokenDocument, options, userId) => {
+	Hooks.on("createToken", (tokenDocument: TokenDocument, options, userId) => {
 		if (userId !== game.user.id) return;
 		if (options.parent !== canvas.scene) return;
 		if (tokenDocument.isLinked) return; // Ignore linked tokens
 		if (shift || !game.settings.get("rpgm-forge", "auto_name")) return;
-		quickNameToken(tokenDocument);
+		void quickNameToken(tokenDocument);
 	});
 }

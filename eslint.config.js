@@ -1,7 +1,7 @@
 import eslint from '@eslint/js';
 import vuelint from 'eslint-plugin-vue'
 import tslint from "typescript-eslint";
-import jsdoclint from "eslint-plugin-jsdoc";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 
 export default tslint.config([
 	{
@@ -17,19 +17,33 @@ export default tslint.config([
 			ecmaVersion: 'latest',
 			sourceType: 'module',
 			parserOptions: {
+				project: "./tsconfig.json",
 				projectService: true,
+				tsconfigRootDir: import.meta.dirname,
 				extraFileExtensions: ["vue"],
 				parser: tslint.parser
 			},
+		},
+		plugins: {
+			"simple-import-sort": simpleImportSort
 		},
 		rules: {
 			semi: "warn",
 			"no-console": "error",
 			"prefer-const": "error",
-			"@typescript-eslint/no-empty-object-type": ["error", { allowInterfaces: 'with-single-extends' }],
-			"@typescript-eslint/consistent-type-imports": "warn",
 			"@typescript-eslint/no-unsafe-call": "off",
+			"@typescript-eslint/no-unsafe-assignment": "off",
 			"@typescript-eslint/no-unsafe-member-access": "off",
+			"@typescript-eslint/no-unsafe-return": "off",
+			"@typescript-eslint/no-empty-object-type": ["error", { allowInterfaces: 'with-single-extends' }],
+			"@typescript-eslint/consistent-type-imports": [
+				"warn",
+				{
+					fixStyle: "separate-type-imports"
+				}
+			],
+			"simple-import-sort/imports": "warn",
+			"simple-import-sort/exports": "warn",
 			// "jsdoc/require-jsdoc": ["warn", {
 			// 	require: {
 			// 		ClassDeclaration: true,

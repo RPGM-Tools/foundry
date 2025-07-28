@@ -1,8 +1,9 @@
-/* eslint-disable jsdoc/require-jsdoc */
-import { type Component } from "vue";
-import { RPGMSettingsMenu } from "./index";
-import DeveloperForm from "#/forms/DeveloperForm.vue";
 import type { DeepPartial } from "fvtt-types/utils";
+import { type Component } from "vue";
+
+import DeveloperForm from "#/forms/DeveloperForm.vue";
+
+import { RPGMSettingsMenu } from "./index";
 type DefaultOptions = DeepPartial<foundry.applications.api.ApplicationV2.Configuration>
 
 export class DeveloperSettings extends RPGMSettingsMenu {
@@ -17,7 +18,7 @@ export class DeveloperSettings extends RPGMSettingsMenu {
 	static get hint(): string { return rpgm.localize("RPGM_TOOLS.CONFIG.DEVELOPER_SETTINGS_HINT"); };
 	static get label(): string { return rpgm.localize("RPGM_TOOLS.CONFIG.DEVELOPER_SETTINGS_LABEL"); };
 	static get subtitle(): string { return rpgm.localize("RPGM_TOOLS.CONFIG.DEVELOPER_SETTINGS_SUBTITLE"); };
-	override type = DeveloperForm as Component;
+	override component = DeveloperForm as Component;
 	override get title(): string {
 		return `RPGM Tools - ${rpgm.localize("RPGM_TOOLS.CONFIG.DEVELOPER_SETTINGS")}`;
 	}

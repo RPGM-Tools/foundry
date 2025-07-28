@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import WriteOnTransition from "#/util/WriteOnTransition.vue";
 import ContentEditable from "#/util/ContentEditable.vue";
 import { vFitLines } from "#/util/VFitLines";
+import WriteOnTransition from "#/util/WriteOnTransition.vue";
 
 const data = inject<ForgeChatHomebrew>("data")!;
 

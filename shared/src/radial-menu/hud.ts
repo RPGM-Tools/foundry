@@ -1,9 +1,11 @@
-import type { ShallowReactive, Component } from 'vue';
+import type { Component, ShallowReactive } from 'vue';
+
 import RadialMenuFloating from './RadialMenuFloating.vue';
 
 /** Injects code to render the dice hud */
 export function injectTokenHUD() {
-	Hooks.on("renderTokenHUD", renderTokenHUD);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+	Hooks.on("renderTokenHUD", renderTokenHUD as any);
 }
 
 /**

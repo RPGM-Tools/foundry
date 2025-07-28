@@ -4,8 +4,9 @@
  * for our module's version. It will update the version in all the relevant places
  * during development and in the build
  */
-import type { PluginOption, ResolvedConfig } from "vite";
 import { existsSync, readFile, writeFile } from 'node:fs';
+
+import type { PluginOption, ResolvedConfig } from "vite";
 
 /**
  * Set version number in module.json
