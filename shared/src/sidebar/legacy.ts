@@ -22,12 +22,19 @@ export default class RpgmSidebar extends SidebarTab {
 			}>
 		};
 		Sidebar.prototype.getData = function(options = {}) {
-			const { tabs } = getData(options);
-			tabs.rpgm = {
-				tooltip: "RPGM_TOOLS.SIDEBAR.TITLE",
-				icon: "rp-dice",
-			};
-			return { tabs };
+			function insertKey<T>(key: string, value: T, obj: Record<string, T>) {
+				// How many items to place after the tab button
+				const LAST_INDEX = 1;
+				const lastIndex = Object.keys(obj).length - LAST_INDEX;
+				return Object.keys(obj).reduce((ac, a, i) => {
+					if (i === lastIndex) ac[key] = value;
+					ac[a] = obj[a];
+					return ac;
+				}, {} as Record<string, T>);
+			}
+			const data = getData(options);
+			data.tabs = insertKey("rpgm", { tooltip: "RPGM_TOOLS.SIDEBAR.TITLE", icon: "rp-dice" }, data.tabs);
+			return data;
 		};
 		super(options);
 	}
@@ -70,7 +77,7 @@ export default class RpgmSidebar extends SidebarTab {
 		this._element = html;
 	}
 
-	/** Max content of the sidebar, up to document height - padding */
+	/** Max content of the sidebar, up to document height - padding. */
 	private onResize(forceCenter = false) {
 		void nextTick(() => {
 			const windowHeight = window.innerHeight;
