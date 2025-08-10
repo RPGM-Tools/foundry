@@ -74,6 +74,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 		readonly title: string,
 	) { this._key = key; }
 
+
 	/**
 	 * Creates a message and saves it to the database.
 	 * @param data - The data to store to this message

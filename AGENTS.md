@@ -51,6 +51,7 @@ The project implements a custom i18n type checking system to ensure type safety 
 
 - **TypeScript:** This project uses TypeScript with strict settings. Adhere to standard TypeScript best practices.
 - **Linting:** We use `eslint` for linting. Run `npm run lint` to check for issues. (Also runs `vue-tsc` for base type checking.)
+  - Do not attempt to run `eslint` or `vue-tsc` manually. Run `npm run lint` or `npm run build` instead.
 - **Formatting:** Maintain consistent formatting. Use Prettier or a similar tool if available.
 - **Imports:** Organize imports logically. Group imports from the same module.
 - **Naming:** Use clear and descriptive names for variables, functions, and classes. Follow existing naming conventions.
@@ -82,7 +83,6 @@ rpgm.chat.registerCommand(literal("name")
 
 The following commands are available in the system:
 
-1. `*help` - Display general help or help for a specific topic
 2. `*name [prompt]` - Generate names for tokens
 3. `*description [type]` - Generate descriptions for tokens
 4. `*homebrew [type]` - Generate custom homebrew content

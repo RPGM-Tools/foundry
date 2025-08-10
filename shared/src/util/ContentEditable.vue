@@ -7,8 +7,10 @@ const slot = ref<HTMLElement | null>(null);
 const { shouldFocus = true, shouldBlur = true, multiline = true } = defineProps<{
 	/** Set this to false to handle focus manually */
 	shouldFocus?: boolean
+
 	/** Set this to false to handle blur manually */
 	shouldBlur?: boolean
+
 	/** Set this to false to disallow multilines */
 	multiline?: boolean
 }>();
@@ -17,7 +19,7 @@ watch(editing, (v) => {
 	if (v) startEdit();
 });
 
-/** Selects everything in the element */
+/** Selects everything in the element. */
 function selectAll() {
 	if (!slot.value) return;
 	slot.value.focus();
@@ -29,7 +31,7 @@ function selectAll() {
 }
 
 /**
- * Enables editing of value and optionally selects contents
+ * Enables editing of value and optionally selects contents.
  */
 function startEdit() {
 	if (shouldFocus)
@@ -37,7 +39,7 @@ function startEdit() {
 }
 
 /**
- * Handles input for slot
+ * Handles input for slot.
  * @param e - Keyboard event
  */
 function keyDown(e: KeyboardEvent) {
@@ -62,13 +64,13 @@ function keyDown(e: KeyboardEvent) {
 	}
 }
 
-/** Called when focus is passed to this element */
+/** Called when focus is passed to this element. */
 function focus() {
 	if (editing.value)
 		selectAll();
 }
 
-/** Saves value and clears the selection */
+/** Saves value and clears the selection. */
 function blur() {
 	value.value = slot.value!.innerText.trim();
 	void nextTick(() => {

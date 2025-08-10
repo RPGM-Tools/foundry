@@ -1,7 +1,8 @@
 import { hudHeuristics } from "./radial-menu";
 import { DeveloperSettings } from "./settings/developer";
 import { RadialMenuSettings } from "./settings/radialMenu";
-import { SecretsSettings } from "./settings/secrets";
+// import { SecretsSettings } from "./settings/secrets";
+import RpgmSidebarAppAccount from "./sidebar/RpgmSidebarApp/RpgmSidebarAppAccount.vue";
 import RpgmSidebarAppHelp from "./sidebar/RpgmSidebarApp/RpgmSidebarAppHelp.vue";
 import RpgmSidebarAppShop from "./sidebar/RpgmSidebarApp/RpgmSidebarAppShop.vue";
 
@@ -22,9 +23,6 @@ export function GlobalSettings() {
 		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG_HINT"),
 		default: false,
 	});
-	game.settings.register("rpgm-tools", "login-token", {
-		default: "",
-	});
 	rpgm.radialMenu.registerCategory("rpgm_debug", { color: '60deg' });
 	rpgm.radialMenu.registerTokenHudButton({
 		category: rpgm.radialMenu.categories.rpgm_debug,
@@ -39,6 +37,7 @@ export function GlobalSettings() {
 		title: "Account",
 		icon: "fa-solid fa-user",
 		color: "#c8016e",
+		component: RpgmSidebarAppAccount,
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
@@ -51,7 +50,7 @@ export function GlobalSettings() {
 
 	rpgm.sidebar.registerSidebarMenu({
 		id: "help",
-		title: "Help",
+		title: "Help and Support (Beta)",
 		icon: "fa-solid fa-question-circle",
 		color: "#aaaaaa",
 		component: RpgmSidebarAppHelp,
@@ -64,6 +63,6 @@ export function GlobalSettings() {
  */
 export function GlobalMenus(id: string) {
 	RadialMenuSettings.registerMenu(id);
-	SecretsSettings.registerMenu(id);
+	// SecretsSettings.registerMenu(id);
 	DeveloperSettings.registerMenu(id);
 }

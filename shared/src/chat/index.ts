@@ -92,7 +92,7 @@ export class ChatCommands {
 	}
 
 	/**
-	 * Scroll to the bottom of the page smoothly
+	 * Scroll to the bottom of the page smoothly.
 	 * @param force - Skip checking scroll distance
 	 */
 	updateScroll(force?: boolean) {
@@ -107,19 +107,16 @@ export class ChatCommands {
 
 	/**
 	 * Register a new chat command with the system
-	 * 
+	 *
 	 * This method registers a new command that can be executed by users in the chat interface.
 	 * Commands are defined using the brigadier-ts-lite library which provides a Minecraft-like 
 	 * command syntax with argument parsing and autocompletion.
-	 * 
 	 * @param command - The command to register, created using literal(), argument(), etc. from brigadier-ts-lite
-	 * 
 	 * @example
 	 * // Register a simple command without arguments
 	 * rpgm.chat.registerCommand(literal("help").executes(() => {
 	 *   // Show help text
 	 * }));
-	 * 
 	 * @example
 	 * // Register a command with arguments
 	 * rpgm.chat.registerCommand(literal("name")
@@ -138,12 +135,10 @@ export class ChatCommands {
 
 	/**
 	 * Register a new message handler with the system
-	 * 
+	 *
 	 * This method registers a new ChatWizard handler that can render custom content in chat messages.
 	 * Message handlers are used by the ChatWizards system to create interactive, persistent chat interfaces.
-	 * 
 	 * @param handler - The ChatWizard instance to register for handling specific message types
-	 * 
 	 * @example
 	 * // Register a wizard for handling name generation
 	 * const nameChats = new ChatWizard<ForgeChatNames>(
@@ -160,17 +155,14 @@ export class ChatCommands {
 
 	/**
 	 * Execute a chat command
-	 * 
+	 *
 	 * This method executes a registered chat command with the provided command string.
 	 * The command string should not include the command prefix (*).
-	 * 
 	 * @param command - The command to execute (without the * prefix)
 	 * @returns The exit code of the command execution
-	 * 
 	 * @example
 	 * // Execute the "help" command
 	 * rpgm.chat.execute("help");
-	 * 
 	 * @example
 	 * // Execute the "name" command with arguments
 	 * rpgm.chat.execute("name dragon");
@@ -181,10 +173,9 @@ export class ChatCommands {
 
 	/**
 	 * Parse a chat command
-	 * 
+	 *
 	 * This method parses a command string and returns the parse results.
 	 * This is primarily used internally for command autocompletion.
-	 * 
 	 * @param command - The command to parse (without the * prefix)
 	 * @returns The parse results containing information about the command structure
 	 */
@@ -194,10 +185,9 @@ export class ChatCommands {
 
 	/**
 	 * Get command completion suggestions
-	 * 
+	 *
 	 * This method returns completion suggestions for a parsed command.
 	 * This is used by the AutoComplete component to provide autocompletion in the chat interface.
-	 * 
 	 * @param parse - The parse results to interpret
 	 * @returns A list of completion suggestions for the current command context
 	 */
@@ -205,7 +195,7 @@ export class ChatCommands {
 		return this.commands.getCompletionSuggestions(parse);
 	}
 
-	/** Creates the {@link AutoComplete} app */
+	/** Creates the {@link AutoComplete} app. */
 	createChatPanel() {
 		const chatInput = rpgm.majorGameVersion === 12 ? document.querySelector("#chat-form")
 			: document.querySelector("#chat-message");
@@ -216,7 +206,7 @@ export class ChatCommands {
 		this.chatPanel.mount(panelContainer);
 	}
 
-	/** Removes all messages that are no longer in the game */
+	/** Removes all messages that are no longer in the game. */
 	prune() {
 		for (const handler of this.messageHandlers)
 			handler.prune();

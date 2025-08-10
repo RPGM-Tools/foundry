@@ -1,7 +1,8 @@
 import { GlobalMenus, GlobalSettings } from "#/settings";
+import { rpgmPolyhedriumBalance } from '#/util/usePolyhedriumBalance';
 
+import { auth } from "./auth";
 import { ChatCommands } from "./chat";
-import { registerRpgmCommands } from "./chat/commands";
 import { RadialMenuRegister } from "./radial-menu";
 import { RpgmSidebarManager } from "./sidebar";
 import { localize } from "./util/localize";
@@ -21,44 +22,59 @@ import { RPGMLogger } from "./util/LoggingV2";
 export abstract class RpgmModule {
 	/** The major game version of Foundry VTT, e.g., 11, 12, 13. */
 	static majorGameVersion: number;
+
 	/** A generic logger instance for logging messages from RPGM Tools. */
 	static logger: RPGMLogger;
+
 	/** Manages chat commands registered by RPGM modules. */
 	static chat: ChatCommands;
+
 	/** Manages the registration and display of radial menu entries. */
 	static radialMenu: RadialMenuRegister;
+
 	/** A record of all currently active and registered RPGM modules, keyed by their unique IDs. */
 	static modules: Record<string, RpgmModule> = {};
+
 	/** Utility function for localizing strings using Foundry's localization system. */
 	static localize = localize;
 
 	static sidebar: RpgmSidebarManager;
+
+	static auth = auth;
+
+	static usePolyhedriumBalance: ReturnType<typeof rpgmPolyhedriumBalance>;
+
 	/**
 	 * The unique slug ID for this module, which also serves as its namespace for client settings.
 	 * This must be defined by the extending module.
 	 */
 	abstract readonly id: ClientSettings.Namespace;
+
 	/**
 	 * The user-friendly display name for this module.
 	 * This must be defined by the extending module.
 	 */
 	abstract readonly name: string;
+
 	/**
 	 * An icon string (e.g., a Unicode emoji) representing this module, used in logs and UI.
 	 * This must be defined by the extending module.
 	 */
 	abstract readonly icon: string;
+
 	/**
 	 * An instance-specific logger for this module. Each module should have its own logger for clear output.
 	 * This must be defined by the extending module, typically by initializing it in the module's constructor.
 	 */
 	abstract readonly logger: RPGMLogger;
+
 	/** 
 	 * The version string of this module.
 	 * This value is typically replaced during the build process with the actual module version.
 	 * Although declared in the abstract class, each bundled module will have its specific version embedded here.
 	 */
 	readonly version = __MODULE_VERSION__;
+
 	/** 
 	 * A flag indicating if this was the first RPGM module to initialize,
 	 * thereby triggering the setup of the global `rpgm` singleton.
@@ -109,8 +125,6 @@ export abstract class RpgmModule {
 	 * Calls `GlobalMenus` to register shared menus relevant to the module.
 	 */
 	private async _setup() {
-		if (this.first)
-			registerRpgmCommands();
 		await this.registerSettings();
 		GlobalMenus(this.id);
 	}
@@ -132,6 +146,7 @@ export abstract class RpgmModule {
 		RpgmModule.chat = new ChatCommands();
 		RpgmModule.logger.styled("color: #ad8cef; font-weight: bold;").prefixed("").log(`🛠️ RPGM Tools joined the game`);
 		RpgmModule.sidebar = new RpgmSidebarManager();
+		RpgmModule.usePolyhedriumBalance = rpgmPolyhedriumBalance();
 		Hooks.on("renderSettingsConfig", (_, html) => {
 			Object.keys(RpgmModule.modules).forEach(k => {
 				const settingsHtml = rpgm.j(html);

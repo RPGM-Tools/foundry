@@ -2,6 +2,12 @@
 	transform-origin: center;
 }
 
+.rpgm-app h1 {
+	line-height: 1;
+	font-size: 24px;
+	margin: 0 0 4px 0;
+}
+
 .rpgm-app h2 {
 	font-size: 20px;
 	margin: 0 0 4px 0;
@@ -18,6 +24,20 @@
 	margin: 4px 0 0 0;
 }
 
+.rpgm-app img {
+	border: none;
+}
+
+.rpgm-app .circular {
+	border-radius: 50%;
+}
+
+.rpgm-app button:disabled,
+.rpgm-button:disabled {
+	cursor: default;
+}
+
+.rpgm-app button,
 .rpgm-button {
 	margin-top: 2px;
 	transition: background 150ms ease;
@@ -26,11 +46,13 @@
 	width: 100%;
 }
 
-.rpgm-button:hover {
-	background-color: rgba(200, 0, 255);
+.rpgm-app button:hover:not(:disabled),
+.rpgm-button:hover:not(:disabled) {
+	box-shadow: 0 0 5px #6633cc !important;
 }
 
-.rpgm-button:active {
+.rpgm-app button:active:not(:disabled),
+.rpgm-button:active:not(:disabled) {
 	background-color: #6633cc;
 }
 
@@ -39,6 +61,7 @@
 	width: 100%;
 }
 
+.rpgm-app input,
 .rpgm-input {
 	width: 100%;
 	padding: 4px;
@@ -47,6 +70,11 @@
 	outline: none;
 }
 
+.rpgm-app input[type="password"]::placeholder {
+	text-align: center;
+}
+
+.rpgm-app input:focus,
 .rpgm-button:focus,
 .rpgm-checkbox:focus,
 .rpgm-textarea:focus,

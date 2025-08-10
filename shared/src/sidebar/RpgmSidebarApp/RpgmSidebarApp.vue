@@ -1,8 +1,25 @@
 <script setup lang="ts">
+import { useElementVisibility } from '@vueuse/core';
+
 import StaggeredTransitionGroup from '#/util/StaggeredTransitionGroup';
 import WriteOnTransition from '#/util/WriteOnTransition.vue';
 
+import PolyhedriumBalance from './PolyhedriumBalance.vue';
 import RpgmSidebarAppButton from './RpgmSidebarAppButton.vue';
+
+// Takes a ref that returns true once its inner value has been true at least once
+function lockTrue(input: Ref<boolean>) {
+	const isTrue = ref<boolean>(false);
+	watch(input, (value) => {
+		if (value) {
+			isTrue.value = true;
+		}
+	}, { immediate: true });
+	return isTrue;
+}
+
+const visible = useElementVisibility(useTemplateRef("root"));
+const shouldShow = lockTrue(visible);
 
 const onResize = inject<(forceCenter?: boolean) => void>('onResize');
 
@@ -23,13 +40,23 @@ function submenuClick(menu: typeof rpgm.sidebar.menus[number]) {
 function back() {
 	activeMenu.value = undefined;
 }
+
+const { updateBalance } = rpgm.usePolyhedriumBalance();
+
+watch(visible, (v) => {
+	if (v) {
+		rpgm.logger.log("Sidebar opened");
+		updateBalance();
+	}
+});
 </script>
 
 <template>
-	<div class="rpgm-sidebar-window" :data-submenu="activeMenu?.id || undefined">
-		<span class="sidebar-title">
+	<div ref="root" class="rpgm-app rpgm-sidebar-window" :data-submenu="activeMenu?.id || undefined">
+		<span v-if="shouldShow" class="sidebar-title">
+			<PolyhedriumBalance style="position: absolute; right: 0; top: 50%; transform: translateY(-50%);" align="right" />
 			<WriteOnTransition appear :duration="400">
-				<h1 :key="activeTitle">{{ activeTitle }}</h1>
+				<h1 :key="activeTitle" style="alignment-baseline: baseline;">{{ activeTitle }}</h1>
 			</WriteOnTransition>
 			<i class="fas fa-chevron-left sidebar-back" @click="back" />
 		</span>
@@ -46,7 +73,13 @@ function back() {
 	</div>
 </template>
 
+<style></style>
+
 <style scoped>
+.sidebar-popout .sidebar-content {
+	min-height: unset !important;
+}
+
 .rpgm-sidebar-window {
 	height: 100%;
 	display: flex;
@@ -59,24 +92,26 @@ function back() {
 		overflow: hidden;
 		flex-shrink: 0;
 		justify-content: center;
-		margin-top: 1rem;
-		padding-bottom: 8px;
+		margin-top: 0.4rem;
+		margin-bottom: 0.4rem;
 
 		h1 {
 			text-align: center;
 			font-size: 2rem;
 			margin: 0;
+			padding-top: 4px;
 		}
 
 	}
 
 	.sidebar-content {
+		/* min-height: 100%; */
 		max-height: 100%;
-		scrollbar-gutter: stable;
+		scrollbar-gutter: stable both-edges;
 		position: relative;
 		overflow-y: scroll;
 		overflow-x: hidden;
-		padding: 2px;
+		padding-bottom: 8px;
 
 		>ul {
 			display: flex;

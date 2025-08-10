@@ -20,6 +20,7 @@
 }
 
 @keyframes moveBackground {
+
 	0%,
 	100% {
 		background-position: 0% 0%, 0% 100%, 100% 100%, 100% 0%;
@@ -46,6 +47,7 @@
 
 .rpgm-stagger-leave-active {
 	position: absolute;
+	width: 100%;
 }
 
 .rpgm-stagger-enter-from,
@@ -68,6 +70,7 @@
 
 .rpgm-stagger-alternate-leave-active {
 	position: absolute;
+	width: 100%;
 }
 
 .rpgm-stagger-alternate-enter-from:nth-child(odd),
@@ -96,6 +99,7 @@
 
 .rpgm-fade-leave-active {
 	position: absolute;
+	width: 100%;
 }
 
 .rpgm-fade-enter-from,

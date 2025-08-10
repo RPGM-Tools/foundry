@@ -6,7 +6,7 @@ import type RpgmSidebar from "#/sidebar/modern";
 
 declare global {
 	declare const __MODULE_VERSION__: string;
-	declare const __XSOLLA_PROJECT_ID__: string;
+	declare const __API_URL__: string;
 
 	interface RPGM extends object { }
 

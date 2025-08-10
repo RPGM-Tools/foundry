@@ -20,7 +20,7 @@ function onBeforeEnter(el: Element) {
 }
 
 /**
- * Extracts the common prefix of two strings
+ * Extracts the common prefix of two strings.
  * @param a - First string
  * @param b - Second string
  * @returns The index of the last common character
@@ -44,7 +44,7 @@ function onEnter(el: Element, done: () => void) {
 }
 
 /**
- * Animates the writing of text on an element 
+ * Animates the writing of text on an element.
  * @param el - Element to edit
  * @param duration - How long each character should take to type
  * @param text - The text to write on
@@ -68,7 +68,7 @@ async function writeOn(el: HTMLElement, duration: number, text: string, index: n
 }
 
 /**
- * Animates the deletion of text on an element 
+ * Animates the deletion of text on an element.
  * @param el - Element to edit
  * @param duration - How long each character should take to delete
  * @param index - What position the writer should stop deleting

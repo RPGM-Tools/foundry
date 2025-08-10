@@ -7,9 +7,9 @@ export class RpgmSidebarManager {
 	}
 
 	private async initSidebar() {
-		const legacy = rpgm.majorGameVersion <= 12;
-		const RpgmSidebar = (await import(legacy ? "./legacy.ts" : "./modern.ts"))
-			.default as foundry.applications.sidebar.AbstractSidebarTab;
+		const isLegacy = rpgm.majorGameVersion <= 12;
+		const RpgmSidebar = (await import(isLegacy ? "./legacy.ts" : "./modern.ts"))
+			.default;
 
 		CONFIG.ui["rpgm"] = RpgmSidebar;
 	}
