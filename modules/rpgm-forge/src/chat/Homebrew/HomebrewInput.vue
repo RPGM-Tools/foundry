@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ComboBox from '#/util/ComboBox.vue';
 import { localize } from '#/util/localize';
-import WriteOnTransition from "#/util/WriteOnTransition.vue";
+import WriteOn from "#/util/WriteOn";
 
 import HomebrewInputField from './HomebrewInputField.vue';
 
@@ -73,10 +73,10 @@ function changeName(n: Event) {
 			:filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())" @update:model-value="newSelection" />
 		<div v-if="data.options.schema?.name" class="rpgm-homebrew-field-container">
 			<h3>Name</h3>
-			<WriteOnTransition :enabled="true" :duration="400">
-				<p :key="data.options.schema.name.toLowerCase()" class="rpgm-homebrew-field-description">The name for this {{
-					data.options.schema.name.toLowerCase() }}</p>
-			</WriteOnTransition>
+			<WriteOn :value="data.options.schema.name.toLowerCase()" tag="p" class="rpgm-homebrew-field-description"
+				#="{ display }" :enabled="true" :duration="400">
+				The name for this {{ display }}
+			</WriteOn>
 			<input class="rpgm-input rpgm-homebrew-field-value" type="text"
 				:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')" @input="changeName">
 		</div>

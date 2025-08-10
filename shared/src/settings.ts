@@ -50,7 +50,7 @@ export function GlobalSettings() {
 
 	rpgm.sidebar.registerSidebarMenu({
 		id: "help",
-		title: "Help and Support (Beta)",
+		title: "Help",
 		icon: "fa-solid fa-question-circle",
 		color: "#aaaaaa",
 		component: RpgmSidebarAppHelp,

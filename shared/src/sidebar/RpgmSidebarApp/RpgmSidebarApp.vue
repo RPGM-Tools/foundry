@@ -2,8 +2,9 @@
 import { useElementVisibility } from '@vueuse/core';
 
 import StaggeredTransitionGroup from '#/util/StaggeredTransitionGroup';
-import WriteOnTransition from '#/util/WriteOnTransition.vue';
+import WriteOn from '#/util/WriteOn';
 
+// import WriteOnTransition from '#/util/WriteOnTransition.vue';
 import PolyhedriumBalance from './PolyhedriumBalance.vue';
 import RpgmSidebarAppButton from './RpgmSidebarAppButton.vue';
 
@@ -53,11 +54,9 @@ watch(visible, (v) => {
 
 <template>
 	<div ref="root" class="rpgm-app rpgm-sidebar-window" :data-submenu="activeMenu?.id || undefined">
-		<span v-if="shouldShow" class="sidebar-title">
+		<span v-if="shouldShow" class="sidebar-title-container">
 			<PolyhedriumBalance style="position: absolute; right: 0; top: 50%; transform: translateY(-50%);" align="right" />
-			<WriteOnTransition appear :duration="400">
-				<h1 :key="activeTitle" style="alignment-baseline: baseline;">{{ activeTitle }}</h1>
-			</WriteOnTransition>
+			<WriteOn class="sidebar-title" :value="activeTitle" :duration="400" />
 			<i class="fas fa-chevron-left sidebar-back" @click="back" />
 		</span>
 		<div class="sidebar-content">
@@ -85,17 +84,16 @@ watch(visible, (v) => {
 	display: flex;
 	flex-direction: column;
 
-	.sidebar-title {
+	.sidebar-title-container {
 		width: 100%;
 		z-index: 10;
 		position: relative;
 		overflow: hidden;
 		flex-shrink: 0;
 		justify-content: center;
-		margin-top: 0.4rem;
 		margin-bottom: 0.4rem;
 
-		h1 {
+		.sidebar-title {
 			text-align: center;
 			font-size: 2rem;
 			margin: 0;
@@ -131,14 +129,14 @@ watch(visible, (v) => {
 	}
 }
 
-.rpgm-sidebar-window[data-submenu] .sidebar-title .sidebar-back {
+.rpgm-sidebar-window[data-submenu] .sidebar-title-container .sidebar-back {
 	opacity: 1;
 	visibility: visible;
 	transform: translateX(0) scale(1, 1);
 
 }
 
-.rpgm-sidebar-window[data-submenu] .sidebar-title .sidebar-back:hover {
+.rpgm-sidebar-window[data-submenu] .sidebar-title-container .sidebar-back:hover {
 	transform: translateX(25%) scale(1.25, 1)
 }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ContentEditable from "#/util/ContentEditable.vue";
 import { vFitLines } from "#/util/VFitLines";
-import WriteOnTransition from "#/util/WriteOnTransition.vue";
+import WriteOn from "#/util/WriteOn";
 
 const data = inject<ForgeChatHomebrew>("data")!;
 
@@ -32,12 +32,14 @@ const rename = (n: string) => {
 	<div class="rpgm-homebrew-title-container" :editing @click="emit('click', $event)">
 		<ContentEditable v-slot="config" v-model:editing="editingTitle" :model-value="currentTitle" :multiline="false"
 			@update:model-value="rename">
-			<WriteOnTransition :appear="true" :enabled="!editingTitle" :duration="400">
-				<h1 :key="currentTitle" :ref="config.ref" v-fit-lines :contenteditable="config.contenteditable"
-					class="rpgm-homebrew-title rpgm-radial-ignore" @keydown="config.onKeydown" @blur="config.onBlur">
-					{{ currentTitle }}
+			<WriteOn :value="currentTitle" :appear="true" :enabled="!editingTitle" #="{ display, cursorClass }"
+				:duration="400">
+				<h1 :key="currentTitle" :ref="config.ref" v-fit-lines :class="cursorClass"
+					:contenteditable="config.contenteditable" class="rpgm-homebrew-title rpgm-radial-ignore"
+					@keydown="config.onKeydown" @blur="config.onBlur">
+					{{ display }}
 				</h1>
-			</WriteOnTransition>
+			</WriteOn>
 		</ContentEditable>
 		<div v-show="!editing && currentTitle.length > 0" class="rpgm-icons">
 			<a v-show="Object.keys(data.generations).length > 1" title="Previous generation"

@@ -1,3 +1,9 @@
+.rpgm-write-on-transition::after {
+	content: "▮";
+	font-style: normal;
+	position: absolute;
+}
+
 @keyframes enter {
 	from {
 		scale: 1.025;

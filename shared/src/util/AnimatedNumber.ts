@@ -47,7 +47,13 @@ export default defineComponent({
 		}
 	},
 
-	slots: Object as SlotsType<{ default: (scope: { value: number, display: string, direction: -1 | 0 | 1 }) => undefined }>,
+	slots: Object as SlotsType<{
+		default: (scope: {
+			value: number,
+			display: string,
+			direction: -1 | 0 | 1
+		}) => undefined
+	}>,
 
 	setup(props, { slots }) {
 		const displayValue = ref(props.value ?? 0);
@@ -104,9 +110,6 @@ export default defineComponent({
 				? slots.default({ value, display, direction })
 				: display;
 
-			if (props.tag === "template") {
-				return h("span", null, content);
-			}
 			return h(props.tag, null, content);
 		};
 	},

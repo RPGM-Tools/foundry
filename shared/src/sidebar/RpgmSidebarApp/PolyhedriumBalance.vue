@@ -23,7 +23,9 @@ const { align = 'center center' } = defineProps<{
 			</span>
 		</AnimatedNumber>
 		<template #not-logged-in>
-			Log in to see your balance
+			<span v-bind="$attrs">
+				Log in to see your balance
+			</span>
 		</template>
 	</LoggedIn>
 </template>
