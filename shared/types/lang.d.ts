@@ -1,11 +1,11 @@
 declare global {
-	type RpgmLangs = ObjectDotNotation<I18n_Merged>
+	type RpgmLangs = ObjectDotNotation<I18n_Merged>;
 	type GetI18nCombinedTypes<T> = T extends { langs: infer A } ? A : never;
 	type I18n_Merged = DeepMergeAll<GetI18nCombinedTypes<RpgmI18nCombined>>;
 	interface RpgmI18nCombined {
 		langs: [RpgmI18n]
 	}
-	type LanguageSchema = { [key: string]: string | LanguageSchema }
+	type LanguageSchema = { [key: string]: string | LanguageSchema };
 	export interface RpgmI18n {
 		RPGM_TOOLS: {
 			SIDEBAR: {
@@ -34,6 +34,10 @@ declare global {
 				RADIAL_MENU_HUD_HINT
 				RADIAL_MENU_DEBUG
 				RADIAL_MENU_DEBUG_HINT
+				AI_URL
+				AI_URL_HINT
+				AI_KEY
+				AI_KEY_HINT
 			},
 			RADIAL_MENU: {
 				INFO
@@ -44,7 +48,7 @@ declare global {
 
 	type ToString<T> =
 		IsAnyOr<T, string> extends true ? string
-		: { [K in keyof T]: ToString<T[K]> }
+		: { [K in keyof T]: ToString<T[K]> };
 }
 
 type IsAnyOr<T, U> = 0 extends (1 & T) | (1 & U) ? true : false;
@@ -55,14 +59,14 @@ type BreakDownObject<O, R = void> = {
 	? ObjectDotNotation<O[K], `${R}.${K}`>
 	: ObjectDotNotation<O[K], `${K}`>
 	: never
-}
+};
 
 type ObjectDotNotation<O, R = void> =
 	(O extends string
 		? (R extends string
 			? R
 			: never)
-		: BreakDownObject<O, R>[keyof BreakDownObject<O, R>])
+		: BreakDownObject<O, R>[keyof BreakDownObject<O, R>]);
 
 type DeepMerge<A, B> =
 	A extends object
@@ -78,13 +82,13 @@ type DeepMerge<A, B> =
 		: never
 	}
 	: B
-	: B
+	: B;
 
 type DeepMergeAll<T extends []> =
 	T extends [infer A, ...infer B]
 	? B extends []
 	? ToString<A>
 	: DeepMerge<ToString<A>, DeepMergeAll<B>>
-	: unknown
+	: unknown;
 
 export { };

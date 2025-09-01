@@ -43,7 +43,7 @@ export default defineComponent({
 		},
 		tag: {
 			type: String as PropType<keyof HTMLElementTagNameMap>,
-			default: "span"
+			default: 'span'
 		}
 	},
 

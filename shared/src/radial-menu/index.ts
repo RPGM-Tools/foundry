@@ -1,5 +1,5 @@
 import type { App, Component } from 'vue';
-import type { Reactive } from "vue";
+import type { Reactive } from 'vue';
 import { createApp, shallowReactive } from 'vue';
 
 import { injectTokenHUD } from './hud';
@@ -14,6 +14,7 @@ export * from './heuristics';
 export class RadialMenuRegister {
 	elements = new Map<HTMLElement, { vueApp: App, injectedEl: HTMLElement }>();
 	private _categories = {} as Record<keyof RadialMenuCategories, RadialMenuCategoryOptions>;
+
 	/** @returns The categories registered that can be used */
 	get categories(): Readonly<typeof this._categories> { return this._categories; }
 	buttons: RadialButton<InputContext>[] = [];
@@ -53,13 +54,13 @@ export class RadialMenuRegister {
 		let getValue: () => string;
 		let setValue: (value: string) => void;
 		if (el.contentEditable === 'true') {
-			getValue = () => el.textContent ?? "";
+			getValue = () => el.textContent ?? '';
 			setValue = (value) => { el.textContent = value; };
 		} else if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
 			getValue = () => el.value;
 			setValue = (value) => { el.value = value; };
 		} else {
-			getValue = () => "";
+			getValue = () => '';
 			setValue = () => { };
 		}
 		vueApp.provide('element', el);
@@ -107,16 +108,16 @@ export class RadialMenuRegister {
 		);
 	}
 
-	/** Matches functionality of the radial menu with the user's setting */
+	/** Matches functionality of the radial menu with the user's setting. */
 	update() {
-		if (game.settings.get("rpgm-tools", "radial_menu_input") === true) {
+		if (game.settings.get('rpgm-tools', 'radial_menu_input') === true) {
 			this.startWatching();
 		}
 		else
 			this.stopWatching();
 	}
 
-	/** Activate watcher */
+	/** Activate watcher. */
 	startWatching() {
 		this.inputObserver.observe(document.body, {
 			childList: true,
@@ -125,7 +126,7 @@ export class RadialMenuRegister {
 		this.recursivelyWatch(document.body);
 	}
 
-	/** Deactivate watcher */
+	/** Deactivate watcher. */
 	stopWatching() {
 		this.inputObserver.disconnect();
 		this.elements.forEach((value, key) => {
@@ -140,7 +141,7 @@ export class RadialMenuRegister {
 	 * @param category - Options for this category
 	 */
 	registerCategory<T extends keyof RadialMenuCategories>(id: T, category: RadialMenuCategoryOptions) {
-		rpgm.logger.debug(`Registering radial menu category: ${id}`);
+		category.logger.debug(`Registering radial menu category: ${id}`);
 		this._categories[id] = category;
 	}
 
@@ -148,7 +149,7 @@ export class RadialMenuRegister {
 	 * @param button - The input button to register
 	 */
 	registerInputButton(button: RadialButton<InputContext>) {
-		rpgm.logger.debug(`Registering radial menu button: ${button.tooltip}`);
+		button.logger.debug(`Registering radial menu button: ${button.tooltip}`);
 		this.buttons.push(button);
 	}
 
@@ -156,7 +157,7 @@ export class RadialMenuRegister {
 	 * @param button - The hud button to register
 	 */
 	registerTokenHudButton(button: RadialButton<TokenHudContext>) {
-		rpgm.logger.debug(`Registering radial menu button: ${button.tooltip}`);
+		button.logger.debug(`Registering radial menu button: ${button.tooltip}`);
 		this.tokenHudButtons.push(button);
 	}
 }

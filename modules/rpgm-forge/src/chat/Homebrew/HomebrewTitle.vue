@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import ContentEditable from "#/util/ContentEditable.vue";
-import { vFitLines } from "#/util/VFitLines";
-import WriteOn from "#/util/WriteOn";
+import ContentEditable from '#/util/ContentEditable.vue';
+import { vFitLines } from '#/util/VFitLines';
+import WriteOn from '#/util/WriteOn';
 
-const data = inject<ForgeChatHomebrew>("data")!;
+const data = inject<ForgeChatHomebrew>('data')!;
 
 const canGotoGenerations = computed(() => Object.keys(data.generations).length > 0);
 
@@ -29,28 +29,69 @@ const rename = (n: string) => {
 </script>
 
 <template>
-	<div class="rpgm-homebrew-title-container" :editing @click="emit('click', $event)">
-		<ContentEditable v-slot="config" v-model:editing="editingTitle" :model-value="currentTitle" :multiline="false"
-			@update:model-value="rename">
-			<WriteOn :value="currentTitle" :appear="true" :enabled="!editingTitle" #="{ display, cursorClass }"
-				:duration="400">
-				<h1 :key="currentTitle" :ref="config.ref" v-fit-lines :class="cursorClass"
-					:contenteditable="config.contenteditable" class="rpgm-homebrew-title rpgm-radial-ignore"
-					@keydown="config.onKeydown" @blur="config.onBlur">
+	<div
+		class="rpgm-homebrew-title-container"
+		:editing
+		@click="emit('click', $event)"
+	>
+		<ContentEditable
+			v-slot="config"
+			v-model:editing="editingTitle"
+			:model-value="currentTitle"
+			:multiline="false"
+			@update:model-value="rename"
+		>
+			<WriteOn
+				:value="currentTitle"
+				:appear="true"
+				:enabled="!editingTitle"
+				#="display"
+				:duration="400"
+			>
+				<h1
+					:key="display.value"
+					:ref="config.ref"
+					v-fit-lines
+					:contenteditable="config.contenteditable"
+					class="rpgm-homebrew-title rpgm-radial-ignore"
+					@keydown="config.onKeydown"
+					@blur="config.onBlur"
+				>
 					{{ display }}
 				</h1>
 			</WriteOn>
 		</ContentEditable>
-		<div v-show="!editing && currentTitle.length > 0" class="rpgm-icons">
-			<a v-show="Object.keys(data.generations).length > 1" title="Previous generation"
-				@click.stop="emit('cycle', -1)"><i class="fa-solid fa-circle-left" /></a>
-			<a v-show="Object.keys(data.generations).length > 1" title="Next generation" style="margin-left: auto;"
-				@click.stop="emit('cycle', 1)"><i class="fa-solid fa-circle-right" /></a>
+		<div
+			v-show="!editing && currentTitle.length > 0"
+			class="rpgm-icons"
+		>
+			<a
+				v-show="Object.keys(data.generations).length > 1"
+				title="Previous generation"
+				@click.stop="emit('cycle', -1)"
+			><i class="fa-solid fa-circle-left" /></a>
+			<a
+				v-show="Object.keys(data.generations).length > 1"
+				title="Next generation"
+				style="margin-left: auto;"
+				@click.stop="emit('cycle', 1)"
+			><i class="fa-solid fa-circle-right" /></a>
 		</div>
-		<div v-show="editing && currentTitle.length > 0" class="rpgm-icons">
-			<a v-if="!editingTitle" title="Edit Type" @click.stop="editingTitle = true"><i class="fa-solid fa-feather" /></a>
-			<a v-if="canGotoGenerations" style="margin-left: auto;" title="View all generations"
-				@click.stop="emit('gotoGenerations')"><i class="fa-solid fa-list-ul" /></a>
+		<div
+			v-show="editing && currentTitle.length > 0"
+			class="rpgm-icons"
+		>
+			<a
+				v-if="!editingTitle"
+				title="Edit Type"
+				@click.stop="editingTitle = true"
+			><i class="fa-solid fa-feather" /></a>
+			<a
+				v-if="canGotoGenerations"
+				style="margin-left: auto;"
+				title="View all generations"
+				@click.stop="emit('gotoGenerations')"
+			><i class="fa-solid fa-list-ul" /></a>
 		</div>
 	</div>
 </template>

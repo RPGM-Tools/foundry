@@ -9,7 +9,7 @@
 		},
 		"types": [
 			"vite/client",
-			"fvtt-types/lenient"
+			"fvtt-types/lenient",
 		],
 		"plugins": [
 			{

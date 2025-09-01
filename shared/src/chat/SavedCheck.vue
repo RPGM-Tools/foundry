@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { watchDebounced } from '@vueuse/core';
 
-const element = inject<HTMLElement>("element")!;
-const chatIconRow = element.querySelector(".message-metadata");
+const element = inject<HTMLElement>('element')!;
+const chatIconRow = element.querySelector('.message-metadata');
 const props = defineProps<{ saved: boolean }>();
 const checked = ref(false);
 

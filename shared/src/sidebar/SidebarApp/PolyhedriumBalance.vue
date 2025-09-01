@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { Property } from "csstype";
+import type { Property } from 'csstype';
 
 import AnimatedNumber from '#/util/AnimatedNumber';
-import LoggedIn from "#/util/LoggedIn.vue";
+import SignedIn from '#/util/SignedIn.vue';
 
-const { balance, loading } = rpgm.usePolyhedriumBalance();
+const { balance, updateBalance } = rpgm.usePolyhedriumBalance();
 
 const { align = 'center center' } = defineProps<{
 	align?: Property.TransformOrigin
@@ -12,22 +12,18 @@ const { align = 'center center' } = defineProps<{
 </script>
 
 <template>
-	<LoggedIn>
-		<AnimatedNumber v-bind="$attrs" :value="balance" #="{ display, direction }" :duration="3000">
-			<span v-if="loading">...</span>
-			<span v-else class="balance-outer" :style="{ transformOrigin: align }"
-				:class="{ increasing: direction > 0, decreasing: direction < 0 }">
-				<span class="balance-inner" :class="{ increasing: direction > 0, decreasing: direction < 0 }">
-					{{ display }}
+	<div @click="updateBalance">
+		<SignedIn>
+			<AnimatedNumber :value="balance" #="{ display, direction }" :duration="3000">
+				<span class="balance-outer" :style="{ transformOrigin: align }"
+					:class="{ increasing: direction > 0, decreasing: direction < 0 }">
+					<span class="balance-inner" :class="{ increasing: direction > 0, decreasing: direction < 0 }">
+						{{ display }}
+					</span>
 				</span>
-			</span>
-		</AnimatedNumber>
-		<template #not-logged-in>
-			<span v-bind="$attrs">
-				Log in to see your balance
-			</span>
-		</template>
-	</LoggedIn>
+			</AnimatedNumber>
+		</SignedIn>
+	</div>
 </template>
 
 <style scoped>

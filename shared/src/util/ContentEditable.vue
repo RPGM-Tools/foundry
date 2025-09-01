@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const value = defineModel<string>({ required: true });
-const editing = defineModel<boolean>("editing", { required: true });
+const editing = defineModel<boolean>('editing', { required: true });
 
 const slot = ref<HTMLElement | null>(null);
 
@@ -44,7 +44,7 @@ function startEdit() {
  */
 function keyDown(e: KeyboardEvent) {
 	switch (e.key) {
-		case "Enter": {
+		case 'Enter': {
 			// Disallow newlines in the right circumstances
 			if (e.shiftKey) {
 				if (!multiline)
@@ -55,7 +55,7 @@ function keyDown(e: KeyboardEvent) {
 				blur();
 			}
 			break;
-		} case "Escape": {
+		} case 'Escape': {
 			e.preventDefault();
 			slot.value!.innerText = value.value;
 			blur();

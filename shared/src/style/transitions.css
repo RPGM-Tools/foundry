@@ -1,9 +1,3 @@
-.rpgm-write-on-transition::after {
-	content: "▮";
-	font-style: normal;
-	position: absolute;
-}
-
 @keyframes enter {
 	from {
 		scale: 1.025;
@@ -22,6 +16,20 @@
 	to {
 		scale: 1.025;
 		opacity: 0;
+	}
+}
+
+@keyframes rpgmLoading {
+	0% {
+		background-position: left center;
+	}
+
+	50% {
+		background-position: right center;
+	}
+
+	100% {
+		background-position: left center;
 	}
 }
 

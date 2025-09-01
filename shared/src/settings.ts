@@ -1,59 +1,83 @@
-import { hudHeuristics } from "./radial-menu";
-import { DeveloperSettings } from "./settings/developer";
-import { RadialMenuSettings } from "./settings/radialMenu";
-// import { SecretsSettings } from "./settings/secrets";
-import RpgmSidebarAppAccount from "./sidebar/RpgmSidebarApp/RpgmSidebarAppAccount.vue";
-import RpgmSidebarAppHelp from "./sidebar/RpgmSidebarApp/RpgmSidebarAppHelp.vue";
-import RpgmSidebarAppShop from "./sidebar/RpgmSidebarApp/RpgmSidebarAppShop.vue";
+import { hudHeuristics } from './radial-menu';
+import { DeveloperSettings } from './settings/developer';
+import { RadialMenuSettings } from './settings/radialMenu';
+import SidebarAccount from './sidebar/SidebarApp/SidebarAccount';
+import SidebarAccountByoAI from './sidebar/SidebarApp/SidebarAccount/SidebarAccountByoAI.vue';
+import SidebarAppHelp from './sidebar/SidebarApp/SidebarAppHelp.vue';
+import SidebarAppShop from './sidebar/SidebarApp/SidebarAppShop.vue';
 
 /** Register shared settings once. */
 export function GlobalSettings() {
-	game.settings.register("rpgm-tools", "radial_menu_input", {
-		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_INPUT"),
-		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_INPUT_HINT"),
-		default: false,
+	game.settings.register('rpgm-tools', 'radial_menu_input', {
+		name: rpgm.localize('RPGM_TOOLS.CONFIG.RADIAL_MENU_INPUT'),
+		hint: rpgm.localize('RPGM_TOOLS.CONFIG.RADIAL_MENU_INPUT_HINT'),
+		default: false
 	});
-	game.settings.register("rpgm-tools", "radial_menu_hud", {
-		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_HUD"),
-		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_HUD_HINT"),
-		default: true,
+	game.settings.register('rpgm-tools', 'radial_menu_hud', {
+		name: rpgm.localize('RPGM_TOOLS.CONFIG.RADIAL_MENU_HUD'),
+		hint: rpgm.localize('RPGM_TOOLS.CONFIG.RADIAL_MENU_HUD_HINT'),
+		default: true
 	});
-	game.settings.register("rpgm-tools", "radial_menu_debug", {
-		name: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG"),
-		hint: rpgm.localize("RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG_HINT"),
-		default: false,
+	game.settings.register('rpgm-tools', 'radial_menu_debug', {
+		name: rpgm.localize('RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG'),
+		hint: rpgm.localize('RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG_HINT'),
+		default: false
 	});
-	rpgm.radialMenu.registerCategory("rpgm_debug", { color: '60deg' });
+	rpgm.radialMenu.registerCategory('rpgm_debug', { color: '60deg', logger: rpgm.tools.logger });
 	rpgm.radialMenu.registerTokenHudButton({
 		category: rpgm.radialMenu.categories.rpgm_debug,
 		icon: 'fa-regular fa-circle-info',
-		tooltip: "RPGM_TOOLS.RADIAL_MENU.INFO",
+		tooltip: 'RPGM_TOOLS.RADIAL_MENU.INFO',
 		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
-		callback: (context) => rpgm.logger.log(context.token)
+		callback: (context) => rpgm.tools.logger.log(context.token),
+		logger: rpgm.tools.logger
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
-		id: "account",
-		title: "Account",
-		icon: "fa-solid fa-user",
-		color: "#c8016e",
-		component: RpgmSidebarAppAccount,
+		path: '/account',
+		meta: {
+			title: 'Account',
+			menu: {
+				icon: 'fa-solid fa-user',
+				color: '#c8016e',
+				index: 1
+			}
+		},
+		component: SidebarAccount
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
-		id: "shop",
-		title: "Shop",
-		icon: "fa-solid fa-store",
-		color: "#ff8000",
-		component: RpgmSidebarAppShop,
+		path: '/account/bring-your-own-ai',
+		component: SidebarAccountByoAI,
+		meta: {
+			title: 'I have my own AI'
+		}
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
-		id: "help",
-		title: "Help",
-		icon: "fa-solid fa-question-circle",
-		color: "#aaaaaa",
-		component: RpgmSidebarAppHelp,
+		path: '/shop',
+		meta: {
+			title: 'Shop',
+			menu: {
+				icon: 'fa-solid fa-store',
+				color: '#ff8000',
+				index: -1
+			}
+		},
+		component: SidebarAppShop
+	});
+
+	rpgm.sidebar.registerSidebarMenu({
+		path: '/help',
+		meta: {
+			title: 'Help',
+			menu: {
+				icon: 'fa-solid fa-question-circle',
+				color: '#aaaaaa',
+				index: -1
+			}
+		},
+		component: SidebarAppHelp
 	});
 }
 

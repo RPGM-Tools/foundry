@@ -1,5 +1,10 @@
+#sidebar-tabs {
+	position: relative;
+}
+
 .rpgm-app {
 	transform-origin: center;
+	position: relative;
 }
 
 .rpgm-app h1 {
@@ -32,28 +37,44 @@
 	border-radius: 50%;
 }
 
-.rpgm-app button:disabled,
 .rpgm-button:disabled {
 	cursor: default;
 }
 
 .rpgm-app button,
 .rpgm-button {
-	margin-top: 2px;
-	transition: background 150ms ease;
 	box-shadow: none !important;
-	position: relative;
-	width: 100%;
 }
 
-.rpgm-app button:hover:not(:disabled),
 .rpgm-button:hover:not(:disabled) {
 	box-shadow: 0 0 5px #6633cc !important;
 }
 
-.rpgm-app button:active:not(:disabled),
 .rpgm-button:active:not(:disabled) {
 	background-color: #6633cc;
+}
+
+.rpgm-button-primary {
+	border: none;
+	margin: 0;
+	color: white;
+	background-image: linear-gradient(to right, #6633cc 40%, #ff73c0 50%, #6633cc 60%);
+	background-position: left center;
+	background-size: 400% auto;
+}
+
+.rpgm-button-secondary {
+	color: white;
+	margin: 0;
+	border: inset 2px #6633cc;
+	background-color: transparent;
+	background-image: linear-gradient(to right, transparent 40%, #ff73c0 50%, transparent 60%);
+	background-position: left center;
+	background-size: 400% auto;
+}
+
+.rpgm-button[data-loading="true"] {
+	animation: rpgmLoading 2.0s infinite linear;
 }
 
 .rpgm-textarea {
@@ -61,12 +82,9 @@
 	width: 100%;
 }
 
-.rpgm-app input,
 .rpgm-input {
 	width: 100%;
 	padding: 4px;
-	border-radius: 3px;
-	border: solid 1px #00000033 !important;
 	outline: none;
 }
 
@@ -108,15 +126,22 @@
 	transition-duration: 150ms;
 }
 
+.rpgm-app a:focus,
+.rpgm-app a:hover {
+	text-shadow: 0 0 8px #8040ff !important;
+}
+
 .rpgm-links a {
 	color: #6633cc !important;
 }
 
+.rpgm-link:focus,
+.rpgm-link:hover,
 .rpgm-links a:focus,
 .rpgm-links a:hover,
 .rpgm-icons a:focus,
 .rpgm-icons a:hover {
-	text-shadow: 0 0 8px #6633cc !important;
+	text-shadow: 0 0 8px #8040ff !important;
 }
 
 .rpgm-app-inner {

@@ -1,19 +1,30 @@
-import { polarClient } from "@polar-sh/better-auth";
-import { anonymousClient, usernameClient } from "better-auth/client/plugins";
-import { createAuthClient } from "better-auth/vue";
+import { polarClient } from '@polar-sh/better-auth';
+import { inferAdditionalFields, usernameClient } from 'better-auth/client/plugins';
+import { createAuthClient } from 'better-auth/vue';
 
 export const auth = createAuthClient({
 	baseURL: __API_URL__,
-	basePath: "auth",
 	fetchOptions: {
 		onError: (ctx) => {
-			rpgm.logger.visible.error(ctx.error.message);
+			if (ctx.error.message)
+				rpgm.tools.logger.visible.error(ctx.error.message);
 		}
 	},
 	disableDefaultFetchPlugins: true,
 	plugins: [
+		inferAdditionalFields({
+			user: {
+				legacy: {
+					type: 'boolean',
+					input: false,
+				},
+				polyhedrium: {
+					type: 'number',
+					input: false
+				}
+			}
+		}),
 		polarClient(),
 		usernameClient(),
-		anonymousClient(),
 	],
 });

@@ -17,9 +17,9 @@ const pressed = ref(false);
 
 const emit = defineEmits(['click']);
 const context = defineModel<ButtonContext>({ required: true });
-const { button, rotation = "uniform" } = defineProps<{
+const { button, rotation = 'uniform' } = defineProps<{
 	button: RadialButton<ButtonContext>,
-	rotation?: "uniform" | "random"
+	rotation?: 'uniform' | 'random'
 }>();
 
 const colorStyle = computed<StyleValue>(() => ({
@@ -34,7 +34,7 @@ const rotationStyle = computed<StyleValue>(() =>
 	});
 
 /**
- * Execute this button's callback and set loading state to true 
+ * Execute this button's callback and set loading state to true.
  * @param event - The {@link MouseEvent} used to detect the shift modifier
  */
 async function onClick(event: MouseEvent) {

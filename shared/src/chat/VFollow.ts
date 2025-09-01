@@ -1,4 +1,4 @@
-import type { Directive } from "vue";
+import type { Directive } from 'vue';
 
 /** Custom directive for following an html element based on a css selector, inserting itself before the target */
 export const vFollow: Directive<HTMLElement & { _observer?: MutationObserver, _parent?: HTMLElement }, string> = {
@@ -12,7 +12,7 @@ export const vFollow: Directive<HTMLElement & { _observer?: MutationObserver, _p
 				newParent?.insertBefore(el, target);
 			}
 		});
-		const interfaceEl = document.querySelector("#interface");
+		const interfaceEl = document.querySelector('#interface');
 		if (!interfaceEl) return;
 		observer.observe(interfaceEl, { childList: true, subtree: true });
 		el._observer = observer;

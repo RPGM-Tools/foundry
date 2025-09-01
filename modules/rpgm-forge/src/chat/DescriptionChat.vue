@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ForgeDescription } from '@rpgm/forge';
-
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 
 const description = rpgm.forge.descriptionsChats.useChatWizard(), { data } = description;
@@ -13,10 +11,10 @@ const loading = ref(false);
 async function generate() {
 	loading.value = true;
 	const oldDesc = data.description;
-	data.description = "";
+	data.description = '';
 
-	const result = await rpgm.forge.queue.generate(ForgeDescription, {
-		name: data.name ?? "",
+	const result = await rpgm.forge.mod.generateDescriptions({
+		name: data.name ?? '',
 		type: data.type,
 		system: rpgm.forge.system,
 		language: rpgm.forge.language,
@@ -25,9 +23,9 @@ async function generate() {
 		notes: ''
 	});
 
-	if (!result.success) rpgm.forge.logger.visible.error(result.error);
+	if (result.isErr()) rpgm.forge.logger.visible.error(result.error.message);
 
-	data.description = result.success ? result.output : oldDesc;
+	data.description = result.isOk() ? result.value.description : oldDesc;
 	rpgm.chat.updateScroll();
 	loading.value = false;
 }
@@ -37,14 +35,16 @@ const buttons: RadialButton<ButtonContext>[] = [
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		callback: copy,
 		detective: () => secure,
-		icon: "fa fa-copy",
-		tooltip: "RPGM_FORGE.RADIAL_MENU.COPY",
+		icon: 'fa fa-copy',
+		tooltip: 'RPGM_FORGE.RADIAL_MENU.COPY',
+		logger: rpgm.forge.logger
 	},
 	{
 		category: rpgm.radialMenu.categories.rpgm_forge,
 		callback: generate,
-		icon: "fa fa-refresh",
-		tooltip: "RPGM_FORGE.RADIAL_MENU.REGENERATE",
+		icon: 'fa fa-refresh',
+		tooltip: 'RPGM_FORGE.RADIAL_MENU.REGENERATE',
+		logger: rpgm.forge.logger
 	}
 ];
 
@@ -54,7 +54,7 @@ const buttons: RadialButton<ButtonContext>[] = [
 function copy() {
 	try {
 		void navigator.clipboard.writeText(`# ${data.name ? `${data.name} – ` : ''}${data.type}\n${data.description}`);
-		rpgm.forge.logger.visible.log("Copied description to clipboard!");
+		rpgm.forge.logger.visible.log('Copied description to clipboard!');
 	} catch { return; }
 }
 
@@ -66,10 +66,20 @@ const secure = window.isSecureContext;
 </script>
 
 <template>
-	<ChatWizardContainer :wizard="description" :buttons>
+	<ChatWizardContainer
+		:wizard="description"
+		:buttons
+	>
 		<h2>{{ data.name ? `${data.name} – ` : "" }}{{ data.type }}</h2>
 		<Transition name="forge-description">
-			<p v-if="data.description" ref="content" tabindex="0" class="forge-description">{{ data.description }}</p>
+			<p
+				v-if="data.description"
+				ref="content"
+				tabindex="0"
+				class="forge-description"
+			>
+				{{ data.description }}
+			</p>
 		</Transition>
 	</ChatWizardContainer>
 </template>

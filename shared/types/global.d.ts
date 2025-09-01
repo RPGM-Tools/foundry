@@ -1,8 +1,7 @@
-/* eslint-disable no-var */
-import type { App } from "vue";
+import type { App } from 'vue';
 
-import type { RpgmModule } from "#/module";
-import type RpgmSidebar from "#/sidebar/modern";
+import type { RpgmModule } from '#/module';
+import type RpgmSidebar from '#/sidebar/modern';
 
 declare global {
 	declare const __MODULE_VERSION__: string;
@@ -28,7 +27,7 @@ declare global {
 		color: string;
 		icon: string;
 		component?: Component;
-	}
+	};
 
 	interface FlagConfig {
 		ChatMessage: {
@@ -41,7 +40,7 @@ declare global {
 			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
 			renderSettingsConfig: (settingsConfig: SettingsConfig, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
 			renderChatMessageHTML: (message: ChatMessage, html: HTMLElement, context: object) => void
-			"rpgm-init": () => void
+			'rpgm-init': () => void
 			createToken(tokenDocument: TokenDocument, scene: foundry.abstract.types.DatabaseUpdateOperation, userId: string): void
 		}
 
@@ -74,7 +73,7 @@ declare global {
 		cssClass?: string,
 		cssId: string,
 		tabName?: string,
-	}
+	};
 
 	interface ChatLog {
 		_getEntryContextOptions(): {
@@ -83,6 +82,17 @@ declare global {
 			condition: (li: JQuery | HTMLElement) => boolean
 			callback: (message: ChatMessage) => void
 		}[]
+	}
+}
+
+declare module 'vue-router' {
+	interface RouteMeta {
+		title: string
+		menu?: {
+			icon: string
+			color: string
+			index?: number
+		}
 	}
 }
 

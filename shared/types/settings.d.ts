@@ -5,7 +5,6 @@ declare global {
 		'rpgm-tools.radial_menu_input': boolean
 		'rpgm-tools.radial_menu_hud': boolean
 		'rpgm-tools.radial_menu_debug': boolean
-		'rpgm-tools.login-token': string
 	}
 }
 export { };

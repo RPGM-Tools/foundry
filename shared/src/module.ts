@@ -1,12 +1,14 @@
-import { GlobalMenus, GlobalSettings } from "#/settings";
+import type { RpgmModule as Module } from '@rpgm/tools';
+import { RpgmTools } from '@rpgm/tools';
+
+import { GlobalMenus, GlobalSettings } from '#/settings';
 import { rpgmPolyhedriumBalance } from '#/util/usePolyhedriumBalance';
 
-import { auth } from "./auth";
-import { ChatCommands } from "./chat";
-import { RadialMenuRegister } from "./radial-menu";
-import { RpgmSidebarManager } from "./sidebar";
-import { localize } from "./util/localize";
-import { RPGMLogger } from "./util/LoggingV2";
+import { auth } from './auth';
+import { ChatCommands } from './chat';
+import { RadialMenuRegister } from './radial-menu';
+import { RpgmSidebarManager } from './sidebar';
+import { localize } from './util/localize';
 
 /**
  * Abstract base class for all RPGM (Role-Playing Game Master) modules.
@@ -19,12 +21,9 @@ import { RPGMLogger } from "./util/LoggingV2";
  * 2. `setup`: (Foundry's `setup` hook) - Module-specific settings registration, global menu setup, and chat command registration.
  * 3. `ready`: (Foundry's `ready` hook) - Final initialization, global ready tasks, and module-specific ready tasks.
  */
-export abstract class RpgmModule {
+export abstract class RpgmModule<ID extends string = string> {
 	/** The major game version of Foundry VTT, e.g., 11, 12, 13. */
 	static majorGameVersion: number;
-
-	/** A generic logger instance for logging messages from RPGM Tools. */
-	static logger: RPGMLogger;
 
 	/** Manages chat commands registered by RPGM modules. */
 	static chat: ChatCommands;
@@ -44,29 +43,47 @@ export abstract class RpgmModule {
 
 	static usePolyhedriumBalance: ReturnType<typeof rpgmPolyhedriumBalance>;
 
+	static show(method: 'log' | 'warn' | 'error', message: string) {
+		ui.notifications?.[method === 'log' ? 'info' : method](message, { console: false });
+	}
+
+	static settings = (id: string) => ({
+		load: () => {
+			try {
+				return JSON.parse(localStorage.getItem(`${id}.settings`) ?? 'null');
+			} catch {
+				return null;
+			}
+		},
+		save: (data: object) => {
+			const dataString = JSON.stringify(data);
+			localStorage.setItem(`${id}.settings`, dataString);
+		}
+	});
+
+	static tools = new RpgmTools({
+		logger: {
+			show: RpgmModule.show
+		},
+		settings: this.settings('rpgm-tools')
+	});
+
+	abstract mod: Module<ID>;
+
 	/**
 	 * The unique slug ID for this module, which also serves as its namespace for client settings.
-	 * This must be defined by the extending module.
 	 */
-	abstract readonly id: ClientSettings.Namespace;
+	get id(): typeof this.mod.id { return this.mod.id; };
 
 	/**
 	 * The user-friendly display name for this module.
-	 * This must be defined by the extending module.
 	 */
-	abstract readonly name: string;
-
-	/**
-	 * An icon string (e.g., a Unicode emoji) representing this module, used in logs and UI.
-	 * This must be defined by the extending module.
-	 */
-	abstract readonly icon: string;
+	get name() { return this.mod.name; };
 
 	/**
 	 * An instance-specific logger for this module. Each module should have its own logger for clear output.
-	 * This must be defined by the extending module, typically by initializing it in the module's constructor.
 	 */
-	abstract readonly logger: RPGMLogger;
+	get logger() { return this.mod.logger; };
 
 	/** 
 	 * The version string of this module.
@@ -93,16 +110,10 @@ export abstract class RpgmModule {
 	 * Each hook adds its corresponding private method (`_init`, `_setup`, `_ready`) to the `setup` promise chain.
 	 */
 	constructor() {
-		Hooks.once("init", () => { this.setup = this.setup.then(this._init.bind(this)); });
-		Hooks.once("setup", () => { this.setup = this.setup.then(this._setup.bind(this)); });
-		Hooks.once("ready", () => { this.setup = this.setup.then(this._ready.bind(this)); });
+		Hooks.once('init', () => { this.setup = this.setup.then(this._init.bind(this)); });
+		Hooks.once('setup', () => { this.setup = this.setup.then(this._setup.bind(this)); });
+		Hooks.once('ready', () => { this.setup = this.setup.then(this._ready.bind(this)); });
 	}
-
-	/** 
-	 * Retrieves the API key set by the user in the global RPGM Tools settings.
-	 * @returns The API key string, or an empty string if not set.
-	 */
-	static get loginToken() { return game.settings.get("rpgm-tools", "login-token") || ""; }
 
 	/** 
 	 * The initial asynchronous method called when the Foundry VTT `init` hook fires for this module.
@@ -113,9 +124,9 @@ export abstract class RpgmModule {
 	private async _init() {
 		if (!globalThis.rpgm)
 			this.initGlobal();
-		this.logger.styled("color: #ad8cef; font-weight: bold;").prefixed("").log(`${this.icon} ${this.name} joined the game`);
-		rpgm.modules[this.id] = this;
 		await this.init();
+		rpgm.modules[this.id] = this;
+		this.logger.styled('color: #ad8cef; font-weight: bold;').prefixed('').log(`${this.mod.icon} ${this.name} joined the game`);
 	}
 
 	/** 
@@ -141,24 +152,23 @@ export abstract class RpgmModule {
 		this.first = true;
 		globalThis.rpgm = RpgmModule as typeof globalThis.rpgm;
 		RpgmModule.majorGameVersion = game.data.release.generation;
-		RpgmModule.logger = new RPGMLogger("🛠️ RPGM Tools | ");
 		RpgmModule.radialMenu = new RadialMenuRegister();
 		RpgmModule.chat = new ChatCommands();
-		RpgmModule.logger.styled("color: #ad8cef; font-weight: bold;").prefixed("").log(`🛠️ RPGM Tools joined the game`);
+		RpgmModule.tools.logger.prefixed('').log('🛠️ RPGM Tools joined the game');
 		RpgmModule.sidebar = new RpgmSidebarManager();
 		RpgmModule.usePolyhedriumBalance = rpgmPolyhedriumBalance();
-		Hooks.on("renderSettingsConfig", (_, html) => {
+		Hooks.on('renderSettingsConfig', (_, html) => {
 			Object.keys(RpgmModule.modules).forEach(k => {
 				const settingsHtml = rpgm.j(html);
-				const screen = settingsHtml.querySelector(`[data-category="${k}"]`) as HTMLElement;
+				const screen = settingsHtml.querySelector(`[data - category= "${k}"]`) as HTMLElement;
 				// Move all menus to the bottom of the page
-				screen?.querySelectorAll(`.form-group.submenu,.form-group:has([data-action="openSubmenu"])`).forEach(s => screen.appendChild(s));
-				const copyright = document.createElement("div");
-				copyright.style.fontStyle = "italic";
-				copyright.style.textAlign = "center";
-				copyright.innerText = "© 2025 RPGM Tools, LLC";
-				screen.querySelectorAll("input,select").forEach(i => i.classList.add("rpgm-input"));
-				screen.querySelectorAll("button").forEach(i => i.classList.add("rpgm-button"));
+				screen?.querySelectorAll('.form-group.submenu,.form-group:has([data-action="openSubmenu"])').forEach(s => screen.appendChild(s));
+				const copyright = document.createElement('div');
+				copyright.style.fontStyle = 'italic';
+				copyright.style.textAlign = 'center';
+				copyright.innerText = '© 2025 RPGM Tools, LLC';
+				screen.querySelectorAll('input,select').forEach(i => i.classList.add('rpgm-input'));
+				screen.querySelectorAll('button').forEach(i => i.classList.add('rpgm-button'));
 				screen?.appendChild(copyright);
 			});
 		});
@@ -186,7 +196,7 @@ export abstract class RpgmModule {
 	 */
 	protected async _ready() {
 		if (this.first)
-			RpgmModule.globalReady();
+			rpgm.globalReady();
 		await this.rpgmReady();
 	}
 
@@ -204,7 +214,7 @@ export abstract class RpgmModule {
 	 * @returns The underlying HTMLElement.
 	 */
 	static j(el: JQuery<HTMLElement> | HTMLElement): HTMLElement {
-		return el instanceof HTMLElement ? el : el[0];
+		return el instanceof HTMLElement ? el : el[0] as HTMLElement;
 	}
 
 	/** 
@@ -223,9 +233,9 @@ export abstract class RpgmModule {
 		};
 
 		const splitJustify = (s: string) => {
-			const [left, right] = s.split("%s");
+			const [left, right] = s.split('%s', 2) as [string] | [string, string];
 			const spaces = Math.floor(48 - left.length);
-			return `${left}${right.padStart(spaces)}`;
+			return `${left}${right?.padStart(spaces) || ''} `;
 		};
 		const asciiArt = (String.raw`
  ____  ____   ____ __  __  _              _     
@@ -234,8 +244,8 @@ export abstract class RpgmModule {
 |  _ <|  __/| |_| | |  | || || (_) | (_) | \__ \
 |_| \_\_|    \____|_|  |_(_)__\___/ \___/|_|___/
 ————————————————————————————————————————————————
-${center(`© 2025 RPGM Tools, LLC`)}
-${Object.values(rpgm.modules).map(m => splitJustify(` ${m.icon} ${m.name} %s v${m.version} `)).join('\n')}`).slice(1);
-		rpgm.logger.styled("color: #d44e7b; font-weight: bold;").prefixed("").log(asciiArt);
+${center('© 2025 RPGM Tools, LLC')}
+${Object.values(rpgm.modules).map(m => splitJustify(` ${m.mod.icon} ${m.name} %s v${m.version} `)).join('\n')} `).slice(1);
+		rpgm.tools.logger.prefixed('').styled('color: #d44e7b; font-weight: bold;').log(asciiArt);
 	}
 }

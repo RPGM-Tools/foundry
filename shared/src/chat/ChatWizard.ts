@@ -1,5 +1,5 @@
-import { watchDebounced } from "@vueuse/core";
-import type { App, Component, Reactive } from "vue";
+import { watchDebounced } from '@vueuse/core';
+import type { App, Component, Reactive } from 'vue';
 
 export type WizardData<T extends object = object> = {
 	/** The data for this message */
@@ -49,7 +49,7 @@ export type WizardData<T extends object = object> = {
  * await myWizard.newMessage({ initialData: "value" });
  * ```
  */
-export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
+export class ChatWizard<T extends WizardData['data'] = WizardData['data']> {
 	data: Map<string, T> = new Map();
 	apps: Map<string, App> = new Map();
 
@@ -62,7 +62,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 
 	/**
 	 * Creates a new ChatWizard.
-	 * @param moduleId - The namespace of this wizard
+	 * @param moduleId - The namespace of this wizard, must be the module id
 	 * @param key - The key of this wizard
 	 * @param renderer - The component to render for this wizard
 	 * @param title - The title of this wizard, to be rendered as the title of the message
@@ -72,6 +72,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 		key: string,
 		readonly renderer: Component,
 		readonly title: string,
+		readonly logger: typeof rpgm.tools.logger
 	) { this._key = key; }
 
 
@@ -101,7 +102,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	 * @returns A unique identifier extracted for this message if it exists
 	 */
 	private messageId(message: ChatMessage): string {
-		return message.getFlag(this.moduleId, this.key) || "";
+		return message.getFlag(this.moduleId, this.key) || '';
 	}
 
 	/**
@@ -124,17 +125,17 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 		const data = this.data.get(id);
 
 		if (!data) {
-			rpgm.logger.warn(`No data found for ${this.key} wizard with id ${id}, deleting...`);
+			this.logger.warn(`No data found for ${this.key} wizard with id ${id}, deleting...`);
 			void message.delete({});
 			return false;
 		}
 
 		const app = createApp(this.renderer);
 		const mount = html.querySelector<HTMLElement>(`.${this.moduleId}-${this.key}`)!;
-		app.provide("message", message);
-		app.provide("id", id);
-		app.provide("data", reactive(data));
-		app.provide("element", html);
+		app.provide('message', message);
+		app.provide('id', id);
+		app.provide('data', reactive(data));
+		app.provide('element', html);
 		app.mount(mount);
 		return true;
 	}
@@ -153,12 +154,12 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	 */
 	load() {
 		game.settings.register(this.moduleId, this.key, {
-			scope: "world",
+			scope: 'world',
 		});
 		const data = game.settings.get(this.moduleId, this.key) as string;
 		this.data = (data ? new Map(Object.entries(JSON.parse(data) as Record<string, T>)) : new Map<string, T>());
 		rpgm.chat.registerMessageHandler(this);
-		rpgm.logger.debug(`Loaded ${this.key} wizard with ${this.data.size} messages`);
+		this.logger.debug(`Loaded ${this.key} wizard with ${this.data.size} messages`);
 	}
 
 	/** Removes any messages that no longer exist. */
@@ -169,7 +170,7 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 			.filter(([id]) => message_ids.includes(id)));
 		this.save();
 		if (old_length > this.data.size)
-			rpgm.logger.debug(`Pruned ${this.key} wizard with ${old_length - this.data.size} messages`);
+			this.logger.debug(`Pruned ${this.key} wizard with ${old_length - this.data.size} messages`);
 	}
 
 	/** Sync this database's data to localStorage. */
@@ -185,10 +186,10 @@ export class ChatWizard<T extends WizardData["data"] = WizardData["data"]> {
 	 * @returns A reactive reference to the message's data, along with the original message
 	 */
 	useChatWizard(debounce: number = 1000): WizardData<T> {
-		const message = inject("message") as ChatMessage;
-		const data = inject("data") as T;
-		const id = inject("id") as string;
-		const element = inject("element") as HTMLElement;
+		const message = inject('message') as ChatMessage;
+		const data = inject('data') as T;
+		const id = inject('id') as string;
+		const element = inject('element') as HTMLElement;
 		const rData = reactive(data);
 		const saved = ref(true);
 		const close = () => this.delete(message);

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ForgeNames } from '@rpgm/forge';
 
-import { getSelectedToken, nameToken } from '@/util/token';
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
-import SkeletonParagraph from "#/chat/SkeletonParagraph.vue";
+import SkeletonParagraph from '#/chat/SkeletonParagraph.vue';
+import { getSelectedToken, nameToken } from '$/util/token';
 
 const NAMES_PER_GENERATION = 4;
 
@@ -41,9 +40,9 @@ async function generate(regenerate: boolean = false) {
 		} else p();
 	});
 
-	const result = await rpgm.forge.queue.generate(ForgeNames, {
+	const result = await rpgm.forge.mod.generateNames({
 		quantity: NAMES_PER_GENERATION,
-		gender: "any",
+		gender: 'any',
 		genre: rpgm.forge.genre,
 		language: rpgm.forge.language,
 		method: rpgm.forge.method,
@@ -52,15 +51,16 @@ async function generate(regenerate: boolean = false) {
 
 	loading.value = false;
 	await fadeOut;
-	if (!result.success) rpgm.forge.logger.visible.error(result.error);
-	insertValues(result.success ? result.output : oldNames);
+	if (result.isErr()) rpgm.forge.logger.visible.error(result.error);
+	insertValues(result.isOk() ? result.value.names : oldNames);
 }
 
 const buttons: RadialButton[] = [{
 	category: rpgm.radialMenu.categories.rpgm_forge,
 	callback: async () => generate(true),
-	icon: "fa fa-refresh",
-	tooltip: "RPGM_FORGE.RADIAL_MENU.REGENERATE",
+	icon: 'fa fa-refresh',
+	tooltip: 'RPGM_FORGE.RADIAL_MENU.REGENERATE',
+	logger: rpgm.forge.logger
 }];
 
 /** 
@@ -82,12 +82,28 @@ onMounted(() => {
 </script>
 
 <template>
-	<ChatWizardContainer :wizard="names" :buttons>
+	<ChatWizardContainer
+		:wizard="names"
+		:buttons
+	>
 		<h2>{{ data.prompt }}</h2>
-		<SkeletonParagraph :loading="false" width="100%" height="400px">
-			<TransitionGroup name="rpgm-forge-name" class="rpgm-forge-name-container" tag="ul">
-				<li v-for="name in data.names" :key="name" :title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')"
-					class="rpgm-forge-name" @click="assign(name)">
+		<SkeletonParagraph
+			:loading="false"
+			width="100%"
+			height="400px"
+		>
+			<TransitionGroup
+				name="rpgm-forge-name"
+				class="rpgm-forge-name-container"
+				tag="ul"
+			>
+				<li
+					v-for="name in data.names"
+					:key="name"
+					:title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')"
+					class="rpgm-forge-name"
+					@click="assign(name)"
+				>
 					{{ name }}
 				</li>
 			</TransitionGroup>

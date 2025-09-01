@@ -23,6 +23,6 @@ export async function writeOn(context: InputContext, text: string, time: number)
  * @returns A function to clear the effect
  */
 export function shimmerInput(context: InputContext) {
-	context.element.classList.add("rpgm-active");
-	return () => { context.element.classList.remove("rpgm-active"); };
+	context.element.classList.add('rpgm-active');
+	return () => { context.element.classList.remove('rpgm-active'); };
 }

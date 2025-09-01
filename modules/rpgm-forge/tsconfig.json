@@ -3,10 +3,10 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"paths": {
-			"@/*": [
+			"$/*": [
 				"./src/*"
 			],
-			"@@/*": [
+			"$$/*": [
 				"./*"
 			],
 			"#/*": [
@@ -18,8 +18,7 @@
 		},
 		"types": [
 			"vite/client",
-			"fvtt-types/lenient",
-			"@rpgm/forge/types"
+			"fvtt-types/lenient"
 		],
 		"plugins": [
 			{
@@ -29,6 +28,7 @@
 	},
 	"include": [
 		"./**/*.ts",
+		"*.ts",
 		"./lang/index.d.ts",
 		"./**/*.vue",
 		"../../shared/types/*.d.ts"

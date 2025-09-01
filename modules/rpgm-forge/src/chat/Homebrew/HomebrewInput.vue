@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ComboBox from '#/util/ComboBox.vue';
 import { localize } from '#/util/localize';
-import WriteOn from "#/util/WriteOn";
+import WriteOn from '#/util/WriteOn';
 
 import HomebrewInputField from './HomebrewInputField.vue';
 
@@ -10,9 +10,9 @@ const hasGenerated = computed(() => Object.keys(data.generations).length > 0);
 
 const emit = defineEmits<{ generate: [] }>();
 
-const fieldsContainer = useTemplateRef("fieldsContainer");
+const fieldsContainer = useTemplateRef('fieldsContainer');
 
-const data = inject<ForgeChatHomebrew>("data")!;
+const data = inject<ForgeChatHomebrew>('data')!;
 
 const { loading } = defineProps<{ loading: boolean }>();
 
@@ -27,13 +27,13 @@ function pauseTransition() {
 /** Appends a field to the current schema. */
 function newField() {
 	data.options.schema?.fields.push({
-		name: "[Name]",
-		description: "[Description]",
-		type: "short",
+		name: '[Name]',
+		description: '[Description]',
+		type: 'short'
 	});
 	// Gross scroll down hack
 	setTimeout(() => {
-		fieldsContainer.value?.parentElement?.parentElement?.scrollBy({ top: 9999, behavior: "smooth" });
+		fieldsContainer.value?.parentElement?.parentElement?.scrollBy({ top: 9999, behavior: 'smooth' });
 	}, 100);
 }
 
@@ -67,31 +67,69 @@ function changeName(n: Event) {
 </script>
 
 <template>
-	<div ref="fieldsContainer" class="rpgm-homebrew-fields-container">
-		<ComboBox v-if="!hasGenerated" v-model="data.options.schema" placeholder="Preset" :values="schemas"
-			:unique="v => v.name" :display="v => v.name" :assign
-			:filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())" @update:model-value="newSelection" />
-		<div v-if="data.options.schema?.name" class="rpgm-homebrew-field-container">
+	<div
+		ref="fieldsContainer"
+		class="rpgm-homebrew-fields-container"
+	>
+		<ComboBox
+			v-if="!hasGenerated"
+			v-model="data.options.schema"
+			placeholder="Preset"
+			:values="schemas"
+			:unique="v => v.name"
+			:display="v => v.name"
+			:assign
+			:filter="(v, t) => v.name.toLowerCase().startsWith(t.toLowerCase())"
+			@update:model-value="newSelection"
+		/>
+		<div
+			v-if="data.options.schema?.name"
+			class="rpgm-homebrew-field-container"
+		>
 			<h3>Name</h3>
-			<WriteOn :value="data.options.schema.name.toLowerCase()" tag="p" class="rpgm-homebrew-field-description"
-				#="{ display }" :enabled="true" :duration="400">
+			<WriteOn
+				:value="data.options.schema.name.toLowerCase()"
+				tag="p"
+				class="rpgm-homebrew-field-description"
+				#="display"
+				:enabled="true"
+				:duration="600"
+			>
 				The name for this {{ display }}
 			</WriteOn>
-			<input class="rpgm-input rpgm-homebrew-field-value" type="text"
-				:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')" @input="changeName">
+			<input
+				class="rpgm-input rpgm-homebrew-field-value"
+				type="text"
+				:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')"
+				@input="changeName"
+			>
 		</div>
 		<template v-if="data.options.schema?.fields">
-			<TransitionGroup :css="!renaming" name="rpgm-homebrew-field-container">
-				<HomebrewInputField v-for="(field, i) in data.options.schema.fields" :key="field.name" :model-value="field"
-					:i="buttonIndex(i)" @renaming="pauseTransition" />
+			<TransitionGroup
+				:css="!renaming"
+				name="rpgm-homebrew-field-container"
+			>
+				<HomebrewInputField
+					v-for="(field, i) in data.options.schema.fields"
+					:key="field.name"
+					:model-value="field"
+					:i="buttonIndex(i)"
+					@renaming="pauseTransition"
+				/>
 			</TransitionGroup>
 			<div class="rpgm-homebrew-field-add rpgm-icons">
 				<a @click="newField">
 					<i class="fa-solid fa-plus" />
 				</a>
 			</div>
-			<button class="rpgm-button" :class="{ 'rpgm-active': loading }"
-				:disabled="(data.options.schema.fields.length ?? 0) == 0 || loading" @click="emit('generate')">Generate</button>
+			<button
+				class="rpgm-button"
+				:class="{ 'rpgm-active': loading }"
+				:disabled="(data.options.schema.fields.length ?? 0) == 0 || loading"
+				@click="emit('generate')"
+			>
+				Generate
+			</button>
 		</template>
 		<p v-if="data.options.schema?.fields?.length == 0">
 			<i>Add some fields to get started</i>

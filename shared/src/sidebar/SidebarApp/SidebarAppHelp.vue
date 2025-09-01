@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Converter } from "showdown";
+import { Converter } from 'showdown';
 
-import Help from "../../../assets/help.md?raw";
+import Help from '../../../assets/help.md?raw';
 
 const formattedHelp = computed(() => {
 	const converter = new Converter();

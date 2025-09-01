@@ -3,12 +3,12 @@ import { RadialMenuSettings } from '#/settings/radialMenu';
 import { useSetting } from '#/util';
 
 const rpgm = globalThis.rpgm;
-const radialMenuInput = useSetting("rpgm-tools.radial_menu_input");
-const radialMenuHUD = useSetting("rpgm-tools.radial_menu_hud");
-const app = inject<RadialMenuSettings>("app")!;
+const radialMenuInput = useSetting('rpgm-tools.radial_menu_input');
+const radialMenuHUD = useSetting('rpgm-tools.radial_menu_hud');
+const app = inject<RadialMenuSettings>('app')!;
 
 /**
- Saves changed settings
+ * Saves changed settings
  */
 function submit() {
 	radialMenuInput.save();

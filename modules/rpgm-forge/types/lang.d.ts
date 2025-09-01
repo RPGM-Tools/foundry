@@ -5,51 +5,51 @@ declare global {
 	interface ForgeI18n {
 		RPGM_FORGE: {
 			CONFIG: {
-				AUTO_NAME
-				AUTO_NAME_HINT
-				RENAME_ACTORS
-				RENAME_ACTORS_HINT
-				LANGUAGE
-				LANGUAGE_HINT
-				SYSTEM
-				SYSTEM_HINT
-				GENRE
-				GENRE_HINT
-				METHOD
-				METHOD_HINT
-				METHOD_AI
-				METHOD_SIMPLE
+				AUTO_NAME: string
+				AUTO_NAME_HINT: string
+				RENAME_ACTORS: string
+				RENAME_ACTORS_HINT: string
+				LANGUAGE: string
+				LANGUAGE_HINT: string
+				SYSTEM: string
+				SYSTEM_HINT: string
+				GENRE: string
+				GENRE_HINT: string
+				METHOD: string
+				METHOD_HINT: string
+				METHOD_AI: string
+				METHOD_SIMPLE: string
 			}
 			INIT: {
-				TITLE
-				PROMPT1
-				PROMPT2
-				PROMPT3
-				PROMPT4
+				TITLE: string
+				PROMPT1: string
+				PROMPT2: string
+				PROMPT3: string
+				PROMPT4: string
 			}
 			NAMES: {
-				ASSIGN_TOOLTIP
+				ASSIGN_TOOLTIP: string
 			}
 			HOMEBREW: {
-				PLACEHOLDER
+				PLACEHOLDER: string
 			}
 			ERORRS: {
-				TOKEN_SELECT
-				TOKEN_OWNER
+				TOKEN_SELECT: string
+				TOKEN_OWNER: string
 			}
 			RADIAL_MENU: {
-				NAMES
-				DESCRIPTION
-				D4
-				D6
-				LOREM_IPSUM
-				START_SHIMMER
-				STOP_SHIMMER
-				DELETE
-				REGENERATE
-				COPY
-				SEND_TO_JOURNAL
-				OPEN_JOURNAL
+				NAMES: string
+				DESCRIPTION: string
+				D4: string
+				D6: string
+				LOREM_IPSUM: string
+				START_SHIMMER: string
+				STOP_SHIMMER: string
+				DELETE: string
+				REGENERATE: string
+				COPY: string
+				SEND_TO_JOURNAL: string
+				OPEN_JOURNAL: string
 			}
 		}
 	}

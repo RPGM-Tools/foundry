@@ -5,8 +5,9 @@ This document outlines the conventions and commands for working in this reposito
 
 **Note: Linting is performed during the build process automatically.**
 
-- **Build all packages:** `npm run build`
-- **Lint all packages:** `npm run lint`
+- **Build all packages:** `pnpm build`
+- **Lint all packages:** `pnpm lint`
+- **Lint and fix all packages:** `pnpm lint:fix`
 
 ## Repository Structure
 
@@ -50,8 +51,8 @@ The project implements a custom i18n type checking system to ensure type safety 
 ## Code Style and Conventions
 
 - **TypeScript:** This project uses TypeScript with strict settings. Adhere to standard TypeScript best practices.
-- **Linting:** We use `eslint` for linting. Run `npm run lint` to check for issues. (Also runs `vue-tsc` for base type checking.)
-  - Do not attempt to run `eslint` or `vue-tsc` manually. Run `npm run lint` or `npm run build` instead.
+- **Linting:** We use `eslint` for linting. Run `pnpm lint` to check for issues. (Implicitly runs `vue-tsc` for base type checking.)
+  - Do not attempt to run `eslint` or `vue-tsc` manually. Run `pnpm lint` or `pnpm build` instead.
 - **Formatting:** Maintain consistent formatting. Use Prettier or a similar tool if available.
 - **Imports:** Organize imports logically. Group imports from the same module.
 - **Naming:** Use clear and descriptive names for variables, functions, and classes. Follow existing naming conventions.

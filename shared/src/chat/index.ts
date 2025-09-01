@@ -1,10 +1,10 @@
-import type { LiteralArgumentBuilder, ParseResults } from "brigadier-ts-lite";
-import { CommandDispatcher } from "brigadier-ts-lite";
+import type { LiteralArgumentBuilder, ParseResults } from 'brigadier-ts-lite';
+import { CommandDispatcher } from 'brigadier-ts-lite';
 import type { App, Component } from 'vue';
 import { createApp } from 'vue';
 
-import AutoComplete from "./AutoComplete.vue";
-import type { ChatWizard } from "./ChatWizard";
+import AutoComplete from './AutoComplete.vue';
+import type { ChatWizard } from './ChatWizard';
 
 /**
  * ChatCommands stores all chat commands and provides utility functions related to chat
@@ -47,7 +47,7 @@ export class ChatCommands {
 	constructor() {
 		// renderChatMessage is deprecated in v13+
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		Hooks.on(rpgm.majorGameVersion <= 12 ? "renderChatMessage" : "renderChatMessageHTML" as any,
+		Hooks.on(rpgm.majorGameVersion <= 12 ? 'renderChatMessage' : 'renderChatMessageHTML' as any,
 			(message: ChatMessage, html: JQuery | HTMLElement) => {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
@@ -56,15 +56,15 @@ export class ChatCommands {
 					return;
 				}
 			});
-		Hooks.once("ready", () => { rpgm.chat.createChatPanel(); });
+		Hooks.once('ready', () => { rpgm.chat.createChatPanel(); });
 
 		// Patch chat context menu to not allow revealing wizards
 		const _getEntryContextOptions = ChatLog.prototype._getEntryContextOptions.bind(ui.chat);
 		ChatLog.prototype._getEntryContextOptions = () => {
-			rpgm.logger.debug("Patching chat context menu");
+			rpgm.tools.logger.debug('Patching chat context menu');
 			const options = _getEntryContextOptions();
 			for (const option of options) {
-				if (option.name === "CHAT.RevealMessage") {
+				if (option.name === 'CHAT.RevealMessage') {
 					const condition = option.condition;
 					option.condition = (li: JQuery | HTMLElement) => {
 						const message = game.messages.get(rpgm.j(li).dataset.messageId!);
@@ -84,7 +84,7 @@ export class ChatCommands {
 	 * @returns The top and bottom distances in the chat scroll window
 	 */
 	get scrollDistances() {
-		this.chatlog ??= document.querySelector("#chat #chat-log,#chat .chat-scroll") as HTMLElement;
+		this.chatlog ??= document.querySelector('#chat #chat-log,#chat .chat-scroll') as HTMLElement;
 		return {
 			top: this.chatlog.scrollTop,
 			bottom: this.chatlog.scrollHeight - this.chatlog.scrollTop - this.chatlog.clientHeight,
@@ -97,11 +97,11 @@ export class ChatCommands {
 	 */
 	updateScroll(force?: boolean) {
 		setTimeout(() => {
-			this.chatlog ??= document.querySelector("#chat #chat-log,#chat .chat-scroll") as HTMLElement;
+			this.chatlog ??= document.querySelector('#chat #chat-log,#chat .chat-scroll') as HTMLElement;
 			const { top, bottom } = this.scrollDistances;
 			const shouldScroll = force || (top > 300 && bottom < 300);
 			if (shouldScroll)
-				this.chatlog.scrollBy({ top: 9999, behavior: "smooth" });
+				this.chatlog.scrollBy({ top: 9999, behavior: 'smooth' });
 		}, force ? 200 : 500);
 	}
 
@@ -197,11 +197,11 @@ export class ChatCommands {
 
 	/** Creates the {@link AutoComplete} app. */
 	createChatPanel() {
-		const chatInput = rpgm.majorGameVersion === 12 ? document.querySelector("#chat-form")
-			: document.querySelector("#chat-message");
-		if (!chatInput) { rpgm.logger.error("Couldn't find the chat input!"); return; };
+		const chatInput = rpgm.majorGameVersion === 12 ? document.querySelector('#chat-form')
+			: document.querySelector('#chat-message');
+		if (!chatInput) { rpgm.tools.logger.error('Couldn\'t find the chat input!'); return; };
 		this.chatPanel = createApp(AutoComplete as Component);
-		const panelContainer = document.createElement("div");
+		const panelContainer = document.createElement('div');
 
 		this.chatPanel.mount(panelContainer);
 	}

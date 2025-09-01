@@ -1,4 +1,4 @@
-import { argument, literal, string } from "brigadier-ts-lite";
+import { argument, literal, string } from 'brigadier-ts-lite';
 
 /**
  * Register the homebrew chat command.
@@ -13,10 +13,10 @@ import { argument, literal, string } from "brigadier-ts-lite";
  * The command creates a new ChatWizard message with the homebrew interface for interactive generation.
  */
 export function command() {
-	rpgm.chat.registerCommand(literal("homebrew")
-		.then(argument("type", string("greedy_phrase"))
+	rpgm.chat.registerCommand(literal('homebrew')
+		.then(argument('type', string('greedy_phrase'))
 			.executes(c => {
-				void rpgm.forge.homebrewChats.newMessage(getSchema(c.get("type")));
+				void rpgm.forge.homebrewChats.newMessage(getSchema(c.get('type')));
 			}))
 		.executes(() => {
 			void rpgm.forge.homebrewChats.newMessage(getSchema());
@@ -42,7 +42,7 @@ function getSchema(name?: string): ForgeChatHomebrew {
 				fields: []
 			} : undefined
 		},
-		activeGeneration: "",
+		activeGeneration: '',
 		generations: {}
 	};
 }

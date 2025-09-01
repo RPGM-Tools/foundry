@@ -19,10 +19,10 @@ const {
 
 const isOpen = ref(false);
 
-const inputRef = useTemplateRef("inputRef");
+const inputRef = useTemplateRef('inputRef');
 
 const value = defineModel<T>();
-const input = ref("");
+const input = ref('');
 
 const filtered = computed(() => {
 	return values.filter(v => filter(v, input.value)).slice(0, max);
@@ -43,16 +43,16 @@ function select(t: T) {
  * @param k - Keyboard event
  */
 function keyDown(k: KeyboardEvent) {
-	if (k.key == "Enter") {
+	if (k.key == 'Enter') {
 		if (input.value.length == 0) return;
 		isOpen.value = false;
 		// Get and set to first filtered item
 		if (filtered.value[0]) {
 			select(filtered.value[0]);
 		}
-	} else if (k.key == "Escape") {
+	} else if (k.key == 'Escape') {
 		isOpen.value = false;
-		input.value = "";
+		input.value = '';
 	} else {
 		isOpen.value = true;
 	}

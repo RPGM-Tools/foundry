@@ -16,10 +16,10 @@ const context = ref<ButtonContext>({
 });
 
 onMounted(() => {
-	const del = message["delete"].bind(message);
-	message["delete"] = async () => {
+	const del = message['delete'].bind(message);
+	message['delete'] = async () => {
 		// Null check just in case
-		element?.classList.add("rpgm-close");
+		element?.classList.add('rpgm-close');
 		await new Promise(r => setTimeout(r, 200));
 		return del({});
 	};

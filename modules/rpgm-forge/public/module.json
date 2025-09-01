@@ -8,7 +8,6 @@
 	"manifest": "https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge.json",
 	"download": "https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge-v{{RPGM_VERSION}}.zip",
 	"bugs": "https://github.com/RPGM-Tools/foundry/issues",
-	"roadmap": "https://github.com/RPGM-Tools/foundry/blob/main/roadmap.md",
 	"compatibility": {
 		"minimum": "12",
 		"verified": "13"

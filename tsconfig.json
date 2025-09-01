@@ -9,7 +9,6 @@
 		"types": [
 			"vite/client",
 			"fvtt-types/lenient",
-			"@rpgm/forge/types",
 			"vue",
 		],
 		"target": "esnext",
@@ -20,16 +19,24 @@
 		"esModuleInterop": true,
 		"isolatedModules": true,
 		"noImplicitOverride": true,
+		"allowJs": true,
+		// "noUncheckedIndexedAccess": true,
 		"skipLibCheck": true,
 		"resolveJsonModule": true,
 		/* Linting */
 		"strict": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true
+		"noFallthroughCasesInSwitch": true,
+		"maxNodeModuleJsDepth": 0
 	},
 	"include": [
 		"**/*.ts",
+		"**/*.js",
 		"**/*.vue"
+	],
+	"exclude": [
+		"../../node_modules",
+		"**/.dist"
 	]
 }

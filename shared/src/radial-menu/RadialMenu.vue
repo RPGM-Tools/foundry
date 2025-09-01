@@ -145,7 +145,7 @@ function toggleOpen() {
 	radialFloater.update();
 	// Fix overlap of subsequent radial menus
 	if (root.value?.parentElement)
-		root.value.parentElement.style.zIndex = isOpen.value ? "999" : "99";
+		root.value.parentElement.style.zIndex = isOpen.value ? '999' : '99';
 }
 
 /**
@@ -196,14 +196,14 @@ function getSubButtonStyle(index: number): StyleValue {
 	// If not => scale(0) at the center
 	const transform = isOpen.value
 		? `rotate(0deg) translate(${finalX}px, ${finalY}px) rotate(0deg) scale(1)`
-		: `rotate(-90deg) translate(0px, 0px) rotate(-180deg) scale(0)`;
+		: 'rotate(-90deg) translate(0px, 0px) rotate(-180deg) scale(0)';
 
 	return {
 		scale: Number(isOpen.value),
 		transform,
 		opacity: isOpen.value ? 1 : 0,
 		transitionDelay: `${staggerDelay}s`,
-		transitionTimingFunction: isOpen.value ? "cubic-bezier(0, 0, .4, 1)" : "cubic-bezier(.4, 0, 1, 1)",
+		transitionTimingFunction: isOpen.value ? 'cubic-bezier(0, 0, .4, 1)' : 'cubic-bezier(.4, 0, 1, 1)',
 	};
 }
 

@@ -1,0 +1,3 @@
+.n-tabs .n-tabs-rail .n-tabs-capsule {
+	transition: all 0.3s var(--n-bezier) !important;
+}

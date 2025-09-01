@@ -37,11 +37,11 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 	static async setShader(): Promise<void> {
 		await fetch(vertexURL).then(async (v) => {
 			if (v.ok) ShimmerFilter.vertex ??= await v.text();
-			else rpgm.logger.error("Failed to grab shimmer shaders");
+			else rpgm.forge.logger.error('Failed to grab shimmer shaders');
 		});
 		await fetch(fragURL).then(async (v) => {
 			if (v.ok) ShimmerFilter.frag ??= await v.text();
-			else rpgm.logger.error("Failed to grab shimmer shaders");
+			else rpgm.forge.logger.error('Failed to grab shimmer shaders');
 		});
 	}
 
@@ -50,7 +50,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 			iTime: 0,
 			fade: 0,
 			seed: 1 + Math.random(),
-			tokenSize: [token.w, token.h],
+			tokenSize: [token.w, token.h]
 		});
 		this.fadingOut = false;
 		this.token = token;

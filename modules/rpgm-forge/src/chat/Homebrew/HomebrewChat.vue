@@ -1,33 +1,33 @@
 <script setup lang="ts">
-import { ForgeHomebrew } from "@rpgm/forge";
+import type { HomebrewOptions } from '@rpgm/tools/forge';
 
-import ChatWizardContainer from "#/chat/ChatWizardContainer.vue";
-import { inputHeuristics } from "#/radial-menu";
+import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
+import { inputHeuristics } from '#/radial-menu';
 
-import HomebrewDisplay from "./HomebrewDisplay.vue";
-import HomebrewInput from "./HomebrewInput.vue";
-import HomebrewTitle from "./HomebrewTitle.vue";
+import HomebrewDisplay from './HomebrewDisplay.vue';
+import HomebrewInput from './HomebrewInput.vue';
+import HomebrewTitle from './HomebrewTitle.vue';
 
 const schemas = rpgm.forge.homebrewSchemas;
 
 const editing = ref(true);
 const currentTitle = computed<string>(() => {
 	if (editing.value)
-		return data.options.schema?.name ?? "";
+		return data.options.schema?.name ?? '';
 	else
-		return data.generations[data.activeGeneration]?.custom_name ?? "";
+		return data.generations[data.activeGeneration]?.custom_name ?? '';
 });
 const homebrew = rpgm.forge.homebrewChats.useChatWizard(), { data, id } = homebrew;
 const loading = ref(false);
 
-const buttonAnchor = useTemplateRef("buttonAnchor");
+const buttonAnchor = useTemplateRef('buttonAnchor');
 
-watch(buttonAnchor, (r) => { if (r) buttonContext.element = r.closest(".chat-message")!; });
+watch(buttonAnchor, (r) => { if (r) buttonContext.element = r.closest('.chat-message')!; });
 
 const buttonContext = shallowReactive({
 	element: buttonAnchor.value!,
 	loading: false,
-	shift: false,
+	shift: false
 });
 
 const buttons = computed<RadialButton[]>(() =>
@@ -35,50 +35,55 @@ const buttons = computed<RadialButton[]>(() =>
 		[
 			{
 				category: rpgm.radialMenu.categories.rpgm_forge,
-				icon: "fa-solid fa-copy",
-				tooltip: "RPGM_FORGE.RADIAL_MENU.COPY",
+				icon: 'fa-solid fa-copy',
+				tooltip: 'RPGM_FORGE.RADIAL_MENU.COPY',
 				detective() { return window.isSecureContext; },
 				callback() { copyGeneration(data.activeGeneration); },
+				logger: rpgm.forge.logger
 			},
 			{
 				category: rpgm.radialMenu.categories.rpgm_forge,
-				icon: "fas fa-book-open",
-				tooltip: "RPGM_FORGE.RADIAL_MENU.SEND_TO_JOURNAL",
+				icon: 'fas fa-book-open',
+				tooltip: 'RPGM_FORGE.RADIAL_MENU.SEND_TO_JOURNAL',
 				detective() {
-					return game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id)
-						?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration) === undefined;
+					return game.journal.find(j => j.getFlag('rpgm-forge', 'homebrew') === id)
+						?.pages.find(e => e.getFlag('rpgm-forge', 'homebrew') === data.activeGeneration) === undefined;
 				},
 				callback(c) { void sendToJournal(data.activeGeneration, c.shift); },
+				logger: rpgm.forge.logger
 			},
 			{
 				category: rpgm.radialMenu.categories.rpgm_forge,
-				icon: "fas fa-book-open",
-				tooltip: "RPGM_FORGE.RADIAL_MENU.OPEN_JOURNAL",
+				icon: 'fas fa-book-open',
+				tooltip: 'RPGM_FORGE.RADIAL_MENU.OPEN_JOURNAL',
 				detective() {
-					return game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id)
-						?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration) !== undefined;
+					return game.journal.find(j => j.getFlag('rpgm-forge', 'homebrew') === id)
+						?.pages.find(e => e.getFlag('rpgm-forge', 'homebrew') === data.activeGeneration) !== undefined;
 				},
 				callback() {
-					const entry = game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id);
-					void entry?.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === data.activeGeneration)?.sheet?.render(true);
+					const entry = game.journal.find(j => j.getFlag('rpgm-forge', 'homebrew') === id);
+					void entry?.pages.find(e => e.getFlag('rpgm-forge', 'homebrew') === data.activeGeneration)?.sheet?.render(true);
 				},
+				logger: rpgm.forge.logger
 			},
 			{
 				category: rpgm.radialMenu.categories.rpgm_forge,
-				icon: "fa-solid fa-trash",
-				tooltip: "RPGM_FORGE.RADIAL_MENU.DELETE",
+				icon: 'fa-solid fa-trash',
+				tooltip: 'RPGM_FORGE.RADIAL_MENU.DELETE',
 				callback() { deleteGeneration(data.activeGeneration); },
+				logger: rpgm.forge.logger
 			},
 			{
 				category: rpgm.radialMenu.categories.rpgm_debug,
-				icon: "fa-regular fa-info-circle",
-				tooltip: "RPGM_TOOLS.RADIAL_MENU.INFO",
+				icon: 'fa-regular fa-info-circle',
+				tooltip: 'RPGM_TOOLS.RADIAL_MENU.INFO',
 				detective(c) { return inputHeuristics(c as InputContext).isDebug().result; },
-				callback() { rpgm.logger.debug(toRaw(data), id); },
-			},
+				callback() { rpgm.forge.logger.debug(toRaw(data), id); },
+				logger: rpgm.forge.logger
+			}
 		]);
 
-provide("data", data);
+provide('data', data);
 
 onMounted(() => {
 	if (data.activeGeneration && data.generations[data.activeGeneration]) {
@@ -95,32 +100,32 @@ onMounted(() => {
 async function sendToJournal(generation: string, open: boolean = false) {
 	const gen = data.generations[generation];
 
-	let entry = game.journal.find(j => j.getFlag("rpgm-forge", "homebrew") === id) as JournalEntry;
+	let entry = game.journal.find(j => j.getFlag('rpgm-forge', 'homebrew') === id) as JournalEntry;
 	if (!entry) {
 		entry = (await JournalEntry.create({
 			name: gen.name,
-			flags: { "rpgm-forge": { "homebrew": id } }
+			flags: { 'rpgm-forge': { 'homebrew': id } }
 		}))!;
 	}
 
-	let page = entry.pages.find(e => e.getFlag("rpgm-forge", "homebrew") === generation) as JournalEntryPage;
+	let page = entry.pages.find(e => e.getFlag('rpgm-forge', 'homebrew') === generation) as JournalEntryPage;
 	if (!page) {
 		page = (await JournalEntryPage.create({
 			name: gen.custom_name,
 			text: {
 				content: `*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`,
 				markdown: `*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`,
-				format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.MARKDOWN,
+				format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.MARKDOWN
 			},
 			// Puts the newest entry on top, may change later
 			sort: entry.pages.reduce((m, e) => { return e.sort < m ? (m = e.sort) : m; }, 0) - 1,
-			flags: { "rpgm-forge": { "homebrew": generation } }
+			flags: { 'rpgm-forge': { 'homebrew': generation } }
 		}, { parent: entry }))!;
 		if (open)
 			void page.sheet?.render(true);
-		rpgm.logger.visible.log(`Journal Entry created for "${gen.custom_name}"`,);
+		rpgm.forge.logger.visible.log(`Journal Entry created for "${gen.custom_name}"`);
 	} else {
-		rpgm.logger.visible.error(`Journal Entry for "${gen.custom_name}" already exists!`);
+		rpgm.forge.logger.visible.error(`Journal Entry for "${gen.custom_name}" already exists!`);
 	}
 }
 
@@ -142,18 +147,18 @@ async function generate() {
 	if (!data.options.schema?.fields.length) return;
 	loading.value = true;
 
-	const result = await rpgm.forge.queue.generate(ForgeHomebrew, data.options as HomebrewOptions);
+	const result = await rpgm.forge.mod.generateHomebrew(data.options as HomebrewOptions);
 
-	if (result.success) {
+	if (result.isOk()) {
 		rpgm.chat.updateScroll();
 
 		const id = foundry.utils.randomID();
-		data.generations[id] = result.output;
+		data.generations[id] = result.value;
 		data.activeGeneration = id;
 		editing.value = false;
 	}
 	else
-		rpgm.forge.logger.visible.error(result.error);
+		rpgm.forge.logger.visible.error(result.error.message);
 	loading.value = false;
 }
 
@@ -199,9 +204,9 @@ function restoreSchemaFromActiveGeneration() {
 			name: data.generations[data.activeGeneration].name,
 			custom_name: undefined,
 			fields: [
-				...data.generations[data.activeGeneration].fields.map(f => ({ name: f.name, type: f.type, description: f.description })),
+				...data.generations[data.activeGeneration].fields.map(f => ({ name: f.name, type: f.type, description: f.description }))
 			]
-		},
+		}
 	};
 	editing.value = true;
 	rpgm.chat.updateScroll();
@@ -209,17 +214,36 @@ function restoreSchemaFromActiveGeneration() {
 </script>
 
 <template>
-	<ChatWizardContainer :wizard="homebrew" :buttons>
-		<HomebrewTitle ref="titleRef" v-model="currentTitle" :editing @cycle="cycleGenerations"
-			@goto-generations="gotoGenerations" @click="restoreSchemaFromActiveGeneration" />
-		<div ref="buttonAnchor" class="rpgm-homebrew-content">
+	<ChatWizardContainer
+		:wizard="homebrew"
+		:buttons
+	>
+		<HomebrewTitle
+			ref="titleRef"
+			v-model="currentTitle"
+			:editing
+			@cycle="cycleGenerations"
+			@goto-generations="gotoGenerations"
+			@click="restoreSchemaFromActiveGeneration"
+		/>
+		<div
+			ref="buttonAnchor"
+			class="rpgm-homebrew-content"
+		>
 			<Transition name="rpgm-homebrew-main">
 				<div v-if="editing">
-					<HomebrewInput v-model="data.options.schema" :loading @generate="generate" />
+					<HomebrewInput
+						v-model="data.options.schema"
+						:loading
+						@generate="generate"
+					/>
 				</div>
 				<div v-else-if="!editing">
 					<Transition name="rpgm-homebrew-main">
-						<HomebrewDisplay :key="data.activeGeneration" :generation="data.activeGeneration" />
+						<HomebrewDisplay
+							:key="data.activeGeneration"
+							:generation="data.activeGeneration"
+						/>
 					</Transition>
 				</div>
 			</Transition>

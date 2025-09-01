@@ -2,11 +2,11 @@
 import { DeveloperSettings } from '#/settings/developer';
 import { useSetting } from '#/util';
 
-const radialMenuDebug = useSetting("rpgm-tools.radial_menu_debug");
-const app = inject<DeveloperSettings>("app")!;
+const radialMenuDebug = useSetting('rpgm-tools.radial_menu_debug');
+const app = inject<DeveloperSettings>('app')!;
 
 /**
- Saves changed settings
+ * Saves changed settings
  */
 function submit() {
 	radialMenuDebug.save();

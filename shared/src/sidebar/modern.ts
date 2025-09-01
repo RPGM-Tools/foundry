@@ -1,7 +1,7 @@
 import type { DeepPartial } from 'fvtt-types/utils';
 import { type App, type Component, createApp } from 'vue';
 
-import RpgmSidebarApp from "./RpgmSidebarApp";
+import SidebarApp from './SidebarApp';
 
 type ClosingOptions = foundry.applications.api.ApplicationV2.ClosingOptions;
 type Configuration = foundry.applications.api.ApplicationV2.Configuration;
@@ -11,25 +11,25 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 
 	constructor(options: DeepPartial<foundry.applications.api.ApplicationV2.Configuration>) {
 		CONFIG.RpgmSidebar = {
-			sidebarIcon: "rp-dice",
+			sidebarIcon: 'rp-dice',
 			documentClass: RpgmSidebar,
 		};
 		foundry.applications.sidebar.Sidebar.TABS.rpgm = {
 			//@ts-expect-error TABS is not able to be overriden
-			documentName: "RpgmSidebar",
-			tooltip: "RPGM_TOOLS.SIDEBAR.TITLE",
+			documentName: 'RpgmSidebar',
+			tooltip: 'RPGM_TOOLS.SIDEBAR.TITLE',
 		};
 		super(options);
 	}
 
-	static override tabName = "rpgm";
+	static override tabName = 'rpgm';
 
 	static override DEFAULT_OPTIONS: DeepPartial<Configuration> = {
-		classes: ["rpgm-app"],
+		classes: ['rpgm-app'],
 		window: {
-			title: "RPGM Tools",
+			title: 'RPGM Tools',
 			minimizable: false,
-			icon: "rp-dice"
+			icon: 'rp-dice'
 		},
 	};
 
@@ -42,15 +42,16 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 	}
 
 	override _renderHTML() {
-		const mount = (this.element.querySelector(".window-content") ?? this.element);
-		if (!this.popout) mount.classList.add("static");
+		const mount = (this.element.querySelector('.window-content') ?? this.element);
+		if (!this.popout) mount.classList.add('static');
 		return Promise.resolve(mount);
 	}
 
 	override _replaceHTML(result: HTMLElement) {
 		if (this.app) return;
-		this.app = createApp(RpgmSidebarApp as Component);
-		this.app.provide("onResize", this.onResize.bind(this));
+		this.app = createApp(SidebarApp as Component);
+		this.app.use(rpgm.sidebar.router);
+		this.app.provide('onResize', this.onResize.bind(this));
 		this.app.mount(result);
 		this.onResize(true);
 	}
@@ -60,8 +61,8 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 		void nextTick(() => {
 			const windowHeight = window.innerHeight;
 			const maxHeight = Math.min(windowHeight, parseInt(getComputedStyle(this.element).maxHeight) || 0);
-			const headerHeight = this.element.querySelector(".window-header")?.clientHeight ?? 0;
-			const innerHeight = this.element.querySelector(".sidebar-content")?.scrollHeight ?? 9999;
+			const headerHeight = this.element.querySelector('.window-header')?.clientHeight ?? 0;
+			const innerHeight = this.element.querySelector('.sidebar-content')?.scrollHeight ?? 9999;
 
 			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 70);
 			const newTop = ((this.position.top ?? 0) + newHeight) > windowHeight || forceCenter ? (
@@ -76,7 +77,7 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 	}
 
 	override async close(options?: DeepPartial<ClosingOptions>): Promise<this> {
-		this.element.classList.add("closing");
+		this.element.classList.add('closing');
 		await new Promise(p => setTimeout(p, 200));
 		return super.close({ animate: false, closeKey: options?.closeKey });
 	}

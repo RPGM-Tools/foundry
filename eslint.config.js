@@ -1,51 +1,66 @@
 import eslint from '@eslint/js';
-import vuelint from 'eslint-plugin-vue'
-import tslint from "typescript-eslint";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
-import jsdoclint from "eslint-plugin-jsdoc";
+import stylistic from '@stylistic/eslint-plugin';
+import jsdoclint from 'eslint-plugin-jsdoc';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import vuelint from 'eslint-plugin-vue';
+import tslint from 'typescript-eslint';
 
 export default tslint.config([
 	{
-		ignores: ["**/.dist/"],
 		extends: [
 			eslint.configs.recommended,
 			...tslint.configs.recommended,
 			...vuelint.configs['flat/recommended'],
 			jsdoclint.configs['flat/stylistic-typescript'],
-			jsdoclint.configs['flat/contents-typescript'],
+			jsdoclint.configs['flat/contents-typescript']
 		],
-		files: ["**/*.{ts,vue}"],
+		files: ['**/*.{js,ts,vue}'],
+		ignores: ['**/.dist/**/*'],
 		languageOptions: {
 			ecmaVersion: 'latest',
-			sourceType: 'module',
 			parserOptions: {
-				project: "./tsconfig.json",
+				extraFileExtensions: ['ts', 'vue', 'js'],
+				parser: tslint.parser,
+				project: './tsconfig.json',
 				projectService: true,
-				tsconfigRootDir: import.meta.dirname,
-				extraFileExtensions: ["vue"],
-				parser: tslint.parser
+				tsconfigRootDir: import.meta.dirname
 			},
+			sourceType: 'module'
 		},
 		plugins: {
-			"simple-import-sort": simpleImportSort,
+			'@stylistic': stylistic,
+			'simple-import-sort': simpleImportSort
 		},
 		rules: {
-			semi: "warn",
-			"no-console": "error",
-			"prefer-const": "error",
-			"@typescript-eslint/no-unsafe-call": "off",
-			"@typescript-eslint/no-unsafe-assignment": "off",
-			"@typescript-eslint/no-unsafe-member-access": "off",
-			"@typescript-eslint/no-unsafe-return": "off",
-			"@typescript-eslint/no-empty-object-type": ["error", { allowInterfaces: 'with-single-extends' }],
-			"@typescript-eslint/consistent-type-imports": [
-				"warn",
+			'@stylistic/comma-dangle': 'warn',
+			'@stylistic/quotes': ['warn', 'single'],
+			'@stylistic/semi': 'warn',
+			'@stylistic/comma-spacing': ['warn', { before: false, after: true }],
+			'@typescript-eslint/consistent-type-imports': [
+				'warn',
 				{
-					fixStyle: "separate-type-imports"
+					fixStyle: 'separate-type-imports'
 				}
 			],
-			"simple-import-sort/imports": "warn",
-			"simple-import-sort/exports": "warn",
+			'@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'with-single-extends' }],
+			'@typescript-eslint/no-unsafe-assignment': 'off',
+			'@typescript-eslint/no-unsafe-call': 'off',
+			'@typescript-eslint/no-unsafe-member-access': 'off',
+			'@typescript-eslint/no-unsafe-return': 'off',
+			'@typescript-eslint/no-unused-vars': ['error', {
+				'argsIgnorePattern': '^_',
+				'caughtErrors': 'all',
+				'caughtErrorsIgnorePattern': '^_',
+				'caughtErrorsIgnorePattern': '^_',
+				'destructuredArrayIgnorePattern': '^_',
+				'ignoreRestSiblings': true,
+				'varsIgnorePattern': '^_'
+			}],
+			'jsdoc/require-hyphen-before-param-description': ['warn', 'always'],
+			'no-console': 'error',
+			'prefer-const': 'error',
+			'simple-import-sort/exports': 'warn',
+			'simple-import-sort/imports': 'warn',
 			// "jsdoc/require-jsdoc": ["warn", {
 			// 	require: {
 			// 		ClassDeclaration: true,
@@ -55,23 +70,20 @@ export default tslint.config([
 			// 	checkConstructors: false,
 			// 	enableFixer: false,
 			// }],
-			"jsdoc/require-hyphen-before-param-description": ["warn", "always"],
-			"@typescript-eslint/no-unused-vars": ["error", {
-				"args": "all",
-				"argsIgnorePattern": "^_",
-				"caughtErrors": "all",
-				"caughtErrorsIgnorePattern": "^_",
-				"destructuredArrayIgnorePattern": "^_",
-				"varsIgnorePattern": "^_",
-				"ignoreRestSiblings": true
-			}],
-			"vue/html-indent": "off",
-			"vue/html-closing-bracket-newline": "off",
-			"vue/no-v-html": "off",
-			"vue/first-attribute-linebreak": "off",
-			"vue/max-attributes-per-line": "off",
-			"vue/multiline-html-element-content-newline": "off",
-			"vue/singleline-html-element-content-newline": "off",
+			'vue/html-indent': ['warn', 'tab'],
+			// 'vue/html-closing-bracket-newline': 'off',
+			'vue/no-v-html': 'off'
+			// 'vue/sort-keys': ['warn', 'asc', {
+			// 	'caseSensitive': true,
+			// 	'ignoreChildrenOf': ['model'],
+			// 	'ignoreGrandchildrenOf': ['computed', 'directives', 'inject', 'props', 'watch'],
+			// 	'minKeys': 2,
+			// 	'natural': true
+			// }]
+			// 'vue/first-attribute-linebreak': 'off',
+			// 'vue/max-attributes-per-line': 'off',
+			// 'vue/multiline-html-element-content-newline': 'off',
+			// 'vue/singleline-html-element-content-newline': 'off',
 		}
-	},
+	}
 ]);

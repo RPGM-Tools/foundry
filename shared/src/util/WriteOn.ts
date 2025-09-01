@@ -1,4 +1,4 @@
-import { type Reactive, type SlotsType, Text } from 'vue';
+import { type SlotsType, Text } from 'vue';
 
 /**
  * Extracts the common prefix of two strings.
@@ -34,22 +34,19 @@ export default defineComponent({
 		},
 		tag: {
 			type: String as PropType<keyof HTMLElementTagNameMap>,
-			default: "h1"
+			default: 'h1'
 		}
 	},
 
 	slots: Object as SlotsType<{
-		default: (scope: {
-			display: Ref<string>,
-			cursorClass: Reactive<Record<string, boolean>>
-		}) => VNode[]
+		default: (display: Ref<string>) => VNode[]
 	}>,
 
 	setup(props, { slots, attrs }) {
-		const displayText = ref("");
+		const displayText = ref('');
 		let interval: number | null = null;
-		let fromText = "";
-		let toText = "";
+		let fromText = '';
+		let toText = '';
 		const animating = ref(false);
 
 		async function onEnter() {
@@ -78,12 +75,12 @@ export default defineComponent({
 				let i = index;
 				interval = window.setInterval(() => {
 					if (i === text.length + 1) {
-						displayText.value = text || "​";
+						displayText.value = text || '​';
 						clearInterval(interval!);
 						resolve();
 						return;
 					}
-					displayText.value = text.slice(0, i++) || "​";
+					displayText.value = '​' + text.slice(0, i++) + '▮';
 				}, duration);
 			});
 		}
@@ -101,7 +98,7 @@ export default defineComponent({
 				const text = fromText;
 				let i = text.length;
 				interval = window.setInterval(() => {
-					displayText.value = text.slice(0, i--) || "​";
+					displayText.value = '​' + text.slice(0, i--) + '▮';
 					if (i == index) {
 						clearInterval(interval!);
 						resolve();
@@ -125,25 +122,16 @@ export default defineComponent({
 
 		return () => {
 			if (slots.default) {
-				const rSlots = slots.default({
-					display: displayText,
-					cursorClass: { "rpgm-write-on-transition": animating.value }
-				});
+				const rSlots = slots.default(displayText);
 
 				// Rendered slot must be a single element node, otherwise wrap it
 				if (rSlots.length > 1 || rSlots[0].type === Text) {
-					return h(props.tag, {
-						...attrs,
-						class: { ...(attrs.class ? attrs.class : {}), "rpgm-write-on-transition": animating.value }
-					}, rSlots);
+					return h(props.tag, attrs, rSlots);
 				} else {
 					return rSlots;
 				}
 			}
-			return h(props.tag, {
-				...attrs,
-				class: { ...(attrs.class ? attrs.class : {}), "rpgm-write-on-transition": animating.value }
-			}, displayText.value);
+			return h(props.tag, attrs, displayText.value);
 		};
 	}
 });

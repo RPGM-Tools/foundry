@@ -4,8 +4,8 @@ import RadialMenuFloating from './RadialMenuFloating.vue';
 
 /** Injects code to render the dice hud */
 export function injectTokenHUD() {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-	Hooks.on("renderTokenHUD", renderTokenHUD as any);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	Hooks.on('renderTokenHUD', renderTokenHUD as any);
 }
 
 /**
@@ -14,7 +14,8 @@ export function injectTokenHUD() {
  * @param html - The token hud element to modify
  */
 function renderTokenHUD(_element: JQuery, html: JQuery | HTMLElement) {
-	if (game.settings.get("rpgm-tools", "radial_menu_hud") !== true) return;
+	if (game.settings.get('rpgm-tools', 'radial_menu_hud') !== true) return;
+
 	/**
 	 * Workaround for differences between Foundry 12 and 13 
 	 * {@link html} is of type JQuery in 12, HTMLElement in 13

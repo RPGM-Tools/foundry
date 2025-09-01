@@ -1,7 +1,8 @@
 <!-- A large menu button to access a submenu -->
 <script setup lang="ts">
+import type { RouteRecordNormalized } from 'vue-router';
 const { menu } = defineProps<{
-	menu: SidebarMenu
+	menu: RouteRecordNormalized
 }>();
 
 defineEmits<{
@@ -10,12 +11,13 @@ defineEmits<{
 </script>
 
 <template>
-	<div class="sidebar-button" :style="{ pointerEvents: menu.component ? 'auto' : 'none' }" :tabindex="0"
+	<div class="sidebar-button" :tabindex="0"
+		@keydown.space.prevent="$emit('click')"
 		@click="$emit('click')">
 		<span class="sidebar-inner-button">
-			<i class="sidebar-button-icon" :class="menu.icon" />
+			<i class="sidebar-button-icon" :class="menu.meta.menu!.icon" />
 			<span class="sidebar-button-title">
-				{{ menu.title }}
+				{{ menu.meta.title }}
 			</span>
 			<i class="fas fa-chevron-right sidebar-button-icon sidebar-chevron" />
 		</span>
@@ -24,21 +26,22 @@ defineEmits<{
 
 <style scoped>
 .sidebar-button {
-	--sidebar-button-color: v-bind(menu.color);
+	--sidebar-button-color: v-bind(menu.meta.menu.color);
 	width: 100%;
 	cursor: pointer;
 	padding: 1.5rem 1.5rem;
 	margin: 1rem;
-	border-radius: 2rem;
-	border: 1px solid hsl(from var(--sidebar-button-color) h s l);
-	background: radial-gradient(circle, var(--sidebar-button-color) 0%, rgba(255, 255, 255, 0) 100%),
-		radial-gradient(circle, var(--sidebar-button-color) 0%, rgba(255, 255, 255, 0) 100%);
+	border-radius: 100vmax;
+	border: 1px solid var(--sidebar-button-color);
+	background: rgb(from var(--sidebar-button-color) r g b / 0.5);
 	background-size: 400% 400%;
 	background-repeat: no-repeat;
-	transition: background 0.3s ease-out, box-shadow 0.2s ease-out;
+	transition: background 0.3s ease-out, box-shadow 0.2s ease-out, border 0.3s ease-out;
 	background-position: 100% 10%, 10% 100%;
 	overflow: hidden;
 	display: flex;
+	user-select: none;
+	outline: none;
 }
 
 .sidebar-inner-button {
@@ -50,9 +53,12 @@ defineEmits<{
 	padding: 2px;
 }
 
+.sidebar-button:focus,
 .sidebar-button:hover {
 	background-position: 70% 10%, 10% 40%;
-	box-shadow: 0px 0px 10px var(--sidebar-button-color) !important;
+	background: rgb(from var(--sidebar-button-color) r g b / 0.7);
+	border: 1px solid color-mix(in srgb, var(--sidebar-button-color), white 20%);
+	box-shadow: 0px 0px 10px color-mix(in srgb, var(--sidebar-button-color), white 20%) !important;
 
 	.sidebar-chevron {
 		opacity: 1;

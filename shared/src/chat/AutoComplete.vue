@@ -9,7 +9,7 @@ const CHAT_MESSAGE = '#chat-message';
 
 const messageHook = ref(-1);
 const chatInput = ref<HTMLTextAreaElement>();
-const chatValue = ref("");
+const chatValue = ref('');
 const observer = ref<MutationObserver | null>();
 const targetParent = ref<HTMLElement | null>();
 const parseResult = ref<ParseResults>();
@@ -17,8 +17,8 @@ const completionIndex = ref(-1);
 const completionCursor = ref(-1);
 
 const Statuses = {
-	okay: "#00ffae",
-	warn: "#ffae00",
+	okay: '#00ffae',
+	warn: '#ffae00',
 };
 
 const suggestions = computed<Suggestions>(() => {
@@ -48,9 +48,9 @@ const statusStyle = computed<StyleValue>(() => {
  */
 function onKeyDown(e: KeyboardEvent) {
 	switch (e.key) {
-		case "Enter": {
+		case 'Enter': {
 			break;
-		} case "Tab": {
+		} case 'Tab': {
 			e.preventDefault();
 			// About to start completing, save the original cursor position
 			if (completionIndex.value == -1) {
@@ -62,7 +62,7 @@ function onKeyDown(e: KeyboardEvent) {
 			moveSuggestionCursor(direction);
 			fillInSuggestion(suggestions.value.suggestions[completionIndex.value], false);
 			break;
-		} case "Shift": {
+		} case 'Shift': {
 			break;
 		} default: {
 			if (e.key.length > 1) {
@@ -101,7 +101,7 @@ function fillInSuggestion(completion: typeof suggestions.value.suggestions['0'] 
 }
 
 /**
- * Attempt to execute a message as a command
+ * Attempt to execute a message as a command.
  * @param _log - (unused)
  * @param message - The message string to attempt to execute
  * @param _chatData - (unused)
@@ -109,17 +109,17 @@ function fillInSuggestion(completion: typeof suggestions.value.suggestions['0'] 
  * @param _chatData.speaker - (unused)
  * @returns True if the command was executed, else void
  */
-function handleMessage(_log: ChatLog, message: string, _chatData: { user: string, speaker: ReturnType<ChatMessage.ImplementationClass["getSpeaker"]> }): boolean | void {
+function handleMessage(_log: ChatLog, message: string, _chatData: { user: string, speaker: ReturnType<ChatMessage.ImplementationClass['getSpeaker']> }): boolean | void {
 	if (message.trimStart().startsWith('*')) {
-		chatValue.value = "";
+		chatValue.value = '';
 		setTimeout(() => {
 			onInput();
 		}, 10);
 		try {
 			rpgm.chat.execute(message.slice(1));
 		} catch (e) {
-			rpgm.logger.visible.error("An error occured when executing the command!");
-			rpgm.logger.error((e as Error).message);
+			rpgm.tools.logger.visible.error('An error occured when executing the command!');
+			rpgm.tools.logger.error((e as Error).message);
 		}
 		return false;
 	}
@@ -134,7 +134,7 @@ function handleMessage(_log: ChatLog, message: string, _chatData: { user: string
 	}
 }
 
-/** When a character is typed, parse the input */
+/** When a character is typed, parse the input. */
 function onInput() {
 	completionIndex.value = -1;
 	if (chatInput.value?.value === undefined) return;
@@ -145,9 +145,9 @@ function onInput() {
 }
 
 onMounted(() => {
-	chatInput.value = document.querySelector("#chat-message") as HTMLTextAreaElement;
-	chatInput.value?.addEventListener("input", onInput, true);
-	chatInput.value?.addEventListener("keydown", onKeyDown);
+	chatInput.value = document.querySelector('#chat-message') as HTMLTextAreaElement;
+	chatInput.value?.addEventListener('input', onInput, true);
+	chatInput.value?.addEventListener('keydown', onKeyDown);
 
 	observer.value = new MutationObserver(() => {
 		const newParent = chatInput.value?.parentElement;
@@ -163,22 +163,22 @@ onMounted(() => {
 		});
 	}
 
-	messageHook.value = Hooks.on("chatMessage", handleMessage);
+	messageHook.value = Hooks.on('chatMessage', handleMessage);
 });
 
-onUnmounted(() => Hooks.off("chatMessage", messageHook.value));
+onUnmounted(() => Hooks.off('chatMessage', messageHook.value));
 
 const commandStyles = computed<StyleValue[]>(() => {
 	return suggestions.value.suggestions.map<StyleValue>((_, i) => {
 		return {
-			...i == completionIndex.value ? { "color": "#00ffae" } : {},
+			...i == completionIndex.value ? { 'color': '#00ffae' } : {},
 		};
 	});
 });
 
 onUnmounted(() => {
-	chatInput.value?.removeEventListener("input", onInput);
-	chatInput.value?.removeEventListener("keydown", onKeyDown);
+	chatInput.value?.removeEventListener('input', onInput);
+	chatInput.value?.removeEventListener('keydown', onKeyDown);
 	observer.value?.disconnect();
 });
 </script>
