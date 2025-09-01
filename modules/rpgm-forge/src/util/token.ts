@@ -1,3 +1,4 @@
+import type { Names, NamesOptions } from '@rpgm/tools/forge';
 import type { Result } from 'neverthrow';
 import { errAsync } from 'neverthrow';
 
@@ -85,7 +86,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 		shimmerFilter = await shimmerToken(token);
 		void shimmerFilter.fadeIn(500);
 	}
-	const result = await rpgm.forge.mod.generateNames(options);
+	const result = await rpgm.forge.generateNames(options);
 
 	// const result = await rpgm.forge.queue.generate(ForgeNames, options);
 	if (result.isErr()) {

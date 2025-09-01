@@ -14,10 +14,19 @@ watchDebounced(props, ({ saved }) => {
 </script>
 
 <template>
-	<Teleport v-if="chatIconRow" :to="chatIconRow">
-		<a v-show="checked" class="message-saved">
-			<i :class="saved ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle-check'"
-				style="text-shadow: none; cursor: default;" :title="saved ? 'Saved' : 'Not Saved'" />
+	<Teleport
+		v-if="chatIconRow"
+		:to="chatIconRow"
+	>
+		<a
+			v-show="checked"
+			class="message-saved"
+		>
+			<i
+				:class="saved ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle-check'"
+				style="text-shadow: none; cursor: default;"
+				:title="saved ? 'Saved' : 'Not Saved'"
+			/>
 		</a>
 	</Teleport>
 </template>

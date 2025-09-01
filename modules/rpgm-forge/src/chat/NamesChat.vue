@@ -40,7 +40,7 @@ async function generate(regenerate: boolean = false) {
 		} else p();
 	});
 
-	const result = await rpgm.forge.mod.generateNames({
+	const result = await rpgm.forge.generateNames({
 		quantity: NAMES_PER_GENERATION,
 		gender: 'any',
 		genre: rpgm.forge.genre,

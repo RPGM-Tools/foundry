@@ -154,7 +154,7 @@ export class ChatWizard<T extends WizardData['data'] = WizardData['data']> {
 	 */
 	load() {
 		game.settings.register(this.moduleId, this.key, {
-			scope: 'world',
+			scope: 'world'
 		});
 		const data = game.settings.get(this.moduleId, this.key) as string;
 		this.data = (data ? new Map(Object.entries(JSON.parse(data) as Record<string, T>)) : new Map<string, T>());

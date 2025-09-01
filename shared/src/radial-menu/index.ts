@@ -121,7 +121,7 @@ export class RadialMenuRegister {
 	startWatching() {
 		this.inputObserver.observe(document.body, {
 			childList: true,
-			subtree: true,
+			subtree: true
 		});
 		this.recursivelyWatch(document.body);
 	}

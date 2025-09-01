@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import fs from 'fs';
 import { basename, resolve } from 'path';
 import { pathToFileURL } from 'url';
@@ -90,7 +91,7 @@ export function GenerateI18n(langGlob: string, id: string): Plugin {
 			if (ctx.file.split('/').at(-2) === 'lang') {
 				ctx.server.ws.send({
 					type: 'full-reload',
-					triggeredBy: 'rpgm-generatei18n',
+					triggeredBy: 'rpgm-generatei18n'
 				});
 			}
 			console.log(ctx.file);
@@ -103,7 +104,7 @@ export function GenerateI18n(langGlob: string, id: string): Plugin {
 				this.emitFile({
 					type: 'asset',
 					fileName: `lang/${name}.json`,
-					source: JSON.stringify(langs[name], null, 4),
+					source: JSON.stringify(langs[name], null, 4)
 				});
 			}
 		}

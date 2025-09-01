@@ -1,21 +1,54 @@
 <template>
-	<Teleport :disabled="!teleportRef" :to="teleportRef">
+	<Teleport
+		:disabled="!teleportRef"
+		:to="teleportRef"
+	>
 		<Transition name="radial-menu-fade">
-			<div v-if="Items.length > 0" ref="root" class="radial-menu-container" :open="isOpen"
-				:style="[rootStyle, radialFloater.floatingStyles.value]" @focusout="focusOut">
+			<div
+				v-if="Items.length > 0"
+				ref="root"
+				class="radial-menu-container"
+				:open="isOpen"
+				:style="[rootStyle, radialFloater.floatingStyles.value]"
+				@focusout="focusOut"
+			>
 				<template v-if="Items.length > 1">
-					<button ref="center" :disabled="menuContext.loading" class="radial-menu-center"
-						:style="{ width: `${centerSize}px`, height: `${centerSize}px` }" :class="{ pressed: centerPressed }"
-						@keydown.space="centerPressed = true" @keyup.space="centerPressed = false" @click.prevent.stop="toggleOpen">
-						<img :class="{ loading: menuContext.loading }" :src="diceImage" class="center-image">
+					<button
+						ref="center"
+						:disabled="menuContext.loading"
+						class="radial-menu-center"
+						:style="{ width: `${centerSize}px`, height: `${centerSize}px` }"
+						:class="{ pressed: centerPressed }"
+						@keydown.space="centerPressed = true"
+						@keyup.space="centerPressed = false"
+						@click.prevent.stop="toggleOpen"
+					>
+						<img
+							:class="{ loading: menuContext.loading }"
+							:src="diceImage"
+							class="center-image"
+						>
 					</button>
 
 					<div class="submenu-group">
-						<DiceButton v-for="(button, index) in Items" :key="button.callback.toString()" v-model="menuContext" :button
-							:index :style="buttonStyle[index]" rotation="random" :tabindex="isOpen ? 0 : -1" @click="onSubClick" />
+						<DiceButton
+							v-for="(button, index) in Items"
+							:key="button.callback.toString()"
+							v-model="menuContext"
+							:button
+							:index
+							:style="buttonStyle[index]"
+							rotation="random"
+							:tabindex="isOpen ? 0 : -1"
+							@click="onSubClick"
+						/>
 					</div>
 				</template>
-				<DiceButton v-else v-model="menuContext" :button="Items[0]" />
+				<DiceButton
+					v-else
+					v-model="menuContext"
+					:button="Items[0]"
+				/>
 			</div>
 		</Transition>
 	</Teleport>
@@ -83,7 +116,7 @@ const anchor = computed((): 'right' | 'right-start' => {
  */
 const rootStyle = computed(() => ({
 	width: `${isOpen.value && Items.value.length > 1 ? radius.value * 1.7 + centerSize.value : 30}px`,
-	height: `${isOpen.value && Items.value.length > 1 ? radius.value * 1.7 + centerSize.value : 30}px`,
+	height: `${isOpen.value && Items.value.length > 1 ? radius.value * 1.7 + centerSize.value : 30}px`
 }));
 
 /* 
@@ -105,7 +138,7 @@ const paddingOffset = () =>
 		const _margin = parseInt(style.margin || '0');
 		return {
 			mainAxis: -(_padding + _margin + padding.right) / 2,
-			crossAxis: anchor.value === 'right-start' ? (_padding + _margin + padding.top) / 2 : 0,
+			crossAxis: anchor.value === 'right-start' ? (_padding + _margin + padding.top) / 2 : 0
 		};
 	});
 
@@ -124,20 +157,20 @@ const radialFloater = useFloating(toRef(menuContext.value.element), root, {
 	middleware: [
 		paddingOffset(),
 		widthOffset(),
-		...padDocument ? [shift({ crossAxis: true, boundary: document.body, altBoundary: true, rootBoundary: 'document' })] : [],
+		...padDocument ? [shift({ crossAxis: true, boundary: document.body, altBoundary: true, rootBoundary: 'document' })] : []
 	],
 	whileElementsMounted(reference, floating, update) {
 		return autoUpdate(reference, floating, update, { ancestorScroll: true });
-	},
+	}
 });
 
-/** Close radial menu */
+/** Close radial menu. */
 function onSubClick() {
 	open.value = false;
 	center.value?.blur();
 }
 
-/** Toggle radial menu */
+/** Toggle radial menu. */
 function toggleOpen() {
 	if (menuContext.value.loading) return;
 	open.value = !isOpen.value;
@@ -149,7 +182,7 @@ function toggleOpen() {
 }
 
 /**
- * Ignore focus changes within the radial menu, else close the menu
+ * Ignore focus changes within the radial menu, else close the menu.
  * @param event - The {@link FocusEvent} to detect the target of blur
  */
 function focusOut(event: FocusEvent) {
@@ -203,7 +236,7 @@ function getSubButtonStyle(index: number): StyleValue {
 		transform,
 		opacity: isOpen.value ? 1 : 0,
 		transitionDelay: `${staggerDelay}s`,
-		transitionTimingFunction: isOpen.value ? 'cubic-bezier(0, 0, .4, 1)' : 'cubic-bezier(.4, 0, 1, 1)',
+		transitionTimingFunction: isOpen.value ? 'cubic-bezier(0, 0, .4, 1)' : 'cubic-bezier(.4, 0, 1, 1)'
 	};
 }
 

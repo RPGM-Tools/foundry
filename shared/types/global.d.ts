@@ -1,13 +1,19 @@
 import type { App } from 'vue';
 
-import type { RpgmModule } from '#/module';
+import { RpgmModule as Module } from '@rpgm/tools';
+import type { FoundyRpgmModuleMixin, RpgmModule } from '#/module';
 import type RpgmSidebar from '#/sidebar/modern';
+import type { RpgmTools } from '#/tools';
+import { RpgmForge } from '../../modules/rpgm-forge/src/forge';
 
 declare global {
+	declare module '*.vue';
 	declare const __MODULE_VERSION__: string;
 	declare const __API_URL__: string;
 
-	interface RPGM extends object { }
+	interface RPGM extends object {
+		forge?: RpgmForge
+	}
 
 	interface HookConfig {
 		renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
@@ -18,7 +24,7 @@ declare global {
 	 * Our global singleton object
 	 * Essentially the static instance of {@link RpgmModule}
 	 */
-	var rpgm: RPGM & typeof RpgmModule;
+	var rpgm: RPGM & typeof RpgmTools;
 	var game: ReadyGame;
 
 	type SidebarMenu = {

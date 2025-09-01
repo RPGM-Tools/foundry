@@ -1,5 +1,5 @@
 /**
- * Localizes an RPGM-specific key
+ * Localizes an RPGM-specific key.
  * @param id - The localization key to localize
  * @returns The localized string
  */

@@ -1,11 +1,11 @@
 import { HomebrewSchemas } from '@rpgm/tools/forge';
-import { Forge, type HomebrewSchema } from '@rpgm/tools/forge';
+import { AbstractForge, type HomebrewSchema } from '@rpgm/tools/forge';
 import { argument, literal, string } from 'brigadier-ts-lite';
 import ISO639 from 'iso-639-1';
 import type { Component } from 'vue';
 
 import { ChatWizard } from '#/chat/ChatWizard';
-import { RpgmModule } from '#/module';
+import { FoundyRpgmModuleMixin } from '#/module';
 import { inputHeuristics, shimmerInput, writeOn } from '#/radial-menu';
 import DescriptionChat from '$/chat/DescriptionChat.vue';
 import HomebrewChat from '$/chat/Homebrew/HomebrewChat.vue';
@@ -17,13 +17,7 @@ import Genres from '$$/assets/combined_systems.json?url';
 
 import ForgeSidebar from './sidebar/ForgeSidebar.vue';
 
-
-/**
- * RpgmForge stores chat databases for forge wizards
- */
-export class RpgmForge extends RpgmModule<'rpgm-forge'> {
-	override mod!: Forge;
-
+export class RpgmForge extends FoundyRpgmModuleMixin(AbstractForge) {
 	/** @returns The current genre setting */
 	get genre() { return game.settings.get('rpgm-forge', 'genre'); }
 
@@ -44,20 +38,8 @@ export class RpgmForge extends RpgmModule<'rpgm-forge'> {
 	descriptionsChats!: ChatWizard<ForgeChatDescription>;
 	homebrewChats!: ChatWizard<ForgeChatHomebrew>;
 
-	/**
-	 * Called before everything else.
-	 * Not much goes on in here.
-	 */
-	override async init(): Promise<void> {
+	protected override async init() {
 		rpgm.forge = this;
-		this.mod = new Forge({
-			singleton: rpgm.tools,
-			logger: {
-				show: rpgm.show
-			},
-			settings: RpgmModule.settings('rpgm-forge'),
-			maxConcurrency: 4
-		});
 		this.homebrewSchemas = HomebrewSchemas as HomebrewSchema[];
 		this.genres = await (await fetch(Genres)).json() as typeof this.genres;
 		this.promptChats = new ChatWizard(
@@ -94,10 +76,6 @@ export class RpgmForge extends RpgmModule<'rpgm-forge'> {
 		this.homebrewChats.load();
 	}
 
-	/**
-	 * Register module-specific settings here.
-	 * Also where Radial Menu buttons, RP-Commands, and chat commands are registered.
-	 */
 	override registerSettings(): void {
 		game.settings.register('rpgm-forge', 'auto_name', {
 			name: rpgm.localize('RPGM_FORGE.CONFIG.AUTO_NAME'),
@@ -242,10 +220,7 @@ export class RpgmForge extends RpgmModule<'rpgm-forge'> {
 		registerTokenCreate();
 	}
 
-	/**
-	 * Called when everything else in Foundry is loaded.
-	 */
-	override rpgmReady(): Promise<void> | void {
+	override ready() {
 		if (this.promptChats.data.size === 0 && !game.settings.get('rpgm-forge', 'has_been_prompted'))
 			void this.promptChats.newMessage();
 	}

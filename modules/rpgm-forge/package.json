@@ -6,8 +6,6 @@
 	"scripts": {
 		"dev": "vite build --watch & vite",
 		"preview": "vite build --watch & vite preview",
-		"lint": "vue-tsc; eslint; echo 'Linting complete. Above are any errors.'",
-		"lint:fix": "vue-tsc; eslint --fix; echo 'Linting complete. Above are any errors.'",
 		"build": "vue-tsc && vite build"
 	}
 }

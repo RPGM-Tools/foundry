@@ -87,7 +87,7 @@ export class ChatCommands {
 		this.chatlog ??= document.querySelector('#chat #chat-log,#chat .chat-scroll') as HTMLElement;
 		return {
 			top: this.chatlog.scrollTop,
-			bottom: this.chatlog.scrollHeight - this.chatlog.scrollTop - this.chatlog.clientHeight,
+			bottom: this.chatlog.scrollHeight - this.chatlog.scrollTop - this.chatlog.clientHeight
 		};
 	}
 

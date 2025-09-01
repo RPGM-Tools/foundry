@@ -30,6 +30,6 @@ export default {
 		RADIAL_MENU: {
 			INFO: 'Info',
 			COMMAND: 'Command'
-		},
+		}
 	}
 } satisfies RpgmI18n;

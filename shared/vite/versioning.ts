@@ -10,7 +10,7 @@ import { existsSync, readFile, writeFile } from 'node:fs';
 import type { PluginOption, ResolvedConfig } from 'vite';
 
 /**
- * Set version number in module.json
+ * Set version number in module.json.
  * @param version - What version to use when versioning this module
  * @returns Versioning plugin
  */

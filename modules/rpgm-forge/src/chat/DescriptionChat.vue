@@ -13,7 +13,7 @@ async function generate() {
 	const oldDesc = data.description;
 	data.description = '';
 
-	const result = await rpgm.forge.mod.generateDescriptions({
+	const result = await rpgm.forge.generateDescriptions({
 		name: data.name ?? '',
 		type: data.type,
 		system: rpgm.forge.system,

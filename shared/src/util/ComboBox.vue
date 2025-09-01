@@ -29,7 +29,7 @@ const filtered = computed(() => {
 });
 
 /**
- * A selection was made, now update the value and close the input
+ * A selection was made, now update the value and close the input.
  * @param t - The item that was selected
  */
 function select(t: T) {
@@ -60,13 +60,31 @@ function keyDown(k: KeyboardEvent) {
 </script>
 
 <template>
-	<div class="rpgm-combobox" @focusin="isOpen = true">
-		<input ref="inputRef" v-model="input" :placeholder class="rpgm-input rpgm-radial-ignore" type="text"
-			@keydown="keyDown">
+	<div
+		class="rpgm-combobox"
+		@focusin="isOpen = true"
+	>
+		<input
+			ref="inputRef"
+			v-model="input"
+			:placeholder
+			class="rpgm-input rpgm-radial-ignore"
+			type="text"
+			@keydown="keyDown"
+		>
 		<div>
-			<ul class="rpgm-dropdown" :open="isOpen">
-				<li v-for="v in filtered" :key="unique(v)" tabindex="0" class="rpgm-dropdown-item" @click="select(v)"
-					@keydown.space.enter.prevent="select(v)">
+			<ul
+				class="rpgm-dropdown"
+				:open="isOpen"
+			>
+				<li
+					v-for="v in filtered"
+					:key="unique(v)"
+					tabindex="0"
+					class="rpgm-dropdown-item"
+					@click="select(v)"
+					@keydown.space.enter.prevent="select(v)"
+				>
 					{{ display(v) }}
 				</li>
 			</ul>

@@ -11,11 +11,17 @@ defineEmits<{
 </script>
 
 <template>
-	<div class="sidebar-button" :tabindex="0"
+	<div
+		class="sidebar-button"
+		:tabindex="0"
 		@keydown.space.prevent="$emit('click')"
-		@click="$emit('click')">
+		@click="$emit('click')"
+	>
 		<span class="sidebar-inner-button">
-			<i class="sidebar-button-icon" :class="menu.meta.menu!.icon" />
+			<i
+				class="sidebar-button-icon"
+				:class="menu.meta.menu!.icon"
+			/>
 			<span class="sidebar-button-title">
 				{{ menu.meta.title }}
 			</span>

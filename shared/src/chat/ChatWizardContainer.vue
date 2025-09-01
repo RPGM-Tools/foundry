@@ -12,7 +12,7 @@ const { wizard, buttons = [] } = defineProps<{
 const context = ref<ButtonContext>({
 	loading: false,
 	element: wizard.element,
-	shift: false,
+	shift: false
 });
 
 onMounted(() => {
@@ -27,8 +27,15 @@ onMounted(() => {
 </script>
 
 <template>
-	<RadialMenu v-model="context" to=".chat-message" :buttons :top="true" :right="true" :pad-document="false"
-		:padding="{ top: 40, right: 0 }" />
+	<RadialMenu
+		v-model="context"
+		to=".chat-message"
+		:buttons
+		:top="true"
+		:right="true"
+		:pad-document="false"
+		:padding="{ top: 40, right: 0 }"
+	/>
 	<div class="rpgm-app static">
 		<SavedCheck :saved />
 		<slot />

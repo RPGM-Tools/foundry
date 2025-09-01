@@ -147,7 +147,7 @@ async function generate() {
 	if (!data.options.schema?.fields.length) return;
 	loading.value = true;
 
-	const result = await rpgm.forge.mod.generateHomebrew(data.options as HomebrewOptions);
+	const result = await rpgm.forge.generateHomebrew(data.options as HomebrewOptions);
 
 	if (result.isOk()) {
 		rpgm.chat.updateScroll();

@@ -1,243 +1,164 @@
 import type { RpgmModule as Module } from '@rpgm/tools';
-import { RpgmTools } from '@rpgm/tools';
+import { RpgmLogger } from '@rpgm/tools';
 
 import { GlobalMenus, GlobalSettings } from '#/settings';
 import { rpgmPolyhedriumBalance } from '#/util/usePolyhedriumBalance';
 
-import { auth } from './auth';
+import { auth as rpgmAuth } from './auth';
 import { ChatCommands } from './chat';
 import { RadialMenuRegister } from './radial-menu';
 import { RpgmSidebarManager } from './sidebar';
 import { localize } from './util/localize';
+import { RpgmTools } from './tools';
+import { toReactive } from '@vueuse/core';
 
-/**
- * Abstract base class for all RPGM (Role-Playing Game Master) modules.
- *
- * This class defines the core lifecycle and shared functionalities for modules within the RPGM Tools ecosystem.
- * Modules extend this class to integrate with the system, register settings, commands, and hooks.
- *
- * The module lifecycle follows a distinct order, orchestrated by Foundry VTT hooks and internal promises:
- * 1. `init`: (Foundry's `init` hook) - Initial setup, global singleton initialization (`rpgm`), and module instance registration.
- * 2. `setup`: (Foundry's `setup` hook) - Module-specific settings registration, global menu setup, and chat command registration.
- * 3. `ready`: (Foundry's `ready` hook) - Final initialization, global ready tasks, and module-specific ready tasks.
- */
-export abstract class RpgmModule<ID extends string = string> {
-	/** The major game version of Foundry VTT, e.g., 11, 12, 13. */
-	static majorGameVersion: number;
+type VoidPromise = void | Promise<void>;
+type AbstractConstructor<T = {}> = abstract new (...args: any[]) => T;
 
-	/** Manages chat commands registered by RPGM modules. */
-	static chat: ChatCommands;
+export function FoundyRpgmModuleMixin<T extends AbstractConstructor<Module>>(Base: T) {
+	abstract class FoundryRpgmModule extends Base {
+		// ==== Static ===
 
-	/** Manages the registration and display of radial menu entries. */
-	static radialMenu: RadialMenuRegister;
+		/** The major game version of Foundry VTT, e.g., 11, 12, 13. */
+		static majorGameVersion: number;
 
-	/** A record of all currently active and registered RPGM modules, keyed by their unique IDs. */
-	static modules: Record<string, RpgmModule> = {};
+		/** Manages chat commands registered by RPGM modules. */
+		static chat: ChatCommands;
 
-	/** Utility function for localizing strings using Foundry's localization system. */
-	static localize = localize;
+		/** Manages the registration and display of radial menu entries. */
+		static radialMenu: RadialMenuRegister;
 
-	static sidebar: RpgmSidebarManager;
+		/** A record of all currently active and registered RPGM modules, keyed by their unique IDs. */
+		static modules: Record<FoundryRpgmModule['id'], FoundryRpgmModule> = {};
 
-	static auth = auth;
+		/** Utility function for localizing strings using Foundry's localization system. */
+		static localize = localize;
 
-	static usePolyhedriumBalance: ReturnType<typeof rpgmPolyhedriumBalance>;
+		static sidebar: RpgmSidebarManager;
 
-	static show(method: 'log' | 'warn' | 'error', message: string) {
-		ui.notifications?.[method === 'log' ? 'info' : method](message, { console: false });
-	}
+		static auth = rpgmAuth;
 
-	static settings = (id: string) => ({
-		load: () => {
+		static usePolyhedriumBalance: ReturnType<typeof rpgmPolyhedriumBalance>;
+
+		readonly version = __MODULE_VERSION__;
+
+		protected static show(method: 'log' | 'warn' | 'error', message: string) {
+			ui.notifications?.[method === 'log' ? 'info' : method](message, { console: false });
+		}
+
+		static j(el: JQuery<HTMLElement> | HTMLElement): HTMLElement {
+			return el instanceof HTMLElement ? el : el[0] as HTMLElement;
+		}
+
+		static settings = (id: string) => ({
+			load: () => {
+				try {
+					return JSON.parse(localStorage.getItem(`${id}.settings`) ?? 'null');
+				} catch {
+					return null;
+				}
+			},
+			save: (data: object) => {
+				const dataString = JSON.stringify(data);
+				localStorage.setItem(`${id}.settings`, dataString);
+			}
+		});
+
+		static tools: RpgmTools;
+
+		// ==== Instance ====
+
+		override logger = RpgmLogger.fromModule(this, { show: FoundryRpgmModule.show });
+
+		protected first: boolean = false;
+
+		private _settings = ref({});
+		override settings = toReactive(this._settings);
+
+		protected override get tools() { return FoundryRpgmModule.tools; };
+
+		private bootstrap = Promise.resolve();
+
+		constructor(...args: any[]) {
+			super(args);
+			Hooks.once('init', () => { this.bootstrap = this.bootstrap.then(this._init.bind(this)); });
+			Hooks.once('setup', () => { this.bootstrap = this.bootstrap.then(this._setup.bind(this)); });
+			Hooks.once('ready', () => { this.bootstrap = this.bootstrap.then(this._ready.bind(this)); });
+		}
+
+		private async initGlobal() {
+			this.first = true;
+			globalThis.rpgm = FoundryRpgmModule as unknown as typeof globalThis.rpgm;
+			FoundryRpgmModule.tools = new RpgmTools();
+			FoundryRpgmModule.tools._init();
+			FoundryRpgmModule.majorGameVersion = game.data.release.generation;
+			FoundryRpgmModule.radialMenu = new RadialMenuRegister();
+			FoundryRpgmModule.chat = new ChatCommands();
+			FoundryRpgmModule.tools.logger.prefixed('').log('🛠️ RPGM Tools joined the game');
+			FoundryRpgmModule.sidebar = new RpgmSidebarManager();
+			FoundryRpgmModule.usePolyhedriumBalance = rpgmPolyhedriumBalance();
+			GlobalSettings();
+		}
+
+		private async _init() {
+			if (!globalThis.rpgm) {
+				this.initGlobal();
+			}
+			this.logger.prefixed('').log(`${this.icon} ${this.name} joined the game`);
+			this._settings.value = this.load();
+			rpgm.modules[this.id] = this;
+			this.logger.warn(this._settings.value);
+			watch(this._settings, this.save.bind(this), { deep: true });
+			await this.init();
+			this.logger = RpgmLogger.fromModule(this, { show: FoundryRpgmModule.show });
+		}
+
+		protected init(): VoidPromise { }
+
+		private async _setup() {
+			this.registerSettings();
+			GlobalMenus(this.id);
+		}
+
+		protected registerSettings(): VoidPromise { }
+
+		private async _ready() {
+			if (this.first) {
+				FoundryRpgmModule.globalReady();
+			}
+			await this.ready();
+		}
+
+		protected ready(): VoidPromise { }
+
+		override save(data: unknown): void {
+			const dataString = JSON.stringify(data);
+			localStorage.setItem(`${this.id}.settings`, dataString);
+		}
+
+		override load() {
 			try {
-				return JSON.parse(localStorage.getItem(`${id}.settings`) ?? 'null');
+				return JSON.parse(localStorage.getItem(`${this.id}.settings`) ?? 'null');
 			} catch {
+				this.logger.error('Failed to load settings');
 				return null;
 			}
-		},
-		save: (data: object) => {
-			const dataString = JSON.stringify(data);
-			localStorage.setItem(`${id}.settings`, dataString);
 		}
-	});
 
-	static tools = new RpgmTools({
-		logger: {
-			show: RpgmModule.show
-		},
-		settings: this.settings('rpgm-tools')
-	});
+		static globalReady() {
+			rpgm.radialMenu.update();
+			rpgm.chat.prune();
 
-	abstract mod: Module<ID>;
+			const center = (s: string) => {
+				return s.padStart(s.length + Math.floor((48 - s.length) / 2));
+			};
 
-	/**
-	 * The unique slug ID for this module, which also serves as its namespace for client settings.
-	 */
-	get id(): typeof this.mod.id { return this.mod.id; };
-
-	/**
-	 * The user-friendly display name for this module.
-	 */
-	get name() { return this.mod.name; };
-
-	/**
-	 * An instance-specific logger for this module. Each module should have its own logger for clear output.
-	 */
-	get logger() { return this.mod.logger; };
-
-	/** 
-	 * The version string of this module.
-	 * This value is typically replaced during the build process with the actual module version.
-	 * Although declared in the abstract class, each bundled module will have its specific version embedded here.
-	 */
-	readonly version = __MODULE_VERSION__;
-
-	/** 
-	 * A flag indicating if this was the first RPGM module to initialize,
-	 * thereby triggering the setup of the global `rpgm` singleton.
-	 */
-	private first = false;
-
-	/** 
-	 * A Promise chain that ensures asynchronous lifecycle hooks (`_init`, `_setup`, `_ready`)
-	 * are executed sequentially and in the correct order.
-	 */
-	private setup = Promise.resolve();
-
-	/**
-	 * Constructs an `RpgmModule` instance.
-	 * Registers Foundry VTT's `init`, `setup`, and `ready` hooks to orchestrate the module's lifecycle methods.
-	 * Each hook adds its corresponding private method (`_init`, `_setup`, `_ready`) to the `setup` promise chain.
-	 */
-	constructor() {
-		Hooks.once('init', () => { this.setup = this.setup.then(this._init.bind(this)); });
-		Hooks.once('setup', () => { this.setup = this.setup.then(this._setup.bind(this)); });
-		Hooks.once('ready', () => { this.setup = this.setup.then(this._ready.bind(this)); });
-	}
-
-	/** 
-	 * The initial asynchronous method called when the Foundry VTT `init` hook fires for this module.
-	 * If `globalThis.rpgm` is not yet defined, it calls {@link initGlobal} to set up the global singleton.
-	 * Registers this module instance with `rpgm.modules`.
-	 * Calls the module's public {@link init} method for custom early initialization logic.
-	 */
-	private async _init() {
-		if (!globalThis.rpgm)
-			this.initGlobal();
-		await this.init();
-		rpgm.modules[this.id] = this;
-		this.logger.styled('color: #ad8cef; font-weight: bold;').prefixed('').log(`${this.mod.icon} ${this.name} joined the game`);
-	}
-
-	/** 
-	 * The asynchronous method called when the Foundry VTT `setup` hook fires for this module.
-	 * If this is the first RPGM module loaded, it registers global RPGM chat commands.
-	 * Calls the module's public {@link registerSettings} method for module-specific settings, Radial Menus, and RP-Commands.
-	 * Calls `GlobalMenus` to register shared menus relevant to the module.
-	 */
-	private async _setup() {
-		await this.registerSettings();
-		GlobalMenus(this.id);
-	}
-
-	/** 
-	 * Initializes the global `rpgm` singleton object (`globalThis.rpgm`).
-	 * This method is called only once by the very first RPGM module to be loaded.
-	 * It sets up static properties like `RpgmModule.majorGameVersion`, `RpgmModule.logger`,
-	 * `RpgmModule.radialMenu`, and `RpgmModule.chat`.
-	 * Also registers a `renderSettingsConfig` hook to customize the appearance of module settings pages.
-	 * Finally, calls `GlobalSettings` to register common RPGM settings.
-	 */
-	private initGlobal() {
-		this.first = true;
-		globalThis.rpgm = RpgmModule as typeof globalThis.rpgm;
-		RpgmModule.majorGameVersion = game.data.release.generation;
-		RpgmModule.radialMenu = new RadialMenuRegister();
-		RpgmModule.chat = new ChatCommands();
-		RpgmModule.tools.logger.prefixed('').log('🛠️ RPGM Tools joined the game');
-		RpgmModule.sidebar = new RpgmSidebarManager();
-		RpgmModule.usePolyhedriumBalance = rpgmPolyhedriumBalance();
-		Hooks.on('renderSettingsConfig', (_, html) => {
-			Object.keys(RpgmModule.modules).forEach(k => {
-				const settingsHtml = rpgm.j(html);
-				const screen = settingsHtml.querySelector(`[data - category= "${k}"]`) as HTMLElement;
-				// Move all menus to the bottom of the page
-				screen?.querySelectorAll('.form-group.submenu,.form-group:has([data-action="openSubmenu"])').forEach(s => screen.appendChild(s));
-				const copyright = document.createElement('div');
-				copyright.style.fontStyle = 'italic';
-				copyright.style.textAlign = 'center';
-				copyright.innerText = '© 2025 RPGM Tools, LLC';
-				screen.querySelectorAll('input,select').forEach(i => i.classList.add('rpgm-input'));
-				screen.querySelectorAll('button').forEach(i => i.classList.add('rpgm-button'));
-				screen?.appendChild(copyright);
-			});
-		});
-		GlobalSettings();
-	}
-
-	/**
-	 * Lifecycle method for early module initialization. This method is called during the Foundry VTT `init` hook.
-	 * Override this method in your module to perform any setup that needs to happen before settings are registered.
-	 */
-	init(): Promise<void> | void { }
-
-	/**
-	 * Lifecycle method for registering module-specific settings, Radial Menu buttons, RP-Commands, and chat commands.
-	 * This method is called during the Foundry VTT `setup` hook.
-	 * Override this method in your module to define its configurations and custom interactions.
-	 * Use `rpgm.chat.registerCommand()` to register new chat commands with the system.
-	 */
-	registerSettings(): Promise<void> | void { }
-
-	/**
-	 * The protected asynchronous method called when the Foundry VTT `ready` hook fires for this module.
-	 * If this is the first RPGM module loaded, it calls {@link RpgmModule.globalReady} for global finalization.
-	 * Calls the module's public {@link rpgmReady} method for custom module-specific final initialization logic.
-	 */
-	protected async _ready() {
-		if (this.first)
-			rpgm.globalReady();
-		await this.rpgmReady();
-	}
-
-	/**
-	 * Lifecycle method called when Foundry VTT is fully loaded and ready.
-	 * This method is invoked during the Foundry VTT `ready` hook.
-	 * Override this method in your module to perform any actions that require the full game environment to be available.
-	 */
-	rpgmReady(): Promise<void> | void { }
-
-	/**
-	 * Unwraps a jQuery object to return the raw HTMLElement.
-	 * This utility is crucial for compatibility with Foundry VTT v13+, which deprecates jQuery.
-	 * @param el - The jQuery object or HTMLElement to unwrap.
-	 * @returns The underlying HTMLElement.
-	 */
-	static j(el: JQuery<HTMLElement> | HTMLElement): HTMLElement {
-		return el instanceof HTMLElement ? el : el[0] as HTMLElement;
-	}
-
-	/** 
-	 * Static method called once when all Foundry VTT modules are loaded and the game is ready.
-	 * This method performs final global setup tasks for RPGM Tools:
-	 * - Updates the radial menu system.
-	 * - Prunes chat commands.
-	 * - Logs a stylized ASCII art banner to the console, listing all active RPGM modules and their versions.
-	 */
-	static globalReady() {
-		rpgm.radialMenu.update();
-		rpgm.chat.prune();
-
-		const center = (s: string) => {
-			return s.padStart(s.length + Math.floor((48 - s.length) / 2));
-		};
-
-		const splitJustify = (s: string) => {
-			const [left, right] = s.split('%s', 2) as [string] | [string, string];
-			const spaces = Math.floor(48 - left.length);
-			return `${left}${right?.padStart(spaces) || ''} `;
-		};
-		const asciiArt = (String.raw`
+			const splitJustify = (s: string) => {
+				const [left, right] = s.split('%s', 2) as [string] | [string, string];
+				const spaces = Math.floor(48 - left.length);
+				return `${left}${right?.padStart(spaces) || ''} `;
+			};
+			const asciiArt = (String.raw`
  ____  ____   ____ __  __  _              _     
 |  _ \|  _ \ / ___|  \/  || |_ ___   ___ | |___ 
 | |_) | |_) | |  _| |/\| || __/ _ \ / _ \| / __|
@@ -245,7 +166,10 @@ export abstract class RpgmModule<ID extends string = string> {
 |_| \_\_|    \____|_|  |_(_)__\___/ \___/|_|___/
 ————————————————————————————————————————————————
 ${center('© 2025 RPGM Tools, LLC')}
-${Object.values(rpgm.modules).map(m => splitJustify(` ${m.mod.icon} ${m.name} %s v${m.version} `)).join('\n')} `).slice(1);
-		rpgm.tools.logger.prefixed('').styled('color: #d44e7b; font-weight: bold;').log(asciiArt);
+${Object.values(rpgm.modules).map(m => splitJustify(` ${m.icon} ${m.name} %s v${m.version} `)).join('\n')} `).slice(1);
+			rpgm.tools.logger.prefixed('').styled('color: #d44e7b; font-weight: bold;').log(asciiArt);
+		}
+
 	}
+	return FoundryRpgmModule;
 }

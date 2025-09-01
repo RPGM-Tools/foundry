@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ContentEditable from '#/util/ContentEditable.vue';
+import type { HomebrewField } from '@rpgm/tools/forge';
 
 const data = inject<ForgeChatHomebrew>('data')!;
 

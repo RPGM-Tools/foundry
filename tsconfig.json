@@ -31,12 +31,11 @@
 		"maxNodeModuleJsDepth": 0
 	},
 	"include": [
-		"**/*.ts",
-		"**/*.js",
-		"**/*.vue"
+		"./**/*.ts",
+		"./**/*.js",
+		"./**/*.vue"
 	],
 	"exclude": [
-		"../../node_modules",
 		"**/.dist"
 	]
 }

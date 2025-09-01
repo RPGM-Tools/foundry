@@ -5,7 +5,7 @@ export default defineComponent({
 	props: {
 		delay: {
 			type: Number,
-			default: 100,
+			default: 100
 		},
 		duration: {
 			type: Number,
@@ -14,8 +14,8 @@ export default defineComponent({
 		},
 		appear: {
 			type: Boolean,
-			default: true,
-		},
+			default: true
+		}
 	},
 	setup(props, { slots, attrs }) {
 		return () => {
@@ -29,7 +29,7 @@ export default defineComponent({
 						...(vnode.props?.style ?? {}),
 						'transition-delay': `${(index + 1) * props.delay}ms`,
 						...(props.duration ? { 'transition-duration': `${props.duration}ms` } : {})
-					},
+					}
 				});
 			});
 
@@ -38,10 +38,10 @@ export default defineComponent({
 				TransitionGroup,
 				{
 					appear: props.appear,
-					...attrs,
+					...attrs
 				},
 				() => children
 			);
 		};
-	},
+	}
 });

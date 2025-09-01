@@ -16,7 +16,7 @@ export const auth = createAuthClient({
 			user: {
 				legacy: {
 					type: 'boolean',
-					input: false,
+					input: false
 				},
 				polyhedrium: {
 					type: 'number',
@@ -25,6 +25,6 @@ export const auth = createAuthClient({
 			}
 		}),
 		polarClient(),
-		usernameClient(),
-	],
+		usernameClient()
+	]
 });

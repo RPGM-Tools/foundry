@@ -2,6 +2,7 @@
 import ComboBox from '#/util/ComboBox.vue';
 import { localize } from '#/util/localize';
 import WriteOn from '#/util/WriteOn';
+import { HomebrewSchema } from '@rpgm/tools/forge';
 
 import HomebrewInputField from './HomebrewInputField.vue';
 

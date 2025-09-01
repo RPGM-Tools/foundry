@@ -1,9 +1,24 @@
 <template>
-	<button class="dice-button" :class="{ pressed, loading: context.loading }" @click.prevent="onClick"
-		@keydown.space="pressed = true" @keyup.space="pressed = false">
-		<img :src="buttonImage" :style="[colorStyle, rotationStyle]" class="button-image">
-		<i class="button-icon" :class="button.icon" />
-		<span v-if="button.tooltip" class="radial-menu-tooltip">{{ rpgm.localize(button.tooltip) }}</span>
+	<button
+		class="dice-button"
+		:class="{ pressed, loading: context.loading }"
+		@click.prevent="onClick"
+		@keydown.space="pressed = true"
+		@keyup.space="pressed = false"
+	>
+		<img
+			:src="buttonImage"
+			:style="[colorStyle, rotationStyle]"
+			class="button-image"
+		>
+		<i
+			class="button-icon"
+			:class="button.icon"
+		/>
+		<span
+			v-if="button.tooltip"
+			class="radial-menu-tooltip"
+		>{{ rpgm.localize(button.tooltip) }}</span>
 	</button>
 </template>
 

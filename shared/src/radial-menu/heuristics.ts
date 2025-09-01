@@ -1,5 +1,5 @@
 /**
- * Heuristics for buttons using the hud radial menu
+ * Heuristics for buttons using the hud radial menu.
  * @param context - The context for this button
  * @returns A builder for the heuristics
  */
@@ -7,7 +7,7 @@ export function hudHeuristics(context: TokenHudContext) {
 	let flag = false;
 	const chatAllowed = false;
 
-	/** Default options that can be overridden */
+	/** Default options that can be overridden. */
 	function defaults() {
 		// Prevent attaching to any input which contains "search"
 		flag ||= context.element.outerHTML.toLowerCase().includes('search');
@@ -33,14 +33,14 @@ export function hudHeuristics(context: TokenHudContext) {
 		isGM() {
 			flag ||= !game.user.isGM;
 			return api;
-		},
+		}
 	};
 
 	return api;
 }
 
 /**
- * Heuristics for buttons using the input radial menu
+ * Heuristics for buttons using the input radial menu.
  * @param context - The context for this button
  * @returns A builder for the heuristics
  */
@@ -48,7 +48,7 @@ export function inputHeuristics(context: InputContext) {
 	let flag = false;
 	let chatAllowed = false;
 
-	/** Default options that can be overridden */
+	/** Default options that can be overridden. */
 	function defaults() {
 		// Prevent attaching to any input which contains "search"
 		flag ||= context.element.outerHTML.toLowerCase().includes('search');
@@ -87,7 +87,7 @@ export function inputHeuristics(context: InputContext) {
 			chatAllowed = true;
 			flag ||= context.element.id !== 'chat-message';
 			return api;
-		},
+		}
 	};
 
 	return api;

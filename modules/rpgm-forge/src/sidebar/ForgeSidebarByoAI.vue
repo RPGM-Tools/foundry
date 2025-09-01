@@ -6,20 +6,20 @@ import SidebarAccountByoAI from '#/sidebar/SidebarApp/SidebarAccount/SidebarAcco
 import ModelSelector from './ModelSelector.vue';
 
 const model = computed({
-	get() { return rpgm.forge.mod.settings.ai.model; },
-	set(v: string) { rpgm.forge.mod.settings.ai.model = v; }
+	get() { return rpgm.forge.settings.ai.model; },
+	set(v: string) { rpgm.forge.settings.ai.model = v; }
 });
 const names = computed({
-	get() { return rpgm.forge.mod.settings.ai.modelOverrides.names; },
-	set(v: string) { rpgm.forge.mod.settings.ai.modelOverrides.names = v; }
+	get() { return rpgm.forge.settings.ai.modelOverrides.names; },
+	set(v: string) { rpgm.forge.settings.ai.modelOverrides.names = v; }
 });
 const descriptions = computed({
-	get() { return rpgm.forge.mod.settings.ai.modelOverrides.descriptions; },
-	set(v: string) { rpgm.forge.mod.settings.ai.modelOverrides.descriptions = v; }
+	get() { return rpgm.forge.settings.ai.modelOverrides.descriptions; },
+	set(v: string) { rpgm.forge.settings.ai.modelOverrides.descriptions = v; }
 });
 const homebrew = computed({
-	get() { return rpgm.forge.mod.settings.ai.modelOverrides.homebrew; },
-	set(v: string) { rpgm.forge.mod.settings.ai.modelOverrides.homebrew = v; }
+	get() { return rpgm.forge.settings.ai.modelOverrides.homebrew; },
+	set(v: string) { rpgm.forge.settings.ai.modelOverrides.homebrew = v; }
 });
 
 const baseModelPlaceholder = computed(() => 'Enter a model slug');

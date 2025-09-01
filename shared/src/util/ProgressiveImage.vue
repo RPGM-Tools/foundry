@@ -11,7 +11,10 @@ const { src, blur } = useProgressiveImage(buttonImage, props.src);
 </script>
 
 <template>
-	<img :src :class="{ loading: blur }">
+	<img
+		:src
+		:class="{ loading: blur }"
+	>
 </template>
 
 <style scoped>

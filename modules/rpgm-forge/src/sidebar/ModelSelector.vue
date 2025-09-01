@@ -12,7 +12,7 @@ const model = defineModel<string>({ required: true });
 
 async function testModel() {
 	const modelToTest = model.value;
-	const v = await rpgm.forge.mod.testModel(modelToTest);
+	const v = await rpgm.forge.testModel(modelToTest);
 	validatedModel.value = modelToTest;
 	if (v.isErr()) {
 		valid.value = false;

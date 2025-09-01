@@ -12,12 +12,12 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 	constructor(options: DeepPartial<foundry.applications.api.ApplicationV2.Configuration>) {
 		CONFIG.RpgmSidebar = {
 			sidebarIcon: 'rp-dice',
-			documentClass: RpgmSidebar,
+			documentClass: RpgmSidebar
 		};
 		foundry.applications.sidebar.Sidebar.TABS.rpgm = {
 			//@ts-expect-error TABS is not able to be overriden
 			documentName: 'RpgmSidebar',
-			tooltip: 'RPGM_TOOLS.SIDEBAR.TITLE',
+			tooltip: 'RPGM_TOOLS.SIDEBAR.TITLE'
 		};
 		super(options);
 	}
@@ -30,7 +30,7 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 			title: 'RPGM Tools',
 			minimizable: false,
 			icon: 'rp-dice'
-		},
+		}
 	};
 
 	override minimize(): Promise<void> {
@@ -56,7 +56,7 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 		this.onResize(true);
 	}
 
-	/** Max content of the sidebar, up to document height - padding */
+	/** Max content of the sidebar, up to document height - padding. */
 	private onResize(forceCenter = false) {
 		void nextTick(() => {
 			const windowHeight = window.innerHeight;

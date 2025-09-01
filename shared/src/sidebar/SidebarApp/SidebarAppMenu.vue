@@ -9,9 +9,19 @@ const menus = computed(() => rpgm.sidebar.router.getRoutes()
 </script>
 
 <template>
-	<StaggeredTransitionGroup appear tag="ul" name="rpgm-fade">
-		<li v-for="menu in menus" :key="menu.path">
-			<SidebarAppButton :menu @click="$router.push(menu.path)" />
+	<StaggeredTransitionGroup
+		appear
+		tag="ul"
+		name="rpgm-fade"
+	>
+		<li
+			v-for="menu in menus"
+			:key="menu.path"
+		>
+			<SidebarAppButton
+				:menu
+				@click="$router.push(menu.path)"
+			/>
 		</li>
 	</StaggeredTransitionGroup>
 </template>

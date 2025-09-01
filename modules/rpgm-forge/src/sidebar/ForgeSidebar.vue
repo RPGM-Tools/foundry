@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NButton, NCard, NFlex, NIcon, NResult, NTabPane, NTabs, NText, NCollapseTransition } from 'naive-ui';
+import { NButton, NCard, NCollapseTransition, NFlex, NResult, NTabPane, NTabs, NText } from 'naive-ui';
 
 import { NaiveUIThemeOverrides } from '#/style/theme';
 import SignedIn from '#/util/SignedIn.vue';
@@ -7,8 +7,8 @@ import SignedIn from '#/util/SignedIn.vue';
 import ForgeSidebarByoAI from './ForgeSidebarByoAI.vue';
 
 const tabValue = computed({
-	get() { return rpgm.forge.mod.settings.mode; },
-	set(v) { rpgm.forge.mod.settings.mode = v; }
+	get() { return rpgm.forge.settings.mode; },
+	set(v) { rpgm.forge.settings.mode = v; }
 });
 
 const primaryColor = NaiveUIThemeOverrides.common.primaryColor;
@@ -19,11 +19,15 @@ const infoCollapsed = ref(false);
 <template>
 	<NCard title="Select a mode to use Forge">
 		<template #header-extra>
-			<NButton text type="info" @click="infoCollapsed = !infoCollapsed">
+			<NButton
+				text
+				type="info"
+				@click="infoCollapsed = !infoCollapsed"
+			>
 				<i class="fas fa-circle-info" />
 			</NButton>
 		</template>
-		<NCollapseTransition :collapsed="infoCollapsed">
+		<NCollapseTransition :show="infoCollapsed">
 			T
 		</NCollapseTransition>
 		<NTabs
@@ -42,9 +46,19 @@ const infoCollapsed = ref(false);
 					</NText>
 				</template>
 				<SignedIn>
-					<NResult size="small" status="success" title="You are signed in" description="Enjoy using Forge!" />
+					<NResult
+						size="small"
+						status="success"
+						title="You are signed in"
+						description="Enjoy using Forge!"
+					/>
 					<template #not-signed-in>
-						<NResult size="small" status="warning" title="Not signed in" description="You must be signed in to use Forge online.">
+						<NResult
+							size="small"
+							status="warning"
+							title="Not signed in"
+							description="You must be signed in to use Forge online."
+						>
 							<template #footer>
 								<RouterLink
 									to="/account?back=true"
@@ -52,7 +66,11 @@ const infoCollapsed = ref(false);
 									#="{ navigate }"
 								>
 									<NFlex vertical>
-										<NButton tertiary type="warning" @click="navigate">
+										<NButton
+											tertiary
+											type="warning"
+											@click="navigate"
+										>
 											Sign In
 										</NButton>
 									</NFlex>

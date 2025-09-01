@@ -29,7 +29,7 @@ export function useSetting<
 	K extends ClientSettings.KeyFor<N>,
 	KV extends keyof SettingConfig>(
 		path: KV & `${N}.${K}`,
-		autosave: boolean = false,
+		autosave: boolean = false
 	) {
 	const [namespace, key] = path.split('.') as [N, K];
 	const value = game.settings.get(path.split('.')[0] as N, path.split('.')[1] as K);

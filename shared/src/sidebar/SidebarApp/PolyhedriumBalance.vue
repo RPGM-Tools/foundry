@@ -14,10 +14,20 @@ const { align = 'center center' } = defineProps<{
 <template>
 	<div @click="updateBalance">
 		<SignedIn>
-			<AnimatedNumber :value="balance" #="{ display, direction }" :duration="3000">
-				<span class="balance-outer" :style="{ transformOrigin: align }"
-					:class="{ increasing: direction > 0, decreasing: direction < 0 }">
-					<span class="balance-inner" :class="{ increasing: direction > 0, decreasing: direction < 0 }">
+			<AnimatedNumber
+				:value="balance"
+				#="{ display, direction }"
+				:duration="3000"
+			>
+				<span
+					class="balance-outer"
+					:style="{ transformOrigin: align }"
+					:class="{ increasing: direction > 0, decreasing: direction < 0 }"
+				>
+					<span
+						class="balance-inner"
+						:class="{ increasing: direction > 0, decreasing: direction < 0 }"
+					>
 						{{ display }}
 					</span>
 				</span>

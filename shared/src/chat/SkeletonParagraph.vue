@@ -1,6 +1,9 @@
 <template>
 	<Transition :name="loading ? 'loading' : 'unloading'">
-		<div v-if="loading" class="outer">
+		<div
+			v-if="loading"
+			class="outer"
+		>
 			<div class="line rpgm-active" />
 			<div class="line rpgm-active" />
 			<div class="line rpgm-active" />

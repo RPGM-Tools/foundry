@@ -27,6 +27,6 @@ export function rpgmPolyhedriumBalance() {
 
 	return () => ({
 		balance: readonly(balance),
-		updateBalance,
+		updateBalance
 	});
 }

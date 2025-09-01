@@ -85,6 +85,11 @@ function blur() {
 </script>
 
 <template>
-	<slot :ref="(el: unknown) => { slot = el as HTMLElement }" :contenteditable="editing" @focus="focus"
-		@keydown="keyDown" @blur="blur" />
+	<slot
+		:ref="(el: unknown) => { slot = el as HTMLElement }"
+		:contenteditable="editing"
+		@focus="focus"
+		@keydown="keyDown"
+		@blur="blur"
+	/>
 </template>

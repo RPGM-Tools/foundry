@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { HomebrewField } from '@rpgm/tools/forge';
+
 const { generation } = defineProps<{ generation: string }>();
 
 const { generations } = inject<ForgeChatHomebrew>('data')!;

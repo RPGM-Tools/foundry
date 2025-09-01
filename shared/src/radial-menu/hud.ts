@@ -2,14 +2,14 @@ import type { Component, ShallowReactive } from 'vue';
 
 import RadialMenuFloating from './RadialMenuFloating.vue';
 
-/** Injects code to render the dice hud */
+/** Injects code to render the dice hud. */
 export function injectTokenHUD() {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	Hooks.on('renderTokenHUD', renderTokenHUD as any);
 }
 
 /**
- * Renders a Radial Menu on the Token HUD
+ * Renders a Radial Menu on the Token HUD.
  * @param _element - (unused)
  * @param html - The token hud element to modify
  */
@@ -36,8 +36,7 @@ function renderTokenHUD(_element: JQuery, html: JQuery | HTMLElement) {
 		loading: false,
 		shift: false,
 		element: htmlElement,
-		token: hud.object,
+		token: hud.object
 	}));
 	hud.menuApp.mount(appContainer);
-
 }

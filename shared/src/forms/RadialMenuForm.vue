@@ -8,7 +8,7 @@ const radialMenuHUD = useSetting('rpgm-tools.radial_menu_hud');
 const app = inject<RadialMenuSettings>('app')!;
 
 /**
- * Saves changed settings
+ * Saves changed settings.
  */
 function submit() {
 	radialMenuInput.save();
@@ -19,7 +19,10 @@ function submit() {
 </script>
 
 <template>
-	<form class="rpgm-app-inner standard-form flexcol" @submit.prevent="submit">
+	<form
+		class="rpgm-app-inner standard-form flexcol"
+		@submit.prevent="submit"
+	>
 		<div class="scrollable tab">
 			<h2>{{ RadialMenuSettings.name }}</h2>
 			<i>{{ RadialMenuSettings.subtitle }}</i>
@@ -34,7 +37,10 @@ function submit() {
 			<div class="form-group">
 				<label>{{ radialMenuHUD.name }}</label>
 				<div class="form-fields">
-					<input v-model="radialMenuHUD.value" type="checkbox">
+					<input
+						v-model="radialMenuHUD.value"
+						type="checkbox"
+					>
 				</div>
 				<p class="hint notes">
 					{{ radialMenuHUD.hint }}

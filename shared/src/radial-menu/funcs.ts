@@ -1,5 +1,5 @@
 /**
- * Animate text on a rp-button's input field
+ * Animate text on a rp-button's input field.
  * @param context - Context of this rp-button
  * @param text - The text to animate
  * @param time - How long the animation should take
@@ -18,7 +18,7 @@ export async function writeOn(context: InputContext, text: string, time: number)
 }
 
 /**
- * Applys a shimmer effect to the rp-button's input
+ * Applys a shimmer effect to the rp-button's input.
  * @param context - Context of this rp-button
  * @returns A function to clear the effect
  */

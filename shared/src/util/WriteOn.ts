@@ -22,15 +22,15 @@ export default defineComponent({
 		},
 		duration: {
 			type: Number,
-			required: true,
+			required: true
 		},
 		enabled: {
 			type: Boolean,
-			default: true,
+			default: true
 		},
 		appear: {
 			type: Boolean,
-			default: false,
+			default: false
 		},
 		tag: {
 			type: String as PropType<keyof HTMLElementTagNameMap>,

@@ -44,7 +44,7 @@ export default class RpgmSidebar extends SidebarTab {
 			id: 'rpgm',
 			height: 1,
 			minimizable: false,
-			title: 'RPGM Tools',
+			title: 'RPGM Tools'
 		} satisfies Partial<Application.Options>));
 	};
 
@@ -115,6 +115,6 @@ export default class RpgmSidebar extends SidebarTab {
 	}
 
 	static metadata = {
-		name: 'RpgmSidebar',
+		name: 'RpgmSidebar'
 	};
 }

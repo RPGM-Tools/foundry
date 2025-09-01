@@ -29,7 +29,7 @@ export function useLoading() {
 		},
 
 		/** Finish loading state by setting loading to false. */
-		finish,
+		finish
 	};
 }
 

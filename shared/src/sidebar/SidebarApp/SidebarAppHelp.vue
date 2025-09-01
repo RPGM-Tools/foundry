@@ -12,7 +12,10 @@ const formattedHelp = computed(() => {
 </script>
 
 <template>
-	<p class="help" v-html="formattedHelp" />
+	<p
+		class="help"
+		v-html="formattedHelp"
+	/>
 </template>
 
 <style scoped>

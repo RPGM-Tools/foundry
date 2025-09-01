@@ -1,5 +1,6 @@
-import type { RpgmForge } from '$/forge';
 import type { Homebrew, HomebrewOptions } from '@rpgm/tools/forge';
+
+import type { RpgmForge } from '$/forge';
 
 type Optional<T, K extends keyof T> = { [K in keyof T]: T[K] | undefined } & Omit<T, K>;
 

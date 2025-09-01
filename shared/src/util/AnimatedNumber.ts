@@ -112,5 +112,5 @@ export default defineComponent({
 
 			return h(props.tag, null, content);
 		};
-	},
+	}
 });

@@ -78,46 +78,84 @@ function priceText(prices: Product['prices']) {
 </script>
 
 <template>
-	<div v-if="!isFetching" class="shop-items">
+	<div
+		v-if="!isFetching"
+		class="shop-items"
+	>
 		<h1>Subscriptions</h1>
 		<div>
-			<StaggeredTransitionGroup appear name="rpgm-stagger" :delay="0">
-				<div v-for="item in subscriptions" :key="item.id" :data-item-id="item.id" class="shop-item">
+			<StaggeredTransitionGroup
+				appear
+				name="rpgm-stagger"
+				:delay="0"
+			>
+				<div
+					v-for="item in subscriptions"
+					:key="item.id"
+					:data-item-id="item.id"
+					class="shop-item"
+				>
 					<h4 class="shop-item-name">
 						{{ item.name }}
 					</h4>
 					<span>{{ priceText(item.prices) }} </span>
 					<div>
-						<ProgressiveImage v-if="item.medias.length > 0" :src="getSmallestMedia(item.medias).publicUrl" />
+						<ProgressiveImage
+							v-if="item.medias.length > 0"
+							:src="getSmallestMedia(item.medias).publicUrl"
+						/>
 						<p class="shop-item-description">
 							{{ item.description }}
 						</p>
 					</div>
 					<LoadingBoundry #="{ loading, start }">
-						<button :disabled="!loggedIn || loading.value || checkingOutLoading" :data-loading="loading.value"
-							class="rpgm-button rpgm-button-primary" @click="start(checkout(item))">
+						<button
+							:disabled="!loggedIn || loading.value || checkingOutLoading"
+							:data-loading="loading.value"
+							class="rpgm-button rpgm-button-primary"
+							@click="start(checkout(item))"
+						>
 							{{ loggedIn ? "Buy" : "Sign In to Buy" }}
 						</button>
 					</LoadingBoundry>
 				</div>
 			</StaggeredTransitionGroup>
 		</div>
-		<h1 style="margin-top: 32px;">Products</h1>
+		<h1 style="margin-top: 32px;">
+			Products
+		</h1>
 		<div>
-			<StaggeredTransitionGroup appear name="rpgm-stagger" :delay="0">
-				<div v-for="item in products" :key="item.id" :data-item-id="item.id" class="shop-item">
+			<StaggeredTransitionGroup
+				appear
+				name="rpgm-stagger"
+				:delay="0"
+			>
+				<div
+					v-for="item in products"
+					:key="item.id"
+					:data-item-id="item.id"
+					class="shop-item"
+				>
 					<h4 class="shop-item-name">
 						{{ item.name }}
 					</h4>
 					<span>{{ priceText(item.prices) }} </span>
 					<div>
-						<ProgressiveImage v-if="item.medias.length > 0" :src="getSmallestMedia(item.medias).publicUrl" />
+						<ProgressiveImage
+							v-if="item.medias.length > 0"
+							:src="getSmallestMedia(item.medias).publicUrl"
+						/>
 						<p class="shop-item-description">
 							{{ item.description }}
 						</p>
 					</div>
 					<LoadingBoundry #="{ loading, start }">
-						<button :disabled="!loggedIn || loading.value || checkingOutLoading" :data-loading="loading.value" class="rpgm-button rpgm-button-primary" @click="start(checkout(item))">
+						<button
+							:disabled="!loggedIn || loading.value || checkingOutLoading"
+							:data-loading="loading.value"
+							class="rpgm-button rpgm-button-primary"
+							@click="start(checkout(item))"
+						>
 							{{ loggedIn ? "Buy" : "Sign In to Buy" }}
 						</button>
 					</LoadingBoundry>
@@ -125,12 +163,22 @@ function priceText(prices: Product['prices']) {
 			</StaggeredTransitionGroup>
 		</div>
 		<LoadingBoundry #="{ loading, start }">
-			<button class="rpgm-button rpgm-button-primary" :disabled="loading.value" :data-loading="loading.value" @click="start(openPortal())">
+			<button
+				class="rpgm-button rpgm-button-primary"
+				:disabled="loading.value"
+				:data-loading="loading.value"
+				@click="start(openPortal())"
+			>
 				Open Portal
 			</button>
 		</LoadingBoundry>
 	</div>
-	<p v-else style="min-height: 500px;">Loading...</p>
+	<p
+		v-else
+		style="min-height: 500px;"
+	>
+		Loading...
+	</p>
 </template>
 
 <style scoped>

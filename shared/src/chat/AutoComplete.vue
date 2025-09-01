@@ -18,7 +18,7 @@ const completionCursor = ref(-1);
 
 const Statuses = {
 	okay: '#00ffae',
-	warn: '#ffae00',
+	warn: '#ffae00'
 };
 
 const suggestions = computed<Suggestions>(() => {
@@ -43,7 +43,7 @@ const statusStyle = computed<StyleValue>(() => {
 });
 
 /**
- * For updating the input after pressing enter
+ * For updating the input after pressing enter.
  * @param e - Keyboard event
  */
 function onKeyDown(e: KeyboardEvent) {
@@ -171,7 +171,7 @@ onUnmounted(() => Hooks.off('chatMessage', messageHook.value));
 const commandStyles = computed<StyleValue[]>(() => {
 	return suggestions.value.suggestions.map<StyleValue>((_, i) => {
 		return {
-			...i == completionIndex.value ? { 'color': '#00ffae' } : {},
+			...i == completionIndex.value ? { 'color': '#00ffae' } : {}
 		};
 	});
 });
@@ -184,12 +184,29 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div id="rpgm-chat-command" v-follow="CHAT_MESSAGE" style="position: relative">
+	<div
+		id="rpgm-chat-command"
+		v-follow="CHAT_MESSAGE"
+		style="position: relative"
+	>
 		<div class="rpgm-chat-commands-container">
-			<div :style="statusStyle" class="rpgm-chat-commands-status" />
-			<TransitionGroup name="rpgm-chat-command" reversed tag="ul" class="rpgm-chat-commands">
-				<li v-for="(completion, i) in suggestions.suggestions" :key="`${completion.text}`" :style="commandStyles[i]"
-					class="rpgm-chat-command" @click="fillInSuggestion(completion, true)">
+			<div
+				:style="statusStyle"
+				class="rpgm-chat-commands-status"
+			/>
+			<TransitionGroup
+				name="rpgm-chat-command"
+				reversed
+				tag="ul"
+				class="rpgm-chat-commands"
+			>
+				<li
+					v-for="(completion, i) in suggestions.suggestions"
+					:key="`${completion.text}`"
+					:style="commandStyles[i]"
+					class="rpgm-chat-command"
+					@click="fillInSuggestion(completion, true)"
+				>
 					{{ completion.tooltip }}
 				</li>
 			</TransitionGroup>
