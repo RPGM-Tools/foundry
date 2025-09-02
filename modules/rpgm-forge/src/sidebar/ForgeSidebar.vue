@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { NButton, NCard, NCollapseTransition, NFlex, NResult, NTabPane, NTabs, NText } from 'naive-ui';
-
 import { NaiveUIThemeOverrides } from '#/style/theme';
 import SignedIn from '#/util/SignedIn.vue';
 
 import ForgeSidebarByoAI from './ForgeSidebarByoAI.vue';
+const onResize = inject<(forceCenter?: boolean) => void>('onResize');
 
 const tabValue = computed({
 	get() { return rpgm.forge.settings.mode; },
@@ -13,23 +12,43 @@ const tabValue = computed({
 
 const primaryColor = NaiveUIThemeOverrides.common.primaryColor;
 
-const infoCollapsed = ref(false);
+watch(tabValue, () => {
+	setTimeout(() => {
+		onResize?.(true);
+	}, 300);
+});
 </script>
 
 <template>
 	<NCard title="Select a mode to use Forge">
 		<template #header-extra>
-			<NButton
-				text
-				type="info"
-				@click="infoCollapsed = !infoCollapsed"
+			<NPopover
+				placement="bottom-end"
+				:show-arrow="false"
+				style="max-width: 300px;"
 			>
-				<i class="fas fa-circle-info" />
-			</NButton>
+				<template #trigger>
+					<NButton
+						text
+						type="info"
+					>
+						<i class="fas fa-circle-info" />
+					</NButton>
+				</template>
+				Lorem ipsum dolor sit amet
+				consectetur adipisicing elit.
+				Quisquam, quod.
+				Lorem ipsum dolor sit amet
+				consectetur adipisicing elit.
+				Quisquam, quod.
+				Lorem ipsum dolor sit amet
+				consectetur adipisicing elit.
+				Quisquam, quod.
+				Lorem ipsum dolor sit amet
+				consectetur adipisicing elit.
+				Quisquam, quod.
+			</NPopover>
 		</template>
-		<NCollapseTransition :show="infoCollapsed">
-			T
-		</NCollapseTransition>
 		<NTabs
 			v-model:value="tabValue"
 			type="segment"
@@ -39,6 +58,7 @@ const infoCollapsed = ref(false);
 			<NTabPane
 				name="rpgm"
 				tab="Online"
+				display-directive="show:lazy"
 			>
 				<template #tab>
 					<NText :type="tabValue === 'rpgm' ? 'default' : 'primary'">
@@ -83,6 +103,7 @@ const infoCollapsed = ref(false);
 			<NTabPane
 				name="diy"
 				tab="DIY"
+				display-directive="show:lazy"
 			>
 				<template #tab>
 					<NText>
@@ -94,6 +115,7 @@ const infoCollapsed = ref(false);
 			<NTabPane
 				name="offline"
 				tab="Offline"
+				display-directive="show:lazy"
 			>
 				<template #tab>
 					<NText>

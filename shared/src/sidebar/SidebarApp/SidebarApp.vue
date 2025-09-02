@@ -38,6 +38,10 @@ function focus() {
 	root.value?.focus();
 	onResize?.(true);
 }
+
+onMounted(() => {
+	setTimeout(focus, 100);
+});
 </script>
 
 <template>
@@ -121,7 +125,7 @@ function focus() {
 		padding-left: 6px;
 		position: relative;
 		overflow-y: scroll;
-		overflow-x: visible;
+		overflow-x: hidden;
 		padding-bottom: 8px;
 	}
 }

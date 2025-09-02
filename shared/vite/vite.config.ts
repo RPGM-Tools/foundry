@@ -70,11 +70,13 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 					manualChunks: {
 						'better-auth': ['better-auth'],
 						btsl: ['brigadier-ts-lite'],
+						naiveui: ['naive-ui'],
 						polar: ['@polar-sh/better-auth', '@polar-sh/sdk'],
 						'rpgm-tools': ['@rpgm/tools', '@rpgm/tools/forge'],
 						showdown: ['showdown'],
 						'vue-router': ['vue-router'],
-						vue: ['vue']
+						vue: ['vue'],
+						zod: ['zod', 'zod/mini']
 					},
 					assetFileNames: () => {
 						return 'assets/[name][extname]';

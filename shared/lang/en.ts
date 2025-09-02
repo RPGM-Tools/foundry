@@ -1,8 +1,7 @@
 export default {
 	RPGM_TOOLS: {
 		SIDEBAR: {
-			TITLE: 'RPGM Tools',
-			POPOUT_HINT: 'This appears in a popup, too!'
+			TITLE: 'RPGM Tools'
 		},
 		LOGGING: {
 			READY: 'RPGM Tools has finished loading!'

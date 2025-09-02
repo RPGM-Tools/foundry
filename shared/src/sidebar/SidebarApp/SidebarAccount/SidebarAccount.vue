@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { NCard } from 'naive-ui';
-
 import SignedIn from '#/util/SignedIn.vue';
 
 import SidebarAccountSignedIn from './SidebarAccountSignedIn.vue';

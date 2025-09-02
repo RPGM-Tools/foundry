@@ -1,15 +1,21 @@
 import type { App } from 'vue';
 
-import { RpgmModule as Module } from '@rpgm/tools';
-import type { FoundyRpgmModuleMixin, RpgmModule } from '#/module';
 import type RpgmSidebar from '#/sidebar/modern';
+import type { NaiveComponents } from '#/style/theme';
 import type { RpgmTools } from '#/tools';
-import { RpgmForge } from '../../modules/rpgm-forge/src/forge';
+
+import type { RpgmForge } from '../../modules/rpgm-forge/src/forge';
+
+declare module 'vue' {
+	export interface GlobalComponents extends NaiveComponents { }
+}
 
 declare global {
 	declare module '*.vue';
+
 	declare const __MODULE_VERSION__: string;
 	declare const __API_URL__: string;
+
 
 	interface RPGM extends object {
 		forge?: RpgmForge
@@ -22,9 +28,9 @@ declare global {
 
 	/**
 	 * Our global singleton object
-	 * Essentially the static instance of {@link RpgmModule}
+	 * Essentially the static instance of RpgmModule
 	 */
-	var rpgm: RPGM & typeof RpgmTools;
+	var rpgm: RPGM & RpgmTools;
 	var game: ReadyGame;
 
 	type SidebarMenu = {

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { FormRules} from 'naive-ui';
-import { NButton, NCollapseTransition, NForm, NFormItemRow, NInput, NTab, NTabs } from 'naive-ui';
+import type { FormRules } from 'naive-ui';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useLoading } from '#/util/useLoading';

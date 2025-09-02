@@ -1,5 +1,7 @@
 import { type App, type Component, createApp } from 'vue';
 
+import { globalNaive } from '#/style/theme';
+
 import SidebarApp from './SidebarApp';
 
 declare class SidebarTab extends Application { }
@@ -58,6 +60,7 @@ export default class RpgmSidebar extends SidebarTab {
 		mount.className = data.cssClass ?? '';
 
 		this.app = createApp(SidebarApp as Component);
+		globalNaive(this.app);
 		this.app.use(rpgm.sidebar.router);
 		this.app.provide('onResize', this.onResize.bind(this));
 		this.app.mount(mount);
@@ -87,7 +90,7 @@ export default class RpgmSidebar extends SidebarTab {
 			const headerHeight = this.element.find('.window-header').get(0)?.clientHeight ?? 0;
 			const innerHeight = this.element.find('.sidebar-content').get(0)?.scrollHeight ?? 9999;
 
-			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 70);
+			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 47);
 			const newTop = ((this.position.top ?? 0) + newHeight) > windowHeight || forceCenter ? (
 				Math.max(0, Math.min(windowHeight - newHeight, (windowHeight - newHeight) / 2))
 			) : this.position.top;

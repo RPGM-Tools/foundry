@@ -1,3 +1,5 @@
+import type { RpgmModule } from '@rpgm/tools';
+
 import { hudHeuristics } from './radial-menu';
 import { DeveloperSettings } from './settings/developer';
 import { RadialMenuSettings } from './settings/radialMenu';
@@ -29,7 +31,7 @@ export function GlobalSettings() {
 		icon: 'fa-regular fa-circle-info',
 		tooltip: 'RPGM_TOOLS.RADIAL_MENU.INFO',
 		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
-		callback: (context) => rpgm.tools.logger.log(context.token),
+		callback: (context) => rpgm.tools.logger.debug(context.token),
 		logger: rpgm.tools.logger
 	});
 
@@ -85,8 +87,9 @@ export function GlobalSettings() {
  * Register shared settings menus on each module's settings page.
  * @param id - The foundry module to register menus to
  */
-export function GlobalMenus(id: string) {
-	RadialMenuSettings.registerMenu(id);
-	// SecretsSettings.registerMenu(id);
-	DeveloperSettings.registerMenu(id);
+export function GlobalMenus(module: RpgmModule) {
+	if (module.id === 'rpgm-tools') return;
+	RadialMenuSettings.registerMenu(module.id);
+	// SecretsSettings.registerMenu(module.id);
+	DeveloperSettings.registerMenu(module.id);
 }

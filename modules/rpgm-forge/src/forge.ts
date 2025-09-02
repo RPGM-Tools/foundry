@@ -33,10 +33,10 @@ export class RpgmForge extends FoundyRpgmModuleMixin(AbstractForge) {
 	homebrewSchemas: HomebrewSchema[] = [];
 	genres: Partial<Record<string, { genre: string }>> = {};
 
-	promptChats!: ChatWizard;
-	nameChats!: ChatWizard<ForgeChatNames>;
-	descriptionsChats!: ChatWizard<ForgeChatDescription>;
-	homebrewChats!: ChatWizard<ForgeChatHomebrew>;
+	promptChats: ChatWizard;
+	nameChats: ChatWizard<ForgeChatNames>;
+	descriptionsChats: ChatWizard<ForgeChatDescription>;
+	homebrewChats: ChatWizard<ForgeChatHomebrew>;
 
 	protected override async init() {
 		rpgm.forge = this;
@@ -52,7 +52,7 @@ export class RpgmForge extends FoundyRpgmModuleMixin(AbstractForge) {
 		this.promptChats.load();
 		this.nameChats = new ChatWizard<ForgeChatNames>(
 			this.id,
-			'name',
+			'names',
 			NamesChat as Component,
 			this.name,
 			this.logger
@@ -60,7 +60,7 @@ export class RpgmForge extends FoundyRpgmModuleMixin(AbstractForge) {
 		this.nameChats.load();
 		this.descriptionsChats = new ChatWizard<ForgeChatDescription>(
 			this.id,
-			'description',
+			'descriptions',
 			DescriptionChat as Component,
 			this.name,
 			this.logger

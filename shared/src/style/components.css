@@ -4,7 +4,7 @@
 
 .rpgm-app {
 	transform-origin: center;
-	position: relative;
+	min-height: 0 !important;
 }
 
 .rpgm-app h1 {

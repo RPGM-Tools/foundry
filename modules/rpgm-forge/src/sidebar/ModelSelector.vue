@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { NButton, NFormItemRow, NInput, NTooltip } from 'naive-ui';
-
 import { LoadingBoundry } from '#/util/useLoading';
 
 defineProps<{

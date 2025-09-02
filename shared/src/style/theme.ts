@@ -1,5 +1,6 @@
 import type { GlobalThemeOverrides } from 'naive-ui';
 import { darkTheme, NConfigProvider } from 'naive-ui';
+import type { App } from 'vue';
 
 export const NaiveUIThemeOverrides = {
 	common: {
@@ -11,7 +12,7 @@ export const NaiveUIThemeOverrides = {
 		actionColor: '#ff73c0',
 		borderColor: '#fff',
 		hoverColor: '#ff73c0',
-		cardColor: 'rgb(24, 24, 28, 0.5)'
+		cardColor: 'rgba(24, 24, 28, 0.5)'
 	},
 	Typography: {
 		textColorPrimary: '#855cd6'
@@ -22,6 +23,9 @@ export const NaiveUIThemeOverrides = {
 		paddingMedium: '8px',
 		paddingLarge: '12px',
 		paddingHuge: '16px'
+	},
+	Tag: {
+		border: '2'
 	}
 } as const satisfies GlobalThemeOverrides;
 
@@ -35,3 +39,74 @@ export const NaiveTheme = defineComponent({
 		}, slots.default);
 	}
 });
+
+import {
+	NAvatar,
+	NButton,
+	NCard,
+	NCollapse,
+	NCollapseItem,
+	NCollapseTransition,
+	NEmpty,
+	NFlex,
+	NForm,
+	NFormItemRow,
+	NH1,
+	NH2,
+	NH3,
+	NIcon,
+	NInput,
+	NList,
+	NListItem,
+	NP,
+	NPopover,
+	NResult,
+	NSpin,
+	NTab,
+	NTabPane,
+	NTabs,
+	NTag,
+	NText,
+	NThing,
+	NTooltip
+} from 'naive-ui';
+
+export type NaiveComponents = typeof NaiveComponents;
+
+const NaiveComponents = {
+	NAvatar,
+	NButton,
+	NCard,
+	NCollapse,
+	NCollapseItem,
+	NCollapseTransition,
+	NEmpty,
+	NFlex,
+	NForm,
+	NFormItemRow,
+	NH1,
+	NH2,
+	NH3,
+	NIcon,
+	NInput,
+	NList,
+	NListItem,
+	NP,
+	NPopover,
+	NResult,
+	NSpin,
+	NTab,
+	NTabPane,
+	NTabs,
+	NTag,
+	NText,
+	NThing,
+	NTooltip
+} as const;
+
+export function globalNaive(app: App) {
+	for (const [name, component] of Object.entries(NaiveComponents)) {
+		app.component(name, component);
+	}
+	return app;
+}

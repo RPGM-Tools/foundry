@@ -9,13 +9,13 @@ div#sidebar:has([data-tab="rpgm"]) {
 }
 
 #rpgm-popout:has(.window-content) .window-content {
-	overflow: hidden;
+	/* overflow: hidden; */
 	padding: 0;
 }
 
-/* #rpgm-popout:has(.window-content) .window-content .sidebar-popout { */
-/* 	height: 100%; */
-/* } */
+#rpgm-popout:has(.window-content) .window-content .sidebar-popout {
+	height: 100%;
+}
 
 .rpgm-open:not(.rpgm-close),
 .rpgm-app:not(.static) {

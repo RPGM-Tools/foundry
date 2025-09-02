@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { NCard, NCollapse, NCollapseItem, NFlex, NP, NText, NThing } from 'naive-ui';
-
 import SidebarAccountByoAI from '#/sidebar/SidebarApp/SidebarAccount/SidebarAccountByoAI.vue';
 
 import ModelSelector from './ModelSelector.vue';
@@ -29,15 +27,14 @@ const overridesPlaceholder = computed(() => model.value || baseModelPlaceholder.
 // Open overrides if any are set
 const defaultOpen = computed(() => [names.value, descriptions.value, homebrew.value].some(Boolean) 
 	? ['1'] : []);
+
 </script>
 
 <template>
 	<NFlex vertical>
+		<SidebarAccountByoAI />
 		<NCard>
-			<SidebarAccountByoAI />
-		</NCard>
-		<NCard>
-			<NThing title="Ai Models">
+			<NThing title="Text Models">
 				<template #description>
 					<NP>
 						Here you can select the text AI model(s) to use for Forge.

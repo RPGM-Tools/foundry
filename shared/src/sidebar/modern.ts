@@ -1,6 +1,8 @@
 import type { DeepPartial } from 'fvtt-types/utils';
 import { type App, type Component, createApp } from 'vue';
 
+import { globalNaive } from '#/style/theme';
+
 import SidebarApp from './SidebarApp';
 
 type ClosingOptions = foundry.applications.api.ApplicationV2.ClosingOptions;
@@ -50,6 +52,7 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 	override _replaceHTML(result: HTMLElement) {
 		if (this.app) return;
 		this.app = createApp(SidebarApp as Component);
+		globalNaive(this.app);
 		this.app.use(rpgm.sidebar.router);
 		this.app.provide('onResize', this.onResize.bind(this));
 		this.app.mount(result);
@@ -64,7 +67,7 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 			const headerHeight = this.element.querySelector('.window-header')?.clientHeight ?? 0;
 			const innerHeight = this.element.querySelector('.sidebar-content')?.scrollHeight ?? 9999;
 
-			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 70);
+			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 47);
 			const newTop = ((this.position.top ?? 0) + newHeight) > windowHeight || forceCenter ? (
 				Math.max(0, Math.min(windowHeight - newHeight, (windowHeight - newHeight) / 2))
 			) : this.position.top;

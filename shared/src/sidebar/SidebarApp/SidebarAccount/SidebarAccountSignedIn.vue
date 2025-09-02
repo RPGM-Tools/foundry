@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { NButton, NFlex, NH1 } from 'naive-ui';
-
 import { LoadingBoundry } from '#/util/useLoading';
 
 import LegacyDiceIcon from './LegacyDiceIcon.vue';

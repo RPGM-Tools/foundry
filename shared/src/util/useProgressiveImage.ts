@@ -1,4 +1,4 @@
-export default function(placeholder: string, url: string) {
+export function useProgressiveImage(placeholder: string, url: string) {
 	const src = ref(placeholder);
 	const blur = ref(true);
 

@@ -1,5 +1,7 @@
 import type { Component, ShallowReactive } from 'vue';
 
+import { j } from '#/util/compatibility';
+
 import RadialMenuFloating from './RadialMenuFloating.vue';
 
 /** Injects code to render the dice hud. */
@@ -21,7 +23,7 @@ function renderTokenHUD(_element: JQuery, html: JQuery | HTMLElement) {
 	 * {@link html} is of type JQuery in 12, HTMLElement in 13
 	 */
 	const hud = game.canvas.tokens!.hud;
-	const htmlElement = rpgm.j(html);
+	const htmlElement = j(html);
 	hud.menuApp?.unmount();
 	const appContainer = document.createElement('div');
 	appContainer.style.position = 'absolute';

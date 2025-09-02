@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import buttonImage from '../../assets/d20-512x512.webp?url';
-import useProgressiveImage from './useProgressiveImage';
+import buttonImage from '#/../assets/d20-512x512.webp?url';
+
+import { useProgressiveImage } from './useProgressiveImage';
 
 const props = defineProps<{
 	src: string

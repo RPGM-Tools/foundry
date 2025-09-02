@@ -19,6 +19,7 @@
 		"esModuleInterop": true,
 		"isolatedModules": true,
 		"noImplicitOverride": true,
+		"strictPropertyInitialization": false,
 		"allowJs": true,
 		// "noUncheckedIndexedAccess": true,
 		"skipLibCheck": true,

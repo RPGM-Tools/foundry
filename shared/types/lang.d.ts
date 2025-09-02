@@ -10,7 +10,6 @@ declare global {
 		RPGM_TOOLS: {
 			SIDEBAR: {
 				TITLE,
-				POPOUT_HINT
 			},
 			LOGGING: {
 				READY
@@ -34,10 +33,6 @@ declare global {
 				RADIAL_MENU_HUD_HINT
 				RADIAL_MENU_DEBUG
 				RADIAL_MENU_DEBUG_HINT
-				AI_URL
-				AI_URL_HINT
-				AI_KEY
-				AI_KEY_HINT
 			},
 			RADIAL_MENU: {
 				INFO

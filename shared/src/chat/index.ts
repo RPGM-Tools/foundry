@@ -3,6 +3,8 @@ import { CommandDispatcher } from 'brigadier-ts-lite';
 import type { App, Component } from 'vue';
 import { createApp } from 'vue';
 
+import { j } from '#/util/compatibility';
+
 import AutoComplete from './AutoComplete.vue';
 import type { ChatWizard } from './ChatWizard';
 
@@ -52,7 +54,7 @@ export class ChatCommands {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
 					if (!shouldHandle) continue;
-					handler.render(message, rpgm.j(html));
+					handler.render(message, j(html));
 					return;
 				}
 			});
@@ -67,7 +69,7 @@ export class ChatCommands {
 				if (option.name === 'CHAT.RevealMessage') {
 					const condition = option.condition;
 					option.condition = (li: JQuery | HTMLElement) => {
-						const message = game.messages.get(rpgm.j(li).dataset.messageId!);
+						const message = game.messages.get(j(li).dataset.messageId!);
 						let wizard = false;
 						for (const handler of rpgm.chat.messageHandlers)
 							if (handler.query(message!))
