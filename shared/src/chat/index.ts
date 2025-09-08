@@ -63,7 +63,7 @@ export class ChatCommands {
 		// Patch chat context menu to not allow revealing wizards
 		const _getEntryContextOptions = ChatLog.prototype._getEntryContextOptions.bind(ui.chat);
 		ChatLog.prototype._getEntryContextOptions = () => {
-			rpgm.tools.logger.debug('Patching chat context menu');
+			rpgm.logger.debug('Patching chat context menu');
 			const options = _getEntryContextOptions();
 			for (const option of options) {
 				if (option.name === 'CHAT.RevealMessage') {
@@ -201,7 +201,7 @@ export class ChatCommands {
 	createChatPanel() {
 		const chatInput = rpgm.majorGameVersion === 12 ? document.querySelector('#chat-form')
 			: document.querySelector('#chat-message');
-		if (!chatInput) { rpgm.tools.logger.error('Couldn\'t find the chat input!'); return; };
+		if (!chatInput) { rpgm.logger.error('Couldn\'t find the chat input!'); return; };
 		this.chatPanel = createApp(AutoComplete as Component);
 		const panelContainer = document.createElement('div');
 

@@ -12,56 +12,55 @@ const { align = 'center center' } = defineProps<{
 </script>
 
 <template>
-	<div @click="updateBalance">
-		<SignedIn>
-			<AnimatedNumber
-				:value="balance"
-				#="{ display, direction }"
-				:duration="3000"
+	<SignedIn>
+		<AnimatedNumber
+			:value="balance"
+			#="{ display, direction }"
+			:duration="3000"
+		>
+			<NPopover
+				placement="left"
 			>
-				<span
-					class="balance-outer"
-					:style="{ transformOrigin: align }"
-					:class="{ increasing: direction > 0, decreasing: direction < 0 }"
-				>
-					<span
-						class="balance-inner"
-						:class="{ increasing: direction > 0, decreasing: direction < 0 }"
+				<span>{{ balance }} Polyhedrium</span>
+				<template #trigger>
+					<NTag
+						:type="direction === 0 ? 'info' : direction > 0 ? 'success' : 'error'"
+						@click="updateBalance"
 					>
-						{{ display }}
-					</span>
-				</span>
-			</AnimatedNumber>
-		</SignedIn>
-	</div>
+						<template
+							#icon
+						>
+							<NIcon size="medium">
+								<i class="fa-solid fa-dice-d12" />
+							</NIcon>
+						</template>
+						<span
+							class="balance-outer"
+							:style="{ transformOrigin: align }"
+							:class="{ increasing: direction > 0, decreasing: direction < 0 }"
+						>
+							{{ display }}
+						</span>
+					</NTag>
+				</template>
+			</NPopover>
+		</AnimatedNumber>
+	</SignedIn>
 </template>
 
 <style scoped>
 .balance-outer {
 	z-index: 100;
-	transition: scale 0.2s ease-out;
+	transition: all 0.2s ease-out;
 	display: inline-block;
 
 	&.increasing {
 		scale: 1.2;
-	}
-
-	&.decreasing {
-		scale: 0.9;
-	}
-}
-
-.balance-inner {
-	display: inline-block;
-	transition: transform 0.2s ease-out, color 0.2s ease-out;
-
-	&.increasing {
-		color: green;
 		animation: rotate-shake 0.25s ease-in-out infinite;
 	}
 
 	&.decreasing {
-		color: red;
+		scale: 0.9;
 	}
 }
 

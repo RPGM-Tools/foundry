@@ -1,35 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { AbstractTools, RpgmModule as Module } from '@rpgm/tools';
+import type { AbstractRpgmModule, AbstractTools, IRpgmModule, ModuleMap } from '@rpgm/tools';
 import { RpgmLogger } from '@rpgm/tools';
-import { toReactive } from '@vueuse/core';
 
-import { GlobalMenus } from '#/settings';
-
+import { LocalStorageMap } from './settings';
 import { RpgmTools } from './tools';
+import { j } from './util/compatibility';
 
 type VoidPromise = void | Promise<void>;
-type AbstractConstructor<T> = (abstract new (...args: any[]) => T);
-interface StaticFoundryRpgmModule extends Omit<typeof Module, 'prototype'> { }
-type AbstractFoundryRpgmModule = AbstractConstructor<Module> & StaticFoundryRpgmModule;
 
-export type FoundryModule = InstanceType<ReturnType<typeof FoundyRpgmModuleMixin>>;
+type AbstractConstructor<T> = abstract new (...args: any[]) => T;
+export type FoundryRpgmModule = InstanceType<ReturnType<typeof FoundyRpgmModuleMixin>>;
 
-export function FoundyRpgmModuleMixin<T extends AbstractFoundryRpgmModule>(Base: T) {
+export function FoundyRpgmModuleMixin<C extends AbstractConstructor<AbstractRpgmModule<Settings> & IRpgmModule<keyof ModuleMap, Settings>>, Settings extends AbstractRpgmModule.ModuleSettings>(Base: C) {
 	abstract class FoundryRpgmModule extends Base {
 		readonly version = __MODULE_VERSION__;
 
 		private static show(method: 'log' | 'warn' | 'error', message: string) {
-			ui.notifications?.[method === 'log' ? 'info' : method](message, { console: false });
+			const notif = ui.notifications?.[method === 'log' ? 'info' : method](message, { console: false });
+			j(notif.element!).classList.add('rgpm');
 		}
 
 		// ==== Instance ====
 
 		override logger: RpgmLogger;
 
-		private _settings = ref({});
-		override settings = toReactive(this._settings);
+		override settings = new LocalStorageMap<Settings>(this.id, this.DEFAULT_SETTINGS);
 
-		protected override get tools() { return rpgm as AbstractTools; };
+		protected override get tools() { return window.rpgm as unknown as AbstractTools; };
 
 		protected bootstrap = Promise.resolve();
 
@@ -42,15 +39,13 @@ export function FoundyRpgmModuleMixin<T extends AbstractFoundryRpgmModule>(Base:
 
 		private async _init() {
 			this.logger = RpgmLogger.fromModule(this, { show: FoundryRpgmModule.show });
-			if (!globalThis.rpgm) {
+			if (!window.rpgm) {
 				this.logger.debug('first');
-				globalThis.rpgm = new RpgmTools();
+				window.rpgm = new RpgmTools();
 				rpgm._init();
 			}
 			this.logger.prefixed('').log(`${this.icon} ${this.name} joined the game`);
-			this._settings.value = this.load() ?? Base.DEFAULT_SETTINGS;
-			rpgm.modules[this.id] = this;
-			watch(this._settings, this.save.bind(this), { deep: true });
+			rpgm.modules[this.id] = this as any;
 			await this.init();
 		}
 
@@ -58,7 +53,6 @@ export function FoundyRpgmModuleMixin<T extends AbstractFoundryRpgmModule>(Base:
 
 		private async _setup() {
 			this.registerSettings();
-			GlobalMenus(this);
 		}
 
 		protected registerSettings(): VoidPromise { }

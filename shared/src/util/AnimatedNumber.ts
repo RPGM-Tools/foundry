@@ -52,7 +52,7 @@ export default defineComponent({
 			value: number,
 			display: string,
 			direction: -1 | 0 | 1
-		}) => undefined
+		}) => VNode[]
 	}>,
 
 	setup(props, { slots }) {
@@ -106,6 +106,7 @@ export default defineComponent({
 		return () => {
 			const value = Math.round(displayValue.value);
 			const display = formatter.format(value);
+
 			const content = slots.default
 				? slots.default({ value, display, direction })
 				: display;

@@ -55,6 +55,7 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 		envPrefix: 'RPGM_',
 		build: {
 			assetsInlineLimit: ((path: string) => ['.glsl', '.png'].some(f => path.startsWith(f))),
+			chunkSizeWarningLimit: 1000,
 			outDir: resolve(dirname, '.dist'),
 			emptyOutDir: true,
 			// // This wasn't minifying correctly, try enabling if things break

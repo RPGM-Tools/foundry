@@ -2,6 +2,7 @@
 import ContentEditable from '#/util/ContentEditable.vue';
 import { vFitLines } from '#/util/VFitLines';
 import WriteOn from '#/util/WriteOn';
+import { NH1 } from 'naive-ui';
 
 const data = inject<ForgeChatHomebrew>('data')!;
 
@@ -48,7 +49,7 @@ const rename = (n: string) => {
 				#="display"
 				:duration="400"
 			>
-				<h1
+				<NH1
 					:key="display.value"
 					:ref="config.ref"
 					v-fit-lines
@@ -58,7 +59,7 @@ const rename = (n: string) => {
 					@blur="config.onBlur"
 				>
 					{{ display }}
-				</h1>
+				</NH1>
 			</WriteOn>
 		</ContentEditable>
 		<div
@@ -154,8 +155,6 @@ const rename = (n: string) => {
 
 		* {
 			position: relative;
-			top: 50%;
-			transform: translateY(-50%);
 		}
 	}
 }

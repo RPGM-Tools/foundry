@@ -17,7 +17,7 @@ import Genres from '$$/assets/combined_systems.json?url';
 
 import ForgeSidebar from './sidebar/ForgeSidebar.vue';
 
-export class RpgmForge extends FoundyRpgmModuleMixin(AbstractForge) {
+export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, AbstractForge.Settings>(AbstractForge) {
 	/** @returns The current genre setting */
 	get genre() { return game.settings.get('rpgm-forge', 'genre'); }
 

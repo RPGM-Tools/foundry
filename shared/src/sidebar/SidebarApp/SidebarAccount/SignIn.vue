@@ -3,6 +3,7 @@ import type { FormRules } from 'naive-ui';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useLoading } from '#/util/useLoading';
+import { vFocus } from '#/util/vFocus';
 
 const goBack = useRoute().query.back as 'true' | undefined;
 const router = useRouter();
@@ -81,7 +82,7 @@ const { start } = useLoading();
 
 function signIn() {
 	if (!formValue.value.username || !formValue.value.password) {
-		rpgm.tools.logger.visible.warn('Please enter a username and password.');
+		rpgm.logger.visible.warn('Please enter a username and password.');
 		return;
 	};
 	start(rpgm.auth.signIn.username({
@@ -89,7 +90,7 @@ function signIn() {
 		password: formValue.value.password
 	}).then((value) => {
 		// Redirect 
-		rpgm.tools.logger.log(goBack);
+		rpgm.logger.log(goBack);
 		if (goBack === 'true' && !value.error) {
 			router.back();
 		}
@@ -139,7 +140,10 @@ function signIn() {
 				label="Username"
 				path="username"
 			>
-				<NInput v-model:value="formValue.username" />
+				<NInput
+					v-model:value="formValue.username"
+					v-focus="'input'"
+				/>
 			</NFormItemRow>
 			<NFormItemRow
 				label="Password"

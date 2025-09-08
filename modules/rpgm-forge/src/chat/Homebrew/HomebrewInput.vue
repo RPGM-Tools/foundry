@@ -103,6 +103,7 @@ function changeName(n: Event) {
 				class="rpgm-input rpgm-homebrew-field-value"
 				type="text"
 				:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')"
+				:value="data.options.schema.custom_name"
 				@input="changeName"
 			>
 		</div>

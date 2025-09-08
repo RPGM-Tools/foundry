@@ -1,5 +1,4 @@
-import type { Router, RouteRecordRaw } from 'vue-router';
-import { createMemoryHistory, createRouter } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
 import SidebarAppMenu from './SidebarApp/SidebarAppMenu.vue';
 
@@ -9,22 +8,19 @@ export class RpgmSidebarManager {
 
 	constructor() {
 		void this.initSidebar();
-		this.router = createRouter({
-			history: createMemoryHistory(),
-			routes: [
-				{
-					path: '/',
-					name: 'RPGM Tools',
-					component: SidebarAppMenu,
-					meta: {
-						title: 'RPGM Tools'
-					}
-				}
-			]
-		});
 	}
 
-	router: Router;
+	routes: RouteRecordRaw[] = [
+		{
+			path: '/',
+			name: 'RPGM Tools',
+			component: SidebarAppMenu,
+			meta: {
+				title: 'RPGM Tools'
+			}
+		}
+	]
+		;
 
 	private async initSidebar() {
 		const isLegacy = rpgm.majorGameVersion <= 12;
@@ -35,6 +31,6 @@ export class RpgmSidebarManager {
 	}
 
 	registerSidebarMenu(options: RouteRecordRaw) {
-		this.router.addRoute(options);
+		this.routes.push(options);
 	}
 }

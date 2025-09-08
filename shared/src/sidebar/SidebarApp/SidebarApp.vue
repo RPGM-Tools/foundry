@@ -53,24 +53,30 @@ onMounted(() => {
 	>
 		<NaiveTheme>
 			<span class="sidebar-title-container">
-				<PolyhedriumBalance
-					style="position: absolute; right: 0; top: 50%; transform: translateY(-50%);"
-					align="right"
-				/>
 				<WriteOn
-					v-fit-lines
 					class="sidebar-title"
+					style="display: flex; overflow: hidden; align-items: center;"
 					:value="$route.meta.title ?? ''"
+					#="display"
 					:duration="400"
-				/>
-				<i
-					:class="{ 'hide-sidebar-back': $route.path === '/' }"
-					tabindex="0"
-					class="fas fa-chevron-left sidebar-back"
-					@click="$router.back"
-					@keydown.space.prevent="$router.back"
-					@keydown.enter.prevent="$router.back"
-				/>
+				>
+					<i
+						:class="{ 'hide-sidebar-back': $route.path === '/' }"
+						tabindex="0"
+						class="fas fa-chevron-left sidebar-back"
+						@click="$router.back"
+						@keydown.space.prevent="$router.back"
+						@keydown.enter.prevent="$router.back"
+					/>
+					<span
+						:key="display.value"
+						v-fit-lines
+						style="flex: 1; min-width: 0; padding-top: 4px; padding-bottom: 4px;"
+					>
+						{{ display }}
+					</span>
+					<PolyhedriumBalance style="display: flex; align-items: center;" />
+				</WriteOn>
 			</span>
 			<div
 				v-if="shouldShow"
@@ -78,7 +84,7 @@ onMounted(() => {
 			>
 				<RouterView #="{ Component }">
 					<Transition
-						name="rpgm-fade"
+						name="rpgm-zoom"
 						@after-enter="focus"
 					>
 						<component :is="Component" />
@@ -110,12 +116,8 @@ onMounted(() => {
 		margin-bottom: 0.4rem;
 
 		.sidebar-title {
-			text-align: center;
 			font-size: 2rem;
 			margin: 0;
-			padding-top: 4px;
-			padding-left: 2rem;
-			padding-right: 2rem;
 		}
 	}
 
@@ -131,27 +133,27 @@ onMounted(() => {
 }
 
 .sidebar-back {
-	position: absolute;
-	top: 50%;
+	position: relative;
 	height: 100%;
 	left: 0.5rem;
-	transform: translateX(0) scale(1, 1);
-	translate: 0 -50%;
 	font-size: 2rem;
 	z-index: 1;
 	cursor: pointer;
-	transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 	outline: none;
+	margin-right: 0.85rem;
 
 	&.hide-sidebar-back {
-		transform: translateX(-125%) scale(1, 0);
+		margin-left: -2rem;
+		/* transform: translateX(-125%) scale(1, 0); */
 	}
 
 	&:not(.hide-sidebar-back):focus,
 	&:not(.hide-sidebar-back):hover {
 		color: #6633ff;
 		text-shadow: 0 0 4px #6633ff;
-		transform: translateX(25%) scale(1.25, 1);
+		margin-right: 1.35rem;
+		transform: translateX(10%) scale(1.25, 1);
 	}
 }
 </style>

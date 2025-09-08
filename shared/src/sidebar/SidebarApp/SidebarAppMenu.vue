@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+
 import StaggeredTransitionGroup from '#/util/StaggeredTransitionGroup';
 
 import SidebarAppButton from './SidebarAppButton.vue';
 
-const menus = computed(() => rpgm.sidebar.router.getRoutes()
+const router = useRouter();
+
+const menus = computed(() => router.getRoutes()
 	.filter(route => route.meta.menu)
 	.sort((a, b) => (b.meta.menu!.index || 0) - (a.meta.menu!.index || 0)));
 </script>
@@ -12,7 +16,7 @@ const menus = computed(() => rpgm.sidebar.router.getRoutes()
 	<StaggeredTransitionGroup
 		appear
 		tag="ul"
-		name="rpgm-fade"
+		name="rpgm-zoom"
 	>
 		<li
 			v-for="menu in menus"

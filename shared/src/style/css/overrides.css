@@ -1,0 +1,23 @@
+.n-card {
+	overflow: visible !important;
+}
+
+.n-result {
+	padding-top: 1rem;
+}
+
+.n-tabs .n-tabs-rail {
+	overflow: hidden !important;
+}
+
+.n-tabs .n-tabs-rail .n-tabs-capsule {
+	transition: background-color 0.3s var(--n-bezier), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.n-tabs .n-tabs-pane-wrapper {
+	will-change: max-height !important;
+}
+
+.rpgm-app .window-content {
+	overflow: hidden !important;
+}

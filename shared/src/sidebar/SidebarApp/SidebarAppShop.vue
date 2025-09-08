@@ -4,24 +4,29 @@ import { useFetch } from '@vueuse/core';
 import * as z from 'zod/mini';
 
 import ProgressiveImage from '#/util/ProgressiveImage.vue';
+import SignedIn from '#/util/SignedIn.vue';
 import StaggeredTransitionGroup from '#/util/StaggeredTransitionGroup';
 import { LoadingBoundry } from '#/util/useLoading';
 
-const session = rpgm.auth.useSession();
+import SignIn from './SidebarAccount/SignIn.vue';
+
+const onResize = inject<(forceCenter?: boolean) => void>('onResize');
 
 const { updateBalance } = rpgm.usePolyhedriumBalance();
-
-const loggedIn = computed(() => Boolean(session.value.data));
 
 type Product = PolarProduct & { slug: string };
 
 const { isFetching, data } = useFetch(__API_URL__ + '/api/list-products').json<Product[]>();
 
+watch(isFetching, () => {
+	onResize?.(true);
+});
+
 onMounted(updateBalance);
 
 // Disable all buttons while checking out
 const checkingOutLoading = ref(false);
-const subscriptions = computed(() => data.value?.filter(item => item.isRecurring).sort(sortByPrice));
+// const subscriptions = computed(() => data.value?.filter(item => item.isRecurring).sort(sortByPrice));
 const products = computed(() => data.value?.filter(item => !item.isRecurring).sort(sortByPrice));
 
 const tagSchema = z.object({
@@ -102,140 +107,117 @@ function priceText(prices: Product['prices']) {
 <template>
 	<NCard>
 		<Transition name="rpgm-fade">
-			<div
-				v-if="!isFetching"
-				class="shop-items"
-			>
-				<h1>Products</h1>
-				<NList style="background: transparent;">
-					<StaggeredTransitionGroup
-						appear
-						name="rpgm-stagger"
-						:delay="0"
-					>
-						<NListItem
-							v-for="item in products"
-							:key="item.id"
-						>
-							<NThing
-								:title="item.name"
-								class="shop-item"
-							>
-								<ProgressiveImage :src="getSmallestMedia(item.medias).publicUrl" />
-								{{ item.description }}
-								<template #description>
-									<NH3
-										strong
-										style="border: none;"
-										prefix="bar"
-										type="default"
-									>
-										{{ priceText(item.prices) }} 
-									</NH3>
-								</template>
-								<template #footer>
-									<NFlex size="small">
-										<NTooltip
-											v-for="tag in getTags(item)"
-											:key="tag.name"
-										>
-											<template #trigger>
-												<NTag type="info">
-													{{ tag.name }}
-													<template
-														v-if="tag.icon"
-														#icon
-													>
-														<NIcon size="medium">
-															<i :class="tag.icon" />
-														</NIcon>
-													</template>
-												</NTag>
-											</template>
-											{{ tag.desc }}
-										</NTooltip>
-									</NFlex>
-								</template>
-								<template #action>
-									<LoadingBoundry #="{ loading, start }">
-										<NFlex vertical>
-											<NButton
-												type="primary"
-												:loading="loading.value"
-												@click="start(checkout(item))"
-											>
-												Buy
-											</NButton>
-										</NFlex>
-									</LoadingBoundry>
-								</template>
-							</NThing>
-						</NListItem>
-					</StaggeredTransitionGroup>
-				</NList>
-				<h1>Subscriptions</h1>
-				<div>
-					<StaggeredTransitionGroup
-						appear
-						name="rpgm-stagger"
-						:delay="0"
-					>
-						<div
-							v-for="item in subscriptions"
-							:key="item.id"
-							:data-item-id="item.id"
-							class="shop-item"
-						>
-							<h4 class="shop-item-name">
-								{{ item.name }}
-							</h4>
-							<span>{{ priceText(item.prices) }} </span>
-							<div>
-								<ProgressiveImage
-									v-if="item.medias.length > 0"
-									:src="getSmallestMedia(item.medias).publicUrl"
-								/>
-								<p class="shop-item-description">
-									{{ item.description }}
-								</p>
-							</div>
-							<LoadingBoundry #="{ loading, start }">
-								<button
-									:disabled="!loggedIn || loading.value || checkingOutLoading"
-									:data-loading="loading.value"
-									class="rpgm-button rpgm-button-primary"
-									@click="start(checkout(item))"
-								>
-									{{ loggedIn ? "Buy" : "Sign In to Buy" }}
-								</button>
-							</LoadingBoundry>
-						</div>
-					</StaggeredTransitionGroup>
-				</div>
-				<LoadingBoundry #="{ loading, start }">
-					<button
-						class="rpgm-button rpgm-button-primary"
-						:disabled="loading.value"
-						:data-loading="loading.value"
-						@click="start(openPortal())"
-					>
-						Open Portal
-					</button>
-				</LoadingBoundry>
-			</div>
-			<NEmpty
-				v-else
-				description="Loading..."
-			>
-				<template #icon>
-					<NSpin />
+			<SignedIn>
+				<template #not-signed-in>
+					<SignIn />
 				</template>
-			</NEmpty>
+				<div
+					v-if="!isFetching"
+					class="shop-items"
+				>
+					<h1>Products</h1>
+					<NList style="background: transparent;">
+						<StaggeredTransitionGroup
+							appear
+							name="rpgm-stagger"
+							:delay="0"
+						>
+							<NListItem
+								v-for="item in products"
+								:key="item.id"
+							>
+								<NThing
+									:title="item.name"
+									class="shop-item"
+								>
+									<template #avatar>
+										<div style="height: 100%;">
+											<ProgressiveImage
+												style="object-fit: cover; height: 100%;"
+												:src="getSmallestMedia(item.medias).publicUrl"
+											/>
+										</div>
+									</template>
+									{{ item.description }}
+									<template #description>
+										<NFlex vertical>
+											<NH3
+												strong
+												style="border: none;"
+												prefix="bar"
+												type="default"
+											>
+												{{ priceText(item.prices) }} 
+											</NH3>
+											<NFlex size="small">
+												<NTooltip
+													v-for="tag in getTags(item)"
+													:key="tag.name"
+												>
+													<template #trigger>
+														<NTag type="info">
+															{{ tag.name }}
+															<template
+																v-if="tag.icon"
+																#icon
+															>
+																<NIcon size="medium">
+																	<i :class="tag.icon" />
+																</NIcon>
+															</template>
+														</NTag>
+													</template>
+													{{ tag.desc }}
+												</NTooltip>
+											</NFlex>
+										</NFlex>
+									</template>
+									<template #footer />
+									<template #action>
+										<LoadingBoundry #="{ loading, start }">
+											<NFlex vertical>
+												<NButton
+													type="primary"
+													:loading="loading.value"
+													@click="start(checkout(item))"
+												>
+													Buy
+												</NButton>
+											</NFlex>
+										</LoadingBoundry>
+									</template>
+								</NThing>
+							</NListItem>
+						</StaggeredTransitionGroup>
+					</NList>
+					<LoadingBoundry #="{ loading, start }">
+						<button
+							class="rpgm-button rpgm-button-primary"
+							:disabled="loading.value"
+							:data-loading="loading.value"
+							@click="start(openPortal())"
+						>
+							Open Portal
+						</button>
+					</LoadingBoundry>
+				</div>
+				<NEmpty
+					v-else
+					description="Loading..."
+				>
+					<template #icon>
+						<NSpin />
+					</template>
+				</NEmpty>
+			</SignedIn>
 		</Transition>
 	</NCard>
 </template>
 
-<style scoped>
+<style>
+li:nth-child(even) .n-thing .n-thing-avatar-header-wrapper {
+	flex-direction: row-reverse;
+}
 .shop-item:not(:last-child) {
 	border-bottom: 1px solid #ccc;
 	padding-bottom: 8px;
@@ -250,8 +232,10 @@ function priceText(prices: Product['prices']) {
 .shop-item img {
 	float: right;
 	margin: 2px;
+	aspect-ratio: unset !important;
 	border-radius: 4px;
-	max-height: 100px;
+	max-width: 100px;
+	/* max-height: 100px; */
 }
 
 .shop-item-description {

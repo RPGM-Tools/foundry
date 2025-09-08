@@ -59,7 +59,7 @@ async function onClick(event: MouseEvent) {
 	context.value.shift = event.shiftKey;
 	await button.callback(context.value);
 	document.body.blur();
-	context.value.element.focus();
+	context.value.element?.focus();
 	context.value.loading = false;
 }
 </script>

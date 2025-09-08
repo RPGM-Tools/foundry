@@ -71,6 +71,7 @@ export default tslint.config([
 			// 	enableFixer: false,
 			// }],
 			'vue/html-indent': ['warn', 'tab'],
+			'vue/prop-name-casing': 'off',
 			// 'vue/html-closing-bracket-newline': 'off',
 			'vue/no-v-html': 'off'
 			// 'vue/sort-keys': ['warn', 'asc', {

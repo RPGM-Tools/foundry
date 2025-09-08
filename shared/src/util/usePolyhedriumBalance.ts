@@ -26,7 +26,7 @@ export function rpgmPolyhedriumBalance() {
 	const updateBalance = useThrottleFn(update, 4000);
 
 	return () => ({
-		balance: readonly(balance),
+		balance: balance,
 		updateBalance
 	});
 }

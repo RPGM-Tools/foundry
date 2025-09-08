@@ -53,6 +53,8 @@
 	}
 }
 
+/* stagger */
+
 .rpgm-stagger-move,
 .rpgm-stagger-leave-active,
 .rpgm-stagger-enter-active {
@@ -105,6 +107,8 @@
 	transform: translateX(0);
 }
 
+/* fade */
+
 .rpgm-fade-move,
 .rpgm-fade-leave-active,
 .rpgm-fade-enter-active {
@@ -119,5 +123,64 @@
 .rpgm-fade-enter-from,
 .rpgm-fade-leave-to {
 	opacity: 0;
+}
+
+/* zoom */
+
+.rpgm-zoom-move,
+.rpgm-zoom-leave-active,
+.rpgm-zoom-enter-active {
+	transition: opacity 0.2s ease-out, scale 0.2s ease-out;
+}
+
+.rpgm-zoom-leave-active {
+	position: absolute;
+	width: 100%;
+}
+
+.rpgm-zoom-enter-from,
+.rpgm-zoom-leave-to {
+	opacity: 0;
 	scale: 0.95;
+}
+
+/* jiggle */
+
+.rpgm-jiggle-leave-active,
+.rpgm-jiggle-enter-active {
+	transition: all 0.2s ease-out;
+	transform-origin: bottom center;
+	animation: rpgm-jiggle 0.3s ease-in-out;
+}
+
+.rpgm-jiggle-leave-active {
+	position: absolute;
+	width: 100%;
+}
+
+.rpgm-jiggle-enter-from,
+.rpgm-jiggle-leave-to {
+	opacity: 0;
+}
+
+@keyframes rpgm-jiggle {
+	0% {
+		rotate: 0deg;
+	}
+
+	25% {
+		rotate: -4deg;
+	}
+
+	50% {
+		rotate: 3deg;
+	}
+
+	75% {
+		rotate: -2deg;
+	}
+
+	100% {
+		rotate: 0deg;
+	}
 }

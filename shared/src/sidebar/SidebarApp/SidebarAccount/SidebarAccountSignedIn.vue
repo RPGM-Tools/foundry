@@ -60,6 +60,7 @@ async function linkDiscord() {
 			<LoadingBoundry #="{ loading, start }">
 				<NButton
 					type="primary"
+					secondary
 					:loading="loading.value"
 					@click="start(linkDiscord())"
 				>
@@ -72,6 +73,7 @@ async function linkDiscord() {
 			<LoadingBoundry #="{ loading, start }">
 				<NButton
 					type="primary"
+					ghost
 					:loading="loading.value"
 					@click="start(logout())"
 				>

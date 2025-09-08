@@ -1,4 +1,5 @@
 import { type App, type Component, createApp } from 'vue';
+import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
 import { globalNaive } from '#/style/theme';
 
@@ -15,8 +16,10 @@ declare global {
 
 export default class RpgmSidebar extends SidebarTab {
 	app?: App;
+	router: Router;
 
 	constructor(options: Partial<Application.Options>) {
+		super(options);
 		const getData = Sidebar.prototype.getData as (options: unknown) => {
 			tabs: Record<string, {
 				tooltip: string;
@@ -38,7 +41,6 @@ export default class RpgmSidebar extends SidebarTab {
 			data.tabs = insertKey('rpgm', { tooltip: 'RPGM_TOOLS.SIDEBAR.TITLE', icon: 'rp-dice' }, data.tabs);
 			return data;
 		};
-		super(options);
 	}
 
 	static override get defaultOptions(): Application.Options {
@@ -59,9 +61,13 @@ export default class RpgmSidebar extends SidebarTab {
 		mount.dataset.tab = data.tabName;
 		mount.className = data.cssClass ?? '';
 
+		this.router = createRouter({
+			history: createMemoryHistory(),
+			routes: rpgm.sidebar.routes
+		});
 		this.app = createApp(SidebarApp as Component);
 		globalNaive(this.app);
-		this.app.use(rpgm.sidebar.router);
+		this.app.use(this.router);
 		this.app.provide('onResize', this.onResize.bind(this));
 		this.app.mount(mount);
 
@@ -90,7 +96,7 @@ export default class RpgmSidebar extends SidebarTab {
 			const headerHeight = this.element.find('.window-header').get(0)?.clientHeight ?? 0;
 			const innerHeight = this.element.find('.sidebar-content').get(0)?.scrollHeight ?? 9999;
 
-			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 47);
+			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 55);
 			const newTop = ((this.position.top ?? 0) + newHeight) > windowHeight || forceCenter ? (
 				Math.max(0, Math.min(windowHeight - newHeight, (windowHeight - newHeight) / 2))
 			) : this.position.top;

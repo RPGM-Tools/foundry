@@ -87,7 +87,8 @@ const center = useTemplateRef('center');
 
 const observer = ref(new ResizeObserver(() => setTimeout(() => { _updateSize.value++; radialFloater.update(); }, 1)));
 watch(() => menuContext.value.element, (e) => {
-	observer.value?.observe(e);
+	if (e)
+		observer.value?.observe(e);
 }, { immediate: true });
 watch(root, (v) => {
 	if (v && to)
@@ -128,12 +129,12 @@ const _updateSize = ref(0);
 const centerSize = computed(() => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	_updateSize.value;
-	return Math.min(menuContext.value.element.scrollHeight, MAX_CENTER_SIZE);
+	return Math.min(menuContext.value.element?.scrollHeight ?? 0, MAX_CENTER_SIZE);
 });
 
 const paddingOffset = () =>
 	offset(() => {
-		const style = document.defaultView!.getComputedStyle(menuContext.value.element);
+		const style = document.defaultView!.getComputedStyle(menuContext.value.element as HTMLElement);
 		const _padding = parseInt(style.padding || '0');
 		const _margin = parseInt(style.margin || '0');
 		return {
@@ -280,7 +281,7 @@ function getSubButtonStyle(index: number): StyleValue {
 
 .radial-menu-center {
 	pointer-events: all;
-	position: absolute;
+	position: fixed;
 	background: none !important;
 	border: none !important;
 	transition-property: background opacity;

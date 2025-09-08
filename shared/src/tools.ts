@@ -1,16 +1,20 @@
-import type { RpgmModule } from '@rpgm/tools';
 import { AbstractTools } from '@rpgm/tools';
 
 import { auth } from './auth';
 import { ChatCommands } from './chat';
-import type { FoundryModule } from './module';
 import { FoundyRpgmModuleMixin } from './module';
 import { RadialMenuRegister } from './radial-menu';
 import { GlobalSettings } from './settings';
 import { RpgmSidebarManager } from './sidebar';
 import { rpgmPolyhedriumBalance } from './util/usePolyhedriumBalance';
 
-export class RpgmTools extends FoundyRpgmModuleMixin(AbstractTools) {
+export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, AbstractTools.Settings>(AbstractTools) {
+	protected override get rpgmTextAiOptions(): { baseURL: string; apiKey: string; } {
+		return {
+			apiKey: this.authToken || '',
+			baseURL: __API_URL__ + '/api/forge'
+		};
+	}
 	override version: string = '0.0.0';
 
 	auth = auth;
@@ -21,7 +25,7 @@ export class RpgmTools extends FoundyRpgmModuleMixin(AbstractTools) {
 	sidebar: RpgmSidebarManager;
 
 	/** A record of all currently active and registered RPGM modules, keyed by their unique IDs. */
-	modules: Partial<Record<RpgmModule['id'], FoundryModule>> = {};
+	modules: Partial<{ [ID in keyof FoundryModuleMap]: InstanceType<FoundryModuleMap[ID]> }> = {};
 
 	/** Manages the registration and display of radial menu entries. */
 	radialMenu: RadialMenuRegister;
@@ -32,6 +36,7 @@ export class RpgmTools extends FoundyRpgmModuleMixin(AbstractTools) {
 	usePolyhedriumBalance: ReturnType<typeof rpgmPolyhedriumBalance>;
 
 	protected override init(): void | Promise<void> {
+		this.settings.get('textProviders');
 		this.usePolyhedriumBalance = rpgmPolyhedriumBalance();
 		this.majorGameVersion = game.data.release.generation;
 		this.chat = new ChatCommands();
@@ -51,6 +56,8 @@ export class RpgmTools extends FoundyRpgmModuleMixin(AbstractTools) {
 	localize(id: RpgmLangs) {
 		return game.i18n.localize(id);
 	}
+
+	authToken = localStorage.getItem('rpgm-token');
 
 	protected override ready(): void | Promise<void> {
 		rpgm.radialMenu.update();
@@ -74,6 +81,6 @@ export class RpgmTools extends FoundyRpgmModuleMixin(AbstractTools) {
 ————————————————————————————————————————————————
 ${center('© 2025 RPGM Tools, LLC')}
 ${Object.values(rpgm.modules).map(m => splitJustify(` ${m.icon} ${m.name} %s v${m.version} `)).join('\n')} `).slice(1);
-		rpgm.tools.logger.prefixed('').styled('color: #d44e7b; font-weight: bold;').log(asciiArt);
+		rpgm.logger.prefixed('').styled('color: #d44e7b; font-weight: bold;').log(asciiArt);
 	}
 }

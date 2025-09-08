@@ -72,7 +72,7 @@ export class ChatWizard<T extends WizardData['data'] = WizardData['data']> {
 		key: string,
 		readonly renderer: Component,
 		readonly title: string,
-		readonly logger: typeof rpgm.tools.logger
+		readonly logger: typeof rpgm.logger
 	) { this._key = key; }
 
 

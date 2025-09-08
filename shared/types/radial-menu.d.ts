@@ -23,7 +23,7 @@ declare global {
 	interface ButtonContext {
 		loading: boolean
 		shift: boolean
-		element: HTMLElement
+		element: HTMLElement | undefined
 	}
 
 	interface InputContext extends ButtonContext {

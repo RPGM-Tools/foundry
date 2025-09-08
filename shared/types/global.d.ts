@@ -16,6 +16,10 @@ declare global {
 	declare const __MODULE_VERSION__: string;
 	declare const __API_URL__: string;
 
+	type FoundryModuleMap = {
+		'rpgm-tools': typeof RpgmTools
+		'rpgm-forge': typeof RpgmForge
+	};
 
 	interface RPGM extends object {
 		forge?: RpgmForge

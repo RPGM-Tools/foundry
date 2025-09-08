@@ -1,5 +1,6 @@
 import type { DeepPartial } from 'fvtt-types/utils';
 import { type App, type Component, createApp } from 'vue';
+import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
 import { globalNaive } from '#/style/theme';
 
@@ -10,8 +11,10 @@ type Configuration = foundry.applications.api.ApplicationV2.Configuration;
 
 export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSidebarTab {
 	app?: App;
+	router: Router;
 
 	constructor(options: DeepPartial<foundry.applications.api.ApplicationV2.Configuration>) {
+		super(options);
 		CONFIG.RpgmSidebar = {
 			sidebarIcon: 'rp-dice',
 			documentClass: RpgmSidebar
@@ -21,7 +24,6 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 			documentName: 'RpgmSidebar',
 			tooltip: 'RPGM_TOOLS.SIDEBAR.TITLE'
 		};
-		super(options);
 	}
 
 	static override tabName = 'rpgm';
@@ -51,9 +53,13 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 
 	override _replaceHTML(result: HTMLElement) {
 		if (this.app) return;
+		this.router = createRouter({
+			history: createMemoryHistory(),
+			routes: rpgm.sidebar.routes
+		});
 		this.app = createApp(SidebarApp as Component);
 		globalNaive(this.app);
-		this.app.use(rpgm.sidebar.router);
+		this.app.use(this.router);
 		this.app.provide('onResize', this.onResize.bind(this));
 		this.app.mount(result);
 		this.onResize(true);
@@ -67,7 +73,7 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 			const headerHeight = this.element.querySelector('.window-header')?.clientHeight ?? 0;
 			const innerHeight = this.element.querySelector('.sidebar-content')?.scrollHeight ?? 9999;
 
-			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 47);
+			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 55);
 			const newTop = ((this.position.top ?? 0) + newHeight) > windowHeight || forceCenter ? (
 				Math.max(0, Math.min(windowHeight - newHeight, (windowHeight - newHeight) / 2))
 			) : this.position.top;
