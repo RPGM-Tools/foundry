@@ -4,7 +4,7 @@ const signedIn = rpgm.auth.useSession();
 const onResize = inject<(forceCenter?: boolean) => void>('onResize');
 
 watch(signedIn, () => {
-	onResize?.(true);
+	setTimeout(() => onResize?.(true), 400);
 });
 </script>
 
@@ -17,7 +17,7 @@ watch(signedIn, () => {
 		<slot
 			v-else-if="signedIn.isPending"
 			v-bind="$attrs"
-			name="loading"
+			name="fallback"
 		/>
 		<slot
 			v-else

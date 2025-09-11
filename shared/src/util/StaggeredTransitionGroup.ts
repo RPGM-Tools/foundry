@@ -26,9 +26,9 @@ export default defineComponent({
 			const children = slotChildren.map((vnode, index) => {
 				return cloneVNode(vnode, {
 					style: {
-						...(vnode.props?.style ?? {}),
 						'transition-delay': `${(index + 1) * props.delay}ms`,
-						...(props.duration ? { 'transition-duration': `${props.duration}ms` } : {})
+						...(props.duration ? { 'transition-duration': `${props.duration}ms` } : {}),
+						...(vnode.props?.style ?? {})
 					}
 				});
 			});

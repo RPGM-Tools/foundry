@@ -1,5 +1,8 @@
-import { watchDebounced } from '@vueuse/core';
+import type { Product } from '@polar-sh/sdk/models/components/product.js';
+import { createGlobalState, useAsyncState, watchDebounced } from '@vueuse/core';
+import type { MaybePromise } from 'fvtt-types/utils';
 import { shallowReactive } from 'vue';
+import { useRouter } from 'vue-router';
 
 /** An object related to various information about a setting */
 type SettingsRef<T> = {
@@ -50,4 +53,75 @@ export function useSetting<
 	}
 
 	return obj;
+}
+
+export function useFocusCheck(check: () => MaybePromise<boolean>, maxTimes: number = 10) {
+	let times = maxTimes;
+	const update = async () => {
+		if (times-- <= 0 || await check()) {
+			window.removeEventListener('focus', update);
+		}
+	};
+	return () => {
+		window.removeEventListener('focus', update);
+		times = maxTimes;
+		window.addEventListener('focus', update);
+	};
+}
+
+export const useSubscription = createGlobalState(() => {
+	const { isLoading, state: subscription, execute: update } = useAsyncState(() => rpgm.auth.customer.subscriptions
+		.list().then(({ data }) => data?.result.items[0] ?? null), null, { immediate: false, resetOnExecute: false });
+	const state = {
+		isLoading, subscription, update,
+		async then() {
+			await update();
+			return Promise.resolve(state);
+		}
+	};
+	return state;
+});
+
+export const useAccounts = createGlobalState(() => {
+	const { isLoading, state: accounts, execute: update } = useAsyncState(() => rpgm.auth.listAccounts()
+		.then(({ data }) => data ?? []), [], { immediate: false, resetOnExecute: false });
+	const state = {
+		isLoading, accounts, update,
+		async then() {
+			await update();
+			return Promise.resolve(state);
+		}
+	};
+	return state;
+});
+
+export const useProducts = createGlobalState(() => {
+	// const skipCache = false;
+	const skipCache = import.meta.env.DEV;
+	return useAsyncState(() => rpgm.getApiListProducts({
+		query: {
+			'skip-cache': skipCache
+		}
+	}).then(({ data }) => {
+		type RProduct = Exclude<typeof data, undefined>[number];
+		type NProduct = Pick<Product & { slug: string }, keyof RProduct>;
+		return data as NProduct[] | undefined;
+	}), null, { immediate: false, resetOnExecute: false });
+});
+
+export function an(t: string) {
+	return t.match(/^[aeiouAEIOU]/) ? 'an' : 'a';
+}
+
+export function useSignedInRequired(fallbackRoute: string = '/account?back=true') {
+	const session = rpgm.auth.useSession();
+	const router = useRouter();
+
+	watch(session, (newSession) => {
+		console.log(newSession.data);
+		if (newSession.data === null) {
+			console.log('Not signed in');
+			router.push(fallbackRoute);
+		}
+	});
 }

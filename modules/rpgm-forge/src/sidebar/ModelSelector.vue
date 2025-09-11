@@ -8,22 +8,22 @@ defineProps<{
 
 const model = defineModel<string>({ required: true });
 
-async function testModel() {
-	const modelToTest = model.value;
-	const v = await rpgm.forge.testModel(modelToTest);
-	validatedModel.value = modelToTest;
-	if (v.isErr()) {
-		valid.value = false;
-		rpgm.forge.logger.visible.error(v.error.message);
-		return;
-	}
-	valid.value = v.value;
-	if (v.value) {
-		rpgm.forge.logger.visible.log('Model verification successful!');
-	} else {
-		rpgm.forge.logger.visible.error('Model verification failed!');
-	}
-}
+// async function testModel() {
+// 	const modelToTest = model.value;
+// 	const v = await rpgm.forge.testTextModel(modelToTest);
+// 	validatedModel.value = modelToTest;
+// 	if (v.isErr()) {
+// 		valid.value = false;
+// 		rpgm.forge.logger.visible.error(v.error.message);
+// 		return;
+// 	}
+// 	valid.value = v.value;
+// 	if (v.value) {
+// 		rpgm.forge.logger.visible.log('Model verification successful!');
+// 	} else {
+// 		rpgm.forge.logger.visible.error('Model verification failed!');
+// 	}
+// }
 
 // What model was last tested
 const validatedModel = ref<string>();
@@ -41,7 +41,7 @@ const validStatus = computed(() => validatedModel.value && validatedModel.value 
 		:validation-status="validStatus"
 		:show-feedback="feedback !== undefined"
 	>
-		<LoadingBoundry #="{ loading, start }">
+		<LoadingBoundry #="{ loading }">
 			<NInput
 				v-model:value="model"
 				:loading="loading.value || undefined"
@@ -57,7 +57,6 @@ const validStatus = computed(() => validatedModel.value && validatedModel.value 
 								text
 								style="width: unset"
 								:disabled="loading.value"
-								@click="start(testModel())"
 							>
 								<i class="fa-regular fa-circle-play" />
 							</NButton>

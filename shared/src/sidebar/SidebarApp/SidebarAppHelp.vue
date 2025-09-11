@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import { Converter } from 'showdown';
-
-import Help from '../../../assets/help.md?raw';
-
-const formattedHelp = computed(() => {
-	const converter = new Converter();
-	const a = converter.makeHtml(Help);
-
-	return a;
-});
+const helpPages = Object.fromEntries(rpgm.help.pages);
 </script>
 
 <template>
-	<p
-		class="help"
-		v-html="formattedHelp"
-	/>
+	<div>
+		<RouterLink
+			v-for="(page, id) in helpPages"
+			:key="id"
+			custom
+			:to="`/help/${id}`"
+			#="{ navigate }"
+		>
+			<a @click="navigate">{{ page.name }}</a>
+		</RouterLink>
+	</div>
 </template>
 
 <style scoped>

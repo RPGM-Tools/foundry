@@ -1,39 +1,62 @@
 <script setup lang="ts">
-import type { Product as PolarProduct } from '@polar-sh/sdk/models/components/product';
-import { useFetch } from '@vueuse/core';
+// import type { Product } from '@polar-sh/sdk/models/components/product';
+import { Converter } from 'showdown';
 import * as z from 'zod/mini';
 
+import CustomerPortalButton from '#/components/CustomerPortalButton.vue';
+import SubscriptionInfoAlert from '#/components/SubscriptionInfoAlert.vue';
+import SubscriptionWarningAlert from '#/components/SubscriptionWarningAlert.vue';
+import { useFocusCheck, useProducts, useSignedInRequired, useSubscription } from '#/util';
 import ProgressiveImage from '#/util/ProgressiveImage.vue';
-import SignedIn from '#/util/SignedIn.vue';
-import StaggeredTransitionGroup from '#/util/StaggeredTransitionGroup';
 import { LoadingBoundry } from '#/util/useLoading';
-
-import SignIn from './SidebarAccount/SignIn.vue';
 
 const onResize = inject<(forceCenter?: boolean) => void>('onResize');
 
-const { updateBalance } = rpgm.usePolyhedriumBalance();
+// const { update } = rpgm.usePolyhedriumBalance();
 
-type Product = PolarProduct & { slug: string };
+const { state: products, execute: updateProducts } = useProducts();
 
-const { isFetching, data } = useFetch(__API_URL__ + '/api/list-products').json<Product[]>();
+type Product = NonNullable<typeof products.value>[number];
 
-watch(isFetching, () => {
+const { subscription, update: updateSubscription } = useSubscription();
+
+const subscriptionActive = computed(() => Boolean(subscription.value?.status === 'active'));
+const subscriptionCanceling = computed(() => Boolean(subscription.value?.status === 'active' && subscription.value.canceledAt));
+
+watch(products, () => {
 	onResize?.(true);
 });
 
-onMounted(updateBalance);
+const subscriptionCheck = useFocusCheck(async () => {	
+	const oldS = subscription.value;
+	const newS = await updateSubscription();
+	return Boolean(oldS) !== Boolean(newS) || (oldS?.canceledAt?.getTime() !== newS?.canceledAt?.getTime());
+});
+
+useSignedInRequired();
+
+// onMounted(update);
 
 // Disable all buttons while checking out
 const checkingOutLoading = ref(false);
 // const subscriptions = computed(() => data.value?.filter(item => item.isRecurring).sort(sortByPrice));
-const products = computed(() => data.value?.filter(item => !item.isRecurring).sort(sortByPrice));
+const subscriptionProducts = computed(() => products.value?.filter(item => item.isRecurring).sort(sortByPrice));
 
 const tagSchema = z.object({
 	name: z.string(),
 	desc: z.string(),
 	icon: z.optional(z.string())
 });
+
+if (!subscription.value || !products.value) {
+	await Promise.all([
+		updateSubscription(),
+		updateProducts()
+	]);
+} else {
+	updateProducts();
+	updateSubscription();
+}
 
 function getTags(item: Product) {
 	const tags = [];
@@ -61,21 +84,7 @@ function getSmallestMedia(medias: Product['medias']) {
 	return medias.sort((a, b) => b.size - a.size)[0];
 }
 
-// After checking out, update the balance each time the window focuses, up to 10 times
-function updateForABit() {
-	window.removeEventListener('focus', update);
-	let i = 10;
-	function update() {
-		updateBalance().then(([n, o]) => {
-			if (n !== o)
-				window.removeEventListener('focus', update);
-		});
-		if (--i < 0) {
-			window.removeEventListener('focus', update);
-		}
-	}
-	window.addEventListener('focus', update);
-}
+// const updateForABit = useFocusCheck(() => update().then(([n, o]) => n !== o));
 
 async function checkout(item: Product) {
 	checkingOutLoading.value = true;
@@ -83,16 +92,11 @@ async function checkout(item: Product) {
 		checkingOutLoading.value = false;
 		if (r.error) return;
 		window.open(r.data.url, '_blank');
-		updateForABit();
+		subscriptionCheck();	
+		// updateForABit();
 	});
 }
 
-async function openPortal() {
-	return rpgm.auth.customer.portal().then(portal => {
-		if (portal.error) return;
-		window.open(portal.data.url, '_blank');
-	});
-}
 
 function priceText(prices: Product['prices']) {
 	const price = prices[0];
@@ -102,122 +106,137 @@ function priceText(prices: Product['prices']) {
 		return `$${price.priceAmount / 100}`;
 	}
 }
+
+const mdConverter = new Converter();
+function formattedDescription(item: Product) {
+	return mdConverter.makeHtml(item.description!);
+}
 </script>
 
 <template>
 	<NCard>
-		<Transition name="rpgm-fade">
-			<SignedIn>
-				<template #not-signed-in>
-					<SignIn />
-				</template>
-				<div
-					v-if="!isFetching"
-					class="shop-items"
-				>
-					<h1>Products</h1>
-					<NList style="background: transparent;">
-						<StaggeredTransitionGroup
-							appear
-							name="rpgm-stagger"
-							:delay="0"
+		<NFlex vertical>
+			<div style="position: relative;">
+				<Transition name="rpgm-fade">
+					<SubscriptionWarningAlert
+						v-if="subscriptionCanceling"
+						:show-button="false"
+					/>
+					<SubscriptionInfoAlert
+						v-else-if="subscriptionActive"
+						:show-button="false"
+					/>
+				</Transition>
+			</div>
+			<NCard title="Subscriptions">
+				<NList style="background: transparent;">
+					<NListItem
+						v-for="item in subscriptionProducts"
+						:key="item.id"
+					>
+						<NThing
+							:title="item.name"
+							class="shop-item"
 						>
-							<NListItem
-								v-for="item in products"
-								:key="item.id"
-							>
-								<NThing
-									:title="item.name"
-									class="shop-item"
+							<template #avatar>
+								<div style="height: 100%;">
+									<ProgressiveImage
+										style="object-fit: cover; height: 100%;"
+										:src="getSmallestMedia(item.medias)?.publicUrl"
+									/>
+								</div>
+							</template>
+							<p
+								v-if="item.description"
+								v-html="formattedDescription(item)"
+							/>
+							<template #description>
+								<NText type="success">
+									{{ priceText(item.prices) }} 
+								</NText>
+								<NFlex
+									size="small"
+									class="shop-item-tags"
 								>
-									<template #avatar>
-										<div style="height: 100%;">
-											<ProgressiveImage
-												style="object-fit: cover; height: 100%;"
-												:src="getSmallestMedia(item.medias).publicUrl"
-											/>
-										</div>
-									</template>
-									{{ item.description }}
-									<template #description>
-										<NFlex vertical>
-											<NH3
-												strong
-												style="border: none;"
-												prefix="bar"
-												type="default"
-											>
-												{{ priceText(item.prices) }} 
-											</NH3>
-											<NFlex size="small">
-												<NTooltip
-													v-for="tag in getTags(item)"
-													:key="tag.name"
+									<NTooltip
+										v-for="tag in getTags(item)"
+										:key="tag.name"
+									>
+										<template #trigger>
+											<NTag type="info">
+												{{ tag.name }}
+												<template
+													v-if="tag.icon"
+													#icon
 												>
-													<template #trigger>
-														<NTag type="info">
-															{{ tag.name }}
-															<template
-																v-if="tag.icon"
-																#icon
-															>
-																<NIcon size="medium">
-																	<i :class="tag.icon" />
-																</NIcon>
-															</template>
-														</NTag>
-													</template>
-													{{ tag.desc }}
-												</NTooltip>
-											</NFlex>
-										</NFlex>
-									</template>
-									<template #footer />
-									<template #action>
-										<LoadingBoundry #="{ loading, start }">
-											<NFlex vertical>
-												<NButton
-													type="primary"
-													:loading="loading.value"
-													@click="start(checkout(item))"
-												>
-													Buy
-												</NButton>
-											</NFlex>
-										</LoadingBoundry>
-									</template>
-								</NThing>
-							</NListItem>
-						</StaggeredTransitionGroup>
-					</NList>
-					<LoadingBoundry #="{ loading, start }">
-						<button
-							class="rpgm-button rpgm-button-primary"
-							:disabled="loading.value"
-							:data-loading="loading.value"
-							@click="start(openPortal())"
-						>
-							Open Portal
-						</button>
-					</LoadingBoundry>
-				</div>
-				<NEmpty
-					v-else
-					description="Loading..."
-				>
-					<template #icon>
-						<NSpin />
-					</template>
-				</NEmpty>
-			</SignedIn>
-		</Transition>
+													<NIcon size="medium">
+														<i :class="tag.icon" />
+													</NIcon>
+												</template>
+											</NTag>
+										</template>
+										{{ tag.desc }}
+									</NTooltip>
+								</NFlex>
+							</template>
+							<template #footer />
+							<template #action>
+								<LoadingBoundry #="{ loading, start }">
+									<NFlex vertical>
+										<NButton
+											:type="item.id === subscription?.productId ? 'success' : 'primary'"
+											:disabled="subscriptionActive"
+											:ghost="subscriptionActive && item.id === subscription?.productId"
+											:loading="loading.value"
+											@click="start(checkout(item))"
+										>
+											{{ subscriptionActive && item.id === subscription?.productId ? 'Membership Active' : 'Join' }}
+										</NButton>
+									</NFlex>
+								</LoadingBoundry>
+							</template>
+						</NThing>
+					</NListItem>
+				</NList>
+			</NCard>
+			<NFlex
+				vertical
+			>
+				<CustomerPortalButton
+					size="large"
+					secondary
+				/>
+			</NFlex>
+		</NFlex>
 	</NCard>
 </template>
 
 <style>
-li:nth-child(even) .n-thing .n-thing-avatar-header-wrapper {
-	flex-direction: row-reverse;
+li:nth-child(odd) .shop-item.n-thing {
+	.n-thing-avatar-header-wrapper {
+		flex-direction: row-reverse;
+	}
+	.n-thing-avatar {
+		margin: 2px 0 0 12px;
+	}
 }
+
+.shop-item {
+	.n-thing-header__title {
+		width: 100%;
+	}
+	.n-thing-header-wrapper {
+		text-align: center;
+	}
+	.shop-item-tags {
+		justify-content: center !important;
+	}
+}
+
+.shop-item .n-thing-header-wrapper {
+	align-content: space-evenly;
+}
+
 .shop-item:not(:last-child) {
 	border-bottom: 1px solid #ccc;
 	padding-bottom: 8px;

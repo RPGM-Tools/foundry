@@ -81,7 +81,7 @@ const incrementIndex = (i: number) => {
 			class="model-switcher"
 			:style="{zIndex: isOpen ? 2 : 1}"
 		>
-			<ul
+			<div
 				ref="floating"
 				class="floating"
 				tabindex="0"
@@ -90,7 +90,7 @@ const incrementIndex = (i: number) => {
 				@wheel.prevent="scroll"
 				@keydown="keydown"
 			>
-				<li
+				<div
 					v-for="(o, i) in options"
 					:key="o.id"
 					class="icon"
@@ -111,14 +111,14 @@ const incrementIndex = (i: number) => {
 						:is-open
 						:selected="i === selectedIndex"
 					/>
-				</li>
+				</div>
 				<div
 					v-if="$slots.socket"
 					class="socket"
 				>
 					<slot name="socket" />
 				</div>
-			</ul>
+			</div>
 		</div>
 	</div>
 </template>

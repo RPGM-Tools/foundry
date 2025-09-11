@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { RouterLink } from 'vue-router';
+
+import CustomerPortalButton from '#/components/CustomerPortalButton.vue';
+import SubscriptionWarningAlert from '#/components/SubscriptionWarningAlert.vue';
+import { useAccounts, useFocusCheck, useSubscription } from '#/util';
 import { LoadingBoundry } from '#/util/useLoading';
 
 import LegacyDiceIcon from './LegacyDiceIcon.vue';
@@ -12,29 +17,45 @@ const welcome = computed(() => {
 	return session.value.data ? `Welcome back, ${name}!` : 'Welcome back!';
 });
 
+const subscriptionCanceling = computed(() => Boolean(subscription.value?.status === 'active' && subscription.value.canceledAt));
+
 async function logout() {
 	return rpgm.auth.signOut();
 }
 
-const accounts = ref<{ provider: string }[]>([]);
+const discordAccount = computed(() => accounts.value?.find(a => a.provider === 'discord') ?? null);
 
-const discordLinked = computed(() => accounts.value.some(a => a.provider === 'discord'));
+const { subscription, update: updateSubscription } = useSubscription();
 
-onMounted(() => {
-	rpgm.auth.listAccounts().then(r => {
-		if (r.data) {
-			accounts.value = r.data;
-		}
-	});
-});
+const subscriptionName = computed(() => subscription.value?.status === 'active' ? subscription.value.product.name : 'Dabbler');
+
+const { accounts, isLoading: accountsLoading, update: updateAccounts } = useAccounts();
+
+if (!subscription.value) {
+	await updateSubscription();
+} else {
+	updateSubscription();
+}
+
+if (!discordAccount.value) {
+	await updateAccounts();
+} else {
+	updateAccounts();
+}
+
+const discordLinkedCheck = useFocusCheck(() => updateAccounts()
+	.then(r => Boolean(r?.some(a => a.provider === 'discord'))), 5);
 
 async function linkDiscord() {
 	return rpgm.auth.linkSocial({
-		provider: 'discord'
+		provider: 'discord',
+		callbackURL: 'https://nexicore.rpgm.tools/linked'
 	}).then(r => {
-		if (r.data) 
-			window.open(r.data.url, '_blank');
-	});
+			if (r.data) {
+				window.open(r.data.url, '_blank');
+				discordLinkedCheck();
+			}
+		});
 }
 </script>
 
@@ -46,6 +67,7 @@ async function linkDiscord() {
 				<LegacyDiceIcon v-if="session.data?.user.legacy" />
 			</span>
 		</NH1>
+		<SubscriptionWarningAlert v-if="subscriptionCanceling" />
 		<div class="rpgm-info">
 			<label>
 				Username
@@ -55,21 +77,44 @@ async function linkDiscord() {
 				Email
 				<span>{{ session.data?.user.email }}</span>
 			</label>
+			<label>
+				Membership
+				<span>{{ subscriptionName }}</span>
+			</label>
 		</div>
 		<NFlex vertical>
 			<LoadingBoundry #="{ loading, start }">
 				<NButton
 					type="primary"
-					secondary
-					:loading="loading.value"
+					color="#5865F2"
+					round
+					:disabled="!!discordAccount"
+					:loading="!discordAccount && (loading.value || accountsLoading)"
 					@click="start(linkDiscord())"
 				>
 					<template #icon>
 						<i class="fab fa-discord" />
 					</template>
-					{{ discordLinked ? "Linked" : "Link Discord" }}
+					{{ discordAccount ? "Linked" : "Link Discord" }}
 				</NButton>
 			</LoadingBoundry>
+			<RouterLink
+				to="/guildhall"
+				#="{ navigate }"
+				custom
+			>
+				<NButton
+					type="primary"
+					style="height: 51px;"
+					@click="navigate"
+				>
+					<template #icon>
+						<i class="fas fa-house-turret" />
+					</template>
+					Guild Hall
+				</NButton>
+			</RouterLink>
+			<CustomerPortalButton style="height: 51px;" />
 			<LoadingBoundry #="{ loading, start }">
 				<NButton
 					type="primary"

@@ -131,7 +131,7 @@ async function onClick(event: MouseEvent) {
 	line-height: 1.2;
 	white-space: nowrap;
 	pointer-events: none;
-	background: #6633cc;
+	background: #000000aa;
 	color: #fff;
 	border-radius: 4px;
 	opacity: 0;

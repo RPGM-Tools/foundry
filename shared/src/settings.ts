@@ -8,6 +8,7 @@ import { RadialMenuSettings } from './settings/radialMenu';
 import SidebarAccount from './sidebar/SidebarApp/SidebarAccount';
 import SidebarAccountByoAI from './sidebar/SidebarApp/SidebarAccount/SidebarAccountByoAI.vue';
 import SidebarAppHelp from './sidebar/SidebarApp/SidebarAppHelp.vue';
+import SidebarAppHelpPage from './sidebar/SidebarApp/SidebarAppHelpPage.vue';
 import SidebarAppShop from './sidebar/SidebarApp/SidebarAppShop.vue';
 
 export class LocalStorageMap<T extends object> {
@@ -52,9 +53,9 @@ export class LocalStorageMap<T extends object> {
 		let holder = this.holders.get(key);
 		if (!holder) {
 			holder = shallowRef<T[K]>(this.readValue(key) ?? (defaultValue ?? this.defaults[key]));
-			watch(holder as ShallowRef<T[K]>, (v) => this.writeValue(key, v), { deep: true });
 			this.holders.set(key, holder as ShallowRef<T[keyof T] | null>);
 		}
+		watchEffect(() => void this.writeValue(key, holder!.value));
 		return holder as ShallowRef<T[K]>;
 	}
 
@@ -118,7 +119,7 @@ export function GlobalSettings() {
 			title: 'Account',
 			menu: {
 				icon: 'fa-solid fa-user',
-				color: '#c8016e',
+				color: '#b40062',
 				index: 1
 			}
 		},
@@ -134,14 +135,9 @@ export function GlobalSettings() {
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
-		path: '/shop',
+		path: '/guildhall',
 		meta: {
-			title: 'Shop',
-			menu: {
-				icon: 'fa-solid fa-store',
-				color: '#ff8000',
-				index: -1
-			}
+			title: 'Guild Hall'
 		},
 		component: SidebarAppShop
 	});
@@ -152,11 +148,19 @@ export function GlobalSettings() {
 			title: 'Help',
 			menu: {
 				icon: 'fa-solid fa-question-circle',
-				color: '#aaaaaa',
+				color: '#636363',
 				index: -1
 			}
 		},
 		component: SidebarAppHelp
+	});
+
+	rpgm.sidebar.registerSidebarMenu({
+		path: '/help/:page',
+		component: SidebarAppHelpPage,
+		meta: {
+			title: 'Help'
+		}
 	});
 }
 

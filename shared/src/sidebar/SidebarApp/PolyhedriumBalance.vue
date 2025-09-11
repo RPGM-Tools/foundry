@@ -4,7 +4,7 @@ import type { Property } from 'csstype';
 import AnimatedNumber from '#/util/AnimatedNumber';
 import SignedIn from '#/util/SignedIn.vue';
 
-const { balance, updateBalance } = rpgm.usePolyhedriumBalance();
+const { balance, update } = rpgm.usePolyhedriumBalance();
 
 const { align = 'center center' } = defineProps<{
 	align?: Property.TransformOrigin
@@ -25,7 +25,7 @@ const { align = 'center center' } = defineProps<{
 				<template #trigger>
 					<NTag
 						:type="direction === 0 ? 'info' : direction > 0 ? 'success' : 'error'"
-						@click="updateBalance"
+						@click="update"
 					>
 						<template
 							#icon

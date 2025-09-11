@@ -1,6 +1,13 @@
+import type { InjectionKey } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
 
 import SidebarAppMenu from './SidebarApp/SidebarAppMenu.vue';
+
+export const titleKey = Symbol() as InjectionKey<(title: string | undefined) => void>;
+
+export function useTitle(title: string) {
+	inject(titleKey)?.(title);
+}
 
 export class RpgmSidebarManager {
 	get menus(): ReadonlyArray<SidebarMenu> { return this._menus; }

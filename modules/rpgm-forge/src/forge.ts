@@ -14,6 +14,7 @@ import NamesChat from '$/chat/NamesChat.vue';
 import { command } from '$/util/homebrew';
 import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, registerTokenCreate } from '$/util/token';
 import Genres from '$$/assets/combined_systems.json?url';
+import ForgeHelp from '##/assets/help.md?url';
 
 import ForgeSidebar from './sidebar/ForgeSidebar.vue';
 
@@ -153,7 +154,7 @@ export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, Abstr
 					});
 			}));
 		command();
-		rpgm.radialMenu.registerCategory('rpgm_forge', { color: '276deg', logger: this.logger });
+		rpgm.radialMenu.registerCategory('rpgm_forge', { color: '217deg', logger: this.logger });
 		rpgm.radialMenu.registerInputButton({
 			category: rpgm.radialMenu.categories.rpgm_forge,
 			icon: 'fa fa-dice-d4',
@@ -212,12 +213,13 @@ export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, Abstr
 				title: 'Forge',
 				menu: {
 					icon: 'fas fa-dice-d12',
-					color: '#290b53'
+					color: '#043fff'
 				}
 			},
 			component: ForgeSidebar
 		});
 		registerTokenCreate();
+		rpgm.help.pages.set('forge', { name: 'Forge', url: ForgeHelp });
 	}
 
 	override ready() {

@@ -10,10 +10,10 @@ export function hudHeuristics(context: TokenHudContext) {
 	/** Default options that can be overridden. */
 	function defaults() {
 		// Prevent attaching to any input which contains "search"
-		flag ||= context.element.outerHTML.toLowerCase().includes('search');
+		flag ||= context.element?.outerHTML.toLowerCase().includes('search') ?? false;
 		// Don't attach to chat interface by default
 		if (!chatAllowed)
-			flag ||= context.element.id === 'chat-message';
+			flag ||= context.element?.id === 'chat-message';
 	}
 
 	const api = {
@@ -51,10 +51,10 @@ export function inputHeuristics(context: InputContext) {
 	/** Default options that can be overridden. */
 	function defaults() {
 		// Prevent attaching to any input which contains "search"
-		flag ||= context.element.outerHTML.toLowerCase().includes('search');
+		flag ||= context.element?.outerHTML.toLowerCase().includes('search') ?? false;
 		// Don't attach to chat interface by default
 		if (!chatAllowed)
-			flag ||= context.element.id === 'chat-message';
+			flag ||= context.element?.id === 'chat-message';
 	}
 
 	const api = {
@@ -85,7 +85,7 @@ export function inputHeuristics(context: InputContext) {
 		/** @returns Attach button to the main chat interface */
 		isChat() {
 			chatAllowed = true;
-			flag ||= context.element.id !== 'chat-message';
+			flag ||= context.element?.id !== 'chat-message';
 			return api;
 		}
 	};

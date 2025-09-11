@@ -1,37 +1,26 @@
 <script setup lang="ts">
-import { useElementVisibility } from '@vueuse/core';
-import { RouterView } from 'vue-router';
+import { RouterView, useRoute, useRouter } from 'vue-router';
 
-import { NaiveTheme } from '#/style/theme';
+import { titleKey } from '#/sidebar';
+import { NaiveTheme, NaiveUIThemeOverrides } from '#/style/theme';
 import { vFitLines } from '#/util/VFitLines';
 import WriteOn from '#/util/WriteOn';
 
-// import WriteOnTransition from '#/util/WriteOnTransition.vue';
 import PolyhedriumBalance from './PolyhedriumBalance.vue';
 
-// Takes a ref that returns true once its inner value has been true at least once
-function lockTrue(input: Ref<boolean>) {
-	const isTrue = ref<boolean>(false);
-	watch(input, (value) => {
-		if (value) {
-			isTrue.value = true;
-		}
-	}, { immediate: true });
-	return isTrue;
-}
-
 const root = useTemplateRef('root');
-const visible = useElementVisibility(root);
-const shouldShow = lockTrue(visible);
+const router = useRouter();
+const route = useRoute();
 
 const onResize = inject<(forceCenter?: boolean) => void>('onResize');
 
-const { updateBalance } = rpgm.usePolyhedriumBalance();
+const primaryColor = NaiveUIThemeOverrides.common.primaryColor;
 
-watch(visible, (v) => {
-	if (v) {
-		updateBalance();
-	}
+const titleOverride = ref<string>();
+const currentTitle = computed(() => titleOverride.value ?? route.meta.title ?? '');
+router.afterEach(() => void (titleOverride.value = undefined));
+provide(titleKey, (title) => {
+	titleOverride.value = title;
 });
 
 function focus() {
@@ -56,7 +45,7 @@ onMounted(() => {
 				<WriteOn
 					class="sidebar-title"
 					style="display: flex; overflow: hidden; align-items: center;"
-					:value="$route.meta.title ?? ''"
+					:value="currentTitle"
 					#="display"
 					:duration="400"
 				>
@@ -75,20 +64,33 @@ onMounted(() => {
 					>
 						{{ display }}
 					</span>
-					<PolyhedriumBalance style="display: flex; align-items: center;" />
+					<PolyhedriumBalance style="display: flex; align-items: center; margin-right: 4px;" />
 				</WriteOn>
 			</span>
 			<div
-				v-if="shouldShow"
 				class="sidebar-content"
 			>
-				<RouterView #="{ Component }">
-					<Transition
-						name="rpgm-zoom"
-						@after-enter="focus"
-					>
-						<component :is="Component" />
-					</Transition>
+				<RouterView
+					:key="$route.fullPath"
+					#="{ Component }"
+				>
+					<template v-if="Component">
+						<Transition
+							name="rpgm-zoom"
+							@after-enter="focus"
+						>
+							<Suspense timeout="0">
+								<component :is="Component" />
+								<template #fallback>
+									<NCard>
+										<NFlex vertical>
+											<NSpin style="height: 20vh;" />
+										</NFlex>
+									</NCard>
+								</template>
+							</Suspense>
+						</Transition>
+					</template>
 				</RouterView>
 			</div>
 		</NaiveTheme>
@@ -150,10 +152,11 @@ onMounted(() => {
 
 	&:not(.hide-sidebar-back):focus,
 	&:not(.hide-sidebar-back):hover {
-		color: #6633ff;
-		text-shadow: 0 0 4px #6633ff;
+		--color: v-bind(primaryColor);
+		color: var(--color);
+		text-shadow: 0 0 4px var(--color);
 		margin-right: 1.35rem;
-		transform: translateX(10%) scale(1.25, 1);
+		transform: translateX(12%) scale(1.25, 1);
 	}
 }
 </style>

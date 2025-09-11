@@ -1,9 +1,32 @@
-.n-card {
-	overflow: visible !important;
+.rpgm-app {
+	font-family: "Signika", sans-serif !important;
 }
 
 .n-result {
 	padding-top: 1rem;
+}
+
+.n-button--success-type,
+.n-button--warning-type,
+.n-button--error-type,
+.n-button--info-type,
+.n-button--primary-type {
+	&:not(.n-button--ghost):not(.n-button--secondary) {
+		background-color: oklch(from var(--n-color) calc(l * 0.65) c h) !important;
+	}
+
+	/* background-color: rgb(from var(--n-color) r g b / 0.3) !important; */
+	/* --n-color: rgb(from var(--n-color-hover) r g b / 0.3) !important; */
+}
+
+.n-list .n-list-item {
+	&:first-child {
+		padding-top: 0;
+	}
+
+	&:last-child {
+		padding-bottom: 0;
+	}
 }
 
 .n-tabs .n-tabs-rail {
@@ -20,4 +43,21 @@
 
 .rpgm-app .window-content {
 	overflow: hidden !important;
+}
+
+.notification.rpgm {
+	&.info {
+		border: 1px solid #3a73ff;
+		background: #205cffcc;
+	}
+
+	&.warning {
+		border: 1px solid #938002;
+		background: #827201cc;
+	}
+
+	&.error {
+		border: 1px solid #e5027f;
+		background: #cc0171cc;
+	}
 }

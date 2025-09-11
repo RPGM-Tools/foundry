@@ -4,7 +4,6 @@ import { RpgmLogger } from '@rpgm/tools';
 
 import { LocalStorageMap } from './settings';
 import { RpgmTools } from './tools';
-import { j } from './util/compatibility';
 
 type VoidPromise = void | Promise<void>;
 
@@ -16,8 +15,15 @@ export function FoundyRpgmModuleMixin<C extends AbstractConstructor<AbstractRpgm
 		readonly version = __MODULE_VERSION__;
 
 		private static show(method: 'log' | 'warn' | 'error', message: string) {
-			const notif = ui.notifications?.[method === 'log' ? 'info' : method](message, { console: false });
-			j(notif.element!).classList.add('rgpm');
+			const notif = ui.notifications?.[method === 'log' ? 'info' : method](message, { console: false }) as number | Notifications.Notification;
+			if (typeof notif === 'number') {
+				// Foundry V12
+				(ui.notifications as any).element.find(`[data-id="${notif}"]`).addClass('rpgm');
+			} else {
+				if (notif.element) {
+					notif.element.classList.add('rgpm');
+				}
+			}
 		}
 
 		// ==== Instance ====

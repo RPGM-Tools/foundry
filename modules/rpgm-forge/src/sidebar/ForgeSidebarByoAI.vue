@@ -74,12 +74,12 @@ const textModelOptions = computed(() => rpgm.settings.get('textProviders')?.redu
 								label="Names"
 								style="width: 100%;"
 							>
-								<NH2
+								<NText
 									v-fit-lines
 									style="border: 0; overflow: hidden; padding: 6px;"
 								>
 									{{ names?.slug || '' }}
-								</NH2>
+								</NText>
 								<ModeSwitcher
 									v-model="namesModel"
 									:options="textModelOptions"

@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import type { FormRules } from 'naive-ui';
-import { useRoute, useRouter } from 'vue-router';
 
 import { useLoading } from '#/util/useLoading';
 import { vFocus } from '#/util/vFocus';
-
-const goBack = useRoute().query.back as 'true' | undefined;
-const router = useRouter();
 
 const tabValue = ref('signin');
 const onResize = inject<(forceCenter?: boolean) => void>('onResize')!;
@@ -69,7 +65,7 @@ function submit() {
 
 function signUp() {
 	rpgm.auth.signUp.email({
-		name: formValue.value.username,
+		name: formValue.value.name,
 		email: formValue.value.email,
 		password: formValue.value.password,
 		username: formValue.value.username,
@@ -78,7 +74,7 @@ function signUp() {
 	tabValue.value = 'signin';
 }
 
-const { start } = useLoading();
+const { start, loading: signInLoading } = useLoading();
 
 function signIn() {
 	if (!formValue.value.username || !formValue.value.password) {
@@ -88,12 +84,6 @@ function signIn() {
 	start(rpgm.auth.signIn.username({
 		username: formValue.value.username,
 		password: formValue.value.password
-	}).then((value) => {
-		// Redirect 
-		rpgm.logger.log(goBack);
-		if (goBack === 'true' && !value.error) {
-			router.back();
-		}
 	}));
 }
 </script>
@@ -125,6 +115,7 @@ function signIn() {
 			<NCollapseTransition :show="tabValue === 'signup'">
 				<NFormItemRow
 					label="Name"
+					:show-require-mark="false"
 					path="name"
 				>
 					<NInput v-model:value="formValue.name" />
@@ -157,6 +148,8 @@ function signIn() {
 			</NFormItemRow>
 			<NButton
 				type="primary"
+				:loading="signInLoading"
+				style="width: 100%;"
 				attr-type="submit"
 			>
 				{{ tabValue === 'signin' ? 'Login' : 'Sign Up' }}

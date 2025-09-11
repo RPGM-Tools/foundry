@@ -2,17 +2,18 @@ import { AbstractTools } from '@rpgm/tools';
 
 import { auth } from './auth';
 import { ChatCommands } from './chat';
+import { Help } from './help';
 import { FoundyRpgmModuleMixin } from './module';
 import { RadialMenuRegister } from './radial-menu';
 import { GlobalSettings } from './settings';
 import { RpgmSidebarManager } from './sidebar';
-import { rpgmPolyhedriumBalance } from './util/usePolyhedriumBalance';
+import { usePolyhedriumBalance } from './util/usePolyhedriumBalance';
 
 export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, AbstractTools.Settings>(AbstractTools) {
 	protected override get rpgmTextAiOptions(): { baseURL: string; apiKey: string; } {
 		return {
 			apiKey: this.authToken || '',
-			baseURL: __API_URL__ + '/api/forge'
+			baseURL: __API_URL__
 		};
 	}
 	override version: string = '0.0.0';
@@ -33,11 +34,10 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 	/** Manages chat commands registered by RPGM modules. */
 	chat: ChatCommands;
 
-	usePolyhedriumBalance: ReturnType<typeof rpgmPolyhedriumBalance>;
+	usePolyhedriumBalance = usePolyhedriumBalance;
 
 	protected override init(): void | Promise<void> {
 		this.settings.get('textProviders');
-		this.usePolyhedriumBalance = rpgmPolyhedriumBalance();
 		this.majorGameVersion = game.data.release.generation;
 		this.chat = new ChatCommands();
 		this.sidebar = new RpgmSidebarManager();
@@ -58,6 +58,8 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 	}
 
 	authToken = localStorage.getItem('rpgm-token');
+
+	help = new Help();
 
 	protected override ready(): void | Promise<void> {
 		rpgm.radialMenu.update();
