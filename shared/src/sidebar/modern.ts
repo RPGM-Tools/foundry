@@ -4,6 +4,7 @@ import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
 import { globalNaive } from '#/style/theme';
 
+import { resizeKey } from '.';
 import SidebarApp from './SidebarApp';
 
 type ClosingOptions = foundry.applications.api.ApplicationV2.ClosingOptions;
@@ -15,15 +16,20 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 
 	constructor(options: DeepPartial<foundry.applications.api.ApplicationV2.Configuration>) {
 		super(options);
+		const tabs = structuredClone(foundry.applications.sidebar.Sidebar.TABS);
+		const settings = tabs.settings;
+		delete tabs.settings;
 		CONFIG.RpgmSidebar = {
 			sidebarIcon: 'rp-dice',
 			documentClass: RpgmSidebar
 		};
-		foundry.applications.sidebar.Sidebar.TABS.rpgm = {
+		tabs.rpgm = {
 			//@ts-expect-error TABS is not able to be overriden
 			documentName: 'RpgmSidebar',
 			tooltip: 'RPGM_TOOLS.SIDEBAR.TITLE'
 		};
+		tabs.settings = settings;
+		foundry.applications.sidebar.Sidebar.TABS = tabs;
 	}
 
 	static override tabName = 'rpgm';
@@ -31,7 +37,7 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 	static override DEFAULT_OPTIONS: DeepPartial<Configuration> = {
 		classes: ['rpgm-app'],
 		window: {
-			title: 'RPGM Tools',
+			// title: 'RPGM Tools',
 			minimizable: false,
 			icon: 'rp-dice'
 		}
@@ -60,7 +66,7 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 		this.app = createApp(SidebarApp as Component);
 		globalNaive(this.app);
 		this.app.use(this.router);
-		this.app.provide('onResize', this.onResize.bind(this));
+		this.app.provide(resizeKey, this.onResize.bind(this));
 		this.app.mount(result);
 		this.onResize(true);
 	}

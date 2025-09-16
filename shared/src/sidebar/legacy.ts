@@ -3,6 +3,7 @@ import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
 import { globalNaive } from '#/style/theme';
 
+import { resizeKey } from '.';
 import SidebarApp from './SidebarApp';
 
 declare class SidebarTab extends Application { }
@@ -68,7 +69,7 @@ export default class RpgmSidebar extends SidebarTab {
 		this.app = createApp(SidebarApp as Component);
 		globalNaive(this.app);
 		this.app.use(this.router);
-		this.app.provide('onResize', this.onResize.bind(this));
+		this.app.provide(resizeKey, this.onResize.bind(this));
 		this.app.mount(mount);
 
 		if (ui.sidebar?.activeTab === this.id) mount.classList.add('active');

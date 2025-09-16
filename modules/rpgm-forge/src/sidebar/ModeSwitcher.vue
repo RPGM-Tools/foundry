@@ -23,9 +23,13 @@ const getIndex = (id: string) => {
 const isOpen = ref(false);
 const selectedIndex = ref(getIndex(model.value?.id || ''));
 
+const updateValue = () => {
+	model.value = options[selectedIndex.value];
+};
+
 watch(isOpen, (v) => {
 	if (!v) {
-		model.value = options[selectedIndex.value];
+		updateValue();
 	}
 }, { immediate: true });
 
@@ -64,14 +68,17 @@ const keydown = (e: KeyboardEvent) => {
 	} else if (e.key === 'ArrowUp') {
 		incrementIndex(-1);
 	} else { return; }
-	e.preventDefault();
+	// e.preventDefault();
 	e.stopPropagation();
+	e.stopImmediatePropagation();
 	floating.value?.focus();
 };
 
 const incrementIndex = (i: number) => {
-	if (!isOpen.value) return;
+	// if (!isOpen.value) return;
 	selectedIndex.value = Math.min(options.length - 1, Math.max(0, selectedIndex.value + i));	
+	if (isOpen.value) return;
+	updateValue();
 };
 </script>
 
@@ -103,7 +110,7 @@ const incrementIndex = (i: number) => {
 						'--translateY': isOpen ? `${(i - selectedIndex) * 60}px` : `${(i - selectedIndex) * 24}px`,
 						// Delay is based on the distance from the selected icon, inverted if not open
 					}"
-					@click="selectIcon(i)"
+					@mouseup="selectIcon(i)"
 				>
 					<slot
 						name="default"
@@ -155,6 +162,9 @@ const incrementIndex = (i: number) => {
 	filter: drop-shadow(0 0 2px rgb(0 0 0 / 50%)) brightness(1);
 	&[data-selected="false"] {
 		filter: drop-shadow(0 0 2px rgb(0 0 0 / 50%)) brightness(0.9);
+	}
+	&, &>* {
+		cursor: pointer;
 	}
 }
 

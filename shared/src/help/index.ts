@@ -1,4 +1,4 @@
-type HelpEntry = {
+export type HelpEntry = {
 	name: string;
 	url: string;
 };
@@ -8,4 +8,10 @@ export class Help {
 	pages: Map<string, HelpEntry> = new Map();
 	cache: Map<string, string> = new Map();
 	async fetch(url: string) { return fetch(url).then(r => r.text()); }
+	registerHelpTopic(name: string, url: string) {
+		this.pages.set(name.replace(/[^a-z0-9-_]/gi, ''), {
+			name,
+			url
+		});
+	}
 }

@@ -6,12 +6,13 @@ import d20Icon from '##/assets/d20-512x512.webp?url';
 import d20Checked from '##/assets/d20-checked.webp?url';
 import d20Error from '##/assets/d20-error.webp?url';
 import d20Offline from '##/assets/d20-offline.webp?url';
+import d20Basic from '##/assets/d20-sparkles.png?url';
 import d20Warning from '##/assets/d20-warning.webp?url';
 
 const theme = useThemeVars();
 
 interface DiceButtonProps extends /* @vue-ignore */ ImgHTMLAttributes {
-	type?: 'rpgm' | 'success' | 'warning' | 'error' | 'offline',
+	type?: 'rpgm' | 'success' | 'warning' | 'error' | 'offline' | 'basic',
 }
 
 const { type = 'rpgm' } = defineProps<DiceButtonProps>();
@@ -27,6 +28,7 @@ const src = computed(() => {
 		case 'warning': return d20Warning;
 		case 'error': return d20Error;
 		case 'offline': return d20Offline;
+		case 'basic': return d20Basic;
 		default: return d20Icon;
 	}
 });
@@ -38,6 +40,7 @@ const color = computed(() => {
 		case 'warning': return theme.value.warningColor;
 		case 'error': return theme.value.errorColor;
 		case 'offline': return theme.value.baseColor;
+		case 'basic': return '#aaaaaaaa';
 		default: return theme.value.primaryColor;
 	}
 });
@@ -46,7 +49,10 @@ const dropShadow = computed(() => `drop-shadow(0 0 2px ${color.value})`);
 </script>
 
 <template>
-	<img :src>
+	<img
+		:src
+		v-bind="$attrs"
+	>
 </template>
 
 <style scoped>

@@ -15,17 +15,13 @@ declare global {
 				SYSTEM_HINT: string
 				GENRE: string
 				GENRE_HINT: string
-				METHOD: string
-				METHOD_HINT: string
-				METHOD_AI: string
-				METHOD_SIMPLE: string
 			}
 			INIT: {
 				TITLE: string
 				PROMPT1: string
-				PROMPT2: string
 				PROMPT3: string
 				PROMPT4: string
+				BUTTON: string
 			}
 			NAMES: {
 				ASSIGN_TOOLTIP: string
@@ -33,9 +29,10 @@ declare global {
 			HOMEBREW: {
 				PLACEHOLDER: string
 			}
-			ERORRS: {
+			ERRORS: {
 				TOKEN_SELECT: string
 				TOKEN_OWNER: string
+				TEXT_LIMIT: string
 			}
 			RADIAL_MENU: {
 				NAMES: string

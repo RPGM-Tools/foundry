@@ -1,5 +1,4 @@
 import { useThemeVars } from 'naive-ui';
-import type { CSSProperties } from 'vue';
 import type { ImgHTMLAttributes } from 'vue';
 
 import d20Icon from '##/assets/d20-512x512.webp';
@@ -9,7 +8,7 @@ import d20Warning from '##/assets/d20-warning.webp?url';
 export default defineComponent({
 	name: 'DiceIcon',
 	props: {} as ImgHTMLAttributes & {
-		type: 'rpgm' | 'success' | 'warning' | 'error',
+		type: 'rpgm' | 'success' | 'warning' | 'error' | 'offline',
 		shadow: boolean
 	},
 	setup(props) {

@@ -11,10 +11,12 @@ const clone = <T>(o: T) => JSON.parse(JSON.stringify(o)) as T;
 
 const textAiForm = useTemplateRef('textAiForm');
 
+const randomHue = () => Math.floor(Math.random() * 360).toString();
+
 const typeOptions = Object.entries(DIY_PROVIDERS)
 	.map<SelectOption>(([id, provider]) => ({ 
 		label: provider.name,
-		key: id,
+		value: id,
 		icon: () => h('i', { class: provider.classIcon }) 
 	}));
 
@@ -52,10 +54,17 @@ const save = () => {
 			if (warnings?.length) return;
 			providers.value = clone(formValue.value.providers);
 			saved.value = true;
-		});
+		}, () => void 0);
+};
+
+const reset = () => {
+	formValue.value.providers = clone(providers.value);
+	nextTick(() => void (saved.value = true));
 };
 
 const searchForModel = useThrottleFn(async (provider: TextProvider, search: string) => {
+	try {
+
 	const models = await DIY_PROVIDERS[provider.type]?.fetchModels?.({
 		apiKey: provider.apiKey,
 		baseURL: provider.baseURL
@@ -64,6 +73,7 @@ const searchForModel = useThrottleFn(async (provider: TextProvider, search: stri
 	else
 		modelCache[provider.id] = models.filter(m => m.includes(search))
 			.map<SelectOption>(v => ({label: v, value: v}));
+	} catch { void 0; }
 }, 10000);
 </script>
 
@@ -83,29 +93,43 @@ const searchForModel = useThrottleFn(async (provider: TextProvider, search: stri
 					:key="provider.id"
 					title="Provider"
 					style="margin-bottom: 8px;"
+					:style="{ backgroundColor: `oklch(0.3 0.05 ${provider.hue} / 50%)` }"
 				>
 					<template #header-extra>
-						<NPopconfirm
-							:positive-button-props="{ type: 'error' }"
-							positive-text="Yes, Remove"
-							negative-text="Cancel"
-							class="rpgm-app"
-							@positive-click="formValue.providers?.splice(i, 1)"
-						>
-							<template #trigger>
-								<NButton
-									type="error"
-									text
-									icon-placement="right"
-								>
-									<template #icon>
-										<i class="fas fa-circle-xmark" />
-									</template>
-									Remove
-								</NButton>
-							</template>
-							Are you sure you want to remove this provider?
-						</NPopconfirm>
+						<NFlex>
+							<NButton
+								type="primary"
+								text
+								icon-placement="right"
+								@click="provider.hue = randomHue()"
+							>
+								Color
+								<template #icon>
+									<i class="fas fa-rotate-reverse" />
+								</template>
+							</NButton>
+							<NPopconfirm
+								:positive-button-props="{ type: 'error' }"
+								positive-text="Yes, Remove"
+								negative-text="Cancel"
+								class="rpgm-app"
+								@positive-click="formValue.providers?.splice(i, 1)"
+							>
+								<template #trigger>
+									<NButton
+										type="error"
+										text
+										icon-placement="right"
+									>
+										<template #icon>
+											<i class="fas fa-circle-xmark" />
+										</template>
+										Remove
+									</NButton>
+								</template>
+								Are you sure you want to remove this provider?
+							</NPopconfirm>
+						</NFlex>
 					</template>
 					<NFlex>
 						<NFormItemRow
@@ -132,7 +156,7 @@ const searchForModel = useThrottleFn(async (provider: TextProvider, search: stri
 							<NInput v-model:value="provider.baseURL" />
 						</NFormItemRow>
 						<NFormItemRow
-							label="Base API Key"
+							label="API Key"
 							:path="`providers[${i}].apiKey`"
 						>
 							<NInput
@@ -161,25 +185,51 @@ const searchForModel = useThrottleFn(async (provider: TextProvider, search: stri
 						type="primary"
 						icon-placement="right"
 						text
-						@click="formValue.providers?.push({id: randomID(), baseURL: '', apiKey: '', name: '', type: 'openai-compatible', textModels: [] })"
+						@click="formValue.providers?.push({
+							id: randomID(),
+							baseURL: '',
+							apiKey: '',
+							name: '',
+							type: 'openai-compatible',
+							textModels: [],
+							hue: randomHue()
+						})"
 					>
 						<template #icon>
 							<i class="fas fa-circle-plus" />
 						</template>
 						Add Provider
 					</NButton>
-					<NButton
+					<NButtonGroup
 						ref="saveButton"
-						:type="saved ? 'primary' : 'warning'"
-						attr-type="submit"
-						icon-placement="right"
-						primary
+						style="flex-wrap: wrap;"
 					>
-						<template #icon>
-							<i class="fas fa-save" />
-						</template>
-						Save
-					</NButton>
+						<NButton
+							type="primary"
+							attr-type="submit"
+							:disabled="saved"
+							icon-placement="right"
+							primary
+							style="flex: 1;"
+						>
+							<template #icon>
+								<i class="fas fa-save" />
+							</template>
+							Save
+						</NButton>
+						<NButton
+							class="rpgm-no-wide"
+							type="error"
+							:disabled="saved"
+							icon-placement="right"
+							@click="reset"
+						>
+							<template #icon>
+								<i class="fas fa-circle-xmark" />
+							</template>
+							Discard Changes
+						</NButton>
+					</NButtonGroup>
 				</NFlex>
 			</NForm>
 		</NThing>

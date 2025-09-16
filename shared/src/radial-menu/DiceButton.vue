@@ -123,6 +123,7 @@ async function onClick(event: MouseEvent) {
 	position: absolute;
 	right: 120%;
 	top: 50%;
+	text-transform: none;
 	transform: translateY(-50%);
 	padding-left: 4px;
 	padding-right: 4px;

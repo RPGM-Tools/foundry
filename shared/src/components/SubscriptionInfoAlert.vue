@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { an, useSubscription } from '#/util';
+import { useSubscription } from '#/util';
 
 import CustomerPortalButton from './CustomerPortalButton.vue';
 
@@ -16,10 +16,7 @@ const { subscription } = useSubscription();
 	>
 		<NFlex vertical>
 			<p>
-				Looks like you are {{ an(subscription?.product.name || 'Member') }}
-				<NText depth="1">
-					{{ subscription?.product.name || 'Member' }}.
-				</NText>
+				Welcome, {{ subscription?.product.name || 'Member' }}!
 				You can upgrade or make changes to your membership in the Member Portal.
 			</p>
 			<CustomerPortalButton

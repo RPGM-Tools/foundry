@@ -46,7 +46,7 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 		},
 		define: {
 			'__MODULE_VERSION__': `"${version}"`,
-			'__API_URL__': JSON.stringify(env.VITE_RPGM_URL ?? 'https://api.rpgm.tools'),
+			'__API_URL__': JSON.stringify(env.VITE_RPGM_URL ?? 'https://rpgm.tools'),
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		},
 		assetsInclude: [

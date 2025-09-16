@@ -7,6 +7,7 @@ import { FoundyRpgmModuleMixin } from './module';
 import { RadialMenuRegister } from './radial-menu';
 import { GlobalSettings } from './settings';
 import { RpgmSidebarManager } from './sidebar';
+import { api } from './style/theme';
 import { usePolyhedriumBalance } from './util/usePolyhedriumBalance';
 
 export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, AbstractTools.Settings>(AbstractTools) {
@@ -24,6 +25,8 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 	majorGameVersion: number;
 
 	sidebar: RpgmSidebarManager;
+
+	notification = api.notification;
 
 	/** A record of all currently active and registered RPGM modules, keyed by their unique IDs. */
 	modules: Partial<{ [ID in keyof FoundryModuleMap]: InstanceType<FoundryModuleMap[ID]> }> = {};
@@ -63,7 +66,7 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 
 	protected override ready(): void | Promise<void> {
 		rpgm.radialMenu.update();
-		rpgm.chat.prune();
+		setTimeout(() => rpgm.chat.prune(), 4000);
 
 		const center = (s: string) => {
 			return s.padStart(s.length + Math.floor((48 - s.length) / 2));

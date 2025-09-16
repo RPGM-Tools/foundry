@@ -6,11 +6,12 @@ import * as z from 'zod/mini';
 import CustomerPortalButton from '#/components/CustomerPortalButton.vue';
 import SubscriptionInfoAlert from '#/components/SubscriptionInfoAlert.vue';
 import SubscriptionWarningAlert from '#/components/SubscriptionWarningAlert.vue';
+import { useResize } from '#/sidebar';
 import { useFocusCheck, useProducts, useSignedInRequired, useSubscription } from '#/util';
 import ProgressiveImage from '#/util/ProgressiveImage.vue';
 import { LoadingBoundry } from '#/util/useLoading';
 
-const onResize = inject<(forceCenter?: boolean) => void>('onResize');
+const onResize = useResize();
 
 // const { update } = rpgm.usePolyhedriumBalance();
 
@@ -184,7 +185,7 @@ function formattedDescription(item: Product) {
 								<LoadingBoundry #="{ loading, start }">
 									<NFlex vertical>
 										<NButton
-											:type="item.id === subscription?.productId ? 'success' : 'primary'"
+											:type="subscriptionActive && item.id === subscription?.productId ? 'success' : 'primary'"
 											:disabled="subscriptionActive"
 											:ghost="subscriptionActive && item.id === subscription?.productId"
 											:loading="loading.value"

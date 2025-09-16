@@ -1,6 +1,8 @@
 <!-- A large menu button to access a submenu -->
 <script setup lang="ts">
 import type { RouteRecordNormalized } from 'vue-router';
+
+import { vFitLines } from '#/util/VFitLines';
 const { menu } = defineProps<{
 	menu: RouteRecordNormalized
 }>();
@@ -22,7 +24,10 @@ defineEmits<{
 				class="sidebar-button-icon"
 				:class="menu.meta.menu!.icon"
 			/>
-			<span class="sidebar-button-title">
+			<span
+				v-fit-lines
+				class="sidebar-button-title"
+			>
 				{{ menu.meta.title }}
 			</span>
 			<i class="fas fa-chevron-right sidebar-button-icon sidebar-chevron" />
@@ -81,10 +86,11 @@ defineEmits<{
 .sidebar-button-title {
 	text-align: left;
 	font-weight: bold;
+	overflow: hidden;
 	/* font-size: 2rem; */
 	padding: 0.5rem 0;
 	color: #fff;
-	flex: 1;
+	flex: 0 1 70%;
 }
 
 .sidebar-button-icon {

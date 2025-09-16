@@ -58,7 +58,7 @@ export class ChatWizard<T extends WizardData['data'] = WizardData['data']> {
 	readonly _key: string;
 
 	/** @returns The unique key for this wizard and user */
-	get key(): ClientSettings.KeyFor<typeof this.moduleId> { return `${this._key}-${game.userId?.toLowerCase()}` as unknown as ClientSettings.KeyFor<typeof this.moduleId>; }
+	get key(): ClientSettings.KeyFor<typeof this.moduleId> { return `${this._key}-${game.userId}` as unknown as ClientSettings.KeyFor<typeof this.moduleId>; }
 
 	/**
 	 * Creates a new ChatWizard.
@@ -124,7 +124,7 @@ export class ChatWizard<T extends WizardData['data'] = WizardData['data']> {
 		const id = this.messageId(message);
 		const data = this.data.get(id);
 
-		if (!data) {
+		if (data === undefined) {
 			this.logger.warn(`No data found for ${this.key} wizard with id ${id}, deleting...`);
 			void message.delete({});
 			return false;

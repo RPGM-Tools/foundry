@@ -49,7 +49,7 @@ const discordLinkedCheck = useFocusCheck(() => updateAccounts()
 async function linkDiscord() {
 	return rpgm.auth.linkSocial({
 		provider: 'discord',
-		callbackURL: 'https://nexicore.rpgm.tools/linked'
+		callbackURL: 'https://rpgm.tools/linked'
 	}).then(r => {
 			if (r.data) {
 				window.open(r.data.url, '_blank');
@@ -61,28 +61,28 @@ async function linkDiscord() {
 
 <template>
 	<div>
-		<NH1>
-			{{ welcome }}
-			<span class="rpgm-badges">
-				<LegacyDiceIcon v-if="session.data?.user.legacy" />
-			</span>
-		</NH1>
-		<SubscriptionWarningAlert v-if="subscriptionCanceling" />
-		<div class="rpgm-info">
-			<label>
-				Username
-				<span>{{ session.data?.user.displayUsername }}</span>
-			</label>
-			<label>
-				Email
-				<span>{{ session.data?.user.email }}</span>
-			</label>
-			<label>
-				Membership
-				<span>{{ subscriptionName }}</span>
-			</label>
-		</div>
 		<NFlex vertical>
+			<NH1>
+				{{ welcome }}
+				<span class="rpgm-badges">
+					<LegacyDiceIcon v-if="session.data?.user.legacy" />
+				</span>
+			</NH1>
+			<SubscriptionWarningAlert v-if="subscriptionCanceling" />
+			<div class="rpgm-info">
+				<label>
+					Username
+					<span>{{ session.data?.user.displayUsername }}</span>
+				</label>
+				<label>
+					Email
+					<span>{{ session.data?.user.email }}</span>
+				</label>
+				<label>
+					Membership
+					<span>{{ subscriptionName }}</span>
+				</label>
+			</div>
 			<LoadingBoundry #="{ loading, start }">
 				<NButton
 					type="primary"

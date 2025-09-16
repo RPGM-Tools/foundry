@@ -1,12 +1,18 @@
+import { useDebounceFn } from '@vueuse/core';
 import type { InjectionKey } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
 
 import SidebarAppMenu from './SidebarApp/SidebarAppMenu.vue';
 
-export const titleKey = Symbol() as InjectionKey<(title: string | undefined) => void>;
+export const titleKey = 'titleKey' as unknown as InjectionKey<(title: string | undefined) => void>;
+export const resizeKey = 'resizeKey' as unknown as InjectionKey<(forceCenter?: boolean) => void>;
 
-export function useTitle(title: string) {
-	inject(titleKey)?.(title);
+export function useTitle() {
+	return inject(titleKey)!;
+}
+
+export function useResize(delay: number = 0) {
+	return useDebounceFn(inject(resizeKey)!, delay);
 }
 
 export class RpgmSidebarManager {

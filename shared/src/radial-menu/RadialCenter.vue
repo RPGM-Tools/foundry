@@ -5,7 +5,8 @@ const pressed = ref(false);
 </script>
 
 <template>
-	<button
+	<component
+		:is="$attrs.tag ?? 'button'"
 		v-bind="$attrs"
 		:data-pressed="pressed"
 		class="radial-menu-center-2"
@@ -15,7 +16,7 @@ const pressed = ref(false);
 		<slot>
 			<DiceIcon type="rpgm" />
 		</slot>
-	</button>
+	</component>
 </template>
 
 <style scoped>
@@ -27,6 +28,8 @@ const pressed = ref(false);
 	padding: 0 !important;
 	margin: 0 !important;
 	line-height: 0 !important;
+	height: 100% !important;
+	width: 100% !important;
 }
 
 .radial-menu-center-2:focus:not(:active):not([data-pressed='true']),

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { RouterView, useRoute, useRouter } from 'vue-router';
 
-import { titleKey } from '#/sidebar';
+import { titleKey, useResize } from '#/sidebar';
 import { NaiveTheme, NaiveUIThemeOverrides } from '#/style/theme';
 import { vFitLines } from '#/util/VFitLines';
 import WriteOn from '#/util/WriteOn';
 
-import PolyhedriumBalance from './PolyhedriumBalance.vue';
+// import PolyhedriumBalance from './PolyhedriumBalance.vue';
 
 const root = useTemplateRef('root');
 const router = useRouter();
 const route = useRoute();
 
-const onResize = inject<(forceCenter?: boolean) => void>('onResize');
+const onResize = useResize();
 
-const primaryColor = NaiveUIThemeOverrides.common.primaryColor;
+const primaryColor = computed(() => route.meta.menu?.color ?? NaiveUIThemeOverrides.common.primaryColor);
 
 const titleOverride = ref<string>();
 const currentTitle = computed(() => titleOverride.value ?? route.meta.title ?? '');
@@ -60,18 +60,18 @@ onMounted(() => {
 					<span
 						:key="display.value"
 						v-fit-lines
-						style="flex: 1; min-width: 0; padding-top: 4px; padding-bottom: 4px;"
+						class="sidebar-title-text"
+						style="flex: 1; min-width: 0; padding: 4px;"
 					>
 						{{ display }}
 					</span>
-					<PolyhedriumBalance style="display: flex; align-items: center; margin-right: 4px;" />
+					<!-- <PolyhedriumBalance style="display: flex; align-items: center; margin: 0 4px;" /> -->
 				</WriteOn>
 			</span>
 			<div
 				class="sidebar-content"
 			>
 				<RouterView
-					:key="$route.fullPath"
 					#="{ Component }"
 				>
 					<template v-if="Component">
@@ -103,6 +103,16 @@ onMounted(() => {
 	height: unset !important;
 }
 
+.sidebar-title-text {
+	transition: color 0.4s;
+}
+
+.sidebar-title:has(.sidebar-back:hover) {
+	.sidebar-title-text {
+		color: v-bind(primaryColor);
+	}
+}
+
 .rpgm-sidebar-window {
 	height: 100%;
 	display: flex;
@@ -115,10 +125,10 @@ onMounted(() => {
 		overflow: hidden;
 		flex-shrink: 0;
 		justify-content: center;
-		margin-bottom: 0.4rem;
 
 		.sidebar-title {
 			font-size: 2rem;
+			border: none;
 			margin: 0;
 		}
 	}
@@ -141,7 +151,7 @@ onMounted(() => {
 	font-size: 2rem;
 	z-index: 1;
 	cursor: pointer;
-	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.4s;
 	outline: none;
 	margin-right: 0.85rem;
 

@@ -1,12 +1,20 @@
 import { HomebrewSchemas } from '@rpgm/tools/forge';
 import { AbstractForge, type HomebrewSchema } from '@rpgm/tools/forge';
+import { createGlobalState } from '@vueuse/core';
 import { argument, literal, string } from 'brigadier-ts-lite';
 import ISO639 from 'iso-639-1';
+import { NAlert } from 'naive-ui';
 import type { Component } from 'vue';
 
 import { ChatWizard } from '#/chat/ChatWizard';
 import { FoundyRpgmModuleMixin } from '#/module';
 import { inputHeuristics, shimmerInput, writeOn } from '#/radial-menu';
+import HelpForgeFAQ from '$/../assets/faq.md?url';
+import HelpForgeConfigurationOptions from '$/../assets/forge_configuration_options.md?url';
+import HelpGettingStarted from '$/../assets/getting_started.md?url';
+import HelpGlossary from '$/../assets/glossary.md?url';
+import HelpTroubleshooting from '$/../assets/troubleshooting.md?url';
+import HelpUsingForge from '$/../assets/using_forge.md?url';
 import DescriptionChat from '$/chat/DescriptionChat.vue';
 import HomebrewChat from '$/chat/Homebrew/HomebrewChat.vue';
 import InitPrompt from '$/chat/InitPrompt.vue';
@@ -14,16 +22,12 @@ import NamesChat from '$/chat/NamesChat.vue';
 import { command } from '$/util/homebrew';
 import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, registerTokenCreate } from '$/util/token';
 import Genres from '$$/assets/combined_systems.json?url';
-import ForgeHelp from '##/assets/help.md?url';
 
 import ForgeSidebar from './sidebar/ForgeSidebar.vue';
 
 export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, AbstractForge.Settings>(AbstractForge) {
 	/** @returns The current genre setting */
 	get genre() { return game.settings.get('rpgm-forge', 'genre'); }
-
-	/** @returns The current method setting */
-	get method() { return game.settings.get('rpgm-forge', 'method'); }
 
 	/** @returns The current system setting */
 	get system() { return game.system.title; }
@@ -122,18 +126,6 @@ export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, Abstr
 			type: String,
 			config: true
 		});
-		game.settings.register('rpgm-forge', 'method', {
-			name: rpgm.localize('RPGM_FORGE.CONFIG.METHOD'),
-			hint: rpgm.localize('RPGM_FORGE.CONFIG.METHOD_HINT'),
-			default: 'ai',
-			scope: 'world',
-			choices: {
-				ai: rpgm.localize('RPGM_FORGE.CONFIG.METHOD_AI'),
-				simple: rpgm.localize('RPGM_FORGE.CONFIG.METHOD_SIMPLE')
-			},
-			type: String,
-			config: true
-		});
 		rpgm.chat.registerCommand(literal('name')
 			.then(argument('prompt', string('greedy_phrase')).executes(c => {
 				void chatTokenNames(undefined, c.get<string>('prompt'));
@@ -219,12 +211,64 @@ export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, Abstr
 			component: ForgeSidebar
 		});
 		registerTokenCreate();
-		rpgm.help.pages.set('forge', { name: 'Forge', url: ForgeHelp });
+		rpgm.help.registerHelpTopic('Getting Started With Forge', HelpGettingStarted);
+		rpgm.help.registerHelpTopic('Forge Configuration Options', HelpForgeConfigurationOptions);
+		rpgm.help.registerHelpTopic('Using Forge', HelpUsingForge);
+		rpgm.help.registerHelpTopic('Forge FAQ', HelpForgeFAQ);
+		rpgm.help.registerHelpTopic('Troubleshooting Forge', HelpTroubleshooting);
+		rpgm.help.registerHelpTopic('Glossary', HelpGlossary);
 	}
 
 	override ready() {
-		if (this.promptChats.data.size === 0 && !game.settings.get('rpgm-forge', 'has_been_prompted'))
-			void this.promptChats.newMessage();
+		if (this.promptChats.data.size === 0 && !game.settings.get('rpgm-forge', 'has_been_prompted')) {
+			this.promptChats.newMessage({});
+		}
+	}
+
+	useTextLimit = createGlobalState(() => {
+		const session = rpgm.auth.useSession();
+		const textLimit = ref(0);
+		if (session.value)
+			this.getApiForgeUsage().then(limit => {
+				if (typeof limit.data === 'number')
+					textLimit.value = limit.data;
+			});
+		const decrement = () => textLimit.value = Math.max(0, textLimit.value - 1);
+		const update = async () => {
+			const limit = await this.getApiForgeUsage();
+			if (typeof limit.data === 'number')
+				textLimit.value = limit.data;
+			return textLimit.value;
+		};
+		const textLimitValue = computed(() => {
+			if (session.value.data === null) return 0;
+			return textLimit.value;
+		});
+		return { textLimit: textLimitValue, updateTextLimit: update, decrement };
+	});
+
+	warnTextLimit() {
+		const n = rpgm.notification.create({
+			title: 'Limit Reached',
+			content: rpgm.localize('RPGM_FORGE.ERRORS.TEXT_LIMIT'),
+			duration: 10000,
+			action() {
+				return h(NAlert, {
+					type: 'warning',
+					onClick: () => {
+						n.destroy();
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						(ui.rpgm as any).router.push('/guildhall');
+						if (rpgm.majorGameVersion <= 12) {
+							ui.sidebar.activateTab('rpgm');
+						} else {
+							ui.sidebar.changeTab('rpgm', 'primary');
+						}
+					}
+				}, 'Upgrade Your Membership');
+			},
+			type: 'warning'
+		});
 	}
 }
 

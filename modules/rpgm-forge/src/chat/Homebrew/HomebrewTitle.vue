@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { NH1 } from 'naive-ui';
+
 import ContentEditable from '#/util/ContentEditable.vue';
 import { vFitLines } from '#/util/VFitLines';
 import WriteOn from '#/util/WriteOn';
-import { NH1 } from 'naive-ui';
 
 const data = inject<ForgeChatHomebrew>('data')!;
 
@@ -51,7 +52,7 @@ const rename = (n: string) => {
 			>
 				<NH1
 					:key="display.value"
-					:ref="config.ref"
+					:ref="e => config.ref((e as any)?.$el)"
 					v-fit-lines
 					:contenteditable="config.contenteditable"
 					class="rpgm-homebrew-title rpgm-radial-ignore"

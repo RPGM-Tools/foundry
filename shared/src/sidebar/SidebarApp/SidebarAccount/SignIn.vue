@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { FormRules } from 'naive-ui';
 
+import { useResize } from '#/sidebar';
 import { useLoading } from '#/util/useLoading';
 import { vFocus } from '#/util/vFocus';
 
 const tabValue = ref('signin');
-const onResize = inject<(forceCenter?: boolean) => void>('onResize')!;
+const onResize = useResize();
 
 // const accountForm = useTemplateRef('accountForm');
 
@@ -70,7 +71,11 @@ function signUp() {
 		password: formValue.value.password,
 		username: formValue.value.username,
 		callbackURL: 'https://rpgm.tools'
-	});
+	}, {
+			onSuccess() {
+				rpgm.logger.visible.log('Check your email for a confirmation link.');
+			}
+		});
 	tabValue.value = 'signin';
 }
 

@@ -28,6 +28,10 @@ async function generate() {
 	data.description = result.isOk() ? result.value.description : oldDesc;
 	rpgm.chat.updateScroll();
 	loading.value = false;
+	if (result.isOk()) {
+		if (rpgm.forge.settings.get('descriptionsModel').provider === 'rpgm-tools')
+			rpgm.forge.useTextLimit().decrement();
+	}
 }
 
 const buttons: RadialButton<ButtonContext>[] = [

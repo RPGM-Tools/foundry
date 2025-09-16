@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { useResize } from '#/sidebar';
+
 const signedIn = rpgm.auth.useSession();
 
-const onResize = inject<(forceCenter?: boolean) => void>('onResize');
+const onResize = useResize();
 
 watch(signedIn, () => {
-	setTimeout(() => onResize?.(true), 400);
+	setTimeout(() => onResize(true), 400);
 });
 </script>
 
@@ -13,11 +15,6 @@ watch(signedIn, () => {
 		<slot
 			v-if="signedIn.data?.session"
 			v-bind="$attrs"
-		/>
-		<slot
-			v-else-if="signedIn.isPending"
-			v-bind="$attrs"
-			name="fallback"
 		/>
 		<slot
 			v-else

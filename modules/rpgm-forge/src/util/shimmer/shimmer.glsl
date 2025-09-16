@@ -1,117 +1,87 @@
-precision mediump float;
+precision highp float;
 
 varying vec2 vTextureCoord;
 varying vec2 vFilterCoord;
-uniform sampler2D uSampler; // The token's base texture
-uniform float iTime; // Time in seconds (or any rate) — you must update this in JS
-uniform vec2 tokenSize;
+uniform sampler2D uSampler;
 uniform float fade;
+uniform float iTime;
+uniform vec2 tokenSize;
 uniform float seed;
-
-// A handy 2D random function using a "hash" approach
-float rand(vec2 co) {
-    return fract(sin(dot(co.xy, vec2(12.9898 * seed, 78.233 * seed * 1.237))) * 43758.5453);
-}
 
 float smoothFade() {
     return pow(fade, 0.8);
 }
 
-// For smooth edges, a simple "soft circle" alpha function
-// r is the distance from center, radius is how big the circle is
-// returns how "opaque" the circle is at that distance
-float circleAlpha(float r, float radius) {
-    // Example: fuzzy fade-out near the radius
-    float softness = 0.1;
-    float cutoff = radius * (1.0 - softness);
-    if (r > radius) return 0.0;
-    if (r < cutoff) {
-        // fully opaque near the center
-        return 1.0;
-    } else {
-        // fade out in the ring [cutoff..radius]
-        return 1.0 - smoothstep(cutoff, radius, r);
-    }
+float scaleCeil(float x) {
+    float g = 5.;
+    return (x - 1.) * g + 1.;
 }
 
-// Generate a swirling color for a position & time
+float randv(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453 / seed);
+}
+
+float randvs(vec2 co) {
+    return 2. * fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453 / seed) - 1.;
+}
+
 vec3 swirlColor(vec2 pos, float t) {
-    // Example approach: a few sine waves to get color variation
-    float r = 0.5 + 0.5 * sin(2.0 + pos.x * 5.0 + t * 1.5);
-    float g = 0.5 + 0.5 * sin(4.0 + pos.y * 5.0 + t * 1.7);
-    float b = 0.5 + 0.5 * sin(pos.x * 5.0 + pos.y * 5.0 + t * 2.0);
+    float r = 0.7 + 0.7 * sin(2.0 + pos.x * 5.0 + t * 1.5);
+    float g = 0.2 + 0.2 * sin(4.0 + pos.y * 5.0 + t * 1.7);
+    float b = 0.7 + 0.7 * sin(pos.x * 5.0 + pos.y * 5.0 + t * 2.0);
+    return vec3(r, g, r * 1.2);
+}
+
+float randf(float co) {
+    return fract(sin(dot(vec2(co * 0.2739 * seed, co * -31.23 * seed), vec2(12.9898, 78.233))) * 43758.5453 / seed);
+}
+
+vec3 randColor(float ra) {
+    float r = scaleCeil(randf(ra * 54.12));
+    float g = scaleCeil(randf(ra * 12.34));
+    float b = scaleCeil(randf(ra * 87.65));
     return vec3(r, g, b);
 }
 
-// Main fragment
+vec2 swoosh(float t, vec2 l) {
+    float x = 1. - pow(t, l.x * 2. - 1.);
+    float y = 1. - pow(t, l.y * 2. - 1.);
+    return vec2(x, y);
+}
+
+float circleAlpha(vec2 uv, float radius) {
+    float dist = 1. - min(1., length(uv) / radius);
+    float smoothed = dist * 0.75;
+    return smoothed;
+}
+
 void main() {
-    // Original token color
     vec4 baseColor = texture2D(uSampler, vTextureCoord);
+    vec2 cuv = vFilterCoord * 2. - 1.;
 
-    // If the token is fully transparent at this pixel, we’ll keep it that way.
-    // This ensures we don’t draw shimmer outside the token silhouette.
-    if (baseColor.a < 0.001) {
-        gl_FragColor = baseColor;
-        return;
-    }
+    vec3 colors = vec3(0.);
 
-    // Convert vTextureCoord (0..1) into "pixel" space if needed
-    // but we can just keep it 0..1 for this effect
-    vec2 uv = vFilterCoord;
-
-    // ---------------
-    // 1) LARGE GRADIENT CIRCLES
-    // ---------------
-    vec3 gradients = vec3(0.0);
-    float gradAlpha = 0.0;
-
-    // We'll define N circles that drift around
-    // (You can adjust for more or fewer circles for complexity/performance.)
-    const int N = 9;
-    for (int i = 0; i < N; i++) {
-        // Pretend we have some stable "random" center for each circle i
-        // using a built-in rand function.
-        // We also animate the center over time.
+    const int N = 5;
+    for (int i = 1; i < N + 1; i++) {
         float fi = float(i);
-        // base random center
-        vec2 center = vec2(rand(vec2(fi, 13.7)), rand(vec2(fi, 47.3)));
+        float x = randv(vec2(fi * 7.31, fi * 4.3473));
+        float y = randv(vec2(fi * -2.57, fi * 3.12378));
+        float radius = 1. + 0.33 * sin(iTime + fi * 4.3982);
+        vec2 center = vec2(randvs(vec2(fi, 13.7)), randvs(vec2(fi, 47.3)));
+        // Smooth entrance animation
+        center *= 1. - smoothFade() + 1.;
 
         // Make them drift around slightly over time
         center += 0.2 * vec2(
-                    sin(iTime * 2. + fi * 3.1),
-                    cos(iTime * 2. + fi * 2.7)
+                    sin(iTime * 3. + fi * 3.1 * seed),
+                    cos(iTime * 3. + fi * 2.7 * seed)
                 );
+        vec2 muv = cuv + swoosh(smoothFade(), vec2(x, y)) * fi * 0.5;
 
-        // radius could also gently pulsate
-        float radius = 0.4 + 0.15 * sin(iTime + fi * 1.2);
-
-        // Distance from the current pixel to the circle center
-        float dist = distance(uv, center);
-
-        // The circle's alpha (fade at the edge)
-        float cAlpha = circleAlpha(dist, radius);
-        if (cAlpha > 0.0) {
-            // color might swirl based on circle center plus time
-            vec3 cColor = swirlColor((uv - center) * 2.0, iTime * 2.0 + fi * 0.5);
-            // Accumulate color alpha-blended
-            // Weighted by cAlpha, but you can also do more creative blending
-            gradients = mix(gradients, cColor, cAlpha);
-            gradAlpha = mix(gradAlpha, 1.0, cAlpha);
-        }
+        colors += swirlColor(cuv + center, iTime + (fi * randf(seed * fi))) * circleAlpha(cuv + center, radius);
     }
 
-    vec3 shimmerRGB = gradients;
-    float shimmerA = clamp(gradAlpha, 0.0, 1.0);
-
-    // ---------------
-    // FINAL BLENDING
-    // ---------------
-    // We want to overlay this shimmer where the base token is visible.
-    // This means the effect’s final alpha is baseColor.a,
-    // and the shimmer’s color is multiplied by baseColor.a
-    // to ensure it doesn’t spill out of the token silhouette.
-    float outAlpha = baseColor.a;
-    vec3 outColor = mix(baseColor.rgb, shimmerRGB, smoothFade() * 0.25) * baseColor.a;
-
-    gl_FragColor = vec4(outColor, outAlpha);
+    // vec3 outColor = mix(baseColor.rgb, colors, smoothFade() * 0.33);
+    vec3 outColor = baseColor.rgb + colors * smoothFade() * 0.5;
+    gl_FragColor = vec4(outColor * baseColor.a, baseColor.a);
 }

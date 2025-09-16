@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 
+import IHaveMyOwnAI from '#/components/IHaveMyOwnAI.vue';
 import SignedIn from '#/util/SignedIn.vue';
 
 import SidebarAccountSignedIn from './SidebarAccountSignedIn.vue';
@@ -21,31 +22,21 @@ watch(session, (n) => {
 
 <template>
 	<NCard>
-		<SignedIn>
-			<template #fallback>
-				<SidebarLoading />
-			</template>
-			<template #default>
-				<SidebarAccountSignedIn />
-			</template>
-			<template #not-signed-in>
-				<SignIn />
-			</template>
-		</SignedIn>
-		<RouterLink
-			#="{ navigate }"
-			to="/account/bring-your-own-ai"
-			custom
-		>
-			<span style="width: 100%; display: inline-flex; justify-content: end; margin-top: 8px;">
-				<a
-					class="rpgm-link"
-					@click="navigate"
-				>
-					I have my own AI 
-					<i class="fas fa-robot" />
-				</a>
-			</span>
-		</RouterLink>
+		<NFlex vertical>
+			<div style="position: relative;">
+				<SignedIn>
+					<template #fallback>
+						<SidebarLoading />
+					</template>
+					<template #default>
+						<SidebarAccountSignedIn />
+					</template>
+					<template #not-signed-in>
+						<SignIn />
+					</template>
+				</SignedIn>
+			</div>
+			<IHaveMyOwnAI />
+		</NFlex>
 	</NCard>
 </template>

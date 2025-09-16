@@ -1,3 +1,7 @@
+.n-button {
+	transition-property: color, background-color, opacity, border-color, border-radius;
+}
+
 .rpgm-app {
 	font-family: "Signika", sans-serif !important;
 }

@@ -1,43 +1,47 @@
 <script setup lang="ts">
+import IHaveMyOwnAI from '#/components/IHaveMyOwnAI.vue';
+import { useResize } from '#/sidebar';
 import { NaiveUIThemeOverrides } from '#/style/theme';
 
+import ForgeChangelog from './ForgeChangelog.vue';
 import ForgeSidebarByoAI from './ForgeSidebarByoAI.vue';
+import ForgeSidebarConfiguration from './ForgeSidebarConfiguration.vue';
 
 const primaryColor = NaiveUIThemeOverrides.common.primaryColor;
+
+const resize = useResize(250);
 </script>
 
 <template>
-	<NFlex vertical>
-		<NCard title="Select a mode to use Forge">
-			<template #header-extra>
-				<NPopover
-					placement="bottom-end"
-					:show-arrow="false"
-					style="max-width: 300px;"
+	<NFlex>
+		<NCard title="Configuration">
+			<NFlex vertical>
+				<NCollapse
+					accordion
+					default-expanded-names="1"
+					@update:expanded-names="resize"
 				>
-					<template #trigger>
-						<NButton
-							text
-							type="info"
-						>
-							<i class="fas fa-circle-info" />
-						</NButton>
+					<NCollapseItem
+						title="General"
+						name="1"
+					>
+						<ForgeSidebarConfiguration />
+					</NCollapseItem>
+					<NCollapseItem title="Text AI">
+						<ForgeSidebarByoAI />
+					</NCollapseItem>
+					<template #arrow>
+						<i
+							class="fa-solid fa-chevron-right"
+							style="margin-right: 4px; font-size: 0.85rem;"
+						/>
 					</template>
-					Lorem ipsum dolor sit amet
-					consectetur adipisicing elit.
-					Quisquam, quod.
-					Lorem ipsum dolor sit amet
-					consectetur adipisicing elit.
-					Quisquam, quod.
-					Lorem ipsum dolor sit amet
-					consectetur adipisicing elit.
-					Quisquam, quod.
-					Lorem ipsum dolor sit amet
-					consectetur adipisicing elit.
-					Quisquam, quod.
-				</NPopover>
-			</template>
-			<ForgeSidebarByoAI />
+				</NCollapse>
+				<IHaveMyOwnAI />
+			</NFlex>
+		</NCard>
+		<NCard title="Changelog">
+			<ForgeChangelog />
 		</NCard>
 	</NFlex>
 </template>

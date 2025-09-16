@@ -1,5 +1,7 @@
 <script setup lang="ts">
 
+import { RPGM_MODELS } from '@rpgm/tools/forge';
+
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 import SkeletonParagraph from '#/chat/SkeletonParagraph.vue';
 import { getSelectedToken, nameToken } from '$/util/token';
@@ -27,6 +29,14 @@ const insertValues = (values: string[]) => {
  * @todo Less hardcoding
  */
 async function generate(regenerate: boolean = false) {
+	const isLastRpgmGeneration = rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools' 
+		&& rpgm.forge.useTextLimit().textLimit.value === 0;
+	const oldModel = rpgm.forge.settings.get('namesModel');
+	if (isLastRpgmGeneration) {
+		rpgm.forge.settings.set('namesModel', RPGM_MODELS.offlineNames);	
+		rpgm.forge.warnTextLimit();
+	}
+
 	loading.value = true;
 	const oldNames = [...data.names];
 	const fadeOut = new Promise<void>(p => {
@@ -45,14 +55,22 @@ async function generate(regenerate: boolean = false) {
 		gender: 'any',
 		genre: rpgm.forge.genre,
 		language: rpgm.forge.language,
-		method: rpgm.forge.method,
 		type: data.prompt
 	});
 
 	loading.value = false;
 	await fadeOut;
-	if (result.isErr()) rpgm.forge.logger.visible.error(result.error);
+	if (result.isErr()) rpgm.forge.logger.visible.error(result.error.message);
 	insertValues(result.isOk() ? result.value.names : oldNames);
+	if (result.isOk()) {
+		if (rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools')
+			if (rpgm.forge.useTextLimit().decrement() == 0) {
+				rpgm.forge.logger.visible.warn(rpgm.localize('RPGM_FORGE.ERRORS.TEXT_LIMIT'));
+				rpgm.forge.settings.set('namesModel', { provider: 'offline', slug: 'rpgm-names-offline', type: 'text' });
+			}
+	}
+
+	if (isLastRpgmGeneration) rpgm.forge.settings.set('namesModel', oldModel);
 }
 
 const buttons: RadialButton[] = [{
@@ -73,7 +91,6 @@ function assign(name: string) {
 	const oldName = token.name;
 	void nameToken(token.document, name);
 	data.names[data.names.indexOf(name)] = oldName;
-	rpgm.forge.logger.visible.log(`Renamed ${oldName} to ${name}`);
 }
 
 onMounted(() => {

@@ -1,4 +1,4 @@
-import fragURL from './shimmer2.glsl?url';
+import fragURL from './shimmer.glsl?url';
 import vertexURL from './vertex.glsl?url';
 
 /**
@@ -35,6 +35,7 @@ class ShimmerFilter extends PIXI.Filter implements Shimmer {
 
 	/** Fetch the shader code once. */
 	static async setShader(): Promise<void> {
+		if (ShimmerFilter.vertex && ShimmerFilter.frag) return;
 		await fetch(vertexURL).then(async (v) => {
 			if (v.ok) ShimmerFilter.vertex ??= await v.text();
 			else rpgm.forge.logger.error('Failed to grab shimmer shaders');

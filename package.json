@@ -29,7 +29,7 @@
 		"@floating-ui/vue": "^1.1.6",
 		"@polar-sh/better-auth": "^1.0.8",
 		"@polar-sh/sdk": "^0.34.13",
-		"@rpgm/tools": "file:../tools",
+		"@rpgm/tools": "github:RPGM-Tools/tools#main",
 		"@stylistic/eslint-plugin": "^5.2.3",
 		"@types/showdown": "^2.0.6",
 		"@vueuse/core": "^13.1.0",

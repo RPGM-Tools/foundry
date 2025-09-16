@@ -28,7 +28,8 @@ function formatDate(date: Date) {
 				<NText depth="1">
 					{{ subscription?.product.name }}
 				</NText>
-				membership has been canceled and will expire on {{ formatDate(subscription!.canceledAt!) }}. You can still continue to use your account.
+				membership has been canceled and will expire on {{ formatDate(subscription!.currentPeriodEnd!) }}.
+				You can still continue to use your account.
 				You can reactivate your membership in the Member Portal.
 			</p>
 			<CustomerPortalButton

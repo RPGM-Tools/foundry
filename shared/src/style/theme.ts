@@ -1,9 +1,10 @@
 import type { GlobalThemeOverrides } from 'naive-ui';
-import { darkTheme, NConfigProvider } from 'naive-ui';
+import { createDiscreteApi, darkTheme, NConfigProvider } from 'naive-ui';
 import type { App } from 'vue';
 
 export const NaiveUIThemeOverrides = {
 	common: {
+		fontFamily: 'inherit',
 		baseColor: '#ffffff',
 		primaryColor: '#8560ed',
 		primaryColorHover: '#9370ff',
@@ -58,6 +59,8 @@ export const NaiveTheme = defineComponent({
 	}
 });
 
+export const api = createDiscreteApi(['notification'], { configProviderProps: { theme: darkTheme } });
+
 import {
 	NA,
 	NAlert,
@@ -84,7 +87,6 @@ import {
 	NInput,
 	NList,
 	NListItem,
-	NNumberAnimation,
 	NP,
 	NPopconfirm,
 	NPopover,
@@ -129,7 +131,6 @@ const NaiveComponents = {
 	NInput,
 	NList,
 	NListItem,
-	NNumberAnimation,
 	NP,
 	NPopconfirm,
 	NPopover,

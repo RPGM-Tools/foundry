@@ -58,12 +58,12 @@
 .rpgm-stagger-move,
 .rpgm-stagger-leave-active,
 .rpgm-stagger-enter-active {
-	transition: all 0.4s ease-out;
+	transition: all 0.4s ease-out !important;
 }
 
-.rpgm-stagger-leave-active {
-	position: absolute;
-	width: 100%;
+.rpgm-stagger-leave-active:not(.rpgm-no-wide) {
+	position: absolute !important;
+	width: 100% !important;
 }
 
 .rpgm-stagger-enter-from,
@@ -81,12 +81,12 @@
 .rpgm-stagger-alternate-move,
 .rpgm-stagger-alternate-leave-active,
 .rpgm-stagger-alternate-enter-active {
-	transition: all 0.4s ease-out;
+	transition: all 0.4s ease-out !important;
 }
 
-.rpgm-stagger-alternate-leave-active {
-	position: absolute;
-	width: 100%;
+.rpgm-stagger-alternate-leave-active:not(.rpgm-no-wide) {
+	position: absolute !important;
+	width: 100% !important;
 }
 
 .rpgm-stagger-alternate-enter-from:nth-child(odd),
@@ -112,12 +112,12 @@
 .rpgm-fade-move,
 .rpgm-fade-leave-active,
 .rpgm-fade-enter-active {
-	transition: opacity 0.2s ease-out, scale 0.2s ease-out;
+	transition: opacity 0.2s ease-out, scale 0.2s ease-out !important;
 }
 
-.rpgm-fade-leave-active {
-	position: absolute;
-	width: 100%;
+.rpgm-fade-leave-active:not(.rpgm-no-wide) {
+	position: absolute !important;
+	width: 100% !important;
 }
 
 .rpgm-fade-enter-from,
@@ -130,12 +130,13 @@
 .rpgm-zoom-move,
 .rpgm-zoom-leave-active,
 .rpgm-zoom-enter-active {
-	transition: opacity 0.2s ease-out, scale 0.2s ease-out;
+	transform-origin: center 10%;
+	transition: opacity 0.2s ease-out, scale 0.2s ease-out !important;
 }
 
-.rpgm-zoom-leave-active {
-	position: absolute;
-	width: 100%;
+.rpgm-zoom-leave-active:not(.rpgm-no-wide) {
+	position: absolute !important;
+	width: 100% !important;
 }
 
 .rpgm-zoom-enter-from,
@@ -148,14 +149,14 @@
 
 .rpgm-jiggle-leave-active,
 .rpgm-jiggle-enter-active {
-	transition: all 0.2s ease-out;
+	transition: all 0.2s ease-out !important;
 	transform-origin: bottom center;
 	animation: rpgm-jiggle 0.3s ease-in-out;
 }
 
-.rpgm-jiggle-leave-active {
-	position: absolute;
-	width: 100%;
+.rpgm-jiggle-leave-active:not(.rpgm-no-wide) {
+	position: absolute !important;
+	width: 100% !important;
 }
 
 .rpgm-jiggle-enter-from,

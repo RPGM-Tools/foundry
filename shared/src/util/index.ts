@@ -1,6 +1,7 @@
 import type { Product } from '@polar-sh/sdk/models/components/product.js';
-import { createGlobalState, useAsyncState, watchDebounced } from '@vueuse/core';
+import { createGlobalState, useAsyncState, useFetch, watchDebounced } from '@vueuse/core';
 import type { MaybePromise } from 'fvtt-types/utils';
+import { Converter } from 'showdown';
 import { shallowReactive } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -118,10 +119,26 @@ export function useSignedInRequired(fallbackRoute: string = '/account?back=true'
 	const router = useRouter();
 
 	watch(session, (newSession) => {
-		console.log(newSession.data);
 		if (newSession.data === null) {
-			console.log('Not signed in');
 			router.push(fallbackRoute);
 		}
 	});
+}
+
+const texts = new Map<string, string>();
+export function useMarkdown(url: string) {
+	const fetch = useFetch<string>(url, { immediate: false });
+	const converter = new Converter();
+	const markdown = computed(() => {
+		const cached = texts.get(url);
+		if (cached) return cached;
+
+		fetch.execute().then(() => {
+			texts.set(url, fetch.data.value ?? '');
+		});
+
+		return fetch.data.value ?? '';
+	});
+
+	return computed(() => converter.makeHtml(markdown.value));
 }

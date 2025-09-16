@@ -1,4 +1,4 @@
-import type { Names, NamesOptions } from '@rpgm/tools/forge';
+import { type Names, type NamesOptions, RPGM_MODELS } from '@rpgm/tools/forge';
 import type { Result } from 'neverthrow';
 import { errAsync } from 'neverthrow';
 
@@ -12,7 +12,7 @@ export function getSelectedToken(): Token | undefined {
 	if (canvas.tokens!.controlled.length === 1) {
 		return canvas.tokens!.controlled[0];
 	} else {
-		rpgm.forge.logger.visible.error(rpgm.localize('RPGM_FORGE.ERORRS.TOKEN_SELECT'));
+		rpgm.forge.logger.visible.warn(rpgm.localize('RPGM_FORGE.ERRORS.TOKEN_SELECT'));
 		return undefined;
 	}
 }
@@ -66,7 +66,14 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
 export async function generateTokenNames(tokenDocument: TokenDocument, type?: string): Promise<Result<Names, Error>> {
 	const protoToken = tokenDocument.actor?.prototypeToken;
 	if (!protoToken?.name) return errAsync(new Error('Token has no name!'));
-	const method = rpgm.forge.method;
+
+	const isLastRpgmGeneration = rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools'
+		&& rpgm.forge.useTextLimit().textLimit.value === 0;
+	const oldModel = rpgm.forge.settings.get('namesModel');
+	if (isLastRpgmGeneration) {
+		rpgm.forge.settings.set('namesModel', RPGM_MODELS.offlineNames);
+		rpgm.forge.warnTextLimit();
+	}
 
 	/**
 	 * @todo Less hardcoding of values
@@ -75,7 +82,6 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 		quantity: 4,
 		gender: 'any',
 		genre: rpgm.forge.genre,
-		method: method,
 		language: rpgm.forge.language,
 		type: type ?? protoToken.name
 	};
@@ -95,6 +101,15 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 	if (shimmerFilter)
 		void shimmerFilter.fadeOut(500);
 
+	if (result.isOk()) {
+		if (rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools')
+			if (rpgm.forge.useTextLimit().decrement() == 0) {
+				rpgm.forge.settings.set('namesModel', { provider: 'offline', slug: 'rpgm-names-offline', type: 'text' });
+			}
+	}
+	if (isLastRpgmGeneration) {
+		rpgm.forge.settings.set('namesModel', oldModel);
+	}
 	return result;
 }
 
@@ -104,7 +119,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
  */
 export async function quickNameToken(tokenDocument: TokenDocument) {
 	if (!tokenDocument.isOwner) {
-		rpgm.forge.logger.visible.error(rpgm.localize('RPGM_FORGE.ERORRS.TOKEN_OWNER'));
+		rpgm.forge.logger.visible.error(rpgm.localize('RPGM_FORGE.ERRORS.TOKEN_OWNER'));
 		return;
 	}
 	const result = await generateTokenNames(tokenDocument);

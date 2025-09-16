@@ -8,7 +8,7 @@ export default {
 		},
 		CONFIG: {
 			AUTO_NAME: 'Auto Name Tokens',
-			AUTO_NAME_HINT: 'Whether to automatically name tokens when they are placed. You can hold shift to bypass this feature.',
+			AUTO_NAME_HINT: 'Tokens placed on the canvas will automatically be named. You can hold shift to bypass this feature.',
 			RENAME_ACTORS: 'Rename Actors',
 			RENAME_ACTORS_HINT: 'Whether to change a token actor\'s name when renaming the token.',
 			LANGUAGE: 'Language',
@@ -16,11 +16,7 @@ export default {
 			SYSTEM: 'System',
 			SYSTEM_HINT: 'The game system to base AI-generated content on.',
 			GENRE: 'Genre',
-			GENRE_HINT: 'The genre to base AI-generated content on.',
-			METHOD: 'Method',
-			METHOD_HINT: 'Whether to use AI generation when available.',
-			METHOD_AI: 'AI',
-			METHOD_SIMPLE: 'Simple'
+			GENRE_HINT: 'The genre to base AI-generated content on.'
 		},
 		RADIAL_MENU: {
 			D4: 'Roll a D4',
@@ -36,16 +32,17 @@ export default {
 			SEND_TO_JOURNAL: 'Send to Jounal',
 			OPEN_JOURNAL: 'Open Journal'
 		},
-		ERORRS: {
-			TOKEN_SELECT: 'Please select a token on the board.',
-			TOKEN_OWNER: 'You must have ownership of the token to rename it. alksdjflaskdjflaksdfj'
+		ERRORS: {
+			TOKEN_SELECT: 'Please select a token on the canvas or append a subject to the command (eg. *name goblin).',
+			TOKEN_OWNER: 'You must have ownership of the token to rename it.',
+			TEXT_LIMIT: 'You have reached your daily limit on text generations, but names will continue to generate offline.'
 		},
 		INIT: {
 			TITLE: 'Welcome to RPGM Forge!',
-			PROMPT1: 'Get a free key to unlock AI generation by following RPGM Tools on Patreon at the link below.',
-			PROMPT2: 'Use <code>*help</code> in chat to get started!',
+			PROMPT1: 'Get started with free generation by signing up in the RPGM Tools sidebar!',
 			PROMPT3: 'Please confirm these options:',
-			PROMPT4: '(You can change them later in settings)'
+			PROMPT4: '(You can change them later in settings)',
+			BUTTON: 'Open RPGM Tools Sidebar'
 		}
 	}
 } satisfies ForgeI18n;

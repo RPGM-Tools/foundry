@@ -7,8 +7,8 @@ import { DeveloperSettings } from './settings/developer';
 import { RadialMenuSettings } from './settings/radialMenu';
 import SidebarAccount from './sidebar/SidebarApp/SidebarAccount';
 import SidebarAccountByoAI from './sidebar/SidebarApp/SidebarAccount/SidebarAccountByoAI.vue';
+import SidebarAppAbout from './sidebar/SidebarApp/SidebarAppAbout.vue';
 import SidebarAppHelp from './sidebar/SidebarApp/SidebarAppHelp.vue';
-import SidebarAppHelpPage from './sidebar/SidebarApp/SidebarAppHelpPage.vue';
 import SidebarAppShop from './sidebar/SidebarApp/SidebarAppShop.vue';
 
 export class LocalStorageMap<T extends object> {
@@ -116,7 +116,7 @@ export function GlobalSettings() {
 	rpgm.sidebar.registerSidebarMenu({
 		path: '/account',
 		meta: {
-			title: 'Account',
+			title: 'Membership',
 			menu: {
 				icon: 'fa-solid fa-user',
 				color: '#b40062',
@@ -130,7 +130,7 @@ export function GlobalSettings() {
 		path: '/account/bring-your-own-ai',
 		component: SidebarAccountByoAI,
 		meta: {
-			title: 'I have my own AI'
+			title: 'Custom AI'
 		}
 	});
 
@@ -143,12 +143,12 @@ export function GlobalSettings() {
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
-		path: '/help',
+		path: '/help/:page?',
 		meta: {
 			title: 'Help',
 			menu: {
 				icon: 'fa-solid fa-question-circle',
-				color: '#636363',
+				color: '#02764e',
 				index: -1
 			}
 		},
@@ -156,11 +156,16 @@ export function GlobalSettings() {
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
-		path: '/help/:page',
-		component: SidebarAppHelpPage,
+		path: '/about',
 		meta: {
-			title: 'Help'
-		}
+			title: 'About',
+			menu: {
+				icon: 'fa-solid fa-info-circle',
+				color: '#6940c9',
+				index: -2
+			}
+		},
+		component: SidebarAppAbout
 	});
 }
 

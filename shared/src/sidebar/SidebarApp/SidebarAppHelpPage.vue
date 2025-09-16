@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { Converter } from 'showdown';
-import { useRoute } from 'vue-router';
 
+import type { HelpEntry } from '#/help';
 import { useTitle } from '#/sidebar';
 
-const page = useRoute().params.page as string;
+const { page } = defineProps<{ page: HelpEntry }>();
 
-const entry = ref(rpgm.help.pages.get(page));
-const contents = ref(rpgm.help.cache.get(entry.value?.url ?? ''));
+const contents = ref(rpgm.help.cache.get(page.url ?? ''));
 
-if (entry.value) {
-	useTitle(entry.value.name);
-	if (!contents.value) {
-		contents.value = await rpgm.help.fetch(entry.value.url);
-		rpgm.help.cache.set(entry.value.url, contents.value);
-	}
+const setTitle = useTitle();
+
+onActivated(() => {
+	setTitle(page.name);	
+});
+
+if (!contents.value) {
+	contents.value = await rpgm.help.fetch(page.url);
+	rpgm.help.cache.set(page.url, contents.value);
 }
 const converter = new Converter();
 

@@ -10,12 +10,18 @@ const localize = rpgm.localize;
 const language = useSetting('rpgm-forge.language', true);
 const system = useSetting('rpgm-forge.system', true);
 const genre = useSetting('rpgm-forge.genre', true);
-const method = useSetting('rpgm-forge.method', true);
 
-onMounted(() => {
+Hooks.on('ready', () => {
 	void game.settings.set('rpgm-forge', 'has_been_prompted', true);
 });
 
+const openSidebar = () => {
+	if (rpgm.majorGameVersion <= 12) {
+		ui.sidebar.activateTab('rpgm');
+	} else {
+		ui.sidebar.changeTab('rpgm', 'primary');
+	}
+};
 </script>
 
 <template>
@@ -26,11 +32,6 @@ onMounted(() => {
 				{{ localize("RPGM_FORGE.INIT.PROMPT1") }}
 			</h4>
 			<p class="rpgm-links">
-				<a
-					style="margin-bottom: 8px; display: inline-block;"
-					v-html="localize('RPGM_FORGE.INIT.PROMPT2')"
-				/>
-				<br>
 				{{ localize("RPGM_FORGE.INIT.PROMPT3") }}
 				<br>
 				<i>{{ localize("RPGM_FORGE.INIT.PROMPT4") }}</i>
@@ -74,25 +75,6 @@ onMounted(() => {
 					>
 				</div>
 			</div>
-			<div>
-				<h3>{{ method.name }}</h3>
-				<p class="hint notes">
-					<i>{{ method.hint }}</i>
-				</p>
-				<div>
-					<select
-						v-model="method.value"
-						class="rpgm-input"
-					>
-						<option value="ai">
-							{{ localize("RPGM_FORGE.CONFIG.METHOD_AI") }}
-						</option>
-						<option value="manual">
-							{{ localize("RPGM_FORGE.CONFIG.METHOD_SIMPLE") }}
-						</option>
-					</select>
-				</div>
-			</div>
 			<div
 				class="rpgm-links links"
 				style="font-size: 12px;"
@@ -102,10 +84,6 @@ onMounted(() => {
 					target="_blank"
 				><i class="rp-dice" />RPGM.tools</a>
 				<a
-					href="https://www.patreon.com/RPGMTools"
-					target="_blank"
-				><i class="fa-brands fa-patreon" />Patreon</a>
-				<a
 					href="https://github.com/RPGMTools/foundry"
 					target="_blank"
 				><i class="fa-brands fa-github" />Github</a>
@@ -114,6 +92,12 @@ onMounted(() => {
 					target="_blank"
 				><i class="fa-brands fa-discord" />Discord</a>
 			</div>
+			<button
+				class="rpgm-button"
+				@click="openSidebar"
+			>
+				{{ localize("RPGM_FORGE.INIT.BUTTON") }}
+			</button>
 		</div>
 	</ChatWizardContainer>
 </template>
@@ -122,7 +106,7 @@ onMounted(() => {
 .links {
 	padding-top: 10px;
 	display: flex;
-	justify-content: space-between;
+	justify-content: space-around;
 
 	* {
 		text-decoration: none;
