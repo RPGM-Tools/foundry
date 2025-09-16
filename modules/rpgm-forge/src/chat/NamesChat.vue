@@ -30,7 +30,7 @@ const insertValues = (values: string[]) => {
  */
 async function generate(regenerate: boolean = false) {
 	const isLastRpgmGeneration = rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools' 
-		&& rpgm.forge.useTextLimit().textLimit.value === 0;
+		&& (await rpgm.forge.useTextLimit()).textLimit.value === 0;
 	const oldModel = rpgm.forge.settings.get('namesModel');
 	if (isLastRpgmGeneration) {
 		rpgm.forge.settings.set('namesModel', RPGM_MODELS.offlineNames);	
@@ -64,7 +64,7 @@ async function generate(regenerate: boolean = false) {
 	insertValues(result.isOk() ? result.value.names : oldNames);
 	if (result.isOk()) {
 		if (rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools')
-			if (rpgm.forge.useTextLimit().decrement() == 0) {
+			if ((await rpgm.forge.useTextLimit()).decrement() == 0) {
 				rpgm.forge.logger.visible.warn(rpgm.localize('RPGM_FORGE.ERRORS.TEXT_LIMIT'));
 				rpgm.forge.settings.set('namesModel', { provider: 'offline', slug: 'rpgm-names-offline', type: 'text' });
 			}

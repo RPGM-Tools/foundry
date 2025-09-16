@@ -33,7 +33,7 @@ export default {
 			OPEN_JOURNAL: 'Open Journal'
 		},
 		ERRORS: {
-			TOKEN_SELECT: 'Please select a token on the canvas or append a subject to the command (eg. *name goblin).',
+			TOKEN_SELECT: 'Please select a token on the canvas and try again.',
 			TOKEN_OWNER: 'You must have ownership of the token to rename it.',
 			TEXT_LIMIT: 'You have reached your daily limit on text generations, but names will continue to generate offline.'
 		},

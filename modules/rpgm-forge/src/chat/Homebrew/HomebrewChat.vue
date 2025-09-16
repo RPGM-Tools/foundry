@@ -157,7 +157,7 @@ async function generate() {
 		data.activeGeneration = id;
 		editing.value = false;
 		if (rpgm.forge.settings.get('homebrewModel').provider === 'rpgm-tools')
-			rpgm.forge.useTextLimit().decrement();
+			(await rpgm.forge.useTextLimit()).decrement();
 	}
 	else
 		rpgm.forge.logger.visible.error(result.error.message);

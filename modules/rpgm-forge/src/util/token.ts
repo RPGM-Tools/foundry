@@ -68,7 +68,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 	if (!protoToken?.name) return errAsync(new Error('Token has no name!'));
 
 	const isLastRpgmGeneration = rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools'
-		&& rpgm.forge.useTextLimit().textLimit.value === 0;
+		&& (await rpgm.forge.useTextLimit()).textLimit.value === 0;
 	const oldModel = rpgm.forge.settings.get('namesModel');
 	if (isLastRpgmGeneration) {
 		rpgm.forge.settings.set('namesModel', RPGM_MODELS.offlineNames);
@@ -103,7 +103,7 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 
 	if (result.isOk()) {
 		if (rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools')
-			if (rpgm.forge.useTextLimit().decrement() == 0) {
+			if ((await rpgm.forge.useTextLimit()).decrement() == 0) {
 				rpgm.forge.settings.set('namesModel', { provider: 'offline', slug: 'rpgm-names-offline', type: 'text' });
 			}
 	}

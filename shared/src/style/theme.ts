@@ -52,14 +52,22 @@ export const NaiveTheme = defineComponent({
 	name: 'NaiveTheme',
 	setup(_, { slots }) {
 		return () => h(NConfigProvider, {
-			themeOverrides: NaiveUIThemeOverrides,
 			abstract: true,
-			theme: darkTheme
+			preflightStyleDisabled: true,
+			theme: darkTheme,
+			themeOverrides: NaiveUIThemeOverrides
 		}, slots.default);
 	}
 });
 
-export const api = createDiscreteApi(['notification'], { configProviderProps: { theme: darkTheme } });
+export const api = createDiscreteApi(['notification'], {
+	configProviderProps: {
+		abstract: true,
+		preflightStyleDisabled: true,
+		theme: darkTheme,
+		themeOverrides: NaiveUIThemeOverrides
+	}
+});
 
 import {
 	NA,

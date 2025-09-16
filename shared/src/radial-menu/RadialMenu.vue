@@ -153,6 +153,8 @@ const widthOffset = () =>
 		};
 	});
 
+let o: MutationObserver;
+
 const radialFloater = useFloating(toRef(menuContext.value.element), root, {
 	placement: anchor.value,
 	middleware: [
@@ -161,9 +163,13 @@ const radialFloater = useFloating(toRef(menuContext.value.element), root, {
 		...padDocument ? [shift({ crossAxis: true, boundary: document.body, altBoundary: true, rootBoundary: 'document' })] : []
 	],
 	whileElementsMounted(reference, floating, update) {
+		o = new MutationObserver(update);
+		o.observe(menuContext.value.element!, { attributes: true });
 		return autoUpdate(reference, floating, update, { ancestorScroll: true });
 	}
 });
+
+onUnmounted(() => o?.disconnect());
 
 /** Close radial menu. */
 function onSubClick() {

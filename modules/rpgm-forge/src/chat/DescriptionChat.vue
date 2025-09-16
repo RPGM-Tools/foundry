@@ -30,7 +30,7 @@ async function generate() {
 	loading.value = false;
 	if (result.isOk()) {
 		if (rpgm.forge.settings.get('descriptionsModel').provider === 'rpgm-tools')
-			rpgm.forge.useTextLimit().decrement();
+			(await rpgm.forge.useTextLimit()).decrement();
 	}
 }
 

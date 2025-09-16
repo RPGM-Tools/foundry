@@ -3,7 +3,6 @@ import { AbstractForge, type HomebrewSchema } from '@rpgm/tools/forge';
 import { createGlobalState } from '@vueuse/core';
 import { argument, literal, string } from 'brigadier-ts-lite';
 import ISO639 from 'iso-639-1';
-import { NAlert } from 'naive-ui';
 import type { Component } from 'vue';
 
 import { ChatWizard } from '#/chat/ChatWizard';
@@ -24,6 +23,7 @@ import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, regi
 import Genres from '$$/assets/combined_systems.json?url';
 
 import ForgeSidebar from './sidebar/ForgeSidebar.vue';
+import { NButton } from 'naive-ui';
 
 export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, AbstractForge.Settings>(AbstractForge) {
 	/** @returns The current genre setting */
@@ -225,14 +225,14 @@ export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, Abstr
 		}
 	}
 
-	useTextLimit = createGlobalState(() => {
+	useTextLimit = createGlobalState(async () => {
 		const session = rpgm.auth.useSession();
 		const textLimit = ref(0);
-		if (session.value)
-			this.getApiForgeUsage().then(limit => {
-				if (typeof limit.data === 'number')
-					textLimit.value = limit.data;
-			});
+		if (session.value) {
+			const limit = await this.getApiForgeUsage();
+			if (typeof limit.data === 'number')
+				textLimit.value = limit.data;
+		}
 		const decrement = () => textLimit.value = Math.max(0, textLimit.value - 1);
 		const update = async () => {
 			const limit = await this.getApiForgeUsage();
@@ -253,7 +253,7 @@ export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, Abstr
 			content: rpgm.localize('RPGM_FORGE.ERRORS.TEXT_LIMIT'),
 			duration: 10000,
 			action() {
-				return h(NAlert, {
+				return h(NButton, {
 					type: 'warning',
 					onClick: () => {
 						n.destroy();
