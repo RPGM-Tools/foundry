@@ -45,7 +45,11 @@ Click a listed name to assign it. The previous name is rotated back into the can
 ## 4. Provider Awareness
 - Each Lore type (Names, Descriptions, Homebrew) uses its configured provider.
 - Switching a provider affects subsequent results immediately.
-- Offline option (`rpgm-tools-offline`) applies to Names only.
+- Names support:
+	- Hosted AI (`rpgm-names`)
+	- Offline curated (`rpgm-names-offline`)
+	- Adjective mode (`rpgm-names-adjective`) – random adjective + base subject
+- Descriptions & Homebrew require an online/AI provider.
 
 ## 5. Best Practices
 - Keep Language/System/Genre aligned to avoid stylistic drift.

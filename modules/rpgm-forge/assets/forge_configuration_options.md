@@ -28,13 +28,17 @@ Instead of a global method toggle, Forge now lets you choose a provider for each
 Options include:
 - Hosted RPGM provider(s)
 - Your own configured external provider(s)
-- Offline option `rpgm-tools-offline` (Names only) for quick, connection-light name generation
+- Offline curated list `rpgm-names-offline` (Names only) for quick, connection-light name generation
+- Adjective mode `rpgm-names-adjective` (Names only) for random adjective + base subject
 
 Changing a provider immediately affects subsequent Lore requests of that type.
 > External providers vary in quality and payload shapes; results are not guaranteed.
 
 ### Offline Names Provider
-Select `rpgm-tools-offline` in the Names provider slot for an offline-friendly fallback. This applies only to Name generation; Descriptions and Homebrew require an online provider.
+Select `rpgm-names-offline` in the Names provider slot for an offline-friendly fallback. This applies only to Name generation; Descriptions and Homebrew require an online provider.
+
+### Adjective Names Provider
+Select `rpgm-names-adjective` to build names by prepending a random adjective (recent repeats suppressed) to the base subject or actor name. Great for fast flavorful variety. No quota usage.
 
 ## Tips
 - Keep Genre/System aligned with the current campaign to maintain cohesive style.

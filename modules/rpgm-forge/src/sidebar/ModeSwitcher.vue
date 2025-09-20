@@ -8,8 +8,9 @@ const model = defineModel<T | undefined>({
 	} 
 });
 
-const { options } = defineProps<{
-	options: T[]
+const { options, descriptions = {} } = defineProps<{
+	options: T[],
+	descriptions?: Record<string, string>
 }>();
 
 const getIndex = (id: string) => {
@@ -110,6 +111,7 @@ const incrementIndex = (i: number) => {
 						'--translateY': isOpen ? `${(i - selectedIndex) * 60}px` : `${(i - selectedIndex) * 24}px`,
 						// Delay is based on the distance from the selected icon, inverted if not open
 					}"
+					:title="descriptions[o.id] || ''"
 					@mouseup="selectIcon(i)"
 				>
 					<slot

@@ -15,7 +15,8 @@ An account enables hosted provider usage and upgrading to the Crafter tier, whic
 Configure providers for each generation type (Names, Descriptions, Homebrew). You can:
 - Use hosted defaults (where available)
 - Bring your own external AI provider(s)
-- Select the special offline-capable provider `rpgm-tools-offline` (Names only)
+- Select offline curated list `rpgm-names-offline` (Names only)
+- Select adjective combinator `rpgm-names-adjective` (Names only)
 
 ## Generate Your First Lore
 Select a token and try the following chat commands:

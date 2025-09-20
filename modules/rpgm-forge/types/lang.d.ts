@@ -25,6 +25,12 @@ declare global {
 			}
 			NAMES: {
 				ASSIGN_TOOLTIP: string
+				PROVIDERS?: {
+					RPGM: string
+					OFFLINE: string
+					ADJECTIVE: string
+					CUSTOM: string
+				}
 			}
 			HOMEBREW: {
 				PLACEHOLDER: string

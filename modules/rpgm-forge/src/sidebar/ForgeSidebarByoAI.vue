@@ -52,13 +52,19 @@ const namesModelOptions = computed(() => {
 		icon: 'rpgm'
 	}];
 	hydrateModelList(rpgm.settings.get('textProviders') ?? [], models);
-	models.push({icon: 'offline', id: 'rpgm-names-offline', value: {
-		type: 'text',
-		provider: 'offline',
-		slug: 'rpgm-names-offline'
-	}});
+	models.push(
+		{ icon: 'offline', id: 'rpgm-names-offline', value: { type: 'text', provider: 'offline', slug: 'rpgm-names-offline' } },
+		{ icon: 'offline', id: 'rpgm-names-adjective', value: { type: 'text', provider: 'adjective', slug: 'rpgm-names-adjective' } }
+	);
 	return models;
 });
+
+const namesProviderDescriptions = computed(() => ({
+	'rpgm-names': rpgm.localize?.('RPGM_FORGE.NAMES.PROVIDERS.RPGM') ?? 'AI generated creative names',
+	'rpgm-names-offline': rpgm.localize?.('RPGM_FORGE.NAMES.PROVIDERS.OFFLINE') ?? 'Offline curated list of names',
+	'rpgm-names-adjective': rpgm.localize?.('RPGM_FORGE.NAMES.PROVIDERS.ADJECTIVE') ?? 'Random adjective + base name',
+	...Object.fromEntries((rpgm.settings.get('textProviders') ?? []).flatMap(p => p.textModels.map(m => [m, rpgm.localize?.('RPGM_FORGE.NAMES.PROVIDERS.CUSTOM') ?? 'Custom provider model'])))
+}));
 
 const descriptionsModelOptions = computed(() => {
 	const models: ModelOption[] = [{
@@ -83,7 +89,7 @@ const homebrewModelOptions = computed(() => {
 const namesModel = ref<ModelOption>(names.value ? {
 	id: names.value.slug,
 	value: names.value,
-	icon: ['rpgm', 'offline'].includes(names.value.provider) ? names.value.provider as 'rpgm' | 'offline' : 'basic'
+	icon: names.value.provider === 'rpgm-tools' ? 'rpgm' : (['offline','adjective'].includes(names.value.provider) ? 'offline' : 'basic')
 } : {
 		id: 'rpgm-names',
 		value: RPGM_MODELS.names,
@@ -155,6 +161,7 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 				<ModeSwitcher
 					v-model="namesModel"
 					:options="namesModelOptions"
+					:descriptions="namesProviderDescriptions"
 					style="width: 48px; height: 48px; position: relative; margin-right: auto;"
 					option-key="id"
 					@update:model-value="names = $event?.value ?? names"
