@@ -73,7 +73,7 @@ function signUp() {
 		callbackURL: 'https://rpgm.tools'
 	}, {
 			onSuccess() {
-				rpgm.logger.visible.log('Check your email for a confirmation link.');
+				rpgm.logger.visible.log('Check your email for a confirmation link. You may need to check your spam folder.');
 			}
 		});
 	tabValue.value = 'signin';
