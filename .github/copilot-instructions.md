@@ -55,3 +55,23 @@ Output answers referencing concrete files & existing patterns; avoid speculative
 Aaron / neostryder Preference Note (scoped): When assisting Aaron specifically, you may assume push-by-default multi-repo commit workflow (see root
 `.github/copilot-instructions.md` Personal Workflow Preferences). For all other users (e.g., Dallen `dallenb4`, Nate `jack-indaboks`), revert to
 conservative defaults (no implicit push, explicit staging flags, verbose explanations).
+
+---
+
+### Comment & Documentation Update Directive (Foundry Scope)
+
+All code edits in `foundry/` MUST include aligned comment / documentation updates. Treat missing or stale commentary as a defect.
+
+Focus Areas (Foundry specifics):
+
+- Chat commands (`modules/rpgm-forge/src/forge.ts`): each new command block needs a leading comment summarizing purpose, args, side‑effects.
+- Localization additions: reference key path in code comments only when behavior depends on specific phrasing (rare); otherwise rely on lang file.
+- Vue components: add/update top block summarizing role, props, emitted events, and provider/dependency hooks.
+- Tools integration points: when invoking `@rpgm/tools` provider methods, include rationale if non-default model or quota-sensitive.
+
+Apply root directive standards (JSDoc for TS, provenance refs, quality checklist). Example provenance comment:
+`// Ref: loremaster_next/04.0_lore_crystal_and_data_model.md (quota rationale)`.
+
+Failure to update comments = incomplete patch.
+
+Ref: root `/.github/copilot-instructions.md` Comment & Documentation Update Directive v1 (2025-09-22).
