@@ -27,7 +27,7 @@ const discordAccount = computed(() => accounts.value?.find(a => a.provider === '
 
 const { subscription, update: updateSubscription } = useSubscription();
 
-const subscriptionName = computed(() => subscription.value?.status === 'active' ? subscription.value.product.name : 'Dabbler');
+const subscriptionName = computed(() => subscription.value?.status === 'active' ? subscription.value.product.name : 'Tinkerer');
 
 const { accounts, isLoading: accountsLoading, update: updateAccounts } = useAccounts();
 
