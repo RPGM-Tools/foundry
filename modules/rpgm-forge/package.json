@@ -4,8 +4,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite build --watch & vite",
-		"preview": "vite build --watch & vite preview",
+		"dev": "vite",
+		"preview": "vite preview",
 		"build": "vue-tsc && vite build"
 	}
 }
