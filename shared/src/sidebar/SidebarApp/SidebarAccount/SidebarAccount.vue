@@ -5,7 +5,6 @@ import IHaveMyOwnAI from '#/components/IHaveMyOwnAI.vue';
 import SignedIn from '#/util/SignedIn.vue';
 
 import SidebarAccountSignedIn from './SidebarAccountSignedIn.vue';
-import SidebarLoading from './SidebarLoading.vue';
 import SignIn from './SignIn.vue';
 
 const session = rpgm.auth.useSession();
@@ -25,9 +24,6 @@ watch(session, (n) => {
 		<NFlex vertical>
 			<div style="position: relative;">
 				<SignedIn>
-					<template #fallback>
-						<SidebarLoading />
-					</template>
 					<template #default>
 						<SidebarAccountSignedIn />
 					</template>

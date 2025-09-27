@@ -1,16 +1,15 @@
 <script setup lang="ts" generic="T extends { id: string; }">
 import { useThrottleFn } from '@vueuse/core';
 
-const model = defineModel<T | undefined>({ 
+const model = defineModel<T | undefined>({
 	required :true,
 	set: (v) => {
 		return options[getIndex(v?.id || '')];
-	} 
+	}
 });
 
-const { options, descriptions = {} } = defineProps<{
-	options: T[],
-	descriptions?: Record<string, string>
+const { options } = defineProps<{
+	options: T[]
 }>();
 
 const getIndex = (id: string) => {
@@ -69,7 +68,7 @@ const keydown = (e: KeyboardEvent) => {
 	} else if (e.key === 'ArrowUp') {
 		incrementIndex(-1);
 	} else { return; }
-	// e.preventDefault();
+	e.preventDefault();
 	e.stopPropagation();
 	e.stopImmediatePropagation();
 	floating.value?.focus();
@@ -77,7 +76,7 @@ const keydown = (e: KeyboardEvent) => {
 
 const incrementIndex = (i: number) => {
 	// if (!isOpen.value) return;
-	selectedIndex.value = Math.min(options.length - 1, Math.max(0, selectedIndex.value + i));	
+	selectedIndex.value = Math.min(options.length - 1, Math.max(0, selectedIndex.value + i));
 	if (isOpen.value) return;
 	updateValue();
 };
@@ -111,7 +110,6 @@ const incrementIndex = (i: number) => {
 						'--translateY': isOpen ? `${(i - selectedIndex) * 60}px` : `${(i - selectedIndex) * 24}px`,
 						// Delay is based on the distance from the selected icon, inverted if not open
 					}"
-					:title="descriptions[o.id] || ''"
 					@mouseup="selectIcon(i)"
 				>
 					<slot
@@ -137,7 +135,7 @@ const incrementIndex = (i: number) => {
 	height: 48px;
 	width: 48px;
 	aspect-ratio: 1;
-	position: fixed;
+	position: absolute;
 }
 
 .floating {
@@ -171,11 +169,11 @@ const incrementIndex = (i: number) => {
 }
 
 .floating:focus>.icon[data-selected="true"] {
-	filter: brightness(1.2);	
+	filter: brightness(1.2);
 }
 
 .floating[data-open="false"] .socket {
-	opacity: 0;	
+	opacity: 0;
 }
 .socket {
 	width: 100%;

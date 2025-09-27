@@ -27,7 +27,9 @@ const discordAccount = computed(() => accounts.value?.find(a => a.provider === '
 
 const { subscription, update: updateSubscription } = useSubscription();
 
-const subscriptionName = computed(() => subscription.value?.status === 'active' ? subscription.value.product.name : 'Tinkerer');
+const { userInfo, update: updateUserInfo } = rpgm.useUserInfo();
+
+const subscriptionName = computed(() => userInfo.value?.data?.tier.name);
 
 const { accounts, isLoading: accountsLoading, update: updateAccounts } = useAccounts();
 
@@ -41,6 +43,12 @@ if (!discordAccount.value) {
 	await updateAccounts();
 } else {
 	updateAccounts();
+}
+
+if (!userInfo.value) {
+	await updateUserInfo();
+} else {
+	updateUserInfo();
 }
 
 const discordLinkedCheck = useFocusCheck(() => updateAccounts()

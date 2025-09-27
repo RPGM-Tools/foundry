@@ -1,13 +1,10 @@
 export default {
 	RPGM_FORGE: {
-		NAMES: {
-			ASSIGN_TOOLTIP: 'Click to assign this name to the selected token',
-			PROVIDERS: {
-				RPGM: 'AI-generated creative names (uses your daily text quota).',
-				OFFLINE: 'Offline curated weighted list of fantasy names (no quota).',
-				ADJECTIVE: 'Random adjective + base actor name (offline, no quota).',
-				CUSTOM: 'Custom provider model from your configured AI provider.'
-			}
+		PROVIDERS: {
+			RPGM: 'AI-generated creative content (uses your daily text quota).',
+			OFFLINE_NAMES: 'Offline curated weighted list of fantasy names (no quota).',
+			ADJECTIVE_NAMES: 'Random adjective + base actor name (offline, no quota).',
+			CUSTOM: 'Custom provider model from your configured AI provider.'
 		},
 		HOMEBREW: {
 			PLACEHOLDER: 'Leave blank to let AI decide'

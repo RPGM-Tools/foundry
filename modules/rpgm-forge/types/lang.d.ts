@@ -23,14 +23,11 @@ declare global {
 				PROMPT4: string
 				BUTTON: string
 			}
-			NAMES: {
-				ASSIGN_TOOLTIP: string
-				PROVIDERS?: {
-					RPGM: string
-					OFFLINE: string
-					ADJECTIVE: string
-					CUSTOM: string
-				}
+			PROVIDERS: {
+				RPGM: string
+				CUSTOM: string
+				OFFLINE_NAMES: string
+				ADJECTIVE_NAMES: string
 			}
 			HOMEBREW: {
 				PLACEHOLDER: string

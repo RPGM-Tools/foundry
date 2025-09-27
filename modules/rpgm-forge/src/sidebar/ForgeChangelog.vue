@@ -3,7 +3,7 @@ import { useResize } from '#/sidebar';
 import { useMarkdown } from '#/util';
 import C1 from '$$/assets/changelog/v2.0.0.md?url';
 import C2 from '$$/assets/changelog/v2.0.1.md?url';
-import C3 from '$$/assets/changelog/v2.0.2.md?url';
+import C3 from '$$/assets/changelog/v2.1.0.md?url';
 
 const c1text = useMarkdown(C1);
 const c2text = useMarkdown(C2);
@@ -21,7 +21,7 @@ const resize = useResize(250);
 	>
 		<NCollapseItem
 			name="1"
-			title="v2.0.2 - 2025-09-19"
+			title="v2.1.0 - 2025-09-27"
 		>
 			<p v-html="c3text" />
 		</NCollapseItem>

@@ -1,4 +1,5 @@
 import { AbstractTools } from '@rpgm/tools';
+import { createGlobalState, useAsyncState } from '@vueuse/core';
 
 import { auth } from './auth';
 import { ChatCommands } from './chat';
@@ -39,6 +40,15 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 
 	usePolyhedriumBalance = usePolyhedriumBalance;
 
+	useUserInfo = createGlobalState(() => {
+		const { isLoading, state: userInfo, execute: update } = useAsyncState(() => this.getApiUserInfo(), null, {
+			immediate: false, resetOnExecute: false
+		});
+		return {
+			isLoading, userInfo, update
+		};
+	});
+
 	protected override init(): void | Promise<void> {
 		this.settings.get('textProviders');
 		this.majorGameVersion = game.data.release.generation;
@@ -78,8 +88,8 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 			return `${left}${right?.padStart(spaces) || ''} `;
 		};
 		const asciiArt = (String.raw`
- ____  ____   ____ __  __  _              _     
-|  _ \|  _ \ / ___|  \/  || |_ ___   ___ | |___ 
+ ____  ____   ____ __  __  _              _
+|  _ \|  _ \ / ___|  \/  || |_ ___   ___ | |___
 | |_) | |_) | |  _| |/\| || __/ _ \ / _ \| / __|
 |  _ <|  __/| |_| | |  | || || (_) | (_) | \__ \
 |_| \_\_|    \____|_|  |_(_)__\___/ \___/|_|___/

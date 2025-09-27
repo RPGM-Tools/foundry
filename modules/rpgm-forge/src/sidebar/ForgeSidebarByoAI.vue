@@ -37,6 +37,7 @@ function hydrateModelList(TextProviders: TextProvider[], models: ModelOption[]) 
 					provider: provider.id,
 					slug: m
 				},
+				description: rpgm.localize('RPGM_FORGE.PROVIDERS.CUSTOM'),
 				icon: 'basic'
 			};
 		}));
@@ -44,33 +45,28 @@ function hydrateModelList(TextProviders: TextProvider[], models: ModelOption[]) 
 	}, models);
 }
 
-type ModelOption = { id: string, icon: 'rpgm' | 'basic' | 'offline', value: TextModel };
+type ModelOption = { id: string, icon: 'rpgm' | 'basic' | 'offline', value: TextModel, description?: string  };
 const namesModelOptions = computed(() => {
 	const models: ModelOption[] = [{
 		id: RPGM_MODELS.names.slug,
 		value: RPGM_MODELS.names,
-		icon: 'rpgm'
+		icon: 'rpgm',
+		description: rpgm.localize?.('RPGM_FORGE.PROVIDERS.RPGM')
 	}];
 	hydrateModelList(rpgm.settings.get('textProviders') ?? [], models);
 	models.push(
-		{ icon: 'offline', id: 'rpgm-names-offline', value: { type: 'text', provider: 'offline', slug: 'rpgm-names-offline' } },
-		{ icon: 'offline', id: 'rpgm-names-adjective', value: { type: 'text', provider: 'adjective', slug: 'rpgm-names-adjective' } }
+		{ icon: 'offline', id: 'rpgm-names-offline', value: { type: 'text', provider: 'offline', slug: 'rpgm-names-offline' }, description: rpgm.localize('RPGM_FORGE.PROVIDERS.OFFLINE_NAMES') },
+		{ icon: 'offline', id: 'rpgm-names-adjective', value: { type: 'text', provider: 'adjective', slug: 'rpgm-names-adjective' }, description: rpgm.localize('RPGM_FORGE.PROVIDERS.ADJECTIVE_NAMES') }
 	);
 	return models;
 });
-
-const namesProviderDescriptions = computed(() => ({
-	'rpgm-names': rpgm.localize?.('RPGM_FORGE.NAMES.PROVIDERS.RPGM') ?? 'AI generated creative names',
-	'rpgm-names-offline': rpgm.localize?.('RPGM_FORGE.NAMES.PROVIDERS.OFFLINE') ?? 'Offline curated list of names',
-	'rpgm-names-adjective': rpgm.localize?.('RPGM_FORGE.NAMES.PROVIDERS.ADJECTIVE') ?? 'Random adjective + base name',
-	...Object.fromEntries((rpgm.settings.get('textProviders') ?? []).flatMap(p => p.textModels.map(m => [m, rpgm.localize?.('RPGM_FORGE.NAMES.PROVIDERS.CUSTOM') ?? 'Custom provider model'])))
-}));
 
 const descriptionsModelOptions = computed(() => {
 	const models: ModelOption[] = [{
 		id: RPGM_MODELS.descriptions.slug,
 		value: RPGM_MODELS.descriptions,
-		icon: 'rpgm'
+		icon: 'rpgm',
+		description: rpgm.localize?.('RPGM_FORGE.PROVIDERS.RPGM')
 	}];
 	hydrateModelList(rpgm.settings.get('textProviders') ?? [], models);
 	return models;
@@ -80,7 +76,8 @@ const homebrewModelOptions = computed(() => {
 	const models: ModelOption[] = [{
 		id: RPGM_MODELS.homebrew.slug,
 		value: RPGM_MODELS.homebrew,
-		icon: 'rpgm'
+		icon: 'rpgm',
+		description: rpgm.localize?.('RPGM_FORGE.PROVIDERS.RPGM')
 	}];
 	hydrateModelList(rpgm.settings.get('textProviders') ?? [], models);
 	return models;
@@ -89,7 +86,7 @@ const homebrewModelOptions = computed(() => {
 const namesModel = ref<ModelOption>(names.value ? {
 	id: names.value.slug,
 	value: names.value,
-	icon: names.value.provider === 'rpgm-tools' ? 'rpgm' : (['offline','adjective'].includes(names.value.provider) ? 'offline' : 'basic')
+	icon: names.value.provider === 'rpgm-tools' ? 'rpgm' : (['offline', 'adjective'].includes(names.value.provider) ? 'offline' : 'basic')
 } : {
 		id: 'rpgm-names',
 		value: RPGM_MODELS.names,
@@ -161,18 +158,22 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 				<ModeSwitcher
 					v-model="namesModel"
 					:options="namesModelOptions"
-					:descriptions="namesProviderDescriptions"
 					style="width: 48px; height: 48px; position: relative; margin-right: auto;"
 					option-key="id"
 					@update:model-value="names = $event?.value ?? names"
 				>
 					<template #default="{ value, isOpen, selected }">
-						<RadialCenter inert>
-							<DiceIcon
-								:type="handleRpgmIcon(value.icon)"
-								:style="{filter: value.icon === 'basic' ? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)` : ''}"
-							/>
-						</RadialCenter>
+						<NTooltip placement="left">
+							<span>{{ value.description }}</span>
+							<template #trigger>
+								<RadialCenter>
+									<DiceIcon
+										:type="handleRpgmIcon(value.icon)"
+										:style="{filter: value.icon === 'basic' ? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)` : ''}"
+									/>
+								</RadialCenter>
+							</template>
+						</NTooltip>
 						<NText
 							code
 							class="model-label"
@@ -197,12 +198,17 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 					@update:model-value="descriptions = $event?.value ?? descriptions"
 				>
 					<template #default="{ value, isOpen, selected }">
-						<RadialCenter inert>
-							<DiceIcon
-								:type="handleRpgmIcon(value.icon)"
-								:style="{filter: value.icon === 'basic' ? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)` : ''}"
-							/>
-						</RadialCenter>
+						<NTooltip placement="left">
+							<span>{{ value.description }}</span>
+							<template #trigger>
+								<RadialCenter>
+									<DiceIcon
+										:type="handleRpgmIcon(value.icon)"
+										:style="{filter: value.icon === 'basic' ? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)` : ''}"
+									/>
+								</RadialCenter>
+							</template>
+						</NTooltip>
 						<NText
 							code
 							class="model-label"
@@ -227,14 +233,17 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 					@update:model-value="homebrew = $event?.value ?? homebrew"
 				>
 					<template #default="{ value, isOpen, selected }">
-						<RadialCenter
-							inert
-						>
-							<DiceIcon
-								:type="handleRpgmIcon(value.icon)"
-								:style="{filter: value.icon === 'basic' ? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)` : ''}"
-							/>
-						</RadialCenter>
+						<NTooltip placement="left">
+							<span>{{ value.description }}</span>
+							<template #trigger>
+								<RadialCenter>
+									<DiceIcon
+										:type="handleRpgmIcon(value.icon)"
+										:style="{filter: value.icon === 'basic' ? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)` : ''}"
+									/>
+								</RadialCenter>
+							</template>
+						</NTooltip>
 						<NText
 							code
 							class="model-label"

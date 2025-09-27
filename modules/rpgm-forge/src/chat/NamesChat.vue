@@ -9,7 +9,6 @@ import { getSelectedToken, nameToken } from '$/util/token';
 const NAMES_PER_GENERATION = 4;
 
 const names = rpgm.forge.nameChats.useChatWizard(), { data } = names;
-const localize = rpgm.localize;
 const loading = ref(false);
 
 const insertValues = (values: string[]) => {
@@ -29,11 +28,11 @@ const insertValues = (values: string[]) => {
  * @todo Less hardcoding
  */
 async function generate(regenerate: boolean = false) {
-	const isLastRpgmGeneration = rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools' 
+	const isLastRpgmGeneration = rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools'
 		&& (await rpgm.forge.useTextLimit()).textLimit.value === 0;
 	const oldModel = rpgm.forge.settings.get('namesModel');
 	if (isLastRpgmGeneration) {
-		rpgm.forge.settings.set('namesModel', RPGM_MODELS.offlineNames);	
+		rpgm.forge.settings.set('namesModel', RPGM_MODELS.offlineNames);
 		rpgm.forge.warnTextLimit();
 	}
 
@@ -81,7 +80,7 @@ const buttons: RadialButton[] = [{
 	logger: rpgm.forge.logger
 }];
 
-/** 
+/**
  * Apply a name to the currently selected token.
  * @param name - The name to apply
  */
@@ -117,7 +116,6 @@ onMounted(() => {
 				<li
 					v-for="name in data.names"
 					:key="name"
-					:title="localize('RPGM_FORGE.NAMES.ASSIGN_TOOLTIP')"
 					class="rpgm-forge-name"
 					@click="assign(name)"
 				>
