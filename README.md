@@ -6,16 +6,16 @@
 
 ## Features
 
-- **Intelligent Name Generation**  
+- **Intelligent Name Generation**
   Quickly generate character names, place names, and more—customized to fit your campaign’s setting and style.
 
-- **AI-Powered Description Generation**  
+- **AI-Powered Description Generation**
   Instantly create evocative scene and NPC descriptions, lore snippets, and adventure hooks to keep your sessions dynamic and engaging.
 
-- **Homebrew Generation Tools**  
+- **Homebrew Generation Tools**
   Effortlessly generate complex homebrew content such as monsters, items, places, and characters—tailored for your campaign’s needs.
 
-- **Seamless Foundry Integration**  
+- **Seamless Foundry Integration**
   All features are designed to work directly within the Foundry VTT interface for a smooth and intuitive workflow.
 
 ---
@@ -60,3 +60,24 @@ https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge.json
 ---
 
 *Thank you for using RPGM Forge! Stay tuned for more features and updates and future tools from your friends at RPGM Tools!*
+
+# Development
+
+## Installation
+`pnpm install`
+
+## Development
+- To run a dev server for a specific module, run `pnpm --filter <module-name> dev`
+  - With this, the dev server will HMR Vue files and reload the page for TS files.
+  - Changes to i18n require a build and dev server restart
+- Each .env file must be placed in the module's folder it is being used for (will be used for that module's dev server)
+  - VITE_FOUNDRY_URL: The foundry instance url to proxy
+  - VITE_RPGM_URL (optional): The rpgm.tools server to use (https://rpgm.tools is the default)
+
+### RPGM Tools
+This project uses [RPGM Tools](https://github.com/RPGM-Tools/tools).
+To update the module after changes, run `pnpm update @rpgm/tools`
+
+## Building
+`pnpm build`
+- This will build all modules at once
