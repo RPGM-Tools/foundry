@@ -3,6 +3,7 @@ import { AbstractForge, type HomebrewSchema } from '@rpgm/tools/forge';
 import { createGlobalState } from '@vueuse/core';
 import { argument, literal, string } from 'brigadier-ts-lite';
 import ISO639 from 'iso-639-1';
+import { NButton } from 'naive-ui';
 import type { Component } from 'vue';
 
 import { ChatWizard } from '#/chat/ChatWizard';
@@ -23,7 +24,6 @@ import { chatDescription, chatTokenNames, getSelectedToken, quickNameToken, regi
 import Genres from '$$/assets/combined_systems.json?url';
 
 import ForgeSidebar from './sidebar/ForgeSidebar.vue';
-import { NButton } from 'naive-ui';
 
 export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, AbstractForge.Settings>(AbstractForge) {
 	/** @returns The current genre setting */

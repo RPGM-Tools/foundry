@@ -3,8 +3,8 @@
 	"type": "module",
 	"scripts": {
 		"build": "pnpm -r build",
-		"lint": "eslint; echo 'Linting complete. Above are any errors.'",
-		"lint:fix": "eslint --fix; echo 'Linting complete. Above are any errors.'"
+		"lint": "eslint . && node -e \"console.log('Linting complete. Above are any errors.')\"",
+		"lint:fix": "eslint . --fix && node -e \"console.log('Linting complete. Above are any errors.')\""
 	},
 	"devDependencies": {
 		"@types/node": "^22.13.10",

@@ -4,12 +4,12 @@
 	Last updated: 2025-10-04
 -->
 <script setup lang="ts">
-import { useResize } from "#/sidebar";
-import { useMarkdown } from "#/util";
-import C1 from "$$/assets/changelog/v2.0.0.md?url";
-import C2 from "$$/assets/changelog/v2.0.1.md?url";
-import C3 from "$$/assets/changelog/v2.1.0.md?url";
-import C4 from "$$/assets/changelog/v2.1.1.md?url";
+import { useResize } from '#/sidebar';
+import { useMarkdown } from '#/util';
+import C1 from '$$/assets/changelog/v2.0.0.md?url';
+import C2 from '$$/assets/changelog/v2.0.1.md?url';
+import C3 from '$$/assets/changelog/v2.1.0.md?url';
+import C4 from '$$/assets/changelog/v2.1.1.md?url';
 
 const c4text = useMarkdown(C4);
 const c3text = useMarkdown(C3);
@@ -25,16 +25,28 @@ const resize = useResize(250);
 		display-directive="show"
 		@update:expanded-names="resize"
 	>
-		<NCollapseItem name="1" title="v2.1.1 - 2025-10-04">
+		<NCollapseItem
+			name="1"
+			title="v2.1.1 - 2025-10-04"
+		>
 			<p v-html="c4text" />
 		</NCollapseItem>
-		<NCollapseItem name="2" title="v2.1.0 - 2025-09-27">
+		<NCollapseItem
+			name="2"
+			title="v2.1.0 - 2025-09-27"
+		>
 			<p v-html="c3text" />
 		</NCollapseItem>
-		<NCollapseItem name="3" title="v2.0.1 - 2025-09-16">
+		<NCollapseItem
+			name="3"
+			title="v2.0.1 - 2025-09-16"
+		>
 			<p v-html="c2text" />
 		</NCollapseItem>
-		<NCollapseItem name="4" title="v2.0.0 - 2025-09-15">
+		<NCollapseItem
+			name="4"
+			title="v2.0.0 - 2025-09-15"
+		>
 			<p v-html="c1text" />
 		</NCollapseItem>
 		<template #arrow>
