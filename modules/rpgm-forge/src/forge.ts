@@ -1,3 +1,9 @@
+/**
+ * File: forge.ts
+ * Purpose: Implements the Foundry-side Forge module, wiring chat workflows,
+ *          radial menu actions, and notifications to RPGM Tools providers.
+ * Last Updated: 2025-11-11
+ */
 import { HomebrewSchemas } from '@rpgm/tools/forge';
 import { AbstractForge, type HomebrewSchema } from '@rpgm/tools/forge';
 import { createGlobalState } from '@vueuse/core';
