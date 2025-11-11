@@ -4,7 +4,7 @@ import { createGlobalState } from '@vueuse/core';
 import { argument, literal, string } from 'brigadier-ts-lite';
 import ISO639 from 'iso-639-1';
 import { NButton } from 'naive-ui';
-import type { Component } from 'vue';
+import { h, type Component } from 'vue';
 
 import { ChatWizard } from '#/chat/ChatWizard';
 import { FoundyRpgmModuleMixin } from '#/module';
@@ -46,7 +46,8 @@ export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, Abstr
 	protected override async init() {
 		rpgm.forge = this;
 		this.homebrewSchemas = HomebrewSchemas as HomebrewSchema[];
-		this.genres = await (await fetch(Genres)).json() as typeof this.genres;
+		const genresUrl = new URL(Genres, import.meta.url);
+		this.genres = await (await fetch(genresUrl)).json() as typeof this.genres;
 		this.promptChats = new ChatWizard(
 			this.id,
 			'prompt',
@@ -265,7 +266,9 @@ export class RpgmForge extends FoundyRpgmModuleMixin<typeof AbstractForge, Abstr
 							ui.sidebar.changeTab('rpgm', 'primary');
 						}
 					}
-				}, 'Upgrade Your Membership');
+				}, {
+					default: () => 'Upgrade Your Membership'
+				});
 			},
 			type: 'warning'
 		});
