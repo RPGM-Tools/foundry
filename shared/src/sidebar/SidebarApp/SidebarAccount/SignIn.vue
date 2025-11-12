@@ -4,59 +4,59 @@
 	Last updated: 2025-10-05
 -->
 <script setup lang="ts">
-import type { FormRules } from "naive-ui";
+import type { FormRules } from 'naive-ui';
 
-import { useResize } from "#/sidebar";
-import { useLoading } from "#/util/useLoading";
-import { vFocus } from "#/util/vFocus";
+import { useResize } from '#/sidebar';
+import { useLoading } from '#/util/useLoading';
+import { vFocus } from '#/util/vFocus';
 
-const tabValue = ref<"signin" | "signup">("signin");
+const tabValue = ref<'signin' | 'signup'>('signin');
 const onResize = useResize();
 
 // const accountForm = useTemplateRef('accountForm');
 
 const formValue = ref({
-	name: "",
-	email: "",
-	username: "",
-	password: "",
+	name: '',
+	email: '',
+	username: '',
+	password: ''
 });
 
 const signInRules: FormRules = {
 	username: {
 		required: true,
-		message: "Please enter your username.",
-		trigger: "blur",
+		message: 'Please enter your username.',
+		trigger: 'blur'
 	},
 	password: {
 		required: true,
-		message: "Please enter your password.",
-		trigger: "blur",
-	},
+		message: 'Please enter your password.',
+		trigger: 'blur'
+	}
 };
 
 const signUpRules: FormRules = {
 	name: {
 		required: true,
-		level: "warning",
-		message: "Please enter a name.",
-		trigger: "blur",
+		level: 'warning',
+		message: 'Please enter a name.',
+		trigger: 'blur'
 	},
 	email: {
 		required: true,
-		message: "Please enter an email.",
-		trigger: "blur",
+		message: 'Please enter an email. GMAIL USERS: CHECK SPAM FOLDER',
+		trigger: 'blur'
 	},
 	username: {
 		required: true,
-		message: "Please enter a username.",
-		trigger: "blur",
+		message: 'Please enter a username.',
+		trigger: 'blur'
 	},
 	password: {
 		required: true,
-		message: "Please enter a password.",
-		trigger: "blur",
-	},
+		message: 'Please enter a password.',
+		trigger: 'blur'
+	}
 };
 
 watch(tabValue, () => {
@@ -65,7 +65,7 @@ watch(tabValue, () => {
 });
 
 function submit() {
-	if (tabValue.value === "signin") {
+	if (tabValue.value === 'signin') {
 		signIn();
 	} else {
 		signUp();
@@ -79,52 +79,52 @@ function signUp() {
 			email: formValue.value.email,
 			password: formValue.value.password,
 			username: formValue.value.username,
-			callbackURL: "https://rpgm.tools",
+			callbackURL: 'https://rpgm.tools'
 		},
 		{
 			onSuccess() {
 				rpgm.logger.visible.log(
-					"Check your email for a confirmation link. You may need to check your spam folder."
+					'Check your email for a confirmation link. BE SURE TO CHECK YOUR SPAM FOLDER.'
 				);
-			},
+			}
 		}
 	);
-	tabValue.value = "signin";
+	tabValue.value = 'signin';
 }
 
 const { start, loading: signInLoading } = useLoading();
 
 function signIn() {
 	if (!formValue.value.username || !formValue.value.password) {
-		rpgm.logger.visible.warn("Please enter a username and password.");
+		rpgm.logger.visible.warn('Please enter a username and password.');
 		return;
 	}
 	start(
 		rpgm.auth.signIn.username({
 			username: formValue.value.username,
-			password: formValue.value.password,
+			password: formValue.value.password
 		})
 	);
 }
 
 const forgotOpen = ref(false);
-const forgotEmail = ref("");
+const forgotEmail = ref('');
 const forgotLoading = ref(false);
-const forgotError = ref("");
-const forgotSuccess = ref("");
+const forgotError = ref('');
+const forgotSuccess = ref('');
 
-const resetEndpoint = "/api/auth/request-password-reset";
-const resetRedirectUrl = new URL("/reset-password", __API_URL__).toString();
+const resetEndpoint = '/api/auth/request-password-reset';
+const resetRedirectUrl = new URL('/reset-password', __API_URL__).toString();
 
-watch(forgotOpen, (open) => {
+watch(forgotOpen, open => {
 	// Prefill with known email and clear state whenever the panel toggles.
 	if (open) {
-		forgotEmail.value = formValue.value.email || "";
-		forgotError.value = "";
-		forgotSuccess.value = "";
+		forgotEmail.value = formValue.value.email || '';
+		forgotError.value = '';
+		forgotSuccess.value = '';
 	} else {
 		forgotLoading.value = false;
-		forgotEmail.value = "";
+		forgotEmail.value = '';
 	}
 });
 
@@ -140,11 +140,11 @@ function closeForgotPassword() {
 
 async function requestPasswordReset() {
 	const email = forgotEmail.value.trim().toLowerCase();
-	forgotError.value = "";
-	forgotSuccess.value = "";
+	forgotError.value = '';
+	forgotSuccess.value = '';
 
 	if (!email) {
-		forgotError.value = "Enter the email address associated with your account.";
+		forgotError.value = 'Enter the email address associated with your account.';
 		return;
 	}
 
@@ -152,10 +152,10 @@ async function requestPasswordReset() {
 
 	try {
 		const response = await fetch(resetEndpoint, {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ email, redirectTo: resetRedirectUrl }),
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			credentials: 'include',
+			body: JSON.stringify({ email, redirectTo: resetRedirectUrl })
 		});
 
 		let payload: { message?: string; error?: string } | null = null;
@@ -176,7 +176,7 @@ async function requestPasswordReset() {
 
 		const message =
 			payload?.message?.trim() ||
-			"If that email exists, a reset link is on the way.";
+			'If that email exists, a reset link is on the way.';
 		forgotSuccess.value = message;
 		rpgm.logger.visible.log(message);
 
@@ -185,7 +185,7 @@ async function requestPasswordReset() {
 		}, 1600);
 	} catch (error) {
 		const message =
-			error instanceof Error ? error.message : "Unable to send reset email.";
+			error instanceof Error ? error.message : 'Unable to send reset email.';
 		forgotError.value = message;
 		rpgm.logger.visible.warn(message);
 	} finally {
@@ -236,7 +236,7 @@ async function requestPasswordReset() {
 				style="width: 100%"
 				attr-type="submit"
 			>
-				{{ tabValue === "signin" ? "Login" : "Sign Up" }}
+				{{ tabValue === 'signin' ? 'Login' : 'Sign Up' }}
 			</NButton>
 			<div class="actions-row">
 				<NButton
@@ -309,7 +309,7 @@ input {
 	color: white;
 }
 
-.tabs-trigger[data-state="inactive"] {
+.tabs-trigger[data-state='inactive'] {
 	cursor: pointer;
 }
 
