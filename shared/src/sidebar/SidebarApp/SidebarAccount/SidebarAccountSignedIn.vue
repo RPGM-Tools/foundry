@@ -1,3 +1,9 @@
+<!--
+File: SidebarAccountSignedIn.vue
+Purpose: Render signed-in account details and manage Discord linking within the sidebar account panel.
+Last updated: 2025-11-11
+-->
+
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
 
@@ -13,17 +19,26 @@ const session = rpgm.auth.useSession();
 const welcome = computed(() => {
 	if (!session.value.data) return 'Welcome';
 	// const name = session.value.data.user.displayUsername || session.value.data.user.username || session.value.data.user.name;
-	const name = session.value.data.user.name || session.value.data.user.displayUsername || session.value.data.user.username;
+	const name =
+		session.value.data.user.name ||
+		session.value.data.user.displayUsername ||
+		session.value.data.user.username;
 	return session.value.data ? `Welcome back, ${name}!` : 'Welcome back!';
 });
 
-const subscriptionCanceling = computed(() => Boolean(subscription.value?.status === 'active' && subscription.value.canceledAt));
+const subscriptionCanceling = computed(() =>
+	Boolean(
+		subscription.value?.status === 'active' && subscription.value.canceledAt
+	)
+);
 
 async function logout() {
 	return rpgm.auth.signOut();
 }
 
-const discordAccount = computed(() => accounts.value?.find(a => a.provider === 'discord') ?? null);
+const discordAccount = computed(
+	() => accounts.value?.find(a => a.providerId === 'discord') ?? null
+);
 
 const { subscription, update: updateSubscription } = useSubscription();
 
@@ -31,7 +46,11 @@ const { userInfo, update: updateUserInfo } = rpgm.useUserInfo();
 
 const subscriptionName = computed(() => userInfo.value?.data?.tier.name);
 
-const { accounts, isLoading: accountsLoading, update: updateAccounts } = useAccounts();
+const {
+	accounts,
+	isLoading: accountsLoading,
+	update: updateAccounts
+} = useAccounts();
 
 if (!subscription.value) {
 	await updateSubscription();
@@ -51,14 +70,21 @@ if (!userInfo.value) {
 	updateUserInfo();
 }
 
-const discordLinkedCheck = useFocusCheck(() => updateAccounts()
-	.then(r => Boolean(r?.some(a => a.provider === 'discord'))), 5);
+const discordLinkedCheck = useFocusCheck(
+	() =>
+		updateAccounts().then(r =>
+			Boolean(r?.some(a => a.providerId === 'discord'))
+		),
+	5
+);
 
 async function linkDiscord() {
-	return rpgm.auth.linkSocial({
-		provider: 'discord',
-		callbackURL: 'https://rpgm.tools/linked'
-	}).then(r => {
+	return rpgm.auth
+		.linkSocial({
+			provider: 'discord',
+			callbackURL: 'https://rpgm.tools/linked'
+		})
+		.then(r => {
 			if (r.data) {
 				window.open(r.data.url, '_blank');
 				discordLinkedCheck();
@@ -103,26 +129,18 @@ async function linkDiscord() {
 					<template #icon>
 						<i class="fab fa-discord" />
 					</template>
-					{{ discordAccount ? "Linked" : "Link Discord" }}
+					{{ discordAccount ? 'Linked' : 'Link Discord' }}
 				</NButton>
 			</LoadingBoundry>
-			<RouterLink
-				to="/guildhall"
-				#="{ navigate }"
-				custom
-			>
-				<NButton
-					type="primary"
-					style="height: 51px;"
-					@click="navigate"
-				>
+			<RouterLink to="/guildhall" #="{ navigate }" custom>
+				<NButton type="primary" style="height: 51px" @click="navigate">
 					<template #icon>
 						<i class="fas fa-house-turret" />
 					</template>
 					Guild Hall
 				</NButton>
 			</RouterLink>
-			<CustomerPortalButton style="height: 51px;" />
+			<CustomerPortalButton style="height: 51px" />
 			<LoadingBoundry #="{ loading, start }">
 				<NButton
 					type="primary"
