@@ -37,7 +37,7 @@ async function logout() {
 }
 
 const discordAccount = computed(
-	() => accounts.value?.find(a => a.providerId === 'discord') ?? null
+	() => accounts.value?.find(a => a.provider === 'discord') ?? null
 );
 
 const { subscription, update: updateSubscription } = useSubscription();
@@ -73,7 +73,7 @@ if (!userInfo.value) {
 const discordLinkedCheck = useFocusCheck(
 	() =>
 		updateAccounts().then(r =>
-			Boolean(r?.some(a => a.providerId === 'discord'))
+			Boolean(r?.some(a => a.provider === 'discord'))
 		),
 	5
 );

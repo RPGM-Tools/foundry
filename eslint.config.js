@@ -21,7 +21,6 @@ export default tslint.config([
 			parserOptions: {
 				extraFileExtensions: ['ts', 'vue', 'js'],
 				parser: tslint.parser,
-				project: './tsconfig.json',
 				projectService: true,
 				tsconfigRootDir: import.meta.dirname
 			},
