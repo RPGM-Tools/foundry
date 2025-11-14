@@ -3,9 +3,8 @@ import { RPGM_MODELS } from '@rpgm/tools/forge';
 
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 import SkeletonParagraph from '#/chat/SkeletonParagraph.vue';
+import { NAMES_PER_GENERATION } from '$/constants/names';
 import { getSelectedToken, nameToken } from '$/util/token';
-
-const NAMES_PER_GENERATION = 10;
 
 const names = rpgm.forge.nameChats.useChatWizard(),
 	{ data } = names;

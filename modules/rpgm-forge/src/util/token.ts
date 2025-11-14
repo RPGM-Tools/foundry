@@ -4,8 +4,9 @@
  * Last updated: 2025-11-14
  */
 import { type Names, type NamesOptions, RPGM_MODELS } from '@rpgm/tools/forge';
-import type { Result } from 'neverthrow';
-import { errAsync } from 'neverthrow';
+import { errAsync, type Result } from 'neverthrow';
+
+import { NAMES_PER_GENERATION } from '$/constants/names';
 
 import { shimmerToken } from './shimmer';
 
@@ -106,7 +107,7 @@ export async function generateTokenNames(
 	 * @todo Less hardcoding of values
 	 */
 	const options: NamesOptions = {
-		quantity: 4,
+		quantity: NAMES_PER_GENERATION,
 		gender: 'any',
 		genre: rpgm.forge.genre,
 		language: rpgm.forge.language,
