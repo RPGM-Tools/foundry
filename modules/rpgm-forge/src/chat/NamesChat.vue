@@ -1,14 +1,14 @@
 <script setup lang="ts">
-
 import { RPGM_MODELS } from '@rpgm/tools/forge';
 
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 import SkeletonParagraph from '#/chat/SkeletonParagraph.vue';
 import { getSelectedToken, nameToken } from '$/util/token';
 
-const NAMES_PER_GENERATION = 4;
+const NAMES_PER_GENERATION = 10;
 
-const names = rpgm.forge.nameChats.useChatWizard(), { data } = names;
+const names = rpgm.forge.nameChats.useChatWizard(),
+	{ data } = names;
 const loading = ref(false);
 
 const insertValues = (values: string[]) => {
@@ -28,8 +28,9 @@ const insertValues = (values: string[]) => {
  * @todo Less hardcoding
  */
 async function generate(regenerate: boolean = false) {
-	const isLastRpgmGeneration = rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools'
-		&& (await rpgm.forge.useTextLimit()).textLimit.value === 0;
+	const isLastRpgmGeneration =
+		rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools' &&
+		(await rpgm.forge.useTextLimit()).textLimit.value === 0;
 	const oldModel = rpgm.forge.settings.get('namesModel');
 	if (isLastRpgmGeneration) {
 		rpgm.forge.settings.set('namesModel', RPGM_MODELS.offlineNames);
@@ -64,21 +65,29 @@ async function generate(regenerate: boolean = false) {
 	if (result.isOk()) {
 		if (rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools')
 			if ((await rpgm.forge.useTextLimit()).decrement() == 0) {
-				rpgm.forge.logger.visible.warn(rpgm.localize('RPGM_FORGE.ERRORS.TEXT_LIMIT'));
-				rpgm.forge.settings.set('namesModel', { provider: 'offline', slug: 'rpgm-names-offline', type: 'text' });
+				rpgm.forge.logger.visible.warn(
+					rpgm.localize('RPGM_FORGE.ERRORS.TEXT_LIMIT')
+				);
+				rpgm.forge.settings.set('namesModel', {
+					provider: 'offline',
+					slug: 'rpgm-names-offline',
+					type: 'text'
+				});
 			}
 	}
 
 	if (isLastRpgmGeneration) rpgm.forge.settings.set('namesModel', oldModel);
 }
 
-const buttons: RadialButton[] = [{
-	category: rpgm.radialMenu.categories.rpgm_forge,
-	callback: async () => generate(true),
-	icon: 'fa fa-refresh',
-	tooltip: 'RPGM_FORGE.RADIAL_MENU.REGENERATE',
-	logger: rpgm.forge.logger
-}];
+const buttons: RadialButton[] = [
+	{
+		category: rpgm.radialMenu.categories.rpgm_forge,
+		callback: async () => generate(true),
+		icon: 'fa fa-refresh',
+		tooltip: 'RPGM_FORGE.RADIAL_MENU.REGENERATE',
+		logger: rpgm.forge.logger
+	}
+];
 
 /**
  * Apply a name to the currently selected token.
@@ -98,16 +107,9 @@ onMounted(() => {
 </script>
 
 <template>
-	<ChatWizardContainer
-		:wizard="names"
-		:buttons
-	>
+	<ChatWizardContainer :wizard="names" :buttons>
 		<h2>{{ data.prompt }}</h2>
-		<SkeletonParagraph
-			:loading="false"
-			width="100%"
-			height="400px"
-		>
+		<SkeletonParagraph :loading="false" width="100%" height="400px">
 			<TransitionGroup
 				name="rpgm-forge-name"
 				class="rpgm-forge-name-container"
@@ -134,7 +136,7 @@ onMounted(() => {
 }
 
 .rpgm-forge-name::marker {
-	content: "‣ ";
+	content: '‣ ';
 }
 
 .rpgm-forge-name {

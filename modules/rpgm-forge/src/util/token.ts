@@ -1,3 +1,8 @@
+/**
+ * File: token.ts
+ * Purpose: Provide utility helpers for token selection, naming workflows, and visual effects.
+ * Last updated: 2025-11-14
+ */
 import { type Names, type NamesOptions, RPGM_MODELS } from '@rpgm/tools/forge';
 import type { Result } from 'neverthrow';
 import { errAsync } from 'neverthrow';
@@ -12,7 +17,9 @@ export function getSelectedToken(): Token | undefined {
 	if (canvas.tokens!.controlled.length === 1) {
 		return canvas.tokens!.controlled[0];
 	} else {
-		rpgm.forge.logger.visible.warn(rpgm.localize('RPGM_FORGE.ERRORS.TOKEN_SELECT'));
+		rpgm.forge.logger.visible.warn(
+			rpgm.localize('RPGM_FORGE.ERRORS.TOKEN_SELECT')
+		);
 		return undefined;
 	}
 }
@@ -23,15 +30,24 @@ export function getSelectedToken(): Token | undefined {
  * @param prompt.type - The type of "thing" to generate a description for
  * @param prompt.name - The optional name to give the generator for use in the description
  */
-export function chatDescription(prompt?: { type: string, name?: string }) {
+export function chatDescription(prompt?: { type: string; name?: string }) {
 	if (!prompt) {
 		const token = getSelectedToken();
 		if (!token) return;
 		const actor = token.actor;
 		if (!actor || !actor.name) return;
-		void rpgm.forge.descriptionsChats.newMessage({ name: '', tokenId: token.id, description: '', type: actor.name });
+		void rpgm.forge.descriptionsChats.newMessage({
+			name: '',
+			tokenId: token.id,
+			description: '',
+			type: actor.name
+		});
 	} else {
-		void rpgm.forge.descriptionsChats.newMessage({ description: '', type: prompt.type, name: prompt.name });
+		void rpgm.forge.descriptionsChats.newMessage({
+			description: '',
+			type: prompt.type,
+			name: prompt.name
+		});
 	}
 }
 
@@ -47,8 +63,15 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
 		if (token) {
 			const protoToken = token.actor?.prototypeToken;
 			rpgm.forge.logger.debug(protoToken);
-			if (!protoToken?.name) { rpgm.forge.logger.visible.error('Token has no name!'); return; }
-			void rpgm.forge.nameChats.newMessage({ tokenId: token.id, names: [], prompt: protoToken.name });
+			if (!protoToken?.name) {
+				rpgm.forge.logger.visible.error('Token has no name!');
+				return;
+			}
+			void rpgm.forge.nameChats.newMessage({
+				tokenId: token.id,
+				names: [],
+				prompt: protoToken.name
+			});
 		}
 	}
 	// User has a name for us to use
@@ -63,12 +86,16 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
  * @param type - An optional type to pass to the renaming AI
  * @returns The names generated
  */
-export async function generateTokenNames(tokenDocument: TokenDocument, type?: string): Promise<Result<Names, Error>> {
+export async function generateTokenNames(
+	tokenDocument: TokenDocument,
+	type?: string
+): Promise<Result<Names, Error>> {
 	const protoToken = tokenDocument.actor?.prototypeToken;
 	if (!protoToken?.name) return errAsync(new Error('Token has no name!'));
 
-	const isLastRpgmGeneration = rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools'
-		&& (await rpgm.forge.useTextLimit()).textLimit.value === 0;
+	const isLastRpgmGeneration =
+		rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools' &&
+		(await rpgm.forge.useTextLimit()).textLimit.value === 0;
 	const oldModel = rpgm.forge.settings.get('namesModel');
 	if (isLastRpgmGeneration) {
 		rpgm.forge.settings.set('namesModel', RPGM_MODELS.offlineNames);
@@ -98,13 +125,16 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
 	if (result.isErr()) {
 		rpgm.forge.logger.visible.error(result.error.message);
 	}
-	if (shimmerFilter)
-		void shimmerFilter.fadeOut(500);
+	if (shimmerFilter) void shimmerFilter.fadeOut(500);
 
 	if (result.isOk()) {
 		if (rpgm.forge.settings.get('namesModel').provider === 'rpgm-tools')
 			if ((await rpgm.forge.useTextLimit()).decrement() == 0) {
-				rpgm.forge.settings.set('namesModel', { provider: 'offline', slug: 'rpgm-names-offline', type: 'text' });
+				rpgm.forge.settings.set('namesModel', {
+					provider: 'offline',
+					slug: 'rpgm-names-offline',
+					type: 'text'
+				});
 			}
 	}
 	if (isLastRpgmGeneration) {
@@ -119,12 +149,21 @@ export async function generateTokenNames(tokenDocument: TokenDocument, type?: st
  */
 export async function quickNameToken(tokenDocument: TokenDocument) {
 	if (!tokenDocument.isOwner) {
-		rpgm.forge.logger.visible.error(rpgm.localize('RPGM_FORGE.ERRORS.TOKEN_OWNER'));
+		rpgm.forge.logger.visible.error(
+			rpgm.localize('RPGM_FORGE.ERRORS.TOKEN_OWNER')
+		);
 		return;
 	}
 	const result = await generateTokenNames(tokenDocument);
-	if (result.isOk() && result.value.names[0]) {
-		await nameToken(tokenDocument, result.value.names[0]);
+	if (result.isOk()) {
+		const usableNames = result.value.names.filter(
+			(name): name is string =>
+				typeof name === 'string' && name.trim().length > 0
+		);
+		if (usableNames.length > 0) {
+			const randomIndex = Math.floor(Math.random() * usableNames.length);
+			await nameToken(tokenDocument, usableNames[randomIndex]);
+		}
 	}
 }
 
@@ -148,11 +187,15 @@ let shift = false;
  * Setup the functionality for detecting when a token has been placed.
  */
 export function registerTokenCreate() {
-	document.addEventListener('keydown', (k) => {
-		if (k.key == 'Shift') { shift = true; }
+	document.addEventListener('keydown', k => {
+		if (k.key == 'Shift') {
+			shift = true;
+		}
 	});
-	document.addEventListener('keyup', (k) => {
-		if (k.key == 'Shift') { shift = false; }
+	document.addEventListener('keyup', k => {
+		if (k.key == 'Shift') {
+			shift = false;
+		}
 	});
 	Hooks.on('createToken', (tokenDocument: TokenDocument, options, userId) => {
 		if (userId !== game.user.id) return;
