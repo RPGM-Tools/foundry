@@ -10,26 +10,40 @@ import SidebarApp from './SidebarApp';
 type ClosingOptions = foundry.applications.api.ApplicationV2.ClosingOptions;
 type Configuration = foundry.applications.api.ApplicationV2.Configuration;
 
-export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSidebarTab {
+export default class RpgmSidebar extends foundry.applications.sidebar
+	.AbstractSidebarTab {
 	app?: App;
 	router: Router;
 
-	constructor(options: DeepPartial<foundry.applications.api.ApplicationV2.Configuration>) {
+	constructor(
+		options: DeepPartial<foundry.applications.api.ApplicationV2.Configuration>
+	) {
 		super(options);
-		const tabs = structuredClone(foundry.applications.sidebar.Sidebar.TABS);
-		const settings = tabs.settings;
-		delete tabs.settings;
+		const tabs = foundry.applications.sidebar.Sidebar.TABS ?? {};
 		CONFIG.RpgmSidebar = {
 			sidebarIcon: 'rp-dice',
 			documentClass: RpgmSidebar
 		};
-		tabs.rpgm = {
-			//@ts-expect-error TABS is not able to be overriden
-			documentName: 'RpgmSidebar',
-			tooltip: 'RPGM_TOOLS.SIDEBAR.TITLE'
-		};
-		tabs.settings = settings;
-		foundry.applications.sidebar.Sidebar.TABS = tabs;
+		const orderedTabs: Record<string, unknown> = {};
+		let inserted = false;
+		for (const [key, value] of Object.entries(tabs)) {
+			if (key === 'rpgm') continue;
+			if (key === 'settings') {
+				orderedTabs.rpgm = {
+					documentName: 'RpgmSidebar',
+					tooltip: 'RPGM_TOOLS.SIDEBAR.TITLE'
+				};
+				inserted = true;
+			}
+			orderedTabs[key] = value;
+		}
+		if (!inserted) {
+			orderedTabs.rpgm = {
+				documentName: 'RpgmSidebar',
+				tooltip: 'RPGM_TOOLS.SIDEBAR.TITLE'
+			};
+		}
+		foundry.applications.sidebar.Sidebar.TABS = orderedTabs as typeof tabs;
 	}
 
 	static override tabName = 'rpgm';
@@ -52,7 +66,7 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 	}
 
 	override _renderHTML() {
-		const mount = (this.element.querySelector('.window-content') ?? this.element);
+		const mount = this.element.querySelector('.window-content') ?? this.element;
 		if (!this.popout) mount.classList.add('static');
 		return Promise.resolve(mount);
 	}
@@ -75,14 +89,23 @@ export default class RpgmSidebar extends foundry.applications.sidebar.AbstractSi
 	private onResize(forceCenter = false) {
 		void nextTick(() => {
 			const windowHeight = window.innerHeight;
-			const maxHeight = Math.min(windowHeight, parseInt(getComputedStyle(this.element).maxHeight) || 0);
-			const headerHeight = this.element.querySelector('.window-header')?.clientHeight ?? 0;
-			const innerHeight = this.element.querySelector('.sidebar-content')?.scrollHeight ?? 9999;
+			const maxHeight = Math.min(
+				windowHeight,
+				parseInt(getComputedStyle(this.element).maxHeight) || 0
+			);
+			const headerHeight =
+				this.element.querySelector('.window-header')?.clientHeight ?? 0;
+			const innerHeight =
+				this.element.querySelector('.sidebar-content')?.scrollHeight ?? 9999;
 
 			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 55);
-			const newTop = ((this.position.top ?? 0) + newHeight) > windowHeight || forceCenter ? (
-				Math.max(0, Math.min(windowHeight - newHeight, (windowHeight - newHeight) / 2))
-			) : this.position.top;
+			const newTop =
+				(this.position.top ?? 0) + newHeight > windowHeight || forceCenter
+					? Math.max(
+							0,
+							Math.min(windowHeight - newHeight, (windowHeight - newHeight) / 2)
+					  )
+					: this.position.top;
 
 			this.setPosition({
 				height: newHeight,
