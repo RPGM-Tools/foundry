@@ -14,7 +14,12 @@ import { Versioning } from './versioning';
  * @param version - The module version
  * @returns Default Vite config
  */
-export default function defaultConfig(id: string, mode: string, dirname: string, version: string): UserConfig {
+export default function defaultConfig(
+	id: string,
+	mode: string,
+	dirname: string,
+	version: string
+): UserConfig {
 	const env = loadEnv(mode, dirname);
 	const foundryUrl =
 		process.env.RPGM_FOUNDRY_URL ??
@@ -53,34 +58,33 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 			allowedHosts: true,
 			proxy: foundryUrl
 				? {
-					[`^(?!/modules/${id})`]: `http://${foundryUrl}`,
-					// [`^(/modules/${id}/lang)`]: `http://${foundryUrl}`,
-					'/socket.io': {
-						'target': `ws://${foundryUrl}`,
-						ws: true
+						[`^(?!/modules/${id})`]: `http://${foundryUrl}`,
+						// [`^(/modules/${id}/lang)`]: `http://${foundryUrl}`,
+						'/socket.io': {
+							target: `ws://${foundryUrl}`,
+							ws: true
+						}
 					}
-				}
 				: undefined
 		},
 		resolve: {
 			alias: {
-				'$': resolve(dirname, 'src'),
-				'$$': dirname,
+				$: resolve(dirname, 'src'),
+				$$: dirname,
 				'#': resolve(dirname, '../../shared/src'),
 				'##': resolve(dirname, '../../shared')
 			}
 		},
 		define: {
-			'__MODULE_VERSION__': `"${version}"`,
-			'__API_URL__': JSON.stringify(apiUrl),
+			__MODULE_VERSION__: `"${version}"`,
+			__API_URL__: JSON.stringify(apiUrl),
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		},
-		assetsInclude: [
-			'**/*.glsl'
-		],
+		assetsInclude: ['**/*.glsl'],
 		envPrefix: 'RPGM_',
 		build: {
-			assetsInlineLimit: ((path: string) => ['.glsl', '.png'].some(f => path.startsWith(f))),
+			assetsInlineLimit: (path: string) =>
+				['.glsl', '.png'].some(f => path.startsWith(f)),
 			chunkSizeWarningLimit: 1000,
 			outDir: resolve(dirname, '.dist'),
 			emptyOutDir: true,
@@ -121,4 +125,4 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 			GenerateI18n(resolve(dirname, './lang/*'), id)
 		]
 	};
-};
+}

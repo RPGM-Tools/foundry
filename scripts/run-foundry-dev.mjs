@@ -44,7 +44,9 @@ function parseArguments(argv) {
 }
 
 function printHelp() {
-	console.log(`Usage: node ./scripts/run-foundry-dev.mjs [--module <name>] [--target <v13-dev|v14-dev>]\n\nDefaults:\n  --module rpgm-forge\n  --target v14-dev`);
+	console.log(
+		`Usage: node ./scripts/run-foundry-dev.mjs [--module <name>] [--target <v13-dev|v14-dev>]\n\nDefaults:\n  --module rpgm-forge\n  --target v14-dev`
+	);
 }
 
 function resolvePackageManagerCommand() {
@@ -106,17 +108,21 @@ async function main() {
 	);
 
 	const packageManager = resolvePackageManagerCommand();
-	const child = spawn(packageManager.command, ['--filter', options.moduleName, 'dev'], {
-		stdio: 'inherit',
-		shell: packageManager.shell,
-		env: {
-			...process.env,
-			RPGM_DEV_HOST: target.viteHost,
-			RPGM_DEV_PORT: String(target.vitePort),
-			RPGM_FOUNDRY_URL: target.foundryUrl,
-			VITE_FOUNDRY_URL: target.foundryUrl
+	const child = spawn(
+		packageManager.command,
+		['--filter', options.moduleName, 'dev'],
+		{
+			stdio: 'inherit',
+			shell: packageManager.shell,
+			env: {
+				...process.env,
+				RPGM_DEV_HOST: target.viteHost,
+				RPGM_DEV_PORT: String(target.vitePort),
+				RPGM_FOUNDRY_URL: target.foundryUrl,
+				VITE_FOUNDRY_URL: target.foundryUrl
+			}
 		}
-	});
+	);
 
 	child.on('exit', code => {
 		process.exit(code ?? 0);

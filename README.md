@@ -55,11 +55,11 @@ https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge.json
 
 ## Screenshots
 
-*Coming soon! Here you'll find images and examples showing RPGM Forge in action.*
+_Coming soon! Here you'll find images and examples showing RPGM Forge in action._
 
 ---
 
-*Thank you for using RPGM Forge! Stay tuned for more features and updates and future tools from your friends at RPGM Tools!*
+_Thank you for using RPGM Forge! Stay tuned for more features and updates and future tools from your friends at RPGM Tools!_
 
 ## Development
 
