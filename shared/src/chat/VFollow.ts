@@ -1,9 +1,6 @@
 import type { Directive } from 'vue';
 
-function attachBeforeTarget(
-	el: HTMLElement,
-	targetSelector: string
-) {
+function attachBeforeTarget(el: HTMLElement, targetSelector: string) {
 	const target = document.querySelector(targetSelector);
 	if (!target) return;
 
@@ -15,7 +12,10 @@ function attachBeforeTarget(
 }
 
 /** Custom directive for following an html element based on a css selector, inserting itself before the target */
-export const vFollow: Directive<HTMLElement & { _observer?: MutationObserver, _parent?: HTMLElement }, string> = {
+export const vFollow: Directive<
+	HTMLElement & { _observer?: MutationObserver; _parent?: HTMLElement },
+	string
+> = {
 	mounted(el, { value: targetSelector }) {
 		el._parent = el.parentElement!;
 		attachBeforeTarget(el, targetSelector);

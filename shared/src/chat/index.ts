@@ -246,14 +246,7 @@ export class ChatCommands {
 
 	/** Creates the {@link AutoComplete} app. */
 	createChatPanel() {
-		const chatInput =
-			rpgm.majorGameVersion === 12
-				? document.querySelector('#chat-form')
-				: document.querySelector('#chat-message');
-		if (!chatInput) {
-			rpgm.logger.error("Couldn't find the chat input!");
-			return;
-		}
+		if (this.chatPanel) return;
 		this.chatPanel = createApp(AutoComplete as Component);
 		const panelContainer = document.createElement('div');
 
