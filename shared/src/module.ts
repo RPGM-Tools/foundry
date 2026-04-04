@@ -21,7 +21,7 @@ export function FoundyRpgmModuleMixin<C extends AbstractConstructor<AbstractRpgm
 				(ui.notifications as any).element.find(`[data-id="${notif}"]`).addClass('rpgm');
 			} else {
 				if (notif.element) {
-					notif.element.classList.add('rgpm');
+					notif.element.classList.add('rpgm');
 				}
 			}
 		}

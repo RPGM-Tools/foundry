@@ -10,7 +10,7 @@
 	"bugs": "https://github.com/RPGM-Tools/foundry/issues",
 	"compatibility": {
 		"minimum": "12",
-		"verified": "13"
+		"verified": "14"
 	},
 	"esmodules": [
 		"init.js"
