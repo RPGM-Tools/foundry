@@ -8,6 +8,17 @@ import { j } from '#/util/compatibility';
 import AutoComplete from './AutoComplete.vue';
 import type { ChatWizard } from './ChatWizard';
 
+type ChatContextOption = {
+	name: string,
+	icon: string,
+	condition: (li: JQuery | HTMLElement) => boolean,
+	callback: (message: ChatMessage) => void
+};
+
+type LegacyChatLogPrototype = ChatLog & {
+	_getEntryContextOptions?: () => ChatContextOption[]
+};
+
 /**
  * ChatCommands stores all chat commands and provides utility functions related to chat
  * 
@@ -59,27 +70,39 @@ export class ChatCommands {
 				}
 			});
 		Hooks.once('ready', () => { rpgm.chat.createChatPanel(); });
+		this.patchChatContextMenu();
+	}
 
-		// Patch chat context menu to not allow revealing wizards
-		const _getEntryContextOptions = ChatLog.prototype._getEntryContextOptions.bind(ui.chat);
-		ChatLog.prototype._getEntryContextOptions = () => {
+	private patchChatContextMenu() {
+		const chatLogPrototype = ChatLog.prototype as LegacyChatLogPrototype;
+		const getEntryContextOptions = chatLogPrototype._getEntryContextOptions;
+
+		if (typeof getEntryContextOptions !== 'function') {
+			rpgm.logger.warn('Skipping legacy chat context patch because ChatLog._getEntryContextOptions is unavailable in this Foundry version.');
+			return;
+		}
+
+		const originalGetEntryContextOptions = getEntryContextOptions.bind(ui.chat);
+		chatLogPrototype._getEntryContextOptions = () => {
 			rpgm.logger.debug('Patching chat context menu');
-			const options = _getEntryContextOptions();
+			const options = originalGetEntryContextOptions();
 			for (const option of options) {
-				if (option.name === 'CHAT.RevealMessage') {
-					const condition = option.condition;
-					option.condition = (li: JQuery | HTMLElement) => {
-						const message = game.messages.get(j(li).dataset.messageId!);
-						let wizard = false;
-						for (const handler of rpgm.chat.messageHandlers)
-							if (handler.query(message!))
-								wizard = true;
-						return condition(li) && !wizard;
-					};
-				}
+				if (option.name !== 'CHAT.RevealMessage') continue;
+
+				const originalCondition = option.condition;
+				option.condition = (li: JQuery | HTMLElement) => {
+					const messageId = j(li).dataset.messageId;
+					const message = messageId ? game.messages.get(messageId) : undefined;
+					if (!message) return originalCondition(li);
+					return originalCondition(li) && !this.isWizardMessage(message);
+				};
 			}
 			return options;
 		};
+	}
+
+	private isWizardMessage(message: ChatMessage) {
+		return this.messageHandlers.some(handler => handler.query(message));
 	}
 
 	/**
