@@ -71,13 +71,18 @@ export function chatTokenNames(token: Token | undefined, prompt?: string) {
 			void rpgm.forge.nameChats.newMessage({
 				tokenId: token.id,
 				names: [],
+				originalNames: [],
 				prompt: protoToken.name
 			});
 		}
 	}
 	// User has a name for us to use
 	else {
-		void rpgm.forge.nameChats.newMessage({ names: [], prompt });
+		void rpgm.forge.nameChats.newMessage({
+			names: [],
+			originalNames: [],
+			prompt
+		});
 	}
 }
 

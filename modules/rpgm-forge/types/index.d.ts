@@ -25,6 +25,7 @@ declare global {
 	type ForgeChatNames = {
 		prompt: string
 		names: string[]
+		originalNames?: string[]
 		tokenId?: string
 	};
 

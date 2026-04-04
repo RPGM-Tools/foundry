@@ -10,6 +10,8 @@ const names = rpgm.forge.nameChats.useChatWizard(),
 	{ data } = names;
 const loading = ref(false);
 
+const originalNames = computed(() => new Set(data.originalNames ?? []));
+
 const insertValues = (values: string[]) => {
 	values.forEach((v, i) => {
 		setTimeout(() => {
@@ -96,8 +98,19 @@ function assign(name: string) {
 	const token = getSelectedToken();
 	if (!token) return;
 	const oldName = token.name;
+	data.originalNames ??= [];
+	data.originalNames = data.originalNames.filter(
+		originalName => originalName !== name
+	);
 	void nameToken(token.document, name);
 	data.names[data.names.indexOf(name)] = oldName;
+	if (!data.originalNames.includes(oldName)) {
+		data.originalNames.push(oldName);
+	}
+}
+
+function isOriginalName(name: string) {
+	return originalNames.value.has(name);
 }
 
 onMounted(() => {
@@ -115,12 +128,19 @@ onMounted(() => {
 				tag="ul"
 			>
 				<li
-					v-for="name in data.names"
-					:key="name"
+					v-for="(name, index) in data.names"
+					:key="`${name}-${index}`"
 					class="rpgm-forge-name"
+					:class="{ 'rpgm-forge-name-original': isOriginalName(name) }"
 					@click="assign(name)"
 				>
 					{{ name }}
+					<small
+						v-if="isOriginalName(name)"
+						class="rpgm-forge-name-original-cue"
+					>
+						Original
+					</small>
 				</li>
 			</TransitionGroup>
 		</SkeletonParagraph>
@@ -143,9 +163,27 @@ onMounted(() => {
 	left: 0;
 	font-weight: bold;
 	scale: 1;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 	transition: transform 150ms ease-in-out, color 150ms, scale 150ms !important;
 	transform-origin: left;
 	cursor: pointer;
+}
+
+.rpgm-forge-name-original {
+	color: var(--color-light-2);
+}
+
+.rpgm-forge-name-original-cue {
+	padding: 0 0.4rem;
+	border: 1px solid color-mix(in srgb, var(--color-light-2) 50%, transparent);
+	border-radius: 999px;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	opacity: 0.85;
 }
 
 .rpgm-forge-name:hover {
