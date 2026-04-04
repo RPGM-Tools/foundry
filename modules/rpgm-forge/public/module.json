@@ -12,9 +12,7 @@
 		"minimum": "12",
 		"verified": "14"
 	},
-	"esmodules": [
-		"init.js"
-	],
+	"esmodules": ["init.js"],
 	"authors": [
 		{
 			"name": "dallenb4",
@@ -35,9 +33,7 @@
 			"flags": {}
 		}
 	],
-	"styles": [
-		"assets/init.css"
-	],
+	"styles": ["assets/init.css"],
 	"persistentStorage": true,
 	"media": [
 		{
