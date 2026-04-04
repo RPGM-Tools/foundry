@@ -9,37 +9,37 @@ import AutoComplete from './AutoComplete.vue';
 import type { ChatWizard } from './ChatWizard';
 
 type ChatContextOption = {
-	name: string,
-	icon: string,
-	condition: (li: JQuery | HTMLElement) => boolean,
-	callback: (message: ChatMessage) => void
+	name: string;
+	icon: string;
+	condition: (li: JQuery | HTMLElement) => boolean;
+	callback: (message: ChatMessage) => void;
 };
 
 type LegacyChatLogPrototype = ChatLog & {
-	_getEntryContextOptions?: () => ChatContextOption[]
+	_getEntryContextOptions?: () => ChatContextOption[];
 };
 
 /**
  * ChatCommands stores all chat commands and provides utility functions related to chat
- * 
- * The ChatCommands system provides a framework for creating custom chat commands that can be 
- * executed by users in the chat interface. Commands are registered using the brigadier-ts-lite 
+ *
+ * The ChatCommands system provides a framework for creating custom chat commands that can be
+ * executed by users in the chat interface. Commands are registered using the brigadier-ts-lite
  * library which provides a Minecraft-like command syntax with argument parsing and autocompletion.
- * 
- * Commands are prefixed with an asterisk (*) and can be registered by both the shared module 
+ *
+ * Commands are prefixed with an asterisk (*) and can be registered by both the shared module
  * and individual modules like rpgm-forge.
- * 
+ *
  * Key Features:
  * - Command registration with brigadier-ts-lite for argument parsing
  * - Autocompletion support in the chat interface
  * - Integration with the ChatWizards system for interactive command interfaces
  * - Message handler registration for custom chat message rendering
- * 
+ *
  * Usage:
  * 1. Register commands using `rpgm.chat.registerCommand()` in your module's registerSettings method
  * 2. Use `literal()`, `argument()`, and `string()` functions from brigadier-ts-lite to define command structure
  * 3. Implement command execution logic in the executes() callback
- * 
+ *
  * Example:
  * ```typescript
  * rpgm.chat.registerCommand(literal("mycommand")
@@ -60,7 +60,10 @@ export class ChatCommands {
 	constructor() {
 		// renderChatMessage is deprecated in v13+
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		Hooks.on(rpgm.majorGameVersion <= 12 ? 'renderChatMessage' : 'renderChatMessageHTML' as any,
+		Hooks.on(
+			rpgm.majorGameVersion <= 12
+				? 'renderChatMessage'
+				: ('renderChatMessageHTML' as any),
 			(message: ChatMessage, html: JQuery | HTMLElement) => {
 				for (const handler of this.messageHandlers) {
 					const shouldHandle = handler.query(message);
@@ -68,8 +71,11 @@ export class ChatCommands {
 					handler.render(message, j(html));
 					return;
 				}
-			});
-		Hooks.once('ready', () => { rpgm.chat.createChatPanel(); });
+			}
+		);
+		Hooks.once('ready', () => {
+			rpgm.chat.createChatPanel();
+		});
 		this.patchChatContextMenu();
 	}
 
@@ -78,11 +84,15 @@ export class ChatCommands {
 		const getEntryContextOptions = chatLogPrototype._getEntryContextOptions;
 
 		if (typeof getEntryContextOptions !== 'function') {
-			rpgm.logger.warn('Skipping legacy chat context patch because ChatLog._getEntryContextOptions is unavailable in this Foundry version.');
+			rpgm.logger.warn(
+				'Skipping legacy chat context patch because ChatLog._getEntryContextOptions is unavailable in this Foundry version.'
+			);
 			return;
 		}
 
-		const originalGetEntryContextOptions = getEntryContextOptions.bind(ui.chat);
+		const originalGetEntryContextOptions = getEntryContextOptions.bind(
+			ui.chat
+		);
 		chatLogPrototype._getEntryContextOptions = () => {
 			rpgm.logger.debug('Patching chat context menu');
 			const options = originalGetEntryContextOptions();
@@ -92,9 +102,13 @@ export class ChatCommands {
 				const originalCondition = option.condition;
 				option.condition = (li: JQuery | HTMLElement) => {
 					const messageId = j(li).dataset.messageId;
-					const message = messageId ? game.messages.get(messageId) : undefined;
+					const message = messageId
+						? game.messages.get(messageId)
+						: undefined;
 					if (!message) return originalCondition(li);
-					return originalCondition(li) && !this.isWizardMessage(message);
+					return (
+						originalCondition(li) && !this.isWizardMessage(message)
+					);
 				};
 			}
 			return options;
@@ -109,10 +123,15 @@ export class ChatCommands {
 	 * @returns The top and bottom distances in the chat scroll window
 	 */
 	get scrollDistances() {
-		this.chatlog ??= document.querySelector('#chat #chat-log,#chat .chat-scroll') as HTMLElement;
+		this.chatlog ??= document.querySelector(
+			'#chat #chat-log,#chat .chat-scroll'
+		) as HTMLElement;
 		return {
 			top: this.chatlog.scrollTop,
-			bottom: this.chatlog.scrollHeight - this.chatlog.scrollTop - this.chatlog.clientHeight
+			bottom:
+				this.chatlog.scrollHeight -
+				this.chatlog.scrollTop -
+				this.chatlog.clientHeight
 		};
 	}
 
@@ -121,20 +140,25 @@ export class ChatCommands {
 	 * @param force - Skip checking scroll distance
 	 */
 	updateScroll(force?: boolean) {
-		setTimeout(() => {
-			this.chatlog ??= document.querySelector('#chat #chat-log,#chat .chat-scroll') as HTMLElement;
-			const { top, bottom } = this.scrollDistances;
-			const shouldScroll = force || (top > 300 && bottom < 300);
-			if (shouldScroll)
-				this.chatlog.scrollBy({ top: 9999, behavior: 'smooth' });
-		}, force ? 200 : 500);
+		setTimeout(
+			() => {
+				this.chatlog ??= document.querySelector(
+					'#chat #chat-log,#chat .chat-scroll'
+				) as HTMLElement;
+				const { top, bottom } = this.scrollDistances;
+				const shouldScroll = force || (top > 300 && bottom < 300);
+				if (shouldScroll)
+					this.chatlog.scrollBy({ top: 9999, behavior: 'smooth' });
+			},
+			force ? 200 : 500
+		);
 	}
 
 	/**
 	 * Register a new chat command with the system
 	 *
 	 * This method registers a new command that can be executed by users in the chat interface.
-	 * Commands are defined using the brigadier-ts-lite library which provides a Minecraft-like 
+	 * Commands are defined using the brigadier-ts-lite library which provides a Minecraft-like
 	 * command syntax with argument parsing and autocompletion.
 	 * @param command - The command to register, created using literal(), argument(), etc. from brigadier-ts-lite
 	 * @example
@@ -222,9 +246,14 @@ export class ChatCommands {
 
 	/** Creates the {@link AutoComplete} app. */
 	createChatPanel() {
-		const chatInput = rpgm.majorGameVersion === 12 ? document.querySelector('#chat-form')
-			: document.querySelector('#chat-message');
-		if (!chatInput) { rpgm.logger.error('Couldn\'t find the chat input!'); return; };
+		const chatInput =
+			rpgm.majorGameVersion === 12
+				? document.querySelector('#chat-form')
+				: document.querySelector('#chat-message');
+		if (!chatInput) {
+			rpgm.logger.error("Couldn't find the chat input!");
+			return;
+		}
 		this.chatPanel = createApp(AutoComplete as Component);
 		const panelContainer = document.createElement('div');
 
@@ -233,7 +262,6 @@ export class ChatCommands {
 
 	/** Removes all messages that are no longer in the game. */
 	prune() {
-		for (const handler of this.messageHandlers)
-			handler.prune();
+		for (const handler of this.messageHandlers) handler.prune();
 	}
 }
