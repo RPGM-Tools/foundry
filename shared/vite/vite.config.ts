@@ -16,25 +16,51 @@ import { Versioning } from './versioning';
  */
 export default function defaultConfig(id: string, mode: string, dirname: string, version: string): UserConfig {
 	const env = loadEnv(mode, dirname);
+	const foundryUrl =
+		process.env.RPGM_FOUNDRY_URL ??
+		process.env.VITE_FOUNDRY_URL ??
+		env.RPGM_FOUNDRY_URL ??
+		env.VITE_FOUNDRY_URL;
+	const apiUrl =
+		process.env.RPGM_API_URL ??
+		process.env.VITE_RPGM_URL ??
+		env.RPGM_API_URL ??
+		env.VITE_RPGM_URL ??
+		'https://rpgm.tools';
+	const devHost =
+		process.env.RPGM_DEV_HOST ?? env.RPGM_DEV_HOST ?? '127.0.0.1';
+	const devPort = Number(
+		process.env.RPGM_DEV_PORT ?? env.RPGM_DEV_PORT ?? '30001'
+	);
+
+	if (mode === 'development' && !foundryUrl) {
+		throw new Error(
+			'Missing Foundry development target. Set RPGM_FOUNDRY_URL, VITE_FOUNDRY_URL, or use the versioned pnpm dev/test scripts.'
+		);
+	}
 
 	return {
 		root: 'src/',
 		publicDir: resolve(dirname, 'public'),
 		base: `/modules/${id}/`,
 		server: {
+			host: devHost,
 			hmr: {
 				overlay: false
 			},
-			port: 30001,
+			port: devPort,
+			strictPort: true,
 			allowedHosts: true,
-			proxy: {
-				[`^(?!/modules/${id})`]: `http://${env.VITE_FOUNDRY_URL}`,
-				// [`^(/modules/${id}/lang)`]: `http://${env.VITE_FOUNDRY_URL}`,
-				'/socket.io': {
-					'target': `ws://${env.VITE_FOUNDRY_URL}`,
-					ws: true
+			proxy: foundryUrl
+				? {
+					[`^(?!/modules/${id})`]: `http://${foundryUrl}`,
+					// [`^(/modules/${id}/lang)`]: `http://${foundryUrl}`,
+					'/socket.io': {
+						'target': `ws://${foundryUrl}`,
+						ws: true
+					}
 				}
-			}
+				: undefined
 		},
 		resolve: {
 			alias: {
@@ -46,7 +72,7 @@ export default function defaultConfig(id: string, mode: string, dirname: string,
 		},
 		define: {
 			'__MODULE_VERSION__': `"${version}"`,
-			'__API_URL__': JSON.stringify(env.VITE_RPGM_URL ?? 'https://rpgm.tools'),
+			'__API_URL__': JSON.stringify(apiUrl),
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		},
 		assetsInclude: [

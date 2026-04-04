@@ -3,8 +3,12 @@
 	"type": "module",
 	"scripts": {
 		"build": "pnpm -r build",
+		"dev:v13": "node ./scripts/run-foundry-dev.mjs --target v13-dev --module rpgm-forge",
+		"dev:v14": "node ./scripts/run-foundry-dev.mjs --target v14-dev --module rpgm-forge",
 		"lint": "eslint .",
-		"lint:fix": "eslint . --fix"
+		"lint:fix": "eslint . --fix",
+		"test:v13": "pnpm dev:v13",
+		"test:v14": "pnpm dev:v14"
 	},
 	"devDependencies": {
 		"@types/node": "^22.13.10",

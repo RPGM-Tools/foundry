@@ -37,11 +37,11 @@
 2. Click **Install Module**.
 3. Paste the following Manifest URL into the field:
 
-```
+```text
 https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge.json
 ```
 
-4. Click **Install**.
+1. Click **Install**.
 
 ---
 
@@ -61,23 +61,41 @@ https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge.json
 
 *Thank you for using RPGM Forge! Stay tuned for more features and updates and future tools from your friends at RPGM Tools!*
 
-# Development
+## Development
 
-## Installation
+### Installation
+
 `pnpm install`
 
-## Development
+### Local development
+
 - To run a dev server for a specific module, run `pnpm --filter <module-name> dev`
-  - With this, the dev server will HMR Vue files and reload the page for TS files.
-  - Changes to i18n require a build and dev server restart
+    - With this, the dev server will HMR Vue files and reload the page for TS files.
+    - Changes to i18n require a build and dev server restart
 - Each .env file must be placed in the module's folder it is being used for (will be used for that module's dev server)
-  - VITE_FOUNDRY_URL: The foundry instance url to proxy
-  - VITE_RPGM_URL (optional): The rpgm.tools server to use (https://rpgm.tools is the default)
+    - VITE_FOUNDRY_URL: The foundry instance url to proxy
+    - VITE_RPGM_URL (optional): The rpgm.tools server to use (https://rpgm.tools is the default)
+
+### Versioned local testing against Foundry dev lanes
+
+- `pnpm test:v13` runs the `rpgm-forge` Vite dev proxy against the Foundry 13 dev lane at `fvtt-v13-dev.localhost:30013`
+- `pnpm test:v14` runs the `rpgm-forge` Vite dev proxy against the Foundry 14 dev lane at `fvtt-v14-dev.localhost:30014`
+- Equivalent aliases: `pnpm dev:v13` and `pnpm dev:v14`
+- The proxy URLs you open in the browser are:
+    - V13 dev test proxy: `http://127.0.0.13:32013`
+    - V14 dev test proxy: `http://127.0.0.14:32014`
+- These commands expect the corresponding Foundry lane to already be running through the workspace Foundry runtime wrappers.
+- The versioned scripts set the target Foundry URL, proxy hostname, and proxy port for you, so you do not need to edit `modules/rpgm-forge/.env` when switching between V13 and V14 testing.
+- Use the version-specific loopback proxy URLs rather than plain `localhost` so browser cookies stay isolated between the V13 and V14 test lanes without relying on hosts-file DNS aliases.
 
 ### RPGM Tools
+
 This project uses [RPGM Tools](https://github.com/RPGM-Tools/tools).
+
 To update the module after changes, run `pnpm update @rpgm/tools`
 
-## Building
+### Building
+
 `pnpm build`
+
 - This will build all modules at once
