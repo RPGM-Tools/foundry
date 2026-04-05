@@ -55,11 +55,11 @@
         </tr>
         <tr>
             <td>
-                <img src="https://rpgm.tools/assets/names_3.png" alt="Crystal Menu for token naming" />
+                <img src="https://rpgm.tools/assets/names_4.png" alt="Crystal Menu for token naming" />
                 <p><strong>Step 3:</strong> Open the Crystal Menu when you want better options on demand.</p>
             </td>
             <td>
-                <img src="https://rpgm.tools/assets/names_4.png" alt="Token after renaming via menu" />
+                <img src="https://rpgm.tools/assets/names_3.png" alt="Token after renaming via menu" />
                 <p><strong>Step 4:</strong> Refresh again until the result fits the tone of the encounter.</p>
             </td>
         </tr>

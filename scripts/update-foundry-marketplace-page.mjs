@@ -10,7 +10,6 @@ import { loadDotEnvFilesUpTree } from './lib/load-dotenv.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const defaultEditUrl = 'https://foundryvtt.com/packages/rpgm-forge/edit';
-const expectedPublicHeading = 'RPGM Forge: AI-Augmented Prep and Play for Foundry VTT';
 
 function parseArguments(argv) {
 	const options = {
@@ -103,6 +102,34 @@ function buildHtmlFromMarkdown(markdown) {
 	});
 
 	return converter.makeHtml(markdown).trim();
+}
+
+function stripHtmlTags(value) {
+	return value.replace(/<[^>]+>/gu, ' ');
+}
+
+function decodeHtmlEntities(value) {
+	return value
+		.replace(/&amp;/gu, '&')
+		.replace(/&lt;/gu, '<')
+		.replace(/&gt;/gu, '>')
+		.replace(/&quot;/gu, '"')
+		.replace(/&#39;/gu, "'");
+}
+
+function normalizeText(value) {
+	return value.replace(/\s+/gu, ' ').trim();
+}
+
+function extractVerificationHeading(markdown) {
+	const headingMatch = markdown.match(/<h2\b[^>]*>(?<heading>.*?)<\/h2>/isu);
+	if (!headingMatch?.groups?.heading) {
+		return undefined;
+	}
+
+	return normalizeText(
+		decodeHtmlEntities(stripHtmlTags(headingMatch.groups.heading))
+	);
 }
 
 async function dismissCookieBannerIfPresent(page) {
@@ -219,13 +246,18 @@ async function saveForm(page) {
 	]);
 }
 
-async function verifyPublicPage(page) {
+async function verifyPublicPage(page, expectedHeading) {
 	await page.goto('https://foundryvtt.com/packages/rpgm-forge/', {
 		waitUntil: 'domcontentloaded'
 	});
+
+	if (!expectedHeading) {
+		return;
+	}
+
 	await page.waitForFunction(
 		(headingText) => document.body?.innerText?.includes(headingText),
-		expectedPublicHeading,
+		expectedHeading,
 		{ timeout: 30000 }
 	);
 }
@@ -242,6 +274,7 @@ async function updateMarketplacePage(options) {
 	const bodyFilePath = resolveBodyFilePath(options);
 	const markdownBody = await readFile(bodyFilePath, 'utf8');
 	const htmlBody = buildHtmlFromMarkdown(markdownBody);
+	const expectedPublicHeading = extractVerificationHeading(markdownBody);
 	const browser = await chromium.launch({ headless: options.headless });
 
 	try {
@@ -256,7 +289,7 @@ async function updateMarketplacePage(options) {
 		}
 
 		await saveForm(page);
-		await verifyPublicPage(page);
+		await verifyPublicPage(page, expectedPublicHeading);
 
 		console.log(`Updated Foundry marketplace page: ${options.editUrl}`);
 		console.log(`Body source: ${bodyFilePath}`);
