@@ -71,6 +71,18 @@ function stripWrappingQuotes(value) {
 	return value;
 }
 
+function firstNonEmptyString(...values) {
+	for (const value of values) {
+		if (typeof value !== 'string') continue;
+		const trimmedValue = value.trim();
+		if (trimmedValue) {
+			return trimmedValue;
+		}
+	}
+
+	return undefined;
+}
+
 async function loadDotEnvIfPresent() {
 	const envPath = path.join(repoRoot, '.env');
 
@@ -167,8 +179,11 @@ function buildFoundryPayload({
 async function publishFoundryRelease(options) {
 	await loadDotEnvIfPresent();
 
-	const tag =
-		options.tag ?? process.env.FOUNDRY_PUBLISH_TAG ?? process.env.GITHUB_REF_NAME;
+	const tag = firstNonEmptyString(
+		options.tag,
+		process.env.FOUNDRY_PUBLISH_TAG,
+		process.env.GITHUB_REF_NAME
+	);
 	if (!tag) {
 		throw new Error(
 			'No release tag was provided. Pass --tag <module-vx.y.z> or set FOUNDRY_PUBLISH_TAG.'
@@ -176,12 +191,16 @@ async function publishFoundryRelease(options) {
 	}
 
 	const derivedReleaseInfo = deriveReleaseInfo(tag);
-	const moduleId =
-		options.moduleId ??
-		process.env.FOUNDRY_PUBLISH_MODULE_ID ??
-		derivedReleaseInfo.moduleId;
-	const repository =
-		options.repository ?? process.env.GITHUB_REPOSITORY ?? defaultRepository;
+	const moduleId = firstNonEmptyString(
+		options.moduleId,
+		process.env.FOUNDRY_PUBLISH_MODULE_ID,
+		derivedReleaseInfo.moduleId
+	);
+	const repository = firstNonEmptyString(
+		options.repository,
+		process.env.GITHUB_REPOSITORY,
+		defaultRepository
+	);
 	const dryRun =
 		options.dryRun ?? parseBoolean(process.env.FOUNDRY_PUBLISH_DRY_RUN, false);
 	const moduleFolderName = `rpgm-${moduleId}`;
@@ -211,15 +230,16 @@ async function publishFoundryRelease(options) {
 		);
 	}
 
-	const notesUrl =
-		options.notesUrl ??
-		process.env.FOUNDRY_PUBLISH_NOTES_URL ??
+	const notesUrl = firstNonEmptyString(
+		options.notesUrl,
+		process.env.FOUNDRY_PUBLISH_NOTES_URL,
 		buildDefaultNotesUrl(
 			repository,
 			tag,
 			moduleFolderName,
 			packageMetadata.version
-		);
+		)
+	);
 
 	const payload = buildFoundryPayload({
 		moduleManifest,
