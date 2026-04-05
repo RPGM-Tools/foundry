@@ -23,6 +23,7 @@
 		"fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#main",
 		"naive-ui": "^2.44.1",
 		"oxlint": "^0.16.7",
+		"pnpm": "^10.18.3",
 		"typescript-eslint": "^8.58.0",
 		"typescript-vue-plugin": "^1.8.27",
 		"unplugin-auto-import": "19.1.2",
