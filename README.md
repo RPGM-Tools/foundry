@@ -99,3 +99,11 @@ To update the module after changes, run `pnpm update @rpgm/tools`
 `pnpm build`
 
 - This will build all modules at once
+
+### Releasing to GitHub and Foundry
+
+- Pushing a module tag such as `forge-v2.2.0` still creates the GitHub release draft and uploads the versioned manifest and zip assets.
+- Publishing that GitHub release now triggers `.github/workflows/publish-foundry-package.yaml`, which submits the matching version to Foundry through the official Package Release API.
+- The Foundry publish workflow expects a GitHub Actions secret named `FOUNDRY_PACKAGE_RELEASE_TOKEN`. A repo-local `.env` can still supply the same variable for local dry runs with `scripts/publish-foundry-package.mjs`.
+- Manual dry runs are also available through the `Publish Foundry Package` workflow dispatch path when you want to validate the payload before publishing the GitHub release.
+- The Foundry automation uses the version-specific GitHub release asset URL for the manifest and the published GitHub release page as the release notes URL.

@@ -1,0 +1,86 @@
+name: Publish Foundry Package
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish to Foundry, for example forge-v2.2.0
+        required: true
+        type: string
+      module_id:
+        description: Optional short module id, for example forge. Leave blank to derive it from the tag.
+        required: false
+        type: string
+      dry_run:
+        description: Validate the Foundry payload without creating a new package version.
+        required: false
+        type: boolean
+        default: true
+      notes_url:
+        description: Optional override for the Foundry release notes URL.
+        required: false
+        type: string
+
+jobs:
+  publish:
+    name: Publish to Foundry
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Resolve publish inputs
+        id: publish_inputs
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_NOTES_URL: ${{ github.event.release.html_url }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_MODULE_ID: ${{ inputs.module_id }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_NOTES_URL: ${{ inputs.notes_url }}
+        run: |
+          if [ "$EVENT_NAME" = "release" ]; then
+            echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+            echo "notes_url=$RELEASE_NOTES_URL" >> "$GITHUB_OUTPUT"
+            echo "dry_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=$INPUT_TAG" >> "$GITHUB_OUTPUT"
+            echo "notes_url=$INPUT_NOTES_URL" >> "$GITHUB_OUTPUT"
+            echo "dry_run=$INPUT_DRY_RUN" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "module_id=$INPUT_MODULE_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Verify Foundry release token is configured
+        env:
+          FOUNDRY_PACKAGE_RELEASE_TOKEN: ${{ secrets.FOUNDRY_PACKAGE_RELEASE_TOKEN }}
+        run: |
+          if [ -z "$FOUNDRY_PACKAGE_RELEASE_TOKEN" ]; then
+            echo "Missing FOUNDRY_PACKAGE_RELEASE_TOKEN GitHub Actions secret."
+            exit 1
+          fi
+
+      - name: Checkout repository at release tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ steps.publish_inputs.outputs.tag }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Publish package release to Foundry
+        env:
+          FOUNDRY_PACKAGE_RELEASE_TOKEN: ${{ secrets.FOUNDRY_PACKAGE_RELEASE_TOKEN }}
+          FOUNDRY_PUBLISH_DRY_RUN: ${{ steps.publish_inputs.outputs.dry_run }}
+          FOUNDRY_PUBLISH_MODULE_ID: ${{ steps.publish_inputs.outputs.module_id }}
+          FOUNDRY_PUBLISH_NOTES_URL: ${{ steps.publish_inputs.outputs.notes_url }}
+          FOUNDRY_PUBLISH_TAG: ${{ steps.publish_inputs.outputs.tag }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node ./scripts/publish-foundry-package.mjs

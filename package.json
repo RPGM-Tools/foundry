@@ -7,6 +7,8 @@
 		"dev:v14": "node ./scripts/run-foundry-dev.mjs --target v14-dev --module rpgm-forge",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
+		"publish:foundry": "node ./scripts/publish-foundry-package.mjs",
+		"publish:foundry:dry-run": "node ./scripts/publish-foundry-package.mjs --dry-run",
 		"test:v13": "pnpm dev:v13",
 		"test:v14": "pnpm dev:v14"
 	},
