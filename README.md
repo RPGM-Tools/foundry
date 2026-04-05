@@ -107,3 +107,11 @@ To update the module after changes, run `pnpm update @rpgm/tools`
 - The Foundry publish workflow expects a GitHub Actions secret named `FOUNDRY_PACKAGE_RELEASE_TOKEN`. A repo-local `.env` can still supply the same variable for local dry runs with `scripts/publish-foundry-package.mjs`.
 - Manual dry runs are also available through the `Publish Foundry Package` workflow dispatch path when you want to validate the payload before publishing the GitHub release.
 - The Foundry automation uses the version-specific GitHub release asset URL for the manifest and the published GitHub release page as the release notes URL.
+
+### Foundry marketplace presentation body
+
+- Foundry documents an official API for publishing package releases, but not a documented API for editing the marketplace presentation body.
+- `pnpm build:foundry-marketplace` regenerates `modules/rpgm-forge/assets/foundry-marketplace/body.generated.md` from the hand-edited template at `modules/rpgm-forge/assets/foundry-marketplace/body.template.md` and the release notes in `modules/rpgm-forge/assets/changelog/`.
+- `pnpm publish:foundry:marketplace` uses Playwright to log into the Creator Portal, convert `body.generated.md` to HTML, update the `Description` field, save the package page, and verify the public listing.
+- `pnpm publish:foundry:marketplace:dry-run` validates the login and editor wiring without saving.
+- The full runbook lives in `docs/releasing-rpgm-forge.md`.

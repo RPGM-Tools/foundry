@@ -3,6 +3,8 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+import { loadDotEnvFilesUpTree } from './lib/load-dotenv.mjs';
+
 const foundryReleaseEndpoint = 'https://foundryvtt.com/_api/packages/release_version/';
 const defaultRepository = 'RPGM-Tools/foundry';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -60,17 +62,6 @@ function parseBoolean(value, fallback = false) {
 	return ['1', 'true', 'yes', 'on'].includes(String(value).trim().toLowerCase());
 }
 
-function stripWrappingQuotes(value) {
-	if (!value) return value;
-	if (
-		(value.startsWith('"') && value.endsWith('"')) ||
-		(value.startsWith("'") && value.endsWith("'"))
-	) {
-		return value.slice(1, -1);
-	}
-	return value;
-}
-
 function firstNonEmptyString(...values) {
 	for (const value of values) {
 		if (typeof value !== 'string') continue;
@@ -81,29 +72,6 @@ function firstNonEmptyString(...values) {
 	}
 
 	return undefined;
-}
-
-async function loadDotEnvIfPresent() {
-	const envPath = path.join(repoRoot, '.env');
-
-	try {
-		const envFile = await readFile(envPath, 'utf8');
-		for (const rawLine of envFile.split(/\r?\n/u)) {
-			const line = rawLine.trim();
-			if (!line || line.startsWith('#')) continue;
-
-			const separatorIndex = line.indexOf('=');
-			if (separatorIndex <= 0) continue;
-
-			const key = line.slice(0, separatorIndex).trim();
-			const value = stripWrappingQuotes(line.slice(separatorIndex + 1).trim());
-			if (!(key in process.env)) {
-				process.env[key] = value;
-			}
-		}
-	} catch {
-		// A local .env is optional. CI should use secrets, and local shells can export variables directly.
-	}
 }
 
 function deriveReleaseInfo(tag) {
@@ -177,7 +145,7 @@ function buildFoundryPayload({
 }
 
 async function publishFoundryRelease(options) {
-	await loadDotEnvIfPresent();
+	await loadDotEnvFilesUpTree(repoRoot);
 
 	const tag = firstNonEmptyString(
 		options.tag,
