@@ -13,7 +13,7 @@ import C4 from '$$/assets/changelog/v2.1.1.md?url';
 import C5 from '$$/assets/changelog/v2.1.2.md?url';
 import C6 from '$$/assets/changelog/v2.1.3.md?url';
 import C7 from '$$/assets/changelog/v2.1.4.md?url';
-import C8 from '$$/assets/changelog/v2.1.5.md?url';
+import C8 from '$$/assets/changelog/v2.2.0.md?url';
 
 const c8text = useMarkdown(C8);
 const c7text = useMarkdown(C7);
@@ -33,7 +33,7 @@ const resize = useResize(250);
 		display-directive="show"
 		@update:expanded-names="resize"
 	>
-		<NCollapseItem name="1" title="v2.1.5 - 2026-04-04">
+		<NCollapseItem name="1" title="v2.2.0 - 2026-04-04">
 			<p v-html="c8text" />
 		</NCollapseItem>
 		<NCollapseItem name="2" title="v2.1.4 - 2025-11-22">

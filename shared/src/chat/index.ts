@@ -58,6 +58,7 @@ export class ChatCommands {
 	private chatlog?: HTMLElement;
 
 	constructor() {
+		this.patchChatEditorTracking();
 		// renderChatMessage is deprecated in v13+
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		Hooks.on(
@@ -77,6 +78,41 @@ export class ChatCommands {
 			rpgm.chat.createChatPanel();
 		});
 		this.patchChatContextMenu();
+	}
+
+	private patchChatEditorTracking() {
+		const textEditorImplementation =
+			foundry.applications.ux.TextEditor.implementation as unknown as {
+				create?: (
+					options?: Record<string, unknown>,
+					...args: unknown[]
+				) => Promise<unknown>;
+				__rpgmChatEditorTrackingPatched?: boolean;
+			};
+
+		if (textEditorImplementation.__rpgmChatEditorTrackingPatched) return;
+		const originalCreate = textEditorImplementation.create?.bind(
+			textEditorImplementation
+		);
+		if (!originalCreate) return;
+
+		textEditorImplementation.create = async (
+			options?: Record<string, unknown>,
+			...args: unknown[]
+		) => {
+			const editor = await originalCreate(options, ...args);
+			const target = options?.target;
+			const chatInput =
+				target instanceof HTMLElement
+					? target.closest('#chat-message')
+					: null;
+			if (chatInput instanceof HTMLElement) {
+				Object.assign(chatInput, { __rpgmChatEditor: editor });
+			}
+			return editor;
+		};
+
+		textEditorImplementation.__rpgmChatEditorTrackingPatched = true;
 	}
 
 	private patchChatContextMenu() {

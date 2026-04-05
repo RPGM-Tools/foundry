@@ -10,12 +10,23 @@ const CHAT_MESSAGE = '#chat-message';
 type ChatInputElement = (HTMLTextAreaElement | HTMLElement) & {
 	value: string;
 	focus: () => void;
+	__rpgmChatEditor?: {
+		view?: {
+			state: {
+				doc: {
+					content: unknown;
+				};
+			};
+		};
+	};
 };
 
 const messageHook = ref(-1);
+const chatInputHook = ref(-1);
 const renderChatInputHook = ref(-1);
 const chatInput = ref<ChatInputElement | null>(null);
 const chatValue = ref('');
+const typedChatValue = ref('');
 const parseResult = ref<ParseResults>();
 const completionIndex = ref(-1);
 const completionCursor = ref(-1);
@@ -55,6 +66,7 @@ const hasSuggestions = computed(
 
 const onKeyDownEvent: EventListener = event => {
 	if (!(event instanceof KeyboardEvent)) return;
+	if (event.defaultPrevented) return;
 	onKeyDown(event);
 };
 
@@ -62,13 +74,102 @@ function normalizeChatValue(value: string) {
 	if (!value.includes('<')) return value;
 
 	const doc = new DOMParser().parseFromString(value, 'text/html');
+	doc.querySelectorAll('p').forEach((paragraph, index, paragraphs) => {
+		if (index === paragraphs.length - 1) return;
+		paragraph.append(doc.createTextNode('\n'));
+	});
 	doc.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
-	return doc.body.textContent ?? '';
+	const normalizedValue = doc.body.textContent ?? '';
+	if (!normalizedValue.trim()) return '';
+	return normalizedValue.replace(/\n+$/u, '');
+}
+
+function getChatEditorElement() {
+	if (!chatInput.value || chatInput.value instanceof HTMLTextAreaElement) {
+		return null;
+	}
+
+	const editor = chatInput.value.querySelector(
+		':scope > .editor-content .ProseMirror, :scope > .editor-content [contenteditable="true"]'
+	);
+	return editor instanceof HTMLElement ? editor : null;
+}
+
+function getChatEditorView() {
+	const view = chatInput.value?.__rpgmChatEditor?.view;
+	return view?.state ? view : null;
+}
+
+function getChatInputPlugin() {
+	const view = getChatEditorView();
+	if (!view?.state) return null;
+	return (
+		foundry.prosemirror as unknown as {
+			plugins: {
+				chat: {
+					ChatInputPlugin: {
+						key: {
+							get: (state: object) => {
+								spec?: {
+									instance?: {
+										setMessage?: (
+											view: { state: object },
+											message: string,
+											meta?: { noHistory: true }
+										) => void;
+										sendMessage?: (view: { state: object }) => void | Promise<void>;
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		}
+	).plugins.chat.ChatInputPlugin.key.get(
+		view.state
+	)?.spec?.instance;
 }
 
 function getChatInputValue() {
 	if (!chatInput.value) return '';
+	const view = getChatEditorView();
+	if (view?.state) {
+		const prosemirror = globalThis as typeof globalThis & {
+			ProseMirror?: {
+				dom: {
+					serializeString: (content: unknown) => string;
+				};
+			};
+		};
+		const content = view.state.doc.content;
+		return normalizeChatValue(
+			prosemirror.ProseMirror?.dom.serializeString(content) ?? ''
+		);
+	}
+	const editor = getChatEditorElement();
+	if (editor) {
+		return normalizeChatValue(editor.innerHTML ?? '');
+	}
 	return normalizeChatValue(chatInput.value.value ?? '');
+}
+
+function createChatMarkup(value: string) {
+	const container = document.createElement('div');
+	const lines = value.split('\n');
+	const normalizedLines = lines.length ? lines : [''];
+
+	for (const line of normalizedLines) {
+		const paragraph = document.createElement('p');
+		if (line) {
+			paragraph.textContent = line;
+		} else {
+			paragraph.append(document.createElement('br'));
+		}
+		container.append(paragraph);
+	}
+
+	return container.innerHTML;
 }
 
 function addChatListeners(input: ChatInputElement | null) {
@@ -89,53 +190,125 @@ function bindChatInput(input = document.querySelector(CHAT_MESSAGE)) {
 	addChatListeners(input as ChatInputElement | null);
 }
 
-function claimKeyEvent(event: KeyboardEvent) {
+function claimKeyEvent(event: KeyboardEvent, recordPending?: { recordPending: boolean }) {
 	event.preventDefault();
 	event.stopPropagation();
 	event.stopImmediatePropagation();
+	if (recordPending) recordPending.recordPending = false;
 }
 
-function setChatInputValue(value: string, focus: boolean = true) {
+function resetCompletionState() {
+	completionIndex.value = -1;
+	completionCursor.value = typedChatValue.value.length;
+}
+
+function updateParse(value: string) {
+	if (!value.trimStart().startsWith('*')) {
+		parseResult.value = undefined;
+		return;
+	}
+	parseResult.value = rpgm.chat.parse(value.trimStart().slice(1));
+}
+
+function setChatInputValue(
+	value: string,
+	options: { focus?: boolean; notify?: boolean; suppressHistory?: boolean } = {}
+) {
 	if (!chatInput.value) return;
+	const view = getChatEditorView();
+	const chatInputPlugin = getChatInputPlugin();
+	if (view && chatInputPlugin?.setMessage) {
+		chatInputPlugin.setMessage(
+			view,
+			createChatMarkup(value),
+			options.suppressHistory ? { noHistory: true } : undefined
+		);
+		if (options.focus ?? true) chatInput.value.focus();
+		if (options.notify) onInput();
+		return;
+	}
+	const editor = getChatEditorElement();
+	if (editor) {
+		editor.innerHTML = createChatMarkup(value);
+		if (options.focus ?? true) chatInput.value.focus();
+		if (options.notify) {
+			onInput();
+		}
+		return;
+	}
 	chatInput.value.value = value;
-	if (focus) chatInput.value.focus();
-	chatValue.value = value;
-	completionCursor.value = value.length;
-	onInput();
+	if (options.focus ?? true) chatInput.value.focus();
+	if (options.notify) {
+		chatInput.value.dispatchEvent(new Event('input', { bubbles: true }));
+	}
 }
 
-function applySuggestion(
+function syncTypedValue(value: string) {
+	chatValue.value = value;
+	typedChatValue.value = value;
+	completionCursor.value = value.length;
+	updateParse(value);
+}
+
+function clearCommandInput() {
+	setChatInputValue('', {
+		focus: false,
+		notify: true,
+		suppressHistory: true
+	});
+	syncTypedValue('');
+	resetCompletionState();
+}
+
+function getCommandBounds(value: string) {
+	const trimmedValue = value.trimStart();
+	if (!trimmedValue.startsWith('*')) return null;
+
+	const leadingWhitespaceLength = value.length - trimmedValue.length;
+	const commandStart = leadingWhitespaceLength + 1;
+	return {
+		commandStart,
+		commandText: trimmedValue.slice(1)
+	};
+}
+
+function getExecutableCommand(value: string) {
+	const commandBounds = getCommandBounds(value);
+	if (!commandBounds) return null;
+
+	return commandBounds.commandText.trimEnd();
+}
+
+function suggestionValue(
 	completion: (typeof suggestions.value.suggestions)['0'] | undefined,
 	force: boolean
 ) {
-	if (!completion) {
-		setChatInputValue(chatValue.value);
-		return;
-	}
+	if (!completion) return typedChatValue.value;
+
+	const commandBounds = getCommandBounds(typedChatValue.value);
+	if (!commandBounds) return typedChatValue.value;
+
+	const replacementStart =
+		commandBounds.commandStart + completion.range.start;
+	const replacementEnd =
+		commandBounds.commandStart + completion.range.end;
 
 	const nextValue = [
-		chatValue.value.slice(0, completion.range.start),
+		typedChatValue.value.slice(0, replacementStart),
 		completion.text,
-		chatValue.value.slice(completion.range.end)
+		typedChatValue.value.slice(replacementEnd)
 	].join('');
 
-	setChatInputValue(
-		force && !nextValue.endsWith(' ') ? `${nextValue} ` : nextValue
-	);
-	completionIndex.value = suggestions.value.suggestions.findIndex(
-		suggestion => suggestion.text === completion.text
-	);
+	return force && !nextValue.endsWith(' ') ? `${nextValue} ` : nextValue;
 }
 
 function executeCurrentCommand() {
-	const command = chatValue.value.trimStart();
-	if (!command.startsWith('*')) return false;
+	const command = getExecutableCommand(typedChatValue.value);
+	if (!command) return false;
 
 	try {
-		rpgm.chat.execute(command.slice(1));
-		completionIndex.value = -1;
-		parseResult.value = undefined;
-		setChatInputValue('', false);
+		rpgm.chat.execute(command);
+		clearCommandInput();
 		return true;
 	} catch (error) {
 		rpgm.logger.visible.error(
@@ -146,17 +319,34 @@ function executeCurrentCommand() {
 	}
 }
 
+function sendCurrentMessage() {
+	const view = getChatEditorView();
+	const chatInputPlugin = getChatInputPlugin();
+	if (view && chatInputPlugin?.sendMessage) {
+		void chatInputPlugin.sendMessage(view);
+		return true;
+	}
+
+	return executeCurrentCommand();
+}
+
 function previewSuggestion(by: number) {
 	if (!hasSuggestions.value) return;
 	if (completionIndex.value === -1) {
-		completionCursor.value = chatValue.value.length;
+		completionCursor.value = typedChatValue.value.length;
 	}
 	moveSuggestionCursor(by);
-	applySuggestion(suggestions.value.suggestions[completionIndex.value], false);
+	setChatInputValue(
+		suggestionValue(suggestions.value.suggestions[completionIndex.value], false),
+		{ suppressHistory: true }
+	);
 }
 
 function chooseSuggestion(completion?: (typeof suggestions.value.suggestions)['0']) {
-	applySuggestion(completion, true);
+	const value = suggestionValue(completion, true);
+	setChatInputValue(value, { notify: true });
+	syncTypedValue(value);
+	resetCompletionState();
 }
 
 function suggestionLabel(completion: (typeof suggestions.value.suggestions)['0']) {
@@ -167,55 +357,56 @@ function suggestionLabel(completion: (typeof suggestions.value.suggestions)['0']
  * For updating the input after pressing enter.
  * @param e - Keyboard event
  */
-function onKeyDown(e: KeyboardEvent) {
+function handleSuggestionKeydown(
+	e: KeyboardEvent,
+	recordPending?: { recordPending: boolean }
+) {
 	switch (e.key) {
 		case 'Enter': {
-			if (!chatValue.value.trimStart().startsWith('*')) break;
-			claimKeyEvent(e);
-			if (hasSuggestions.value) {
-				if (completionIndex.value === -1) previewSuggestion(1);
-				else chooseSuggestion(
+			if (!typedChatValue.value.trimStart().startsWith('*')) return false;
+			claimKeyEvent(e, recordPending);
+			if (hasSuggestions.value && completionIndex.value >= 0) {
+				chooseSuggestion(
 					suggestions.value.suggestions[completionIndex.value]
 				);
 			}
-			executeCurrentCommand();
-			break;
+			return sendCurrentMessage();
 		}
 		case 'ArrowDown': {
-			if (!hasSuggestions.value) break;
-			claimKeyEvent(e);
+			if (!hasSuggestions.value) return false;
+			claimKeyEvent(e, recordPending);
 			previewSuggestion(1);
-			break;
+			return true;
 		}
 		case 'ArrowUp': {
-			if (!hasSuggestions.value) break;
-			claimKeyEvent(e);
+			if (!hasSuggestions.value) return false;
+			claimKeyEvent(e, recordPending);
 			previewSuggestion(-1);
-			break;
+			return true;
 		}
 		case 'Tab': {
-			if (!hasSuggestions.value) break;
-			claimKeyEvent(e);
+			if (!hasSuggestions.value) return false;
+			claimKeyEvent(e, recordPending);
 			previewSuggestion(e.shiftKey ? -1 : 1);
 			chooseSuggestion(suggestions.value.suggestions[completionIndex.value]);
-			break;
+			return true;
 		}
 		case 'Escape': {
-			if (!hasSuggestions.value && completionIndex.value === -1) break;
-			claimKeyEvent(e);
-			completionIndex.value = -1;
-			setChatInputValue(chatValue.value);
-			break;
-		}
-		case 'Shift': {
-			break;
+			if (!hasSuggestions.value && completionIndex.value === -1) return false;
+			claimKeyEvent(e, recordPending);
+			resetCompletionState();
+			setChatInputValue(typedChatValue.value, { suppressHistory: true });
+			return true;
 		}
 		default: {
-			if (e.key.length > 1) {
-				onInput();
-			}
+			return false;
 		}
 	}
+}
+
+function onKeyDown(e: KeyboardEvent) {
+	if (handleSuggestionKeydown(e)) return;
+	if (e.key.length > 1) onInput();
 }
 
 /**
@@ -251,15 +442,10 @@ function handleMessage(
 	}
 ): boolean | void {
 	const normalizedMessage = normalizeChatValue(message);
-	if (normalizedMessage.trimStart().startsWith('*')) {
-		chatValue.value = '';
-		parseResult.value = undefined;
-		setTimeout(() => {
-			onInput();
-		}, 10);
+	const executableCommand = getExecutableCommand(normalizedMessage);
+	if (executableCommand) {
 		try {
-			rpgm.chat.execute(normalizedMessage.trimStart().slice(1));
-			completionIndex.value = -1;
+			rpgm.chat.execute(executableCommand);
 		} catch (e) {
 			rpgm.logger.visible.error(
 				'An error occured when executing the command!'
@@ -289,26 +475,20 @@ function handleMessage(
 
 /** When a character is typed, parse the input. */
 function onInput() {
-	completionIndex.value = -1;
-	chatValue.value = getChatInputValue();
-	completionCursor.value = chatValue.value.length;
-	if (!chatValue.value.trimStart().startsWith('*'))
-		parseResult.value = undefined;
-	else
-		parseResult.value = rpgm.chat.parse(
-			chatValue.value
-				.trimStart()
-				.slice(
-					1,
-					completionCursor.value >= 0
-						? completionCursor.value
-						: undefined
-				)
-		);
+	const value = getChatInputValue();
+	syncTypedValue(value);
+	resetCompletionState();
 }
 
 onMounted(() => {
 	bindChatInput();
+	chatInputHook.value = Hooks.on(
+		'chatInput' as never,
+		((event: KeyboardEvent, options: { recordPending: boolean }) => {
+			if (!handleSuggestionKeydown(event, options)) return;
+			return false;
+		}) as never
+	);
 	renderChatInputHook.value = Hooks.on(
 		'renderChatInput' as never,
 		((_app: ChatLog, elements: Record<string, HTMLElement>) => {
@@ -320,6 +500,7 @@ onMounted(() => {
 
 onUnmounted(() => {
 	Hooks.off('chatMessage', messageHook.value);
+	Hooks.off('chatInput' as never, chatInputHook.value);
 	Hooks.off('renderChatInput' as never, renderChatInputHook.value);
 	chatInput.value?.removeEventListener('input', onInput, true);
 	chatInput.value?.removeEventListener('keydown', onKeyDownEvent, true);
@@ -328,7 +509,12 @@ onUnmounted(() => {
 const commandStyles = computed<StyleValue[]>(() => {
 	return suggestions.value.suggestions.map<StyleValue>((_, i) => {
 		return {
-			...(i == completionIndex.value ? { color: '#00ffae' } : {})
+			...(i == completionIndex.value
+				? {
+					color: '#00ffae',
+					backgroundColor: 'rgb(255 255 255 / 0.08)'
+				}
+				: {})
 		};
 	});
 });

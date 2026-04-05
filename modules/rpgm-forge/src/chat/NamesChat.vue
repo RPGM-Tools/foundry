@@ -135,12 +135,6 @@ onMounted(() => {
 					@click="assign(name)"
 				>
 					{{ name }}
-					<small
-						v-if="isOriginalName(name)"
-						class="rpgm-forge-name-original-cue"
-					>
-						Original
-					</small>
 				</li>
 			</TransitionGroup>
 		</SkeletonParagraph>
@@ -172,18 +166,13 @@ onMounted(() => {
 }
 
 .rpgm-forge-name-original {
-	color: var(--color-light-2);
-}
-
-.rpgm-forge-name-original-cue {
-	padding: 0 0.4rem;
-	border: 1px solid color-mix(in srgb, var(--color-light-2) 50%, transparent);
-	border-radius: 999px;
-	font-size: 0.7rem;
-	font-weight: 700;
-	letter-spacing: 0.03em;
-	text-transform: uppercase;
-	opacity: 0.85;
+	color: #f2e8ff;
+	font-weight: 900;
+	text-shadow:
+		0 0 4px rgb(147 112 219 / 0.95),
+		0 0 10px rgb(147 112 219 / 0.8),
+		0 0 18px rgb(147 112 219 / 0.55),
+		0 0 28px rgb(102 51 204 / 0.35);
 }
 
 .rpgm-forge-name:hover {

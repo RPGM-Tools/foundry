@@ -5,6 +5,9 @@ on:
     tags:
       - '*-v**'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: Release-o-matic
@@ -23,24 +26,35 @@ jobs:
           MODULE_ID=$(echo "$TAG_NAME" | cut -d'-' -f1)  # Extract 'forge', 'vault', or 'tome'
           TAG_VERSION=$(echo "$TAG_NAME" | cut -d'v' -f2)  # Extract '1.2.3'
           MODULE_NAME=$(jq -r '.title' < ./modules/rpgm-$MODULE_ID/public/module.json)
-          
-          echo "MODULE_ID=$MODULE_ID" >> $GITHUB_ENV
-          echo "MODULE_NAME=$MODULE_NAME" >> $GITHUB_ENV
-          echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
 
           if ! test -d ./modules/rpgm-$MODULE_ID; then
             echo "Module does not exist!"
             exit 1
           fi
 
+          echo "module_id=$MODULE_ID" >> $GITHUB_OUTPUT
+          echo "module_name=$MODULE_NAME" >> $GITHUB_OUTPUT
+          echo "tag_version=$TAG_VERSION" >> $GITHUB_OUTPUT
+
       - name: Get Version from package.json
+        id: version_info
         run: | 
-          VERSION=$(jq -r '.version' < ./modules/rpgm-$MODULE_ID/package.json)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          if ! test "$VERSION" == "$TAG_VERSION"; then
-            echo "Version name is incorrect! Should be ${{env.VERSION}}, is ${{env.TAG_VERSION}}";
+          VERSION=$(jq -r '.version' < ./modules/rpgm-${{ steps.module_info.outputs.module_id }}/package.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          if ! test "$VERSION" == "${{ steps.module_info.outputs.tag_version }}"; then
+            echo "Version name is incorrect! Should be $VERSION, is ${{ steps.module_info.outputs.tag_version }}"
             exit 1
           fi
+
+      - name: Verify release notes exist
+        id: release_notes
+        run: |
+          RELEASE_NOTES_PATH="./modules/rpgm-${{ steps.module_info.outputs.module_id }}/assets/changelog/v${{ steps.module_info.outputs.tag_version }}.md"
+          if ! test -f "$RELEASE_NOTES_PATH"; then
+            echo "Missing release notes file at $RELEASE_NOTES_PATH"
+            exit 1
+          fi
+          echo "path=$RELEASE_NOTES_PATH" >> $GITHUB_OUTPUT
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
@@ -69,10 +83,11 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "${{ env.MODULE_ID }}-v${{ env.TAG_VERSION }}"
-          name: "${{ env.MODULE_NAME }} v${{ env.TAG_VERSION }}"
-          body: "Automated release for rpgm-${{ env.MODULE_ID }}-v${{ env.TAG_VERSION }}"
+          tag_name: "${{ steps.module_info.outputs.module_id }}-v${{ steps.module_info.outputs.tag_version }}"
+          name: "${{ steps.module_info.outputs.module_name }} v${{ steps.module_info.outputs.tag_version }}"
+          body_path: "${{ steps.release_notes.outputs.path }}"
           draft: true
+          fail_on_unmatched_files: true
           files: |
             rpgm*.zip
             rpgm*.json
