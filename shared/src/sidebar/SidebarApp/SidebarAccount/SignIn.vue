@@ -120,7 +120,10 @@ const forgotError = ref('');
 const forgotSuccess = ref('');
 
 const resetEndpoint = '/api/auth/request-password-reset';
-const resetRedirectUrl = new URL('/reset-password', __API_URL__).toString();
+const resetRedirectUrl = createFoundryAccountCenterUrl({
+	baseUrl: __API_URL__,
+	focus: 'password'
+});
 
 watch(forgotOpen, open => {
 	// Prefill with known email and clear state whenever the panel toggles.
