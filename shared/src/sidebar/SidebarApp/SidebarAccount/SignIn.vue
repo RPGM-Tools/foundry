@@ -9,6 +9,7 @@ import type { FormRules } from 'naive-ui';
 import { useResize } from '#/sidebar';
 import { useLoading } from '#/util/useLoading';
 import { vFocus } from '#/util/vFocus';
+import { createFoundryAccountCenterUrl } from '#/auth/accountCenter';
 
 const tabValue = ref<'signin' | 'signup'>('signin');
 const onResize = useResize();
@@ -73,13 +74,18 @@ function submit() {
 }
 
 function signUp() {
+	const accountCenterSessionUrl = createFoundryAccountCenterUrl({
+		baseUrl: __API_URL__,
+		focus: 'session'
+	});
+
 	rpgm.auth.signUp.email(
 		{
 			name: formValue.value.name,
 			email: formValue.value.email,
 			password: formValue.value.password,
 			username: formValue.value.username,
-			callbackURL: 'https://rpgm.tools'
+			callbackURL: accountCenterSessionUrl
 		},
 		{
 			onSuccess() {

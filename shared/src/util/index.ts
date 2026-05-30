@@ -5,6 +5,11 @@ import { Converter } from 'showdown';
 import { shallowReactive } from 'vue';
 import { useRouter } from 'vue-router';
 
+import {
+	createFoundryAccountCenterUrl,
+	isAbsoluteUrl
+} from '#/auth/accountCenter';
+
 /** An object related to various information about a setting */
 type SettingsRef<T> = {
 	/** The name of the setting */
@@ -114,12 +119,25 @@ export function an(t: string) {
 	return t.match(/^[aeiouAEIOU]/) ? 'an' : 'a';
 }
 
-export function useSignedInRequired(fallbackRoute: string = '/account?back=true') {
+const DEFAULT_SIGNED_IN_REQUIRED_FALLBACK_ROUTE =
+	createFoundryAccountCenterUrl({
+		baseUrl: __API_URL__,
+		focus: 'session'
+	});
+
+export function useSignedInRequired(
+	fallbackRoute: string = DEFAULT_SIGNED_IN_REQUIRED_FALLBACK_ROUTE
+) {
 	const session = rpgm.auth.useSession();
 	const router = useRouter();
 
 	watch(session, (newSession) => {
 		if (newSession.data === null) {
+			if (isAbsoluteUrl(fallbackRoute)) {
+				globalThis.location.assign(fallbackRoute);
+				return;
+			}
+
 			router.push(fallbackRoute);
 		}
 	});

@@ -11,6 +11,7 @@ import CustomerPortalButton from '#/components/CustomerPortalButton.vue';
 import SubscriptionWarningAlert from '#/components/SubscriptionWarningAlert.vue';
 import { useAccounts, useFocusCheck, useSubscription } from '#/util';
 import { LoadingBoundry } from '#/util/useLoading';
+import { createFoundryAccountCenterUrl } from '#/auth/accountCenter';
 
 import LegacyDiceIcon from './LegacyDiceIcon.vue';
 
@@ -79,10 +80,15 @@ const discordLinkedCheck = useFocusCheck(
 );
 
 async function linkDiscord() {
+	const accountCenterConnectionsUrl = createFoundryAccountCenterUrl({
+		baseUrl: __API_URL__,
+		focus: 'connections'
+	});
+
 	return rpgm.auth
 		.linkSocial({
 			provider: 'discord',
-			callbackURL: 'https://rpgm.tools/linked'
+			callbackURL: accountCenterConnectionsUrl
 		})
 		.then(r => {
 			if (r.data) {
