@@ -153,7 +153,8 @@ async function requestPasswordReset() {
 	forgotSuccess.value = '';
 
 	if (!email) {
-		forgotError.value = 'Enter the email address associated with your account.';
+		forgotError.value =
+			'Enter the email address associated with your account.';
 		return;
 	}
 
@@ -194,7 +195,9 @@ async function requestPasswordReset() {
 		}, 1600);
 	} catch (error) {
 		const message =
-			error instanceof Error ? error.message : 'Unable to send reset email.';
+			error instanceof Error
+				? error.message
+				: 'Unable to send reset email.';
 		forgotError.value = message;
 		rpgm.logger.visible.warn(message);
 	} finally {
@@ -222,7 +225,11 @@ async function requestPasswordReset() {
 			@submit.prevent="submit"
 		>
 			<NCollapseTransition :show="tabValue === 'signup'">
-				<NFormItemRow label="Name" :show-require-mark="false" path="name">
+				<NFormItemRow
+					label="Name"
+					:show-require-mark="false"
+					path="name"
+				>
 					<NInput v-model:value="formValue.name" />
 				</NFormItemRow>
 				<NFormItemRow label="Email" path="email">
@@ -261,8 +268,8 @@ async function requestPasswordReset() {
 				<div class="forgot-panel">
 					<h3>Reset password</h3>
 					<p>
-						Enter the email tied to your RPGM Tools account. If it exists, we
-						will email you a reset link.
+						Enter the email tied to your RPGM Tools account. If it
+						exists, we will email you a reset link.
 					</p>
 					<NForm @submit.prevent>
 						<NFormItemRow label="Email address">

@@ -129,7 +129,9 @@ async function linkDiscord() {
 					color="#5865F2"
 					round
 					:disabled="!!discordAccount"
-					:loading="!discordAccount && (loading.value || accountsLoading)"
+					:loading="
+						!discordAccount && (loading.value || accountsLoading)
+					"
 					@click="start(linkDiscord())"
 				>
 					<template #icon>

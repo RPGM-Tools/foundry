@@ -54,21 +54,8 @@ function resolvePackageManagerCommand() {
 		return { command: 'pnpm', shell: false };
 	}
 
-	try {
-		const output = execFileSync('where.exe', ['pnpm.cmd'], {
-			encoding: 'utf8'
-		});
-		const command = output
-			.split(/\r?\n/u)
-			.map(line => line.trim())
-			.find(Boolean);
-		if (command) {
-			return { command, shell: false };
-		}
-	} catch {
-		// Fall back to the shell-backed lookup below when PATH inspection fails.
-	}
-
+	// On Windows, invoking pnpm.cmd directly through spawn can throw EINVAL.
+	// Running through the shell is the reliable path for this helper.
 	return { command: 'pnpm', shell: true };
 }
 
