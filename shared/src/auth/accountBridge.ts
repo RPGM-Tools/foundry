@@ -84,19 +84,14 @@ function countVisibleProfileSections(sections: unknown): number {
 function createSignedOutSnapshot(): FoundryAccountBridgeSnapshot {
 	return {
 		status: 'signed-out',
-		sourceSummary:
-			'No signed-in Steward-backed account snapshot is connected to this old Forge lane yet.',
+		sourceSummary: 'No RPGM account is connected in this Foundry session yet.',
 		displayName:
-			'Connect or create your RPGM Tools account on the public web, then sync that signed-in session back into Foundry.',
-		profileSummary:
-			'Profile editing stays on the public RPGM Tools settings origin for this bridge lane.',
-		visibilitySummary:
-			'No public profile visibility summary is available in this local Foundry session yet.',
-		membershipSummary:
-			'No active membership summary is visible in this old Forge lane yet.',
-		usageReadinessSummary:
-			'No managed Forge usage summary is visible in this old Forge lane yet.',
-		economySummary: 'No Ore snapshot is visible in this old Forge lane yet.'
+			'Open your RPGM account to sign in or create one.',
+		profileSummary: 'Profile changes stay on rpgm.tools.',
+		visibilitySummary: 'Profile visibility will appear after the account loads.',
+		membershipSummary: 'No membership is loaded yet.',
+		usageReadinessSummary: 'No managed usage is loaded yet.',
+		economySummary: 'No Ore balance is loaded yet.'
 	};
 }
 
@@ -106,20 +101,18 @@ function createUnavailableSnapshot(
 	return {
 		status: 'unavailable',
 		sourceSummary: details
-			? `Foundry could not refresh the Steward-backed account snapshot: ${details}`
-			: 'Foundry could not refresh the Steward-backed account snapshot just now.',
+			? `Could not refresh the current account summary: ${details}`
+			: 'Could not refresh the current account summary just now.',
 		displayName:
-			'Use the public RPGM Tools settings page when you need the full account and profile surface.',
-		profileSummary:
-			'Profile editing and account ceremony still live on the public RPGM Tools settings origin.',
+			'Open your RPGM account in the browser when you need to manage sign-in or providers.',
+		profileSummary: 'Profile changes stay on rpgm.tools.',
 		visibilitySummary:
-			'Current visibility posture is unavailable until the next successful Steward refresh.',
+			'Profile visibility is unavailable until the next successful refresh.',
 		membershipSummary:
-			'Current membership posture is unavailable until the next successful Steward refresh.',
+			'Membership is unavailable until the next successful refresh.',
 		usageReadinessSummary:
-			'Current Forge usage posture is unavailable until the next successful Steward refresh.',
-		economySummary:
-			'Current Ore posture is unavailable until the next successful Steward refresh.'
+			'Managed usage is unavailable until the next successful refresh.',
+		economySummary: 'Ore balance is unavailable until the next successful refresh.'
 	};
 }
 
@@ -278,8 +271,7 @@ function createAvailableSnapshot(
 
 	return {
 		status: 'available',
-		sourceSummary:
-			'Steward-backed account snapshot loaded for this legacy Forge bridge lane.',
+		sourceSummary: 'Connected to your RPGM account.',
 		displayName: displayName ?? 'No display name is visible yet.',
 		profileSummary: createProfileSummary(profile),
 		visibilitySummary: createVisibilitySummary(profile),
@@ -512,6 +504,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		consumeBridgeReturnFromUrl()
 	);
 	let lastSeenSnapshotToken = readStoredSnapshotToken();
+	let expectsRefreshOnReturn = false;
 
 	const refresh = async () => {
 		const consumedNotice = consumeBridgeReturnFromUrl();
@@ -529,56 +522,38 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		}
 	};
 
-	const refreshIfSnapshotTokenChanged = () => {
+	const refreshIfReturnDetected = () => {
 		const currentSnapshotToken = readStoredSnapshotToken();
+		const snapshotTokenChanged =
+			currentSnapshotToken !== lastSeenSnapshotToken;
 
-		if (currentSnapshotToken === lastSeenSnapshotToken) {
+		if (!expectsRefreshOnReturn && !snapshotTokenChanged) {
 			return;
 		}
+
+		expectsRefreshOnReturn = false;
 
 		void refresh();
 	};
 
-	const openConnectOrCreateAccount = () => {
-		openExternalUrl(
+	const openAccountCenter = (options: {
+		focus: 'session' | 'connections' | 'passkeys' | 'password' | 'forge';
+	}) => {
+		expectsRefreshOnReturn = true;
+		return openExternalUrl(
 			createFoundryAccountCenterUrl({
 				baseUrl: DEFAULT_PUBLIC_WEB_BASE_URL,
-				focus: 'session'
+				focus: options.focus
 			})
 		);
+	};
+
+	const openConnectOrCreateAccount = () => {
+		openAccountCenter({ focus: 'session' });
 	};
 
 	const openAccountSettings = () => {
-		openConnectOrCreateAccount();
-	};
-
-	const openManagePassword = () => {
-		openExternalUrl(
-			createFoundryAccountCenterUrl({
-				baseUrl: DEFAULT_PUBLIC_WEB_BASE_URL,
-				focus: 'password'
-			})
-		);
-	};
-
-	const openSyncSignedInAccount = () => {
-		const syncUrl = createFoundryAccountSessionSyncUrl();
-
-		if (!syncUrl) {
-			notice.value = {
-				kind: 'warning',
-				message:
-					'Foundry could not build the local Steward sync handoff URL just now.'
-			};
-			return;
-		}
-
-		openExternalUrl(syncUrl);
-		notice.value = {
-			kind: 'info',
-			message:
-				'Opened the signed-in Steward sync handoff in a new tab. Finish the web step there, then return to this Foundry tab.'
-		};
+		openAccountCenter({ focus: 'connections' });
 	};
 
 	const disconnectFoundrySession = () => {
@@ -596,10 +571,10 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		notice.value = null;
 	};
 
-	globalThis.addEventListener?.('focus', refreshIfSnapshotTokenChanged);
+	globalThis.addEventListener?.('focus', refreshIfReturnDetected);
 	globalThis.addEventListener?.('visibilitychange', () => {
 		if (globalThis.document?.visibilityState === 'visible') {
-			refreshIfSnapshotTokenChanged();
+			refreshIfReturnDetected();
 		}
 	});
 
@@ -617,8 +592,6 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		clearNotice,
 		openConnectOrCreateAccount,
 		openAccountSettings,
-		openManagePassword,
-		openSyncSignedInAccount,
 		disconnectFoundrySession
 	};
 });

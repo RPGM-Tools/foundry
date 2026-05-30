@@ -1,6 +1,6 @@
 <!--
 File: SidebarAccountSignedIn.vue
-Purpose: Render the Steward-backed account summary for the legacy old Forge bridge lane.
+Purpose: Render the Foundry membership summary from the shared RPGM account session.
 Last updated: 2026-05-30
 -->
 
@@ -8,23 +8,15 @@ Last updated: 2026-05-30
 import { useFoundryAccountBridge } from '#/auth/accountBridge';
 
 const accountBridge = useFoundryAccountBridge();
-
-const welcome = computed(
-	() => `Welcome back, ${accountBridge.snapshot.value.displayName}!`
-);
 </script>
 
 <template>
 	<div class="bridge-account">
 		<NFlex vertical>
-			<NH1>
-				{{ welcome }}
-				<span class="rpgm-badges">
-					<NTag size="small" type="warning" round>
-						Legacy bridge
-					</NTag>
-				</span>
-			</NH1>
+			<NH1>Membership</NH1>
+			<NP class="account-display-name">
+				{{ accountBridge.snapshot.value.displayName }}
+			</NP>
 			<NAlert
 				v-if="accountBridge.notice.value"
 				:type="
@@ -43,10 +35,6 @@ const welcome = computed(
 			</NAlert>
 			<div class="rpgm-info">
 				<label>
-					Display name
-					<span>{{ accountBridge.snapshot.value.displayName }}</span>
-				</label>
-				<label>
 					Membership
 					<span>{{
 						accountBridge.snapshot.value.membershipSummary
@@ -64,37 +52,22 @@ const welcome = computed(
 						accountBridge.snapshot.value.economySummary
 					}}</span>
 				</label>
-				<label>
-					Profile visibility
-					<span>{{
-						accountBridge.snapshot.value.visibilitySummary
-					}}</span>
-				</label>
-				<label>
-					Profile text
-					<span>{{
-						accountBridge.snapshot.value.profileSummary
-					}}</span>
-				</label>
 			</div>
 			<NButton
 				type="primary"
+				@click="accountBridge.openAccountSettings()"
+			>
+				Open account
+			</NButton>
+			<NButton
+				secondary
 				:loading="accountBridge.isLoading.value"
 				@click="accountBridge.refresh()"
 			>
-				Refresh summary
-			</NButton>
-			<NButton secondary @click="accountBridge.openSyncSignedInAccount()">
-				Sync signed-in account
-			</NButton>
-			<NButton quaternary @click="accountBridge.openAccountSettings()">
-				Open account settings
-			</NButton>
-			<NButton quaternary @click="accountBridge.openManagePassword()">
-				Manage password
+				Refresh
 			</NButton>
 			<NButton ghost @click="accountBridge.disconnectFoundrySession()">
-				Disconnect this Foundry session
+				Disconnect this session
 			</NButton>
 		</NFlex>
 	</div>
@@ -113,19 +86,15 @@ const welcome = computed(
 	margin-bottom: 8px;
 }
 
-h2 {
-	display: flex;
-	flex-wrap: wrap;
+.account-display-name {
+	margin: 0;
+	color: var(--n-text-color-2);
 }
 
 label {
 	display: flex;
 	justify-content: space-between;
 	gap: 16px;
-}
-
-.rpgm-badges {
-	margin-left: auto;
 }
 
 label span {

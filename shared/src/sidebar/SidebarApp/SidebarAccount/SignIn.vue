@@ -1,6 +1,6 @@
 <!--
 	SignIn.vue
-	Handles the old Forge bridge handoff into the Steward-backed public account center.
+	Handles the Foundry membership handoff into the shared RPGM account center.
 	Last updated: 2026-05-30
 -->
 <script setup lang="ts">
@@ -19,14 +19,10 @@ const bridgeStatusTone = computed(() => {
 
 <template>
 	<NFlex vertical class="bridge-panel">
-		<div class="bridge-heading-row">
-			<NH2>Old Forge Membership</NH2>
-			<NTag size="small" type="warning" round> Legacy bridge </NTag>
-		</div>
+		<NH2>Membership</NH2>
 		<NP>
-			This legacy Forge lane now starts account work on the public RPGM
-			Tools settings surface. Connect or create the account there, then
-			sync the signed-in Steward snapshot back into this Foundry tab.
+			Open your RPGM account in the browser. If you are already signed in
+			there, this session will connect automatically when you return.
 		</NP>
 		<NAlert
 			v-if="accountBridge.notice.value"
@@ -44,33 +40,19 @@ const bridgeStatusTone = computed(() => {
 		<NAlert :type="bridgeStatusTone" :show-icon="false">
 			{{ accountBridge.snapshot.value.sourceSummary }}
 		</NAlert>
-		<div class="bridge-summary">
-			<label>
-				Display name
-				<span>{{ accountBridge.snapshot.value.displayName }}</span>
-			</label>
-			<label>
-				Membership
-				<span>{{
-					accountBridge.snapshot.value.membershipSummary
-				}}</span>
-			</label>
-		</div>
 		<NButton
 			type="primary"
 			@click="accountBridge.openConnectOrCreateAccount()"
 		>
-			Connect or create account
+			Open account
 		</NButton>
 		<NButton
+			v-if="accountBridge.snapshot.value.status === 'unavailable'"
 			secondary
 			:disabled="accountBridge.isLoading.value"
-			@click="accountBridge.openSyncSignedInAccount()"
+			@click="accountBridge.refresh()"
 		>
-			Sync signed-in account
-		</NButton>
-		<NButton quaternary @click="accountBridge.openManagePassword()">
-			Manage password
+			Refresh
 		</NButton>
 	</NFlex>
 </template>
@@ -80,32 +62,7 @@ const bridgeStatusTone = computed(() => {
 	gap: 12px;
 }
 
-.bridge-heading-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
-}
-
-.bridge-heading-row h2 {
+.bridge-panel h2 {
 	margin: 0;
-}
-
-.bridge-summary {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-}
-
-.bridge-summary label {
-	display: flex;
-	justify-content: space-between;
-	gap: 16px;
-	align-items: flex-start;
-}
-
-.bridge-summary span {
-	max-width: 65%;
-	text-align: right;
 }
 </style>
