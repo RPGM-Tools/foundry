@@ -1,36 +1,33 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 
+import { useFoundryAccountBridge } from '#/auth/accountBridge';
 import IHaveMyOwnAI from '#/components/IHaveMyOwnAI.vue';
-import SignedIn from '#/util/SignedIn.vue';
 
 import SidebarAccountSignedIn from './SidebarAccountSignedIn.vue';
 import SignIn from './SignIn.vue';
 
-const session = rpgm.auth.useSession();
+const accountBridge = useFoundryAccountBridge();
 const router = useRouter();
 const goBack = useRoute().query.back as 'true' | undefined;
 
-watch(session, (n) => {
-	if (!n.data) return;
+watch(
+	() => accountBridge.snapshot.value.status,
+	status => {
+		if (status !== 'available') return;
 	if (goBack === 'true') {
 		router.back();
 	}
-});
+	}
+);
 </script>
 
 <template>
 	<NCard>
 		<NFlex vertical>
 			<div style="position: relative;">
-				<SignedIn>
-					<template #default>
-						<SidebarAccountSignedIn />
-					</template>
-					<template #not-signed-in>
-						<SignIn />
-					</template>
-				</SignedIn>
+				<SidebarAccountSignedIn v-if="accountBridge.isConnected.value" />
+				<SignIn v-else />
 			</div>
 			<IHaveMyOwnAI />
 		</NFlex>

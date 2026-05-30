@@ -1,373 +1,104 @@
 <!--
 	SignIn.vue
-	Handles RPGM account sign in/up and inline password reset panel from the Forge sidebar.
-	Last updated: 2025-10-05
+	Handles the old Forge bridge handoff into the Steward-backed public account center.
+	Last updated: 2026-05-30
 -->
 <script setup lang="ts">
-import type { FormRules } from 'naive-ui';
+import { useFoundryAccountBridge } from '#/auth/accountBridge';
 
-import { useResize } from '#/sidebar';
-import { useLoading } from '#/util/useLoading';
-import { vFocus } from '#/util/vFocus';
-import { createFoundryAccountCenterUrl } from '#/auth/accountCenter';
+const accountBridge = useFoundryAccountBridge();
 
-const tabValue = ref<'signin' | 'signup'>('signin');
-const onResize = useResize();
+const bridgeStatusTone = computed(() => {
+	if (accountBridge.snapshot.value.status === 'unavailable') {
+		return 'warning';
+	}
 
-// const accountForm = useTemplateRef('accountForm');
-
-const formValue = ref({
-	name: '',
-	email: '',
-	username: '',
-	password: ''
+	return 'info';
 });
-
-const signInRules: FormRules = {
-	username: {
-		required: true,
-		message: 'Please enter your username.',
-		trigger: 'blur'
-	},
-	password: {
-		required: true,
-		message: 'Please enter your password.',
-		trigger: 'blur'
-	}
-};
-
-const signUpRules: FormRules = {
-	name: {
-		required: true,
-		level: 'warning',
-		message: 'Please enter a name.',
-		trigger: 'blur'
-	},
-	email: {
-		required: true,
-		message: 'Please enter an email. GMAIL USERS: CHECK SPAM FOLDER',
-		trigger: 'blur'
-	},
-	username: {
-		required: true,
-		message: 'Please enter a username.',
-		trigger: 'blur'
-	},
-	password: {
-		required: true,
-		message: 'Please enter a password.',
-		trigger: 'blur'
-	}
-};
-
-watch(tabValue, () => {
-	onResize(true);
-	forgotOpen.value = false;
-});
-
-function submit() {
-	if (tabValue.value === 'signin') {
-		signIn();
-	} else {
-		signUp();
-	}
-}
-
-function signUp() {
-	const accountCenterSessionUrl = createFoundryAccountCenterUrl({
-		baseUrl: __API_URL__,
-		focus: 'session'
-	});
-
-	rpgm.auth.signUp.email(
-		{
-			name: formValue.value.name,
-			email: formValue.value.email,
-			password: formValue.value.password,
-			username: formValue.value.username,
-			callbackURL: accountCenterSessionUrl
-		},
-		{
-			onSuccess() {
-				rpgm.logger.visible.log(
-					'Check your email for a confirmation link. BE SURE TO CHECK YOUR SPAM FOLDER.'
-				);
-			}
-		}
-	);
-	tabValue.value = 'signin';
-}
-
-const { start, loading: signInLoading } = useLoading();
-
-function signIn() {
-	if (!formValue.value.username || !formValue.value.password) {
-		rpgm.logger.visible.warn('Please enter a username and password.');
-		return;
-	}
-	start(
-		rpgm.auth.signIn.username({
-			username: formValue.value.username,
-			password: formValue.value.password
-		})
-	);
-}
-
-const forgotOpen = ref(false);
-const forgotEmail = ref('');
-const forgotLoading = ref(false);
-const forgotError = ref('');
-const forgotSuccess = ref('');
-
-const resetEndpoint = '/api/auth/request-password-reset';
-const resetRedirectUrl = createFoundryAccountCenterUrl({
-	baseUrl: __API_URL__,
-	focus: 'password'
-});
-
-watch(forgotOpen, open => {
-	// Prefill with known email and clear state whenever the panel toggles.
-	if (open) {
-		forgotEmail.value = formValue.value.email || '';
-		forgotError.value = '';
-		forgotSuccess.value = '';
-	} else {
-		forgotLoading.value = false;
-		forgotEmail.value = '';
-	}
-});
-
-function toggleForgotPassword() {
-	if (forgotLoading.value) return;
-	forgotOpen.value = !forgotOpen.value;
-}
-
-function closeForgotPassword() {
-	if (forgotLoading.value) return;
-	forgotOpen.value = false;
-}
-
-async function requestPasswordReset() {
-	const email = forgotEmail.value.trim().toLowerCase();
-	forgotError.value = '';
-	forgotSuccess.value = '';
-
-	if (!email) {
-		forgotError.value =
-			'Enter the email address associated with your account.';
-		return;
-	}
-
-	forgotLoading.value = true;
-
-	try {
-		const response = await fetch(resetEndpoint, {
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			credentials: 'include',
-			body: JSON.stringify({ email, redirectTo: resetRedirectUrl })
-		});
-
-		let payload: { message?: string; error?: string } | null = null;
-
-		try {
-			payload = await response.json();
-		} catch {
-			payload = null;
-		}
-
-		if (!response.ok) {
-			const message =
-				payload?.message?.trim() ||
-				payload?.error?.trim() ||
-				`Unable to send reset email (status ${response.status}).`;
-			throw new Error(message);
-		}
-
-		const message =
-			payload?.message?.trim() ||
-			'If that email exists, a reset link is on the way.';
-		forgotSuccess.value = message;
-		rpgm.logger.visible.log(message);
-
-		setTimeout(() => {
-			forgotOpen.value = false;
-		}, 1600);
-	} catch (error) {
-		const message =
-			error instanceof Error
-				? error.message
-				: 'Unable to send reset email.';
-		forgotError.value = message;
-		rpgm.logger.visible.warn(message);
-	} finally {
-		forgotLoading.value = false;
-	}
-}
 </script>
 
 <template>
-	<div>
-		<NTabs
-			v-model:value="tabValue"
-			justify-content="space-evenly"
-			animated
-			type="segment"
-			style="margin-bottom: 8px"
+	<NFlex vertical class="bridge-panel">
+		<div class="bridge-heading-row">
+			<NH2>Old Forge Membership</NH2>
+			<NTag size="small" type="warning" round>
+				Legacy bridge
+			</NTag>
+		</div>
+		<NP>
+			This legacy Forge lane now starts account work on the public RPGM
+			Tools settings surface. Connect or create the account there, then sync
+			the signed-in Steward snapshot back into this Foundry tab.
+		</NP>
+		<NAlert
+			v-if="accountBridge.notice.value"
+			:type="accountBridge.notice.value.kind === 'warning' ? 'warning' : 'info'"
+			:show-icon="false"
+			closable
+			@close="accountBridge.clearNotice()"
 		>
-			<NTab name="signin" tab="Login" />
-			<NTab name="signup" tab="Sign Up" />
-		</NTabs>
-		<NForm
-			ref="accountForm"
-			:rules="tabValue === 'signin' ? signInRules : signUpRules"
-			:model="formValue"
-			@submit.prevent="submit"
+			{{ accountBridge.notice.value.message }}
+		</NAlert>
+		<NAlert :type="bridgeStatusTone" :show-icon="false">
+			{{ accountBridge.snapshot.value.sourceSummary }}
+		</NAlert>
+		<div class="bridge-summary">
+			<label>
+				Display name
+				<span>{{ accountBridge.snapshot.value.displayName }}</span>
+			</label>
+			<label>
+				Membership
+				<span>{{ accountBridge.snapshot.value.membershipSummary }}</span>
+			</label>
+		</div>
+		<NButton type="primary" @click="accountBridge.openConnectOrCreateAccount()">
+			Connect or create account
+		</NButton>
+		<NButton
+			secondary
+			:disabled="accountBridge.isLoading.value"
+			@click="accountBridge.openSyncSignedInAccount()"
 		>
-			<NCollapseTransition :show="tabValue === 'signup'">
-				<NFormItemRow
-					label="Name"
-					:show-require-mark="false"
-					path="name"
-				>
-					<NInput v-model:value="formValue.name" />
-				</NFormItemRow>
-				<NFormItemRow label="Email" path="email">
-					<NInput v-model:value="formValue.email" />
-				</NFormItemRow>
-			</NCollapseTransition>
-			<NFormItemRow label="Username" path="username">
-				<NInput v-model:value="formValue.username" v-focus="'input'" />
-			</NFormItemRow>
-			<NFormItemRow label="Password" path="password">
-				<NInput
-					v-model:value="formValue.password"
-					placeholder="↑ ↑ ↓ ↓ ← → ← → B A ⏎"
-					type="password"
-				/>
-			</NFormItemRow>
-			<NButton
-				type="primary"
-				:loading="signInLoading"
-				style="width: 100%"
-				attr-type="submit"
-			>
-				{{ tabValue === 'signin' ? 'Login' : 'Sign Up' }}
-			</NButton>
-			<div class="actions-row">
-				<NButton
-					text
-					type="primary"
-					class="forgot-link"
-					@click="toggleForgotPassword"
-				>
-					Forgot password?
-				</NButton>
-			</div>
-			<NCollapseTransition :show="forgotOpen">
-				<div class="forgot-panel">
-					<h3>Reset password</h3>
-					<p>
-						Enter the email tied to your RPGM Tools account. If it
-						exists, we will email you a reset link.
-					</p>
-					<NForm @submit.prevent>
-						<NFormItemRow label="Email address">
-							<NInput
-								v-model:value="forgotEmail"
-								:disabled="forgotLoading"
-								type="text"
-								:input-props="{ inputmode: 'email' }"
-								placeholder="name@example.com"
-							/>
-						</NFormItemRow>
-					</NForm>
-					<NAlert
-						v-if="forgotError"
-						type="error"
-						:show-icon="false"
-						class="forgot-alert"
-					>
-						{{ forgotError }}
-					</NAlert>
-					<NAlert
-						v-else-if="forgotSuccess"
-						type="success"
-						:show-icon="false"
-						class="forgot-alert"
-					>
-						{{ forgotSuccess }}
-					</NAlert>
-					<div class="panel-actions">
-						<NButton
-							quaternary
-							:disabled="forgotLoading"
-							@click="closeForgotPassword"
-						>
-							Cancel
-						</NButton>
-						<NButton
-							type="primary"
-							:loading="forgotLoading"
-							@click="requestPasswordReset"
-						>
-							Send reset link
-						</NButton>
-					</div>
-				</div>
-			</NCollapseTransition>
-		</NForm>
-	</div>
+			Sync signed-in account
+		</NButton>
+		<NButton quaternary @click="accountBridge.openManagePassword()">
+			Manage password
+		</NButton>
+	</NFlex>
 </template>
 
 <style scoped>
-input {
-	color: white;
+.bridge-panel {
+	gap: 12px;
 }
 
-.tabs-trigger[data-state='inactive'] {
-	cursor: pointer;
-}
-
-.actions-row {
-	margin-top: 8px;
+.bridge-heading-row {
 	display: flex;
-	justify-content: flex-end;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
 }
 
-.forgot-link {
-	padding: 0;
-	font-size: 0.875rem;
+.bridge-heading-row h2 {
+	margin: 0;
 }
 
-.forgot-panel {
-	margin-top: 12px;
-	padding: 16px;
-	border-radius: 16px;
-	background: rgba(20, 21, 34, 0.9);
-	color: #fff;
-}
-
-.forgot-panel h3 {
-	margin: 0 0 8px;
-	font-size: 1.1rem;
-	font-weight: 600;
-}
-
-.forgot-panel p {
-	margin: 0 0 16px;
-	color: #d7d9e7;
-	font-size: 0.95rem;
-}
-
-.forgot-alert {
-	margin-top: 8px;
-}
-
-.panel-actions {
+.bridge-summary {
 	display: flex;
-	justify-content: flex-end;
+	flex-direction: column;
 	gap: 8px;
-	margin-top: 16px;
+}
+
+.bridge-summary label {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+	align-items: flex-start;
+}
+
+.bridge-summary span {
+	max-width: 65%;
+	text-align: right;
 }
 </style>
