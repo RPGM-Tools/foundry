@@ -96,8 +96,7 @@ function createSignedOutSnapshot(): FoundryAccountBridgeSnapshot {
 			'No active membership summary is visible in this old Forge lane yet.',
 		usageReadinessSummary:
 			'No managed Forge usage summary is visible in this old Forge lane yet.',
-		economySummary:
-			'No Ore snapshot is visible in this old Forge lane yet.'
+		economySummary: 'No Ore snapshot is visible in this old Forge lane yet.'
 	};
 }
 
@@ -258,7 +257,9 @@ function createEconomySummary(privateExpansions: unknown): string {
 	return 'No Ore balance summary is visible yet.';
 }
 
-function createAvailableSnapshot(payload: unknown): FoundryAccountBridgeSnapshot {
+function createAvailableSnapshot(
+	payload: unknown
+): FoundryAccountBridgeSnapshot {
 	const typedPayload = payload as {
 		profile?: unknown;
 		privateExpansions?: unknown;
@@ -453,12 +454,15 @@ async function loadAccountSnapshot(): Promise<FoundryAccountBridgeSnapshot> {
 	}
 
 	try {
-		const response = await globalThis.fetch(createAccountProfileRequestUrl(), {
-			method: 'GET',
-			credentials: 'include',
-			cache: 'no-store',
-			headers: requestHeaders
-		});
+		const response = await globalThis.fetch(
+			createAccountProfileRequestUrl(),
+			{
+				method: 'GET',
+				credentials: 'include',
+				cache: 'no-store',
+				headers: requestHeaders
+			}
+		);
 		const payload = await response.json().catch(() => null);
 
 		if (response.status === 401) {
@@ -606,7 +610,9 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		isLoading,
 		notice,
 		isConnected: computed(() => snapshot.value.status === 'available'),
-		hasStoredSnapshotToken: computed(() => Boolean(readStoredSnapshotToken())),
+		hasStoredSnapshotToken: computed(() =>
+			Boolean(readStoredSnapshotToken())
+		),
 		refresh,
 		clearNotice,
 		openConnectOrCreateAccount,

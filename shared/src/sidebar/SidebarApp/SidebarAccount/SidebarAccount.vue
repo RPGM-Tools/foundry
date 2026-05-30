@@ -15,9 +15,9 @@ watch(
 	() => accountBridge.snapshot.value.status,
 	status => {
 		if (status !== 'available') return;
-	if (goBack === 'true') {
-		router.back();
-	}
+		if (goBack === 'true') {
+			router.back();
+		}
 	}
 );
 </script>
@@ -25,8 +25,10 @@ watch(
 <template>
 	<NCard>
 		<NFlex vertical>
-			<div style="position: relative;">
-				<SidebarAccountSignedIn v-if="accountBridge.isConnected.value" />
+			<div style="position: relative">
+				<SidebarAccountSignedIn
+					v-if="accountBridge.isConnected.value"
+				/>
 				<SignIn v-else />
 			</div>
 			<IHaveMyOwnAI />

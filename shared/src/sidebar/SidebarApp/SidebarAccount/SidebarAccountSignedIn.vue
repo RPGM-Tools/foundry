@@ -27,7 +27,11 @@ const welcome = computed(
 			</NH1>
 			<NAlert
 				v-if="accountBridge.notice.value"
-				:type="accountBridge.notice.value.kind === 'warning' ? 'warning' : 'info'"
+				:type="
+					accountBridge.notice.value.kind === 'warning'
+						? 'warning'
+						: 'info'
+				"
 				:show-icon="false"
 				closable
 				@close="accountBridge.clearNotice()"
@@ -44,23 +48,33 @@ const welcome = computed(
 				</label>
 				<label>
 					Membership
-					<span>{{ accountBridge.snapshot.value.membershipSummary }}</span>
+					<span>{{
+						accountBridge.snapshot.value.membershipSummary
+					}}</span>
 				</label>
 				<label>
 					Managed usage
-					<span>{{ accountBridge.snapshot.value.usageReadinessSummary }}</span>
+					<span>{{
+						accountBridge.snapshot.value.usageReadinessSummary
+					}}</span>
 				</label>
 				<label>
 					Ore
-					<span>{{ accountBridge.snapshot.value.economySummary }}</span>
+					<span>{{
+						accountBridge.snapshot.value.economySummary
+					}}</span>
 				</label>
 				<label>
 					Profile visibility
-					<span>{{ accountBridge.snapshot.value.visibilitySummary }}</span>
+					<span>{{
+						accountBridge.snapshot.value.visibilitySummary
+					}}</span>
 				</label>
 				<label>
 					Profile text
-					<span>{{ accountBridge.snapshot.value.profileSummary }}</span>
+					<span>{{
+						accountBridge.snapshot.value.profileSummary
+					}}</span>
 				</label>
 			</div>
 			<NButton

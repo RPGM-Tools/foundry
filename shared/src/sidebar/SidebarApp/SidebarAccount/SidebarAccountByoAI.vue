@@ -162,6 +162,7 @@ const searchForModel = useThrottleFn(async (provider: TextProvider, search: stri
 							<NInput
 								v-model:value="provider.apiKey"
 								type="password"
+								placeholder="↑ ↑ ↓ ↓ ← → ← → B A ⏎"
 							/>
 						</NFormItemRow>
 						<NFormItemRow

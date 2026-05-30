@@ -21,18 +21,20 @@ const bridgeStatusTone = computed(() => {
 	<NFlex vertical class="bridge-panel">
 		<div class="bridge-heading-row">
 			<NH2>Old Forge Membership</NH2>
-			<NTag size="small" type="warning" round>
-				Legacy bridge
-			</NTag>
+			<NTag size="small" type="warning" round> Legacy bridge </NTag>
 		</div>
 		<NP>
 			This legacy Forge lane now starts account work on the public RPGM
-			Tools settings surface. Connect or create the account there, then sync
-			the signed-in Steward snapshot back into this Foundry tab.
+			Tools settings surface. Connect or create the account there, then
+			sync the signed-in Steward snapshot back into this Foundry tab.
 		</NP>
 		<NAlert
 			v-if="accountBridge.notice.value"
-			:type="accountBridge.notice.value.kind === 'warning' ? 'warning' : 'info'"
+			:type="
+				accountBridge.notice.value.kind === 'warning'
+					? 'warning'
+					: 'info'
+			"
 			:show-icon="false"
 			closable
 			@close="accountBridge.clearNotice()"
@@ -49,10 +51,15 @@ const bridgeStatusTone = computed(() => {
 			</label>
 			<label>
 				Membership
-				<span>{{ accountBridge.snapshot.value.membershipSummary }}</span>
+				<span>{{
+					accountBridge.snapshot.value.membershipSummary
+				}}</span>
 			</label>
 		</div>
-		<NButton type="primary" @click="accountBridge.openConnectOrCreateAccount()">
+		<NButton
+			type="primary"
+			@click="accountBridge.openConnectOrCreateAccount()"
+		>
 			Connect or create account
 		</NButton>
 		<NButton
