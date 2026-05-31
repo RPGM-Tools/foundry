@@ -337,7 +337,10 @@ function readLocationHashQueryParams(currentUrl: URL): {
 	};
 }
 
-function readLocationReturnParam(currentUrl: URL, paramName: string): string | null {
+function readLocationReturnParam(
+	currentUrl: URL,
+	paramName: string
+): string | null {
 	return (
 		normalizeOptionalText(currentUrl.searchParams.get(paramName)) ??
 		normalizeOptionalText(
@@ -363,6 +366,34 @@ function clearLocationReturnParams(currentUrl: URL, paramNames: string[]) {
 			? `${hashPath}?${nextHashQuery}`
 			: hashPath
 		: nextHashQuery;
+}
+
+function repairFoundryRouteClass(currentUrl: URL) {
+	const body = globalThis.document?.body;
+
+	if (!body) {
+		return;
+	}
+
+	const routeClass = normalizeOptionalText(
+		currentUrl.pathname.split('/').filter(Boolean).at(-1)
+	);
+	const pollutedClasses = Array.from(body.classList).filter(
+		className => className.includes('?') || className.includes('#')
+	);
+
+	for (const pollutedClass of pollutedClasses) {
+		const normalizedClass = pollutedClass.split(/[?#]/u, 1)[0]?.trim();
+		body.classList.remove(pollutedClass);
+
+		if (normalizedClass) {
+			body.classList.add(normalizedClass);
+		}
+	}
+
+	if (routeClass) {
+		body.classList.add(routeClass);
+	}
 }
 
 function readStoredSnapshotToken(): string | null {
@@ -528,6 +559,7 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 		'',
 		currentUrl.toString()
 	);
+	repairFoundryRouteClass(currentUrl);
 
 	if (accountSessionToken) {
 		return {
@@ -546,6 +578,11 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 }
 
 const INITIAL_BRIDGE_RETURN_NOTICE = consumeBridgeReturnFromUrl();
+const INITIAL_LOCATION_URL = readCurrentLocationUrl();
+
+if (INITIAL_LOCATION_URL) {
+	repairFoundryRouteClass(INITIAL_LOCATION_URL);
+}
 
 function createAccountProfileRequestUrl(): string {
 	const profileRequestUrl = new URL(

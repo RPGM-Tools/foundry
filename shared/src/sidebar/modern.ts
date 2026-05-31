@@ -10,8 +10,9 @@ import SidebarApp from './SidebarApp';
 type ClosingOptions = foundry.applications.api.ApplicationV2.ClosingOptions;
 type Configuration = foundry.applications.api.ApplicationV2.Configuration;
 
-export default class RpgmSidebar extends foundry.applications.sidebar
-	.AbstractSidebarTab {
+export default class RpgmSidebar
+	extends foundry.applications.sidebar.AbstractSidebarTab
+{
 	app?: App;
 	router: Router;
 
@@ -66,7 +67,8 @@ export default class RpgmSidebar extends foundry.applications.sidebar
 	}
 
 	override _renderHTML() {
-		const mount = this.element.querySelector('.window-content') ?? this.element;
+		const mount =
+			this.element.querySelector('.window-content') ?? this.element;
 		if (!this.popout) mount.classList.add('static');
 		return Promise.resolve(mount);
 	}
@@ -88,6 +90,10 @@ export default class RpgmSidebar extends foundry.applications.sidebar
 	/** Max content of the sidebar, up to document height - padding. */
 	private onResize(forceCenter = false) {
 		void nextTick(() => {
+			if (!this.popout) {
+				return;
+			}
+
 			const windowHeight = window.innerHeight;
 			const maxHeight = Math.min(
 				windowHeight,
@@ -96,15 +102,23 @@ export default class RpgmSidebar extends foundry.applications.sidebar
 			const headerHeight =
 				this.element.querySelector('.window-header')?.clientHeight ?? 0;
 			const innerHeight =
-				this.element.querySelector('.sidebar-content')?.scrollHeight ?? 9999;
+				this.element.querySelector('.sidebar-content')?.scrollHeight ??
+				9999;
 
-			const newHeight = Math.min(maxHeight, innerHeight + headerHeight + 55);
+			const newHeight = Math.min(
+				maxHeight,
+				innerHeight + headerHeight + 55
+			);
 			const newTop =
-				(this.position.top ?? 0) + newHeight > windowHeight || forceCenter
+				(this.position.top ?? 0) + newHeight > windowHeight ||
+				forceCenter
 					? Math.max(
 							0,
-							Math.min(windowHeight - newHeight, (windowHeight - newHeight) / 2)
-					  )
+							Math.min(
+								windowHeight - newHeight,
+								(windowHeight - newHeight) / 2
+							)
+						)
 					: this.position.top;
 
 			this.setPosition({

@@ -59,7 +59,7 @@ const accountBridge = useFoundryAccountBridge();
 				class="account-action-button"
 				@click="accountBridge.openAccountSettings()"
 			>
-				<span class="account-action-label">View RPGM Tools Account</span>
+					<span class="account-action-label">View RPGM Tools Account</span>
 			</NButton>
 			<NButton
 				secondary
@@ -69,7 +69,7 @@ const accountBridge = useFoundryAccountBridge();
 			>
 				Refresh
 			</NButton>
-			<NButton block ghost @click="accountBridge.disconnectFoundrySession()">
+				<NButton block ghost @click="accountBridge.disconnectFoundrySession()">
 				Disconnect this session
 			</NButton>
 		</NFlex>
