@@ -214,6 +214,9 @@ const homebrewModel = ref<ModelOption>(
 						<NButton
 							type="warning"
 							secondary
+							size="large"
+							block
+							class="managed-account-connect-button"
 							@click="accountBridge.openConnectOrCreateAccount()"
 						>
 							Connect RPGM Tools Account
@@ -395,5 +398,10 @@ p {
 	height: 100%;
 	align-items: center;
 	justify-content: center;
+}
+
+.managed-account-connect-button {
+	min-height: 52px;
+	white-space: normal;
 }
 </style>

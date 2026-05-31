@@ -12,8 +12,7 @@ const accountBridge = useFoundryAccountBridge();
 
 <template>
 	<div class="bridge-account">
-		<NFlex vertical>
-			<NH1>Membership</NH1>
+		<NFlex vertical class="bridge-account-panel">
 			<NP class="account-display-name">
 				{{ accountBridge.snapshot.value.displayName }}
 			</NP>
@@ -34,43 +33,43 @@ const accountBridge = useFoundryAccountBridge();
 				{{ accountBridge.snapshot.value.sourceSummary }}
 			</NAlert>
 			<div class="rpgm-info">
-				<label>
-					Membership
-					<span>{{
+				<div class="account-summary-item">
+					<span class="account-summary-label">Membership</span>
+					<span class="account-summary-value">{{
 						accountBridge.snapshot.value.membershipSummary
 					}}</span>
-				</label>
-				<label>
-					Managed usage
-					<span>{{
+				</div>
+				<div class="account-summary-item">
+					<span class="account-summary-label">Managed usage</span>
+					<span class="account-summary-value">{{
 						accountBridge.snapshot.value.usageReadinessSummary
 					}}</span>
-				</label>
-				<label>
-					Ore
-					<span>{{
+				</div>
+				<div class="account-summary-item">
+					<span class="account-summary-label">Ore</span>
+					<span class="account-summary-value">{{
 						accountBridge.snapshot.value.economySummary
 					}}</span>
-				</label>
+				</div>
 			</div>
 			<NButton
 				type="primary"
+				size="large"
+				block
+				class="account-action-button"
 				@click="accountBridge.openAccountSettings()"
 			>
-				<span class="account-action-label">
-					<span>View</span>
-					<span>RPGM Tools</span>
-					<span>Account</span>
-				</span>
+				<span class="account-action-label">View RPGM Tools Account</span>
 			</NButton>
 			<NButton
 				secondary
+				block
 				:loading="accountBridge.isLoading.value"
 				@click="accountBridge.refresh()"
 			>
 				Refresh
 			</NButton>
-			<NButton ghost @click="accountBridge.disconnectFoundrySession()">
+			<NButton block ghost @click="accountBridge.disconnectFoundrySession()">
 				Disconnect this session
 			</NButton>
 		</NFlex>
@@ -82,11 +81,14 @@ const accountBridge = useFoundryAccountBridge();
 	width: 100%;
 }
 
+.bridge-account-panel {
+	gap: 12px;
+}
+
 .rpgm-info {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	margin-top: 8px;
+	display: grid;
+	gap: 12px;
+	margin-top: 4px;
 	margin-bottom: 8px;
 }
 
@@ -95,22 +97,32 @@ const accountBridge = useFoundryAccountBridge();
 	color: var(--n-text-color-2);
 }
 
-label {
-	display: flex;
-	justify-content: space-between;
-	gap: 16px;
+.account-summary-item {
+	display: grid;
+	gap: 4px;
 }
 
-label span {
-	max-width: 65%;
-	text-align: right;
+.account-summary-label {
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: var(--n-text-color-2);
+}
+
+.account-summary-value {
+	display: block;
+	overflow-wrap: anywhere;
+	line-height: 1.35;
+}
+
+.account-action-button {
+	min-height: 52px;
 }
 
 .account-action-label {
-	display: inline-flex;
-	flex-direction: column;
-	align-items: center;
-	line-height: 1.1;
-	gap: 2px;
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	line-height: 1.25;
 }
 </style>

@@ -19,7 +19,6 @@ const bridgeStatusTone = computed(() => {
 
 <template>
 	<NFlex vertical class="bridge-panel">
-		<NH2>Membership</NH2>
 		<NP>
 			Open your RPGM Tools account in the browser. If this browser is
 			already signed in there, this session will connect automatically.
@@ -42,13 +41,12 @@ const bridgeStatusTone = computed(() => {
 		</NAlert>
 		<NButton
 			type="primary"
+			size="large"
+			block
+			class="account-action-button"
 			@click="accountBridge.openConnectOrCreateAccount()"
 		>
-			<span class="account-action-label">
-				<span>Connect</span>
-				<span>RPGM Tools</span>
-				<span>Account</span>
-			</span>
+			<span class="account-action-label">Connect RPGM Tools Account</span>
 		</NButton>
 		<NButton
 			v-if="accountBridge.snapshot.value.status === 'unavailable'"
@@ -64,17 +62,18 @@ const bridgeStatusTone = computed(() => {
 <style scoped>
 .bridge-panel {
 	gap: 12px;
+	width: 100%;
 }
 
-.bridge-panel h2 {
-	margin: 0;
+.account-action-button {
+	min-height: 52px;
 }
 
 .account-action-label {
-	display: inline-flex;
-	flex-direction: column;
-	align-items: center;
-	line-height: 1.1;
-	gap: 2px;
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	line-height: 1.25;
 }
 </style>
