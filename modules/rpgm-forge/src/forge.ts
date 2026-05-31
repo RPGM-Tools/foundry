@@ -72,7 +72,9 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 		rpgm.forge = this;
 		this.homebrewSchemas = HomebrewSchemas as HomebrewSchema[];
 		const genresUrl = new URL(Genres, import.meta.url);
-		this.genres = (await (await fetch(genresUrl)).json()) as typeof this.genres;
+		this.genres = (await (
+			await fetch(genresUrl)
+		).json()) as typeof this.genres;
 		this.promptChats = new ChatWizard(
 			this.id,
 			'prompt',
@@ -167,7 +169,9 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 			literal('description')
 				.then(
 					argument('prompt', string('greedy_phrase')).executes(c => {
-						void chatDescription({ type: c.get<string>('prompt')! });
+						void chatDescription({
+							type: c.get<string>('prompt')!
+						});
 					})
 				)
 				.executes(() => {
@@ -278,7 +282,10 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 		);
 		rpgm.help.registerHelpTopic('Using Forge', HelpUsingForge);
 		rpgm.help.registerHelpTopic('Forge FAQ', HelpForgeFAQ);
-		rpgm.help.registerHelpTopic('Troubleshooting Forge', HelpTroubleshooting);
+		rpgm.help.registerHelpTopic(
+			'Troubleshooting Forge',
+			HelpTroubleshooting
+		);
 		rpgm.help.registerHelpTopic('Glossary', HelpGlossary);
 	}
 
@@ -347,7 +354,11 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 			if (!hasManagedForgeConnection.value) return 0;
 			return textLimit.value;
 		});
-		return { textLimit: textLimitValue, updateTextLimit: update, decrement };
+		return {
+			textLimit: textLimitValue,
+			updateTextLimit: update,
+			decrement
+		};
 	});
 
 	warnTextLimit() {

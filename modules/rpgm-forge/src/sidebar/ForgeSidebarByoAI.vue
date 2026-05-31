@@ -4,7 +4,7 @@
 	Dependencies: Uses the legacy Better Auth session and the shared Foundry account bridge so model warnings follow either valid account lane.
 -->
 <script setup lang="ts">
-import type { TextProvider} from '@rpgm/tools';
+import type { TextProvider } from '@rpgm/tools';
 import { type TextModel } from '@rpgm/tools';
 import { RPGM_MODELS } from '@rpgm/tools/forge';
 
@@ -22,15 +22,19 @@ const descriptions = rpgm.forge.settings.ref('descriptionsModel');
 const homebrew = rpgm.forge.settings.ref('homebrewModel');
 
 const anyRpgmSelected = computed(() => {
-	return names.value?.provider === 'rpgm-tools'
-		|| descriptions.value?.provider === 'rpgm-tools'
-		|| homebrew.value?.provider === 'rpgm-tools';
+	return (
+		names.value?.provider === 'rpgm-tools' ||
+		descriptions.value?.provider === 'rpgm-tools' ||
+		homebrew.value?.provider === 'rpgm-tools'
+	);
 });
 
 const hasManagedForgeConnection = computed(() => {
-	return session.value.data !== null
-		|| accountBridge.isConnected.value
-		|| accountBridge.hasStoredSnapshotToken.value;
+	return (
+		session.value.data !== null ||
+		accountBridge.isConnected.value ||
+		accountBridge.hasStoredSnapshotToken.value
+	);
 });
 
 const getProvider = (id: string) => {
@@ -38,93 +42,155 @@ const getProvider = (id: string) => {
 	return p;
 };
 
-const handleRpgmIcon = (icon: 'rpgm' | 'basic' | 'offline') => icon === 'rpgm' && !hasManagedForgeConnection.value ? 'warning' as const : icon;
+const handleRpgmIcon = (icon: 'rpgm' | 'basic' | 'offline') =>
+	icon === 'rpgm' && !hasManagedForgeConnection.value
+		? ('warning' as const)
+		: icon;
 
-function hydrateModelList(TextProviders: TextProvider[], models: ModelOption[]) {
+function hydrateModelList(
+	TextProviders: TextProvider[],
+	models: ModelOption[]
+) {
 	return TextProviders.reduce((acc, provider) => {
-		acc.push(...provider.textModels.map<ModelOption>(m => {
-			return {
-				id: m,
-				value: {
-					type: 'text',
-					provider: provider.id,
-					slug: m
-				},
-				description: rpgm.localize('RPGM_FORGE.PROVIDERS.CUSTOM'),
-				icon: 'basic'
-			};
-		}));
+		acc.push(
+			...provider.textModels.map<ModelOption>(m => {
+				return {
+					id: m,
+					value: {
+						type: 'text',
+						provider: provider.id,
+						slug: m
+					},
+					description: rpgm.localize('RPGM_FORGE.PROVIDERS.CUSTOM'),
+					icon: 'basic'
+				};
+			})
+		);
 		return acc;
 	}, models);
 }
 
-type ModelOption = { id: string, icon: 'rpgm' | 'basic' | 'offline', value: TextModel, description?: string  };
+type ModelOption = {
+	id: string;
+	icon: 'rpgm' | 'basic' | 'offline';
+	value: TextModel;
+	description?: string;
+};
+
+function resolveModelIcon(provider: string): ModelOption['icon'] {
+	if (provider === 'rpgm-tools') {
+		return 'rpgm';
+	}
+
+	if (provider === 'offline' || provider === 'adjective') {
+		return 'offline';
+	}
+
+	return 'basic';
+}
+
 const namesModelOptions = computed(() => {
-	const models: ModelOption[] = [{
-		id: RPGM_MODELS.names.slug,
-		value: RPGM_MODELS.names,
-		icon: 'rpgm',
-		description: rpgm.localize?.('RPGM_FORGE.PROVIDERS.RPGM')
-	}];
+	const models: ModelOption[] = [
+		{
+			id: RPGM_MODELS.names.slug,
+			value: RPGM_MODELS.names,
+			icon: 'rpgm',
+			description: rpgm.localize?.('RPGM_FORGE.PROVIDERS.RPGM')
+		}
+	];
 	hydrateModelList(rpgm.settings.get('textProviders') ?? [], models);
 	models.push(
-		{ icon: 'offline', id: 'rpgm-names-offline', value: { type: 'text', provider: 'offline', slug: 'rpgm-names-offline' }, description: rpgm.localize('RPGM_FORGE.PROVIDERS.OFFLINE_NAMES') },
-		{ icon: 'offline', id: 'rpgm-names-adjective', value: { type: 'text', provider: 'adjective', slug: 'rpgm-names-adjective' }, description: rpgm.localize('RPGM_FORGE.PROVIDERS.ADJECTIVE_NAMES') }
+		{
+			icon: 'offline',
+			id: 'rpgm-names-offline',
+			value: {
+				type: 'text',
+				provider: 'offline',
+				slug: 'rpgm-names-offline'
+			},
+			description: rpgm.localize('RPGM_FORGE.PROVIDERS.OFFLINE_NAMES')
+		},
+		{
+			icon: 'offline',
+			id: 'rpgm-names-adjective',
+			value: {
+				type: 'text',
+				provider: 'adjective',
+				slug: 'rpgm-names-adjective'
+			},
+			description: rpgm.localize('RPGM_FORGE.PROVIDERS.ADJECTIVE_NAMES')
+		}
 	);
 	return models;
 });
 
 const descriptionsModelOptions = computed(() => {
-	const models: ModelOption[] = [{
-		id: RPGM_MODELS.descriptions.slug,
-		value: RPGM_MODELS.descriptions,
-		icon: 'rpgm',
-		description: rpgm.localize?.('RPGM_FORGE.PROVIDERS.RPGM')
-	}];
+	const models: ModelOption[] = [
+		{
+			id: RPGM_MODELS.descriptions.slug,
+			value: RPGM_MODELS.descriptions,
+			icon: 'rpgm',
+			description: rpgm.localize?.('RPGM_FORGE.PROVIDERS.RPGM')
+		}
+	];
 	hydrateModelList(rpgm.settings.get('textProviders') ?? [], models);
 	return models;
 });
 
 const homebrewModelOptions = computed(() => {
-	const models: ModelOption[] = [{
-		id: RPGM_MODELS.homebrew.slug,
-		value: RPGM_MODELS.homebrew,
-		icon: 'rpgm',
-		description: rpgm.localize?.('RPGM_FORGE.PROVIDERS.RPGM')
-	}];
+	const models: ModelOption[] = [
+		{
+			id: RPGM_MODELS.homebrew.slug,
+			value: RPGM_MODELS.homebrew,
+			icon: 'rpgm',
+			description: rpgm.localize?.('RPGM_FORGE.PROVIDERS.RPGM')
+		}
+	];
 	hydrateModelList(rpgm.settings.get('textProviders') ?? [], models);
 	return models;
 });
 
-const namesModel = ref<ModelOption>(names.value ? {
-	id: names.value.slug,
-	value: names.value,
-	icon: names.value.provider === 'rpgm-tools' ? 'rpgm' : (['offline', 'adjective'].includes(names.value.provider) ? 'offline' : 'basic')
-} : {
-		id: 'rpgm-names',
-		value: RPGM_MODELS.names,
-		icon: 'rpgm'
-	});
+const namesModel = ref<ModelOption>(
+	names.value
+		? {
+				id: names.value.slug,
+				value: names.value,
+				icon: resolveModelIcon(names.value.provider)
+			}
+		: {
+				id: 'rpgm-names',
+				value: RPGM_MODELS.names,
+				icon: 'rpgm'
+			}
+);
 
-const descriptionsModel = ref<ModelOption>(descriptions.value ? {
-	id: descriptions.value.slug,
-	value: descriptions.value,
-	icon: descriptions.value.provider === 'rpgm' ? 'rpgm' : 'basic'
-} : {
-		id: 'rpgm-descriptions',
-		value: RPGM_MODELS.descriptions,
-		icon: 'rpgm'
-	});
+const descriptionsModel = ref<ModelOption>(
+	descriptions.value
+		? {
+				id: descriptions.value.slug,
+				value: descriptions.value,
+				icon: resolveModelIcon(descriptions.value.provider)
+			}
+		: {
+				id: 'rpgm-descriptions',
+				value: RPGM_MODELS.descriptions,
+				icon: 'rpgm'
+			}
+);
 
-const homebrewModel = ref<ModelOption>(homebrew.value ? {
-	id: homebrew.value.slug,
-	value: homebrew.value,
-	icon: homebrew.value.provider === 'rpgm' ? 'rpgm' : 'basic'
-} : {
-		id: 'rpgm-homebrew',
-		value: RPGM_MODELS.homebrew,
-		icon: 'rpgm'
-	});
+const homebrewModel = ref<ModelOption>(
+	homebrew.value
+		? {
+				id: homebrew.value.slug,
+				value: homebrew.value,
+				icon: resolveModelIcon(homebrew.value.provider)
+			}
+		: {
+				id: 'rpgm-homebrew',
+				value: RPGM_MODELS.homebrew,
+				icon: 'rpgm'
+			}
+);
 </script>
 
 <template>
@@ -132,21 +198,19 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 		<NFlex vertical>
 			<NP>
 				Here you can select the text AI models to use for Forge.
-				<NText
-					italic
-					type="warning"
-				>
+				<NText italic type="warning">
 					Reasoning models will consume more tokens.
 				</NText>
 			</NP>
-			<NCollapseTransition :show="anyRpgmSelected && !hasManagedForgeConnection">
-				<NAlert
-					:show-icon="false"
-					type="warning"
-				>
+			<NCollapseTransition
+				:show="anyRpgmSelected && !hasManagedForgeConnection"
+			>
+				<NAlert :show-icon="false" type="warning">
 					<NFlex vertical>
-						You have selected an RPGM Tools model, but this Foundry session is not connected to an RPGM Tools account.
-						Connect your RPGM Tools account to use Steward-backed Forge models and managed usage.
+						You have selected an RPGM Tools model, but this Foundry
+						session is not connected to an RPGM Tools account.
+						Connect your RPGM Tools account to use Steward-backed
+						Forge models and managed usage.
 						<NButton
 							type="warning"
 							secondary
@@ -158,13 +222,16 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 				</NAlert>
 			</NCollapseTransition>
 			<NFlex vertical>
-				<NDivider style="margin: 0;">
-					Names
-				</NDivider>
+				<NDivider style="margin: 0"> Names </NDivider>
 				<ModeSwitcher
 					v-model="namesModel"
 					:options="namesModelOptions"
-					style="width: 48px; height: 48px; position: relative; margin-right: auto;"
+					style="
+						width: 48px;
+						height: 48px;
+						position: relative;
+						margin-right: auto;
+					"
 					option-key="id"
 					@update:model-value="names = $event?.value ?? names"
 				>
@@ -175,7 +242,12 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 								<RadialCenter>
 									<DiceIcon
 										:type="handleRpgmIcon(value.icon)"
-										:style="{filter: value.icon === 'basic' ? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)` : ''}"
+										:style="{
+											filter:
+												value.icon === 'basic'
+													? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)`
+													: ''
+										}"
 									/>
 								</RadialCenter>
 							</template>
@@ -193,15 +265,20 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 						<RadialCenter inert />
 					</template>
 				</ModeSwitcher>
-				<NDivider style="margin: 0;">
-					Descriptions
-				</NDivider>
+				<NDivider style="margin: 0"> Descriptions </NDivider>
 				<ModeSwitcher
 					v-model="descriptionsModel"
 					:options="descriptionsModelOptions"
-					style="width: 48px; height: 48px; position: relative; margin-right: auto;"
+					style="
+						width: 48px;
+						height: 48px;
+						position: relative;
+						margin-right: auto;
+					"
 					option-key="id"
-					@update:model-value="descriptions = $event?.value ?? descriptions"
+					@update:model-value="
+						descriptions = $event?.value ?? descriptions
+					"
 				>
 					<template #default="{ value, isOpen, selected }">
 						<NTooltip placement="left">
@@ -210,7 +287,12 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 								<RadialCenter>
 									<DiceIcon
 										:type="handleRpgmIcon(value.icon)"
-										:style="{filter: value.icon === 'basic' ? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)` : ''}"
+										:style="{
+											filter:
+												value.icon === 'basic'
+													? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)`
+													: ''
+										}"
 									/>
 								</RadialCenter>
 							</template>
@@ -228,13 +310,16 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 						<RadialCenter inert />
 					</template>
 				</ModeSwitcher>
-				<NDivider style="margin: 0;">
-					Homebrew
-				</NDivider>
+				<NDivider style="margin: 0"> Homebrew </NDivider>
 				<ModeSwitcher
 					v-model="homebrewModel"
 					:options="homebrewModelOptions"
-					style="width: 48px; height: 48px; position: relative; margin-right: auto;"
+					style="
+						width: 48px;
+						height: 48px;
+						position: relative;
+						margin-right: auto;
+					"
 					option-key="id"
 					@update:model-value="homebrew = $event?.value ?? homebrew"
 				>
@@ -245,7 +330,12 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 								<RadialCenter>
 									<DiceIcon
 										:type="handleRpgmIcon(value.icon)"
-										:style="{filter: value.icon === 'basic' ? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)` : ''}"
+										:style="{
+											filter:
+												value.icon === 'basic'
+													? `brightness(1.1) hue-rotate(${parseInt(getProvider(value.value.provider)?.hue ?? '0') - 30}deg)`
+													: ''
+										}"
 									/>
 								</RadialCenter>
 							</template>
@@ -288,10 +378,10 @@ p {
 	padding: 2px 4px;
 	border-radius: 4px;
 
-	&[data-open="true"] {
+	&[data-open='true'] {
 		background: rgb(0 0 0 / 85%);
 	}
-	&[data-open="false"]:not(.selected) {
+	&[data-open='false']:not(.selected) {
 		visibility: hidden;
 		opacity: 0;
 	}

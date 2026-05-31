@@ -11,8 +11,7 @@ import { createFoundryAccountCenterUrl } from './accountCenter';
 const DEFAULT_PUBLIC_WEB_BASE_URL = 'https://rpgm.tools';
 const ACCOUNT_PROFILE_PATHNAME = '/api/v1/account/profile';
 const ACCOUNT_SESSION_TOKEN_PATHNAME = '/api/v1/account/profile-snapshot-token';
-export const ACCOUNT_SESSION_TOKEN_HEADER_NAME =
-	'x-rpgm-account-session-token';
+export const ACCOUNT_SESSION_TOKEN_HEADER_NAME = 'x-rpgm-account-session-token';
 export const FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY =
 	'rpgm.foundry.profileSnapshotToken';
 const RETURN_REFRESH_POLL_INTERVAL_MS = 1500;
@@ -598,8 +597,37 @@ function openExternalUrl(url: string | null) {
 		return false;
 	}
 
-	globalThis.open?.(url, '_blank', 'noopener,noreferrer');
-	return true;
+	const openedWindow = globalThis.open?.(url, '_blank');
+
+	if (openedWindow) {
+		try {
+			openedWindow.opener = null;
+		} catch {
+			// Ignore cross-origin opener assignment failures.
+		}
+
+		return true;
+	}
+
+	return navigateCurrentPage(url);
+}
+
+function navigateCurrentPage(url: string | null) {
+	if (!url) {
+		return false;
+	}
+
+	if (typeof globalThis.location?.assign === 'function') {
+		globalThis.location.assign(url);
+		return true;
+	}
+
+	if (typeof globalThis.location?.href === 'string') {
+		globalThis.location.href = url;
+		return true;
+	}
+
+	return false;
 }
 
 export const useFoundryAccountBridge = createGlobalState(() => {
@@ -728,12 +756,16 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 			return;
 		}
 
+		if (navigateCurrentPage(createFoundryAccountSessionSyncUrl())) {
+			return;
+		}
+
 		if (!openAccountCenter({ focus: 'session' })) {
 			stopWatchingForReturn();
 			notice.value = {
 				kind: 'warning',
 				message:
-					'Foundry could not open the RPGM Tools account handoff just now.'
+					'Foundry could not open the RPGM Tools account handoff or account center just now.'
 			};
 		}
 	};
