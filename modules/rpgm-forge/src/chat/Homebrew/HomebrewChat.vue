@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomebrewOptions } from '@rpgm/tools/forge';
+import type { HomebrewOptions } from '#/forgeCompat';
 
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 import { inputHeuristics } from '#/radial-menu';

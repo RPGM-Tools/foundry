@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RPGM_MODELS } from '@rpgm/tools/forge';
+import { RPGM_MODELS } from '#/forgeCompat';
 
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 import SkeletonParagraph from '#/chat/SkeletonParagraph.vue';

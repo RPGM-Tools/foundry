@@ -76,6 +76,9 @@ export default function defaultConfig(
 		base: `/modules/${id}/`,
 		server: {
 			host: devHost,
+			fs: {
+				allow: [resolve(dirname, '../../../../')]
+			},
 			hmr: {
 				overlay: false
 			},

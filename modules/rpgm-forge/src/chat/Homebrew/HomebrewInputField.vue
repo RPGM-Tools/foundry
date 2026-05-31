@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomebrewField } from '@rpgm/tools/forge';
+import type { HomebrewField } from '#/forgeCompat';
 
 import ContentEditable from '#/util/ContentEditable.vue';
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomebrewSchema } from '@rpgm/tools/forge';
+import type { HomebrewSchema } from '#/forgeCompat';
 
 import ComboBox from '#/util/ComboBox.vue';
 import { localize } from '#/util/localize';

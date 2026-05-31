@@ -1,4 +1,7 @@
-import type { Homebrew, HomebrewOptions } from '@rpgm/tools/forge';
+import type {
+	Homebrew,
+	HomebrewOptions
+} from '#/forgeCompat';
 
 import type { RpgmForge } from '$/forge';
 
@@ -32,7 +35,7 @@ declare global {
 	type ForgeChatDescription = {
 		type: string
 		name?: string
-		description: Description
+		description: string
 		tokenId?: string
 	};
 

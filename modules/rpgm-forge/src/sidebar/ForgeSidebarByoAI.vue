@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import type { TextProvider } from '@rpgm/tools';
 import { type TextModel } from '@rpgm/tools';
-import { RPGM_MODELS } from '@rpgm/tools/forge';
+import { RPGM_MODELS } from '#/forgeCompat';
 
 import { useFoundryAccountBridge } from '#/auth/accountBridge';
 import RadialCenter from '#/radial-menu/RadialCenter.vue';

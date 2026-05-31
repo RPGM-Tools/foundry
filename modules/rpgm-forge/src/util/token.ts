@@ -3,7 +3,7 @@
  * Purpose: Provide utility helpers for token selection, naming workflows, and visual effects.
  * Last updated: 2025-11-14
  */
-import { type Names, type NamesOptions, RPGM_MODELS } from '@rpgm/tools/forge';
+import { type Names, type NamesOptions, RPGM_MODELS } from '#/forgeCompat';
 import { errAsync, type Result } from 'neverthrow';
 
 import { NAMES_PER_GENERATION } from '$/constants/names';

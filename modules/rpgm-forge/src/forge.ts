@@ -5,11 +5,12 @@
  * Last Updated: 2025-11-11
  */
 import { HomebrewSchemas } from '@rpgm/tools/forge';
-import { AbstractForge, type HomebrewSchema } from '@rpgm/tools/forge';
+import { AbstractForge } from '@rpgm/tools/forge';
 import { createGlobalState } from '@vueuse/core';
 import { argument, literal, string } from 'brigadier-ts-lite';
 import ISO639 from 'iso-639-1';
 import { NButton } from 'naive-ui';
+import { ResultAsync } from 'neverthrow';
 import { h, type Component } from 'vue';
 
 import {
@@ -17,6 +18,14 @@ import {
 	useFoundryAccountBridge
 } from '#/auth/accountBridge';
 import { ChatWizard } from '#/chat/ChatWizard';
+import {
+	shouldUseStewardBackedNamesModel,
+	shouldUseStewardBackedTextModel,
+	type DescriptionsOptions,
+	type HomebrewOptions,
+	type HomebrewSchema,
+	type NamesOptions
+} from '#/forgeCompat';
 import { FoundyRpgmModuleMixin } from '#/module';
 import { inputHeuristics, shimmerInput, writeOn } from '#/radial-menu';
 import HelpForgeFAQ from '$/../assets/faq.md?url';
@@ -39,12 +48,19 @@ import {
 } from '$/util/token';
 import Genres from '$$/assets/combined_systems.json?url';
 
+import {
+	createLegacyFoundryManagedGenerationBridge,
+	type LegacyFoundryManagedGenerationBridge
+} from './runtime/managedGenerationBridge';
+
 import ForgeSidebar from './sidebar/ForgeSidebar.vue';
 
 export class RpgmForge extends FoundyRpgmModuleMixin<
 	typeof AbstractForge,
 	AbstractForge.Settings
 >(AbstractForge) {
+	private _managedGenerationBridge?: LegacyFoundryManagedGenerationBridge;
+
 	/** @returns The current genre setting */
 	get genre() {
 		return game.settings.get('rpgm-forge', 'genre');
@@ -67,6 +83,80 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 	nameChats: ChatWizard<ForgeChatNames>;
 	descriptionsChats: ChatWizard<ForgeChatDescription>;
 	homebrewChats: ChatWizard<ForgeChatHomebrew>;
+
+	private get managedGenerationBridge(): LegacyFoundryManagedGenerationBridge {
+		return (this._managedGenerationBridge ??=
+			createLegacyFoundryManagedGenerationBridge({
+				forge: this,
+				getLegacyHomebrewSchemas: () => this.homebrewSchemas
+			}));
+	}
+
+	override get generateNames() {
+		const legacyGenerateNames = super.generateNames;
+
+		return (options: NamesOptions) => {
+			if (
+				!shouldUseStewardBackedNamesModel(
+					this.settings.get('namesModel')
+				)
+			) {
+				return legacyGenerateNames(options);
+			}
+
+			return ResultAsync.fromPromise(
+				this.managedGenerationBridge.generateNames(options),
+				error =>
+					error instanceof Error
+						? error
+						: new Error('Failed to generate names.')
+			);
+		};
+	}
+
+	override get generateDescriptions() {
+		const legacyGenerateDescriptions = super.generateDescriptions;
+
+		return (options: DescriptionsOptions) => {
+			if (
+				!shouldUseStewardBackedTextModel(
+					this.settings.get('descriptionsModel')
+				)
+			) {
+				return legacyGenerateDescriptions(options);
+			}
+
+			return ResultAsync.fromPromise(
+				this.managedGenerationBridge.generateDescriptions(options),
+				error =>
+					error instanceof Error
+						? error
+						: new Error('Failed to generate description.')
+			);
+		};
+	}
+
+	override get generateHomebrew() {
+		const legacyGenerateHomebrew = super.generateHomebrew;
+
+		return (options: HomebrewOptions) => {
+			if (
+				!shouldUseStewardBackedTextModel(
+					this.settings.get('homebrewModel')
+				)
+			) {
+				return legacyGenerateHomebrew(options);
+			}
+
+			return ResultAsync.fromPromise(
+				this.managedGenerationBridge.generateHomebrew(options),
+				error =>
+					error instanceof Error
+						? error
+						: new Error('Failed to generate homebrew.')
+			);
+		};
+	}
 
 	protected override async init() {
 		rpgm.forge = this;
