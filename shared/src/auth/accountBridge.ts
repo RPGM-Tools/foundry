@@ -8,6 +8,8 @@ const ACCOUNT_SESSION_TOKEN_PATHNAME = '/api/v1/account/profile-snapshot-token';
 const ACCOUNT_SESSION_TOKEN_HEADER_NAME = 'x-rpgm-account-session-token';
 const FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY =
 	'rpgm.foundry.profileSnapshotToken';
+const RETURN_REFRESH_POLL_INTERVAL_MS = 1500;
+const RETURN_REFRESH_POLL_TIMEOUT_MS = 45000;
 const ACCOUNT_PROFILE_QUERY_PARAMS = {
 	expand: 'expand'
 } as const;
@@ -84,11 +86,12 @@ function countVisibleProfileSections(sections: unknown): number {
 function createSignedOutSnapshot(): FoundryAccountBridgeSnapshot {
 	return {
 		status: 'signed-out',
-		sourceSummary: 'No RPGM account is connected in this Foundry session yet.',
-		displayName:
-			'Open your RPGM account to sign in or create one.',
+		sourceSummary:
+			'No RPGM Tools account is connected in this Foundry session yet.',
+		displayName: 'Open your RPGM Tools account to sign in or create one.',
 		profileSummary: 'Profile changes stay on rpgm.tools.',
-		visibilitySummary: 'Profile visibility will appear after the account loads.',
+		visibilitySummary:
+			'Profile visibility will appear after the account loads.',
 		membershipSummary: 'No membership is loaded yet.',
 		usageReadinessSummary: 'No managed usage is loaded yet.',
 		economySummary: 'No Ore balance is loaded yet.'
@@ -104,7 +107,7 @@ function createUnavailableSnapshot(
 			? `Could not refresh the current account summary: ${details}`
 			: 'Could not refresh the current account summary just now.',
 		displayName:
-			'Open your RPGM account in the browser when you need to manage sign-in or providers.',
+			'Open your RPGM Tools account in the browser when you need to manage sign-in or providers.',
 		profileSummary: 'Profile changes stay on rpgm.tools.',
 		visibilitySummary:
 			'Profile visibility is unavailable until the next successful refresh.',
@@ -112,7 +115,8 @@ function createUnavailableSnapshot(
 			'Membership is unavailable until the next successful refresh.',
 		usageReadinessSummary:
 			'Managed usage is unavailable until the next successful refresh.',
-		economySummary: 'Ore balance is unavailable until the next successful refresh.'
+		economySummary:
+			'Ore balance is unavailable until the next successful refresh.'
 	};
 }
 
@@ -271,7 +275,7 @@ function createAvailableSnapshot(
 
 	return {
 		status: 'available',
-		sourceSummary: 'Connected to your RPGM account.',
+		sourceSummary: 'Connected to your RPGM Tools account.',
 		displayName: displayName ?? 'No display name is visible yet.',
 		profileSummary: createProfileSummary(profile),
 		visibilitySummary: createVisibilitySummary(profile),
@@ -505,6 +509,52 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 	);
 	let lastSeenSnapshotToken = readStoredSnapshotToken();
 	let expectsRefreshOnReturn = false;
+	let returnRefreshPollHandle: ReturnType<
+		typeof globalThis.setInterval
+	> | null = null;
+	let returnRefreshTimeoutHandle: ReturnType<
+		typeof globalThis.setTimeout
+	> | null = null;
+
+	const clearPendingReturnRefreshWatch = () => {
+		if (
+			returnRefreshPollHandle !== null &&
+			typeof globalThis.clearInterval === 'function'
+		) {
+			globalThis.clearInterval(returnRefreshPollHandle);
+			returnRefreshPollHandle = null;
+		}
+
+		if (
+			returnRefreshTimeoutHandle !== null &&
+			typeof globalThis.clearTimeout === 'function'
+		) {
+			globalThis.clearTimeout(returnRefreshTimeoutHandle);
+			returnRefreshTimeoutHandle = null;
+		}
+	};
+
+	const stopWatchingForReturn = () => {
+		expectsRefreshOnReturn = false;
+		clearPendingReturnRefreshWatch();
+	};
+
+	const startWatchingForReturn = () => {
+		clearPendingReturnRefreshWatch();
+		expectsRefreshOnReturn = true;
+
+		if (typeof globalThis.setInterval === 'function') {
+			returnRefreshPollHandle = globalThis.setInterval(() => {
+				void refreshIfReturnDetected();
+			}, RETURN_REFRESH_POLL_INTERVAL_MS);
+		}
+
+		if (typeof globalThis.setTimeout === 'function') {
+			returnRefreshTimeoutHandle = globalThis.setTimeout(() => {
+				stopWatchingForReturn();
+			}, RETURN_REFRESH_POLL_TIMEOUT_MS);
+		}
+	};
 
 	const refresh = async () => {
 		const consumedNotice = consumeBridgeReturnFromUrl();
@@ -517,12 +567,20 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		try {
 			snapshot.value = await loadAccountSnapshot();
 			lastSeenSnapshotToken = readStoredSnapshotToken();
+
+			if (snapshot.value.status === 'available') {
+				stopWatchingForReturn();
+			}
 		} finally {
 			isLoading.value = false;
 		}
 	};
 
-	const refreshIfReturnDetected = () => {
+	const refreshIfReturnDetected = async () => {
+		if (isLoading.value) {
+			return;
+		}
+
 		const currentSnapshotToken = readStoredSnapshotToken();
 		const snapshotTokenChanged =
 			currentSnapshotToken !== lastSeenSnapshotToken;
@@ -531,15 +589,29 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 			return;
 		}
 
-		expectsRefreshOnReturn = false;
+		await refresh();
+	};
 
-		void refresh();
+	const trySilentConnectFromActiveBrowserSession = async () => {
+		await refresh();
+
+		if (snapshot.value.status !== 'available') {
+			return false;
+		}
+
+		notice.value = {
+			kind: 'info',
+			message:
+				'Connected your RPGM Tools account from the browser session that is already signed in on rpgm.tools.'
+		};
+
+		return true;
 	};
 
 	const openAccountCenter = (options: {
 		focus: 'session' | 'connections' | 'passkeys' | 'password' | 'forge';
 	}) => {
-		expectsRefreshOnReturn = true;
+		startWatchingForReturn();
 		return openExternalUrl(
 			createFoundryAccountCenterUrl({
 				baseUrl: DEFAULT_PUBLIC_WEB_BASE_URL,
@@ -548,15 +620,34 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		);
 	};
 
-	const openConnectOrCreateAccount = () => {
-		openAccountCenter({ focus: 'session' });
+	const openConnectOrCreateAccount = async () => {
+		if (await trySilentConnectFromActiveBrowserSession()) {
+			return;
+		}
+
+		if (!openAccountCenter({ focus: 'session' })) {
+			stopWatchingForReturn();
+			notice.value = {
+				kind: 'warning',
+				message:
+					'Foundry could not open the RPGM Tools account handoff just now.'
+			};
+		}
 	};
 
 	const openAccountSettings = () => {
-		openAccountCenter({ focus: 'connections' });
+		if (!openAccountCenter({ focus: 'connections' })) {
+			stopWatchingForReturn();
+			notice.value = {
+				kind: 'warning',
+				message:
+					'Foundry could not open the RPGM Tools account view just now.'
+			};
+		}
 	};
 
 	const disconnectFoundrySession = () => {
+		stopWatchingForReturn();
 		writeStoredSnapshotToken(null);
 		lastSeenSnapshotToken = null;
 		snapshot.value = createSignedOutSnapshot();

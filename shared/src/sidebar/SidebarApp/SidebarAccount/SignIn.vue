@@ -1,6 +1,6 @@
 <!--
 	SignIn.vue
-	Handles the Foundry membership handoff into the shared RPGM account center.
+	Handles the Foundry membership handoff into the shared RPGM Tools account center.
 	Last updated: 2026-05-30
 -->
 <script setup lang="ts">
@@ -21,8 +21,8 @@ const bridgeStatusTone = computed(() => {
 	<NFlex vertical class="bridge-panel">
 		<NH2>Membership</NH2>
 		<NP>
-			Open your RPGM account in the browser. If you are already signed in
-			there, this session will connect automatically when you return.
+			Open your RPGM Tools account in the browser. If this browser is
+			already signed in there, this session will connect automatically.
 		</NP>
 		<NAlert
 			v-if="accountBridge.notice.value"
@@ -44,7 +44,11 @@ const bridgeStatusTone = computed(() => {
 			type="primary"
 			@click="accountBridge.openConnectOrCreateAccount()"
 		>
-			Open account
+			<span class="account-action-label">
+				<span>Connect</span>
+				<span>RPGM Tools</span>
+				<span>Account</span>
+			</span>
 		</NButton>
 		<NButton
 			v-if="accountBridge.snapshot.value.status === 'unavailable'"
@@ -64,5 +68,13 @@ const bridgeStatusTone = computed(() => {
 
 .bridge-panel h2 {
 	margin: 0;
+}
+
+.account-action-label {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
+	line-height: 1.1;
+	gap: 2px;
 }
 </style>

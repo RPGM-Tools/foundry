@@ -1,6 +1,6 @@
 <!--
 File: SidebarAccountSignedIn.vue
-Purpose: Render the Foundry membership summary from the shared RPGM account session.
+Purpose: Render the Foundry membership summary from the shared RPGM Tools account session.
 Last updated: 2026-05-30
 -->
 
@@ -57,7 +57,11 @@ const accountBridge = useFoundryAccountBridge();
 				type="primary"
 				@click="accountBridge.openAccountSettings()"
 			>
-				Open account
+				<span class="account-action-label">
+					<span>View</span>
+					<span>RPGM Tools</span>
+					<span>Account</span>
+				</span>
 			</NButton>
 			<NButton
 				secondary
@@ -100,5 +104,13 @@ label {
 label span {
 	max-width: 65%;
 	text-align: right;
+}
+
+.account-action-label {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
+	line-height: 1.1;
+	gap: 2px;
 }
 </style>

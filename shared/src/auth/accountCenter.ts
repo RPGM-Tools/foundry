@@ -1,6 +1,6 @@
 /**
  * File: accountCenter.ts
- * Purpose: Build Foundry-friendly links into the shared RPGM account center.
+ * Purpose: Build Foundry-friendly links into the shared RPGM Tools account center.
  * Notes: Keep this helper aligned with the shared account-center contract in `rpgm-tools/rpgm`.
  */
 
@@ -24,14 +24,12 @@ export type FoundryAccountCenterProviderId =
 
 export type FoundryAccountCenterProviderMode = 'link' | 'sign-in';
 
-export function createFoundryAccountCenterUrl(
-	input: {
-		baseUrl: string | URL;
-		focus?: FoundryAccountCenterFocus | null;
-		provider?: FoundryAccountCenterProviderId | null;
-		mode?: FoundryAccountCenterProviderMode | null;
-	}
-): string {
+export function createFoundryAccountCenterUrl(input: {
+	baseUrl: string | URL;
+	focus?: FoundryAccountCenterFocus | null;
+	provider?: FoundryAccountCenterProviderId | null;
+	mode?: FoundryAccountCenterProviderMode | null;
+}): string {
 	const accountCenterUrl = new URL(
 		FOUNDRY_ACCOUNT_CENTER_PATHNAME,
 		input.baseUrl
