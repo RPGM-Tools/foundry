@@ -11,6 +11,7 @@ import { shallowReactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
+	DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL,
 	createFoundryAccountCenterUrl,
 	isAbsoluteUrl
 } from '#/auth/accountCenter';
@@ -116,7 +117,8 @@ export const useSubscription = createGlobalState(() => {
 			tierName: snapshot.activeTierName,
 			membershipStatus,
 			hasActiveMembership,
-			needsAttention: Boolean(snapshot.activeTierName) && !hasActiveMembership
+			needsAttention:
+				Boolean(snapshot.activeTierName) && !hasActiveMembership
 		};
 	});
 	const update = async () => {
@@ -187,7 +189,7 @@ export function an(t: string) {
 
 const DEFAULT_SIGNED_IN_REQUIRED_FALLBACK_ROUTE = createFoundryAccountCenterUrl(
 	{
-		baseUrl: __API_URL__,
+		baseUrl: DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL,
 		focus: 'session'
 	}
 );

@@ -6,12 +6,17 @@
 
 import { createGlobalState } from '@vueuse/core';
 
-import { createFoundryAccountCenterUrl } from './accountCenter';
+import {
+	createFoundryAccountCenterHostLabel,
+	createFoundryAccountCenterUrl,
+	DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL,
+	DEFAULT_FOUNDRY_ACCOUNT_CENTER_ORIGIN
+} from './accountCenter';
 
-const DEFAULT_PUBLIC_WEB_BASE_URL = 'https://rpgm.tools';
-const PUBLIC_WEB_BASE_URL_ORIGIN = new URL(DEFAULT_PUBLIC_WEB_BASE_URL).origin;
 const ACCOUNT_PROFILE_PATHNAME = '/api/v1/account/profile';
 const ACCOUNT_SESSION_TOKEN_PATHNAME = '/api/v1/account/profile-snapshot-token';
+const ACCOUNT_SESSION_RETURN_PAGE_PATHNAME =
+	'/modules/rpgm-forge/account-session-return.html';
 export const ACCOUNT_SESSION_TOKEN_HEADER_NAME = 'x-rpgm-account-session-token';
 export const FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY =
 	'rpgm.foundry.profileSnapshotToken';
@@ -37,6 +42,7 @@ const ACCOUNT_PROFILE_EXPANSIONS = [
 	'usage-readiness',
 	'economy'
 ] as const;
+const ACCOUNT_CENTER_HOST_LABEL = createFoundryAccountCenterHostLabel();
 
 interface FoundryAccountBridgeNotice {
 	kind: 'info' | 'warning';
@@ -138,7 +144,7 @@ function createSignedOutSnapshot(): FoundryAccountBridgeSnapshot {
 		sourceSummary:
 			'No RPGM Tools account is connected in this Foundry session.',
 		displayName: 'Open your RPGM Tools account to sign in or create one.',
-		profileSummary: 'Profile changes stay on rpgm.tools.',
+		profileSummary: `Profile changes stay on ${ACCOUNT_CENTER_HOST_LABEL}.`,
 		visibilitySummary:
 			'Profile visibility will appear after the account loads.',
 		activeTierName: null,
@@ -164,7 +170,7 @@ function createUnavailableSnapshot(
 			: 'Could not refresh the current account summary just now.',
 		displayName:
 			'Open your RPGM Tools account in the browser when you need to manage sign-in or providers.',
-		profileSummary: 'Profile changes stay on rpgm.tools.',
+		profileSummary: `Profile changes stay on ${ACCOUNT_CENTER_HOST_LABEL}.`,
 		visibilitySummary:
 			'Profile visibility is unavailable until the next successful refresh.',
 		activeTierName: null,
@@ -386,8 +392,7 @@ function createAvailableSnapshot(
 		usageRemaining: usageReadinessState.remaining,
 		usageLimit: usageReadinessState.limit,
 		usageOverLimit: usageReadinessState.overLimit,
-		usageReadinessSummary:
-			createUsageReadinessSummary(usageReadinessState),
+		usageReadinessSummary: createUsageReadinessSummary(usageReadinessState),
 		spendableOre: economyState.spendableOre,
 		lifetimeOre: economyState.lifetimeOre,
 		economySummary: createEconomySummary(economyState)
@@ -615,15 +620,25 @@ function normalizeAccountBackedForgeUsageSnapshot(
 	payload: unknown
 ): FoundryAccountBackedForgeUsageSnapshot | null {
 	const typedPayload = payload as {
+		snapshot?: unknown;
 		used?: unknown;
 		limit?: unknown;
 		remaining?: unknown;
 		overLimit?: unknown;
 	};
-	const used = normalizeFiniteNumber(typedPayload?.used);
+	const snapshotPayload =
+		typedPayload?.snapshot && typeof typedPayload.snapshot === 'object'
+			? (typedPayload.snapshot as {
+					used?: unknown;
+					limit?: unknown;
+					remaining?: unknown;
+					overLimit?: unknown;
+				})
+			: typedPayload;
+	const used = normalizeFiniteNumber(snapshotPayload?.used);
 	const overLimit =
-		typeof typedPayload?.overLimit === 'boolean'
-			? typedPayload.overLimit
+		typeof snapshotPayload?.overLimit === 'boolean'
+			? snapshotPayload.overLimit
 			: null;
 
 	if (used === null || overLimit === null) {
@@ -632,14 +647,14 @@ function normalizeAccountBackedForgeUsageSnapshot(
 
 	return {
 		used,
-		limit: normalizeFiniteNumber(typedPayload.limit),
-		remaining: normalizeFiniteNumber(typedPayload.remaining),
+		limit: normalizeFiniteNumber(snapshotPayload.limit),
+		remaining: normalizeFiniteNumber(snapshotPayload.remaining),
 		overLimit
 	};
 }
 
 export async function loadAccountBackedForgeUsageSnapshot(
-	baseUrl: string | URL = DEFAULT_PUBLIC_WEB_BASE_URL
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
 ): Promise<FoundryAccountBackedForgeUsageSnapshot | null> {
 	const fetchImplementation =
 		typeof globalThis.fetch === 'function'
@@ -743,6 +758,10 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 	return returnNotice;
 }
 
+export function consumeFoundryAccountSessionReturnFromUrl(): FoundryAccountBridgeNotice | null {
+	return consumeBridgeReturnFromUrl();
+}
+
 const INITIAL_BRIDGE_RETURN_NOTICE = consumeBridgeReturnFromUrl();
 const INITIAL_LOCATION_URL = readCurrentLocationUrl();
 
@@ -753,7 +772,7 @@ if (INITIAL_LOCATION_URL) {
 function createAccountProfileRequestUrl(): string {
 	const profileRequestUrl = new URL(
 		ACCOUNT_PROFILE_PATHNAME,
-		DEFAULT_PUBLIC_WEB_BASE_URL
+		DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
 	);
 
 	for (const expansion of ACCOUNT_PROFILE_EXPANSIONS) {
@@ -775,7 +794,7 @@ export function createFoundryAccountSessionSyncUrl(): string | null {
 
 	const accountSessionSyncUrl = new URL(
 		ACCOUNT_SESSION_TOKEN_PATHNAME,
-		DEFAULT_PUBLIC_WEB_BASE_URL
+		DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
 	);
 	accountSessionSyncUrl.searchParams.set(
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.redirectUrl,
@@ -783,6 +802,20 @@ export function createFoundryAccountSessionSyncUrl(): string | null {
 	);
 
 	return accountSessionSyncUrl.toString();
+}
+
+function createFoundryAccountSessionReturnUrl(currentUrl: URL): string {
+	const returnUrl = new URL(
+		ACCOUNT_SESSION_RETURN_PAGE_PATHNAME,
+		currentUrl.origin
+	);
+
+	returnUrl.searchParams.set(
+		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.redirectUrl,
+		currentUrl.toString()
+	);
+
+	return returnUrl.toString();
 }
 
 async function loadAccountSnapshot(): Promise<FoundryAccountBridgeSnapshot> {
@@ -991,8 +1024,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 
 		notice.value = {
 			kind: 'info',
-			message:
-				'Connected your RPGM Tools account from the browser session that is already signed in on rpgm.tools.'
+			message: `Connected your RPGM Tools account from the browser session that is already signed in on ${ACCOUNT_CENTER_HOST_LABEL}.`
 		};
 
 		return true;
@@ -1005,12 +1037,14 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		const currentLocationUrl = readCurrentLocationUrl();
 		const shouldReturnToFoundry = options.focus === 'session';
 		const redirectUrl = shouldReturnToFoundry
-			? (currentLocationUrl?.toString() ?? null)
+			? currentLocationUrl
+				? createFoundryAccountSessionReturnUrl(currentLocationUrl)
+				: null
 			: null;
 
 		return openExternalUrl(
 			createFoundryAccountCenterUrl({
-				baseUrl: DEFAULT_PUBLIC_WEB_BASE_URL,
+				baseUrl: DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL,
 				focus: options.focus,
 				redirectUrl
 			}),
@@ -1019,7 +1053,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 	};
 
 	const handleAccountSessionLaunchMessage = (event: MessageEvent) => {
-		if (event.origin !== PUBLIC_WEB_BASE_URL_ORIGIN) {
+		if (event.origin !== DEFAULT_FOUNDRY_ACCOUNT_CENTER_ORIGIN) {
 			return;
 		}
 

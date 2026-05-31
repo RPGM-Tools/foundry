@@ -1,47 +1,50 @@
-import { polarClient } from '@polar-sh/better-auth';
-import { inferAdditionalFields, usernameClient } from 'better-auth/client/plugins';
-import { createAuthClient } from 'better-auth/vue';
+/**
+ * File: auth/index.ts
+ * Purpose: Preserve the tiny legacy `rpgm.auth` surface that old Forge still exposes.
+ * Notes: Track 1 bridge auth now belongs to the hosted Steward account center, so the
+ * legacy Better Auth browser client is intentionally retired here instead of continuing
+ * to bootstrap a stale auth runtime inside the Foundry shell.
+ */
 
-export const auth = createAuthClient({
-	baseURL: __API_URL__,
-	fetchOptions: {
-		onSuccess(ctx) {
-			const didSignOut = (ctx.request.url instanceof URL
-				? ctx.request.url.pathname
-				: ctx.request.url).includes('sign-out');
+interface LegacyFoundryAuthResult<TData> {
+	data: TData;
+	error: null;
+}
 
-			if (didSignOut) {
-				rpgm.authToken = null;
-				localStorage.removeItem('rpgm-token');
-				return;
-			}
+interface LegacyFoundryAuthClient {
+	listAccounts(): Promise<LegacyFoundryAuthResult<[]>>;
+	getSession(): Promise<LegacyFoundryAuthResult<null>>;
+	signOut(): Promise<LegacyFoundryAuthResult<{ success: true }>>;
+}
 
-			const authToken = ctx.response.headers.get('set-auth-token');
-			if (authToken) {
-				rpgm.authToken = authToken;
-				localStorage.setItem('rpgm-token', authToken);
-			}
-		},
-		onError: (ctx) => {
-			if (ctx.error.message)
-				rpgm.logger.visible.error(ctx.error.message);
-		}
+function createLegacyAuthResult<TData>(
+	data: TData
+): LegacyFoundryAuthResult<TData> {
+	return {
+		data,
+		error: null
+	};
+}
+
+function clearLegacyAuthToken() {
+	rpgm.authToken = null;
+
+	try {
+		localStorage.removeItem('rpgm-token');
+	} catch {
+		return;
+	}
+}
+
+export const auth: LegacyFoundryAuthClient = {
+	async listAccounts() {
+		return createLegacyAuthResult([] as []);
 	},
-	disableDefaultFetchPlugins: true,
-	plugins: [
-		inferAdditionalFields({
-			user: {
-				legacy: {
-					type: 'boolean',
-					input: false
-				},
-				polyhedrium: {
-					type: 'number',
-					input: false
-				}
-			}
-		}),
-		polarClient(),
-		usernameClient()
-	]
-});
+	async getSession() {
+		return createLegacyAuthResult(null);
+	},
+	async signOut() {
+		clearLegacyAuthToken();
+		return createLegacyAuthResult({ success: true as const });
+	}
+};

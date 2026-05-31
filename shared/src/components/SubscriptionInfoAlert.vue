@@ -9,21 +9,14 @@ const { subscription } = useSubscription();
 </script>
 
 <template>
-	<NAlert
-		:show-icon="false"
-		title="Membership Active"
-		type="success"
-	>
+	<NAlert :show-icon="false" title="Membership Active" type="success">
 		<NFlex vertical>
 			<p>
-				Welcome, {{ subscription?.tierName || 'Member' }}!
-				You can review or change your membership in the hosted RPGM
-				Tools account view.
+				Welcome, {{ subscription?.tierName || 'Member' }}! You can
+				review or change your membership in the hosted RPGM Tools
+				account view.
 			</p>
-			<CustomerPortalButton
-				v-if="showButton"
-				type="success"
-			/>
+			<CustomerPortalButton v-if="showButton" type="success" />
 		</NFlex>
 	</NAlert>
 </template>

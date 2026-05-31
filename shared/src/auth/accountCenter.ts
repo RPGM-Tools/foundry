@@ -7,6 +7,17 @@
 export const FOUNDRY_ACCOUNT_CENTER_PATHNAME = '/settings/';
 export const FOUNDRY_ACCOUNT_CENTER_TAB_HASH = 'account';
 export const FOUNDRY_ACCOUNT_CENTER_SOURCE = 'foundry';
+const DEFAULT_PUBLIC_ACCOUNT_CENTER_BASE_URL = 'https://rpgm.tools';
+
+export const DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL = isAbsoluteUrl(
+	__RPGM_ACCOUNT_WEB_BASE_URL__
+)
+	? __RPGM_ACCOUNT_WEB_BASE_URL__
+	: DEFAULT_PUBLIC_ACCOUNT_CENTER_BASE_URL;
+
+export const DEFAULT_FOUNDRY_ACCOUNT_CENTER_ORIGIN = new URL(
+	DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+).origin;
 
 export type FoundryAccountCenterFocus =
 	| 'session'
@@ -56,6 +67,12 @@ export function createFoundryAccountCenterUrl(input: {
 	}
 
 	return accountCenterUrl.toString();
+}
+
+export function createFoundryAccountCenterHostLabel(
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+): string {
+	return new URL(baseUrl).host;
 }
 
 export function isAbsoluteUrl(value: string): boolean {

@@ -13,14 +13,7 @@ watch(accountBridge.isConnected, () => {
 
 <template>
 	<Transition name="rpgm-fade">
-		<slot
-			v-if="accountBridge.isConnected.value"
-			v-bind="$attrs"
-		/>
-		<slot
-			v-else
-			name="not-signed-in"
-			v-bind="$attrs"
-		/>
+		<slot v-if="accountBridge.isConnected.value" v-bind="$attrs" />
+		<slot v-else name="not-signed-in" v-bind="$attrs" />
 	</Transition>
 </template>

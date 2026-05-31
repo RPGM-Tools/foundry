@@ -13,7 +13,12 @@ import CustomerPortalButton from '#/components/CustomerPortalButton.vue';
 import SubscriptionInfoAlert from '#/components/SubscriptionInfoAlert.vue';
 import SubscriptionWarningAlert from '#/components/SubscriptionWarningAlert.vue';
 import { useResize } from '#/sidebar';
-import { useFocusCheck, useProducts, useSignedInRequired, useSubscription } from '#/util';
+import {
+	useFocusCheck,
+	useProducts,
+	useSignedInRequired,
+	useSubscription
+} from '#/util';
 import ProgressiveImage from '#/util/ProgressiveImage.vue';
 import { LoadingBoundry } from '#/util/useLoading';
 
@@ -28,8 +33,12 @@ type Product = NonNullable<typeof products.value>[number];
 
 const { subscription, update: updateSubscription } = useSubscription();
 
-const subscriptionActive = computed(() => Boolean(subscription.value?.hasActiveMembership));
-const subscriptionCanceling = computed(() => Boolean(subscription.value?.needsAttention));
+const subscriptionActive = computed(() =>
+	Boolean(subscription.value?.hasActiveMembership)
+);
+const subscriptionCanceling = computed(() =>
+	Boolean(subscription.value?.needsAttention)
+);
 
 watch(products, () => {
 	onResize?.(true);
@@ -52,7 +61,9 @@ useSignedInRequired();
 // Disable all buttons while checking out
 const checkingOutLoading = ref(false);
 // const subscriptions = computed(() => data.value?.filter(item => item.isRecurring).sort(sortByPrice));
-const subscriptionProducts = computed(() => products.value?.filter(item => item.isRecurring).sort(sortByPrice));
+const subscriptionProducts = computed(() =>
+	products.value?.filter(item => item.isRecurring).sort(sortByPrice)
+);
 
 const tagSchema = z.object({
 	name: z.string(),
@@ -61,10 +72,7 @@ const tagSchema = z.object({
 });
 
 if (!subscription.value || !products.value) {
-	await Promise.all([
-		updateSubscription(),
-		updateProducts()
-	]);
+	await Promise.all([updateSubscription(), updateProducts()]);
 } else {
 	updateProducts();
 	updateSubscription();
@@ -79,14 +87,17 @@ function getTags(item: Product) {
 				const value = JSON.parse(v as string);
 				const t = tagSchema.parse(value);
 				tags.push({ ...t, id });
-			} catch { ; }
+			} catch {}
 		}
 	}
 	return tags;
 }
 
 function sortByPrice(a: Product, b: Product) {
-	if (a.prices[0].amountType === 'fixed' && b.prices[0].amountType === 'fixed') {
+	if (
+		a.prices[0].amountType === 'fixed' &&
+		b.prices[0].amountType === 'fixed'
+	) {
 		return a.prices[0].priceAmount - b.prices[0].priceAmount;
 	}
 	return 0;
@@ -106,7 +117,6 @@ async function checkout(item: Product) {
 	return Promise.resolve(item.slug);
 }
 
-
 function priceText(prices: Product['prices']) {
 	const price = prices[0];
 	if (price.type === 'recurring' && price.amountType === 'fixed') {
@@ -123,14 +133,16 @@ function formattedDescription(item: Product) {
 
 function hasActiveTier(item: Product) {
 	const activeTierName = subscription.value?.tierName?.trim().toLowerCase();
-	return Boolean(activeTierName && item.name.trim().toLowerCase() === activeTierName);
+	return Boolean(
+		activeTierName && item.name.trim().toLowerCase() === activeTierName
+	);
 }
 </script>
 
 <template>
 	<NCard>
 		<NFlex vertical>
-			<div style="position: relative;">
+			<div style="position: relative">
 				<Transition name="rpgm-fade">
 					<SubscriptionWarningAlert
 						v-if="subscriptionCanceling"
@@ -143,20 +155,20 @@ function hasActiveTier(item: Product) {
 				</Transition>
 			</div>
 			<NCard title="Subscriptions">
-				<NList style="background: transparent;">
+				<NList style="background: transparent">
 					<NListItem
 						v-for="item in subscriptionProducts"
 						:key="item.id"
 					>
-						<NThing
-							:title="item.name"
-							class="shop-item"
-						>
+						<NThing :title="item.name" class="shop-item">
 							<template #avatar>
-								<div style="height: 100%;">
+								<div style="height: 100%">
 									<ProgressiveImage
-										style="object-fit: cover; height: 100%;"
-										:src="getSmallestMedia(item.medias)?.publicUrl"
+										style="object-fit: cover; height: 100%"
+										:src="
+											getSmallestMedia(item.medias)
+												?.publicUrl
+										"
 									/>
 								</div>
 							</template>
@@ -166,12 +178,9 @@ function hasActiveTier(item: Product) {
 							/>
 							<template #description>
 								<NText type="success">
-									{{ priceText(item.prices) }} 
+									{{ priceText(item.prices) }}
 								</NText>
-								<NFlex
-									size="small"
-									class="shop-item-tags"
-								>
+								<NFlex size="small" class="shop-item-tags">
 									<NTooltip
 										v-for="tag in getTags(item)"
 										:key="tag.name"
@@ -179,10 +188,7 @@ function hasActiveTier(item: Product) {
 										<template #trigger>
 											<NTag type="info">
 												{{ tag.name }}
-												<template
-													v-if="tag.icon"
-													#icon
-												>
+												<template v-if="tag.icon" #icon>
 													<NIcon size="medium">
 														<i :class="tag.icon" />
 													</NIcon>
@@ -198,12 +204,22 @@ function hasActiveTier(item: Product) {
 								<LoadingBoundry #="{ loading, start }">
 									<NFlex vertical>
 										<NButton
-											:type="hasActiveTier(item) ? 'success' : 'primary'"
+											:type="
+												hasActiveTier(item)
+													? 'success'
+													: 'primary'
+											"
 											:ghost="hasActiveTier(item)"
 											:loading="loading.value"
 											@click="start(checkout(item))"
 										>
-											{{ hasActiveTier(item) ? 'Membership Active' : subscriptionActive ? 'Manage on RPGM Tools' : 'Open on RPGM Tools' }}
+											{{
+												hasActiveTier(item)
+													? 'Membership Active'
+													: subscriptionActive
+														? 'Manage on RPGM Tools'
+														: 'Open on RPGM Tools'
+											}}
 										</NButton>
 									</NFlex>
 								</LoadingBoundry>
@@ -212,13 +228,8 @@ function hasActiveTier(item: Product) {
 					</NListItem>
 				</NList>
 			</NCard>
-			<NFlex
-				vertical
-			>
-				<CustomerPortalButton
-					size="large"
-					secondary
-				/>
+			<NFlex vertical>
+				<CustomerPortalButton size="large" secondary />
 			</NFlex>
 		</NFlex>
 	</NCard>

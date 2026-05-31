@@ -11,11 +11,103 @@ import { LocalStorageMap } from './settings';
 import { RpgmTools } from './tools';
 
 type VoidPromise = void | Promise<void>;
+type LegacyToolsRuntime = AbstractTools & {
+	modules: Partial<{
+		[ID in keyof FoundryModuleMap]: InstanceType<FoundryModuleMap[ID]>;
+	}>;
+	_init?: () => void | Promise<void>;
+};
+const LEGACY_NAMESPACE_RESERVED_KEYS = new Set([
+	'constructor',
+	'forge',
+	'host',
+	'signals'
+]);
 
 type AbstractConstructor<T> = abstract new (...args: any[]) => T;
 export type FoundryRpgmModule = InstanceType<
 	ReturnType<typeof FoundyRpgmModuleMixin>
 >;
+
+function isLegacyToolsRuntime(value: unknown): value is LegacyToolsRuntime {
+	return Boolean(
+		value &&
+		typeof value === 'object' &&
+		typeof (value as { textAiFromModel?: unknown }).textAiFromModel ===
+			'function' &&
+		typeof (value as { modules?: unknown }).modules === 'object'
+	);
+}
+
+function resolveLegacyToolsRuntime(): LegacyToolsRuntime | undefined {
+	if (isLegacyToolsRuntime(window.rpgmTools)) {
+		return window.rpgmTools;
+	}
+
+	if (isLegacyToolsRuntime(window.rpgm)) {
+		return window.rpgm;
+	}
+
+	return undefined;
+}
+
+function bridgeLegacyToolsRuntimeIntoNamespace(
+	sharedNamespace: RPGM,
+	toolsRuntime: LegacyToolsRuntime
+) {
+	if (sharedNamespace === toolsRuntime) {
+		return;
+	}
+
+	const defineLegacyBridge = (
+		propertyKey: string,
+		descriptor: PropertyDescriptor
+	) => {
+		if (LEGACY_NAMESPACE_RESERVED_KEYS.has(propertyKey)) {
+			return;
+		}
+
+		if ('value' in descriptor && typeof descriptor.value === 'function') {
+			Object.defineProperty(sharedNamespace, propertyKey, {
+				configurable: true,
+				enumerable: descriptor.enumerable ?? true,
+				value: descriptor.value.bind(toolsRuntime),
+				writable: true
+			});
+			return;
+		}
+
+		Object.defineProperty(sharedNamespace, propertyKey, {
+			configurable: true,
+			enumerable: descriptor.enumerable ?? true,
+			get: descriptor.get
+				? descriptor.get.bind(toolsRuntime)
+				: () =>
+						(toolsRuntime as unknown as Record<string, unknown>)[
+							propertyKey
+						],
+			set: descriptor.set
+				? descriptor.set.bind(toolsRuntime)
+				: (value: unknown) => {
+						(toolsRuntime as unknown as Record<string, unknown>)[
+							propertyKey
+						] = value;
+					}
+		});
+	};
+
+	for (const [propertyKey, descriptor] of Object.entries(
+		Object.getOwnPropertyDescriptors(toolsRuntime)
+	)) {
+		defineLegacyBridge(propertyKey, descriptor);
+	}
+
+	for (const [propertyKey, descriptor] of Object.entries(
+		Object.getOwnPropertyDescriptors(Object.getPrototypeOf(toolsRuntime))
+	)) {
+		defineLegacyBridge(propertyKey, descriptor);
+	}
+}
 
 export function FoundyRpgmModuleMixin<
 	C extends AbstractConstructor<
@@ -53,8 +145,11 @@ export function FoundyRpgmModuleMixin<
 			this.DEFAULT_SETTINGS
 		);
 
-		protected override get tools() {
-			return window.rpgm as unknown as AbstractTools;
+		protected override get tools(): LegacyToolsRuntime {
+			return (
+				resolveLegacyToolsRuntime() ??
+				(window.rpgm as unknown as LegacyToolsRuntime)
+			);
 		}
 
 		protected bootstrap = Promise.resolve();
@@ -76,15 +171,33 @@ export function FoundyRpgmModuleMixin<
 			this.logger = RpgmLogger.fromModule(this, {
 				show: FoundryRpgmModule.show
 			});
-			if (!window.rpgm) {
+			let toolsRuntime = resolveLegacyToolsRuntime();
+			const currentModuleIsToolsRuntime = isLegacyToolsRuntime(this);
+
+			if (!toolsRuntime) {
 				this.logger.debug('first');
-				window.rpgm = new RpgmTools();
-				rpgm._init();
+				toolsRuntime = currentModuleIsToolsRuntime
+					? this
+					: (new RpgmTools() as unknown as LegacyToolsRuntime);
+				window.rpgmTools = toolsRuntime;
+
+				if (!window.rpgm) {
+					window.rpgm = toolsRuntime as unknown as typeof window.rpgm;
+				} else {
+					bridgeLegacyToolsRuntimeIntoNamespace(
+						window.rpgm,
+						toolsRuntime
+					);
+				}
+
+				if (!currentModuleIsToolsRuntime) {
+					await toolsRuntime._init?.();
+				}
 			}
 			this.logger
 				.prefixed('')
 				.log(`${this.icon} ${this.name} joined the game`);
-			rpgm.modules[this.id] = this as any;
+			this.tools.modules[this.id] = this as any;
 			await this.init();
 		}
 

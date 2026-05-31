@@ -7,12 +7,12 @@ import type { RpgmTools } from '#/tools';
 import type { RpgmForge } from '../../modules/rpgm-forge/src/forge';
 
 declare module 'vue' {
-	export interface GlobalComponents extends NaiveComponents { }
+	export interface GlobalComponents extends NaiveComponents {}
 }
 
 declare module '@rpgm/tools' {
 	interface TextProvider {
-		hue: string
+		hue: string;
 	}
 }
 
@@ -21,19 +21,35 @@ declare global {
 
 	declare const __MODULE_VERSION__: string;
 	declare const __API_URL__: string;
+	declare const __RPGM_ACCOUNT_WEB_BASE_URL__: string;
 
 	type FoundryModuleMap = {
-		'rpgm-tools': typeof RpgmTools
-		'rpgm-forge': typeof RpgmForge
+		'rpgm-tools': typeof RpgmTools;
+		'rpgm-forge': typeof RpgmForge;
 	};
 
+	interface RPGMLegacyToolsRuntime {
+		modules: Partial<{
+			[ID in keyof FoundryModuleMap]: InstanceType<FoundryModuleMap[ID]>;
+		}>;
+		textAiFromModel(...arguments_: unknown[]): unknown;
+	}
+
 	interface RPGM extends object {
-		forge?: RpgmForge
+		forge?: RpgmForge;
 	}
 
 	interface HookConfig {
-		renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
-		test: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
+		renderTokenHUD: (
+			tokenHud: TokenHUD,
+			html: JQuery<HTMLElement> | HTMLElement,
+			app: Application
+		) => void;
+		test: (
+			tokenHud: TokenHUD,
+			html: JQuery<HTMLElement> | HTMLElement,
+			app: Application
+		) => void;
 	}
 
 	/**
@@ -41,7 +57,12 @@ declare global {
 	 * Essentially the static instance of RpgmModule
 	 */
 	var rpgm: RPGM & RpgmTools;
+	var rpgmTools: RPGMLegacyToolsRuntime | undefined;
 	var game: ReadyGame;
+
+	interface Window {
+		rpgmTools?: RPGMLegacyToolsRuntime;
+	}
 
 	type SidebarMenu = {
 		id: string;
@@ -53,34 +74,58 @@ declare global {
 
 	interface FlagConfig {
 		ChatMessage: {
-			[key in foundry.helpers.ClientSettings.Namespace]
-		}
+			[key in foundry.helpers.ClientSettings.Namespace];
+		};
 	}
 
 	namespace Hooks {
 		interface StaticCallbacks {
-			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
-			renderSettingsConfig: (settingsConfig: SettingsConfig, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
-			renderChatMessageHTML: (message: ChatMessage, html: HTMLElement, context: object) => void
-			'rpgm-init': () => void
-			createToken(tokenDocument: TokenDocument, scene: foundry.abstract.types.DatabaseUpdateOperation, userId: string): void
+			renderTokenHUD: (
+				tokenHud: TokenHUD,
+				html: JQuery<HTMLElement> | HTMLElement,
+				app: Application
+			) => void;
+			renderSettingsConfig: (
+				settingsConfig: SettingsConfig,
+				html: JQuery<HTMLElement> | HTMLElement,
+				app: Application
+			) => void;
+			renderChatMessageHTML: (
+				message: ChatMessage,
+				html: HTMLElement,
+				context: object
+			) => void;
+			'rpgm-init': () => void;
+			createToken(
+				tokenDocument: TokenDocument,
+				scene: foundry.abstract.types.DatabaseUpdateOperation,
+				userId: string
+			): void;
 		}
 
 		interface AllHooks {
-			renderTokenHUD: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
-			test: (tokenHud: TokenHUD, html: JQuery<HTMLElement> | HTMLElement, app: Application) => void
+			renderTokenHUD: (
+				tokenHud: TokenHUD,
+				html: JQuery<HTMLElement> | HTMLElement,
+				app: Application
+			) => void;
+			test: (
+				tokenHud: TokenHUD,
+				html: JQuery<HTMLElement> | HTMLElement,
+				app: Application
+			) => void;
 		}
 	}
 
 	interface CONFIG {
 		RpgmSidebar: {
-			sidebarIcon: string
-			documentClass: typeof RpgmSidebar
-		}
+			sidebarIcon: string;
+			documentClass: typeof RpgmSidebar;
+		};
 	}
 	namespace CONFIG {
 		interface UI {
-			rpgm: foundry.applications.sidebar.AbstractSidebarTab
+			rpgm: foundry.applications.sidebar.AbstractSidebarTab;
 		}
 	}
 
@@ -88,34 +133,34 @@ declare global {
 	 * Override for injecting the Radial Menu into TokenHUD
 	 */
 	interface TokenHUD {
-		menuApp: App
+		menuApp: App;
 	}
 
 	type RenderData = {
-		cssClass?: string,
-		cssId: string,
-		tabName?: string,
+		cssClass?: string;
+		cssId: string;
+		tabName?: string;
 	};
 
 	interface ChatLog {
 		_getEntryContextOptions(): {
-			name: string,
-			icon: string,
-			condition: (li: JQuery | HTMLElement) => boolean
-			callback: (message: ChatMessage) => void
-		}[]
+			name: string;
+			icon: string;
+			condition: (li: JQuery | HTMLElement) => boolean;
+			callback: (message: ChatMessage) => void;
+		}[];
 	}
 }
 
 declare module 'vue-router' {
 	interface RouteMeta {
-		title: string
+		title: string;
 		menu?: {
-			icon: string
-			color: string
-			index?: number
-		}
+			icon: string;
+			color: string;
+			index?: number;
+		};
 	}
 }
 
-export { };
+export {};

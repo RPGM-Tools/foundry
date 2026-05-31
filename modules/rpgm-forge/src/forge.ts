@@ -300,7 +300,7 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 
 	useTextLimit = createGlobalState(async () => {
 		const accountBridge = useFoundryAccountBridge();
-		const textLimit = ref(0);
+		const textLimit = ref<number | null>(null);
 
 		const hasManagedForgeConnection = computed(() => {
 			return (
@@ -315,12 +315,14 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 			// stays intentionally cut so bridge-release parity does not depend on
 			// the old Better Auth client remaining alive.
 			const accountBackedUsage =
-				await loadAccountBackedForgeUsageSnapshot();
+				await loadAccountBackedForgeUsageSnapshot(__API_URL__);
 
 			if (accountBackedUsage) {
 				textLimit.value = accountBackedUsage.overLimit
 					? 0
-					: Math.max(0, accountBackedUsage.remaining ?? 0);
+					: accountBackedUsage.remaining === null
+						? null
+						: Math.max(0, accountBackedUsage.remaining);
 				return textLimit.value;
 			}
 
@@ -329,8 +331,13 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 			return textLimit.value;
 		};
 
-		const decrement = () =>
-			(textLimit.value = Math.max(0, textLimit.value - 1));
+		const decrement = () => {
+			if (textLimit.value === null) {
+				return null;
+			}
+
+			return (textLimit.value = Math.max(0, textLimit.value - 1));
+		};
 
 		watch(
 			hasManagedForgeConnection,

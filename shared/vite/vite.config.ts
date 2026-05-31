@@ -26,11 +26,37 @@ export default function defaultConfig(
 		process.env.VITE_FOUNDRY_URL ??
 		env.RPGM_FOUNDRY_URL ??
 		env.VITE_FOUNDRY_URL;
+	const stewardUrl =
+		process.env.RPGM_STEWARD_URL ??
+		env.RPGM_STEWARD_URL ??
+		'https://rpgm-steward-dev.rpgm-tools.workers.dev';
+	const accountWebBaseUrl =
+		process.env.RPGM_ACCOUNT_WEB_BASE_URL ??
+		env.RPGM_ACCOUNT_WEB_BASE_URL ??
+		'https://rpgm.tools';
+	const stewardDevAccessKey =
+		process.env.RPGM_STEWARD_DEV_ACCESS_KEY ??
+		process.env.STEWARD_DEV_ACCESS_KEY ??
+		env.RPGM_STEWARD_DEV_ACCESS_KEY ??
+		env.STEWARD_DEV_ACCESS_KEY;
+	const stewardProxyHeaders = stewardDevAccessKey
+		? {
+				'x-steward-dev-access-key': stewardDevAccessKey
+			}
+		: undefined;
+	const stewardProxyOptions = {
+		target: stewardUrl,
+		changeOrigin: true,
+		...(stewardProxyHeaders ? { headers: stewardProxyHeaders } : {})
+	};
 	const apiUrl =
 		process.env.RPGM_API_URL ??
 		process.env.VITE_RPGM_URL ??
 		env.RPGM_API_URL ??
 		env.VITE_RPGM_URL ??
+		(mode === 'development' && foundryUrl
+			? `http://${process.env.RPGM_DEV_HOST ?? env.RPGM_DEV_HOST ?? '127.0.0.1'}:${process.env.RPGM_DEV_PORT ?? env.RPGM_DEV_PORT ?? '30001'}`
+			: undefined) ??
 		'https://rpgm.tools';
 	const devHost =
 		process.env.RPGM_DEV_HOST ?? env.RPGM_DEV_HOST ?? '127.0.0.1';
@@ -58,6 +84,29 @@ export default function defaultConfig(
 			allowedHosts: true,
 			proxy: foundryUrl
 				? {
+						'/api/forge/chat/completions': {
+							...stewardProxyOptions,
+							rewrite: () => '/api/v1/forge/chat-completions'
+						},
+						'/api/forge/usage': {
+							...stewardProxyOptions,
+							rewrite: () => '/api/v1/forge/usage'
+						},
+						'/api/forge/managed-catalog': {
+							...stewardProxyOptions,
+							rewrite: () => '/api/v1/forge/managed-catalog'
+						},
+						'/api/forge/responses': {
+							...stewardProxyOptions,
+							rewrite: () => '/api/v1/forge/responses'
+						},
+						'/api/forge/images': {
+							...stewardProxyOptions,
+							rewrite: () => '/api/v1/forge/images'
+						},
+						'/api/v1/forge': {
+							...stewardProxyOptions
+						},
 						[`^(?!/modules/${id})`]: `http://${foundryUrl}`,
 						// [`^(/modules/${id}/lang)`]: `http://${foundryUrl}`,
 						'/socket.io': {
@@ -78,6 +127,7 @@ export default function defaultConfig(
 		define: {
 			__MODULE_VERSION__: `"${version}"`,
 			__API_URL__: JSON.stringify(apiUrl),
+			__RPGM_ACCOUNT_WEB_BASE_URL__: JSON.stringify(accountWebBaseUrl),
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		},
 		assetsInclude: ['**/*.glsl'],

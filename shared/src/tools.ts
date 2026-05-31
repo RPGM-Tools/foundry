@@ -3,6 +3,7 @@ import { createGlobalState, useAsyncState } from '@vueuse/core';
 
 import {
 	ACCOUNT_SESSION_TOKEN_HEADER_NAME,
+	consumeFoundryAccountSessionReturnFromUrl,
 	readStoredFoundryAccountSessionToken
 } from './auth/accountBridge';
 import { auth } from './auth';
@@ -15,8 +16,14 @@ import { RpgmSidebarManager } from './sidebar';
 import { api } from './style/theme';
 import { usePolyhedriumBalance } from './util/usePolyhedriumBalance';
 
-export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, AbstractTools.Settings>(AbstractTools) {
-	protected override get rpgmTextAiOptions(): { baseURL: string; apiKey: string; } {
+export class RpgmTools extends FoundyRpgmModuleMixin<
+	typeof AbstractTools,
+	AbstractTools.Settings
+>(AbstractTools) {
+	protected override get rpgmTextAiOptions(): {
+		baseURL: string;
+		apiKey: string;
+	} {
 		return {
 			// Legacy `@rpgm/tools` still expects an auth token string here. During
 			// the bridge release, old Forge feeds the Steward snapshot token through
@@ -38,7 +45,9 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 	notification = api.notification;
 
 	/** A record of all currently active and registered RPGM modules, keyed by their unique IDs. */
-	modules: Partial<{ [ID in keyof FoundryModuleMap]: InstanceType<FoundryModuleMap[ID]> }> = {};
+	modules: Partial<{
+		[ID in keyof FoundryModuleMap]: InstanceType<FoundryModuleMap[ID]>;
+	}> = {};
 
 	/** Manages the registration and display of radial menu entries. */
 	radialMenu: RadialMenuRegister;
@@ -49,15 +58,34 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 	usePolyhedriumBalance = usePolyhedriumBalance;
 
 	useUserInfo = createGlobalState(() => {
-		const { isLoading, state: userInfo, execute: update } = useAsyncState(() => this.getApiUserInfo(), null, {
-			immediate: false, resetOnExecute: false
+		const {
+			isLoading,
+			state: userInfo,
+			execute: update
+		} = useAsyncState(() => this.getApiUserInfo(), null, {
+			immediate: false,
+			resetOnExecute: false
 		});
 		return {
-			isLoading, userInfo, update
+			isLoading,
+			userInfo,
+			update
 		};
 	});
 
 	protected override init(): void | Promise<void> {
+		consumeFoundryAccountSessionReturnFromUrl();
+		globalThis.addEventListener?.('focus', () => {
+			consumeFoundryAccountSessionReturnFromUrl();
+		});
+		globalThis.addEventListener?.('pageshow', () => {
+			consumeFoundryAccountSessionReturnFromUrl();
+		});
+		globalThis.addEventListener?.('visibilitychange', () => {
+			if (globalThis.document?.visibilityState === 'visible') {
+				consumeFoundryAccountSessionReturnFromUrl();
+			}
+		});
 		this.settings.get('textProviders');
 		this.majorGameVersion = game.data.release.generation;
 		this.client.interceptors.request.use(request => {
@@ -130,11 +158,13 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 		};
 
 		const splitJustify = (s: string) => {
-			const [left, right] = s.split('%s', 2) as [string] | [string, string];
+			const [left, right] = s.split('%s', 2) as
+				| [string]
+				| [string, string];
 			const spaces = Math.floor(48 - left.length);
 			return `${left}${right?.padStart(spaces) || ''} `;
 		};
-		const asciiArt = (String.raw`
+		const asciiArt = String.raw`
  ____  ____   ____ __  __  _              _
 |  _ \|  _ \ / ___|  \/  || |_ ___   ___ | |___
 | |_) | |_) | |  _| |/\| || __/ _ \ / _ \| / __|
@@ -142,7 +172,12 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 |_| \_\_|    \____|_|  |_(_)__\___/ \___/|_|___/
 ————————————————————————————————————————————————
 ${center('© 2025 RPGM Tools, LLC')}
-${Object.values(rpgm.modules).map(m => splitJustify(` ${m.icon} ${m.name} %s v${m.version} `)).join('\n')} `).slice(1);
-		rpgm.logger.prefixed('').styled('color: #d44e7b; font-weight: bold;').log(asciiArt);
+${Object.values(rpgm.modules)
+	.map(m => splitJustify(` ${m.icon} ${m.name} %s v${m.version} `))
+	.join('\n')} `.slice(1);
+		rpgm.logger
+			.prefixed('')
+			.styled('color: #d44e7b; font-weight: bold;')
+			.log(asciiArt);
 	}
 }

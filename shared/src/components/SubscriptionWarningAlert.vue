@@ -9,11 +9,7 @@ const { subscription } = useSubscription();
 </script>
 
 <template>
-	<NAlert
-		:show-icon="false"
-		title="Membership Canceled"
-		type="warning"
-	>
+	<NAlert :show-icon="false" title="Membership Canceled" type="warning">
 		<NFlex vertical>
 			<p>
 				Your
@@ -24,10 +20,7 @@ const { subscription } = useSubscription();
 				Use the account page to review membership details and make any
 				needed changes.
 			</p>
-			<CustomerPortalButton
-				v-if="showButton"
-				type="warning"
-			/>
+			<CustomerPortalButton v-if="showButton" type="warning" />
 		</NFlex>
 	</NAlert>
 </template>

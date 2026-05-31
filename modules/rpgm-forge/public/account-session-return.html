@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>RPGM Tools Account Return</title>
+	</head>
+	<body>
+		<script>
+			(function () {
+				const storageKey = 'rpgm.foundry.profileSnapshotToken';
+				const currentUrl = new URL(window.location.href);
+				const hash = currentUrl.hash.startsWith('#')
+					? currentUrl.hash.slice(1)
+					: currentUrl.hash;
+				const hashParams = new URLSearchParams(hash);
+				const accountSessionToken =
+					hashParams.get('accountSessionToken') ||
+					hashParams.get('foundryProfileSnapshotToken');
+				const redirectUrl = currentUrl.searchParams.get('redirectUrl');
+
+				try {
+					if (accountSessionToken) {
+						window.localStorage.setItem(
+							storageKey,
+							accountSessionToken
+						);
+					}
+				} catch {
+					// Ignore storage failures and continue to the redirect fallback.
+				}
+
+				let nextUrl = new URL('/game', currentUrl.origin);
+
+				if (redirectUrl) {
+					try {
+						const candidateUrl = new URL(
+							redirectUrl,
+							currentUrl.origin
+						);
+						if (candidateUrl.origin === currentUrl.origin) {
+							nextUrl = candidateUrl;
+						}
+					} catch {
+						// Keep the default /game fallback.
+					}
+				}
+
+				if (window.opener && !window.opener.closed) {
+					try {
+						window.close();
+						return;
+					} catch {
+						// Fall through to same-tab navigation if the popup cannot close.
+					}
+				}
+
+				window.location.replace(nextUrl.toString());
+			})();
+		</script>
+	</body>
+</html>
