@@ -10,12 +10,6 @@ declare module 'vue' {
 	export interface GlobalComponents extends NaiveComponents {}
 }
 
-declare module '@rpgm/tools' {
-	interface TextProvider {
-		hue: string;
-	}
-}
-
 declare global {
 	declare module '*.vue';
 

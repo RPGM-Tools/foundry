@@ -9,7 +9,7 @@ import { argument, literal, string } from 'brigadier-ts-lite';
 import ISO639 from 'iso-639-1';
 import { NButton } from 'naive-ui';
 import { ResultAsync } from 'neverthrow';
-import type { AbstractRpgmModule, IRpgmModule, ModuleMap } from '@rpgm/tools';
+import type { AbstractRpgmModule, IRpgmModule, ModuleMap } from '#/module';
 import { h, type Component } from 'vue';
 
 import {
@@ -61,8 +61,7 @@ import ForgeSidebar from './sidebar/ForgeSidebar.vue';
 
 type LegacyFoundryForgeBaseForMixin = abstract new (
 	...args: any[]
-) =>
-	AbstractRpgmModule<LegacyFoundryForgeSettings> &
+) => AbstractRpgmModule<LegacyFoundryForgeSettings> &
 	IRpgmModule<keyof ModuleMap, LegacyFoundryForgeSettings> &
 	LegacyFoundryForgeBase;
 

@@ -1,4 +1,4 @@
-import type { RPGMLogger } from '@rpgm/tools';
+import type { RpgmLogger } from '#/logger';
 
 declare global {
 	// List of valid category strings, to be merged by modules
@@ -8,14 +8,14 @@ declare global {
 
 	type RadialMenuCategoryOptions = {
 		color: string
-		logger: RPGMLogger
+		logger: RpgmLogger
 	};
 
 	interface RadialButton<T = ButtonContext> {
 		category: RadialMenuCategoryOptions
 		icon: string
 		tooltip: RpgmLangs
-		logger: RPGMLogger
+		logger: RpgmLogger
 		detective?: (context: T) => boolean
 		callback: (context: T) => Promise<void> | void
 	}

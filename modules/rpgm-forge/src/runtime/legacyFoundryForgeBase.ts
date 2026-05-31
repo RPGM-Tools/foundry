@@ -5,26 +5,12 @@
  *          `@rpgm/tools/forge` dependency.
  * Last Updated: 2026-05-31
  */
-import {
-	RpgmLogger,
-	type AbstractRpgmModule,
-	type IRpgmModule,
-	type TextProvider
-} from '@rpgm/tools';
+import { RpgmLogger } from '#/logger';
+import type { AbstractRpgmModule, IRpgmModule } from '#/module';
+import type { TextProvider } from '#/tools';
 import { AbstractRpgmModule as AbstractRpgmModuleValue } from '../../../../node_modules/@rpgm/tools/dist/shared/src/module.js';
-import {
-	generateObject,
-	generateText,
-	jsonSchema,
-	type JSONSchema7
-} from 'ai';
-import {
-	err,
-	errAsync,
-	ok,
-	ResultAsync,
-	type Result
-} from 'neverthrow';
+import { generateObject, generateText, jsonSchema, type JSONSchema7 } from 'ai';
+import { err, errAsync, ok, ResultAsync, type Result } from 'neverthrow';
 import slugify from 'slugify';
 
 import {
@@ -82,10 +68,7 @@ class LegacyForgeQueue {
 	}
 
 	private async process() {
-		while (
-			this.queue.length > 0 &&
-			this.processing < this.maxConcurrency
-		) {
+		while (this.queue.length > 0 && this.processing < this.maxConcurrency) {
 			this.processing++;
 			let doneCalled = false;
 			const { item, cb, options } = this.queue.shift()!;
@@ -204,11 +187,8 @@ async function ensureOfflineNamesLoaded() {
 	}
 
 	offlineNamesData = (
-		await import(
-			'../../../../node_modules/@rpgm/tools/dist/tools/forge/data/names-list.json'
-		)
-	)
-		.default as typeof offlineNamesData;
+		await import('../../../../node_modules/@rpgm/tools/dist/tools/forge/data/names-list.json')
+	).default as typeof offlineNamesData;
 
 	for (const name of offlineNamesData.names) {
 		const bucket =
@@ -222,7 +202,9 @@ async function ensureOfflineNamesLoaded() {
 	}
 }
 
-function generateOfflineNames(options: NamesOptions): ResultAsync<Names, Error> {
+function generateOfflineNames(
+	options: NamesOptions
+): ResultAsync<Names, Error> {
 	return ResultAsync.fromPromise(
 		(async () => {
 			await ensureOfflineNamesLoaded();
@@ -256,9 +238,7 @@ function generateOfflineNames(options: NamesOptions): ResultAsync<Names, Error> 
 async function ensureAdjectivesLoaded() {
 	if (!adjectiveDictionary) {
 		adjectiveDictionary = (
-			await import(
-				'../../../../node_modules/@rpgm/tools/dist/tools/forge/data/adjectives-list.json'
-			)
+			await import('../../../../node_modules/@rpgm/tools/dist/tools/forge/data/adjectives-list.json')
 		).default.adjectives as string[];
 	}
 }
@@ -282,10 +262,7 @@ function pickUniqueAdjectives(count: number): string[] {
 			continue;
 		}
 
-		if (
-			recentAdjectives.includes(adjective) &&
-			Math.random() < 0.7
-		) {
+		if (recentAdjectives.includes(adjective) && Math.random() < 0.7) {
 			continue;
 		}
 
@@ -330,9 +307,7 @@ async function ensureNamesPromptDictionariesLoaded() {
 
 	if (!namesPromptDictionary) {
 		namesPromptDictionary = (
-			await import(
-				'../../../../node_modules/@rpgm/tools/dist/tools/forge/data/names-list.json'
-			)
+			await import('../../../../node_modules/@rpgm/tools/dist/tools/forge/data/names-list.json')
 		).default as NamesData;
 	}
 }
@@ -478,7 +453,11 @@ function generateLegacyNames(
 		const examples = pickNameExamples(
 			Math.min(4, Math.max(1, options.quantity))
 		);
-		const instruction = buildNamesInstruction(options, adjectives, examples);
+		const instruction = buildNamesInstruction(
+			options,
+			adjectives,
+			examples
+		);
 		const userMessage = buildNamesUserMessage(options, instruction);
 
 		return generateText({
@@ -530,13 +509,16 @@ function buildDescriptionPrompt(options: DescriptionsOptions): string {
 
 	switch (options.length) {
 		case 'short':
-			prompt += 'The description should be a short blurb, up to 4 sentences.\n';
+			prompt +=
+				'The description should be a short blurb, up to 4 sentences.\n';
 			break;
 		case 'medium':
-			prompt += 'The description should be short, up to 2 paragraphs of ~4 sentences each.\n';
+			prompt +=
+				'The description should be short, up to 2 paragraphs of ~4 sentences each.\n';
 			break;
 		case 'extensive':
-			prompt += 'The description should be long and detailed, up to 4 paragraphs of ~4 sentences each.\n';
+			prompt +=
+				'The description should be long and detailed, up to 4 paragraphs of ~4 sentences each.\n';
 			break;
 	}
 
@@ -570,7 +552,10 @@ function generateLegacyDescriptions(
 		return errAsync(new Error('No descriptions model configured.'));
 	}
 
-	const model = this.tools.textAiFromModel.call(this.tools, descriptionsModel);
+	const model = this.tools.textAiFromModel.call(
+		this.tools,
+		descriptionsModel
+	);
 	if (model.isErr()) {
 		return errAsync(model.error);
 	}
@@ -698,16 +683,21 @@ function generateLegacyHomebrew(
 						description:
 							'The various fields to generate content for',
 						additionalProperties: false,
-						properties: Object.entries(options.schema.fields).reduce(
+						properties: Object.entries(
+							options.schema.fields
+						).reduce(
 							(
 								accumulator: { [key: string]: JSONSchema7 },
 								[, field]
 							) => {
-								accumulator[slugify(field.name, { lower: true })] = {
+								accumulator[
+									slugify(field.name, { lower: true })
+								] = {
 									title: field.name,
 									description: field.description,
 									type:
-										field.type === 'short' || field.type === 'long'
+										field.type === 'short' ||
+										field.type === 'long'
 											? 'string'
 											: field.type
 								};

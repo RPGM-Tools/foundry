@@ -4,9 +4,8 @@
 	Dependencies: Uses the shared Foundry account bridge so model warnings follow the Steward-backed account lane instead of the legacy Better Auth session.
 -->
 <script setup lang="ts">
-import type { TextProvider } from '@rpgm/tools';
-import { type TextModel } from '@rpgm/tools';
 import { RPGM_MODELS } from '#/forgeCompat';
+import type { TextModel, TextProvider } from '#/tools';
 
 import { useFoundryAccountBridge } from '#/auth/accountBridge';
 import RadialCenter from '#/radial-menu/RadialCenter.vue';

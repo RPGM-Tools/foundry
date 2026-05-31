@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { TextProvider } from '@rpgm/tools';
-import { DIY_PROVIDERS } from '@rpgm/tools';
+import { DIY_PROVIDERS, type TextProvider } from '#/tools';
 import { useThrottleFn } from '@vueuse/core';
 import type { SelectOption } from 'naive-ui';
 import { onBeforeRouteLeave } from 'vue-router';

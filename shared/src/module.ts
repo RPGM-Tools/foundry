@@ -1,14 +1,58 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type {
-	AbstractRpgmModule,
-	AbstractTools,
-	IRpgmModule,
-	ModuleMap
-} from '@rpgm/tools';
-import { RpgmLogger } from '@rpgm/tools';
+import type { ShallowRef } from 'vue';
+import type { AbstractTools } from './tools';
+
+import { RpgmLogger } from './logger';
 
 import { LocalStorageMap } from './settings';
 import { RpgmTools } from './tools';
+
+export type ModuleMap = FoundryModuleMap;
+
+export interface SettingsMap<T extends object> {
+	get<K extends keyof T>(key: K, defaultValue?: T[K]): T[K];
+	ref<K extends keyof T>(key: K, defaultValue?: T[K]): ShallowRef<T[K]>;
+	set<K extends keyof T>(key: K, value: T[K]): this;
+	delete(key: keyof T): void;
+}
+
+type AbstractConstructor<T> = abstract new (...args: any[]) => T;
+
+export namespace AbstractRpgmModule {
+	export type ModuleSettings = object;
+}
+
+export type RealizedRpgmModule<
+	ID extends keyof ModuleMap = keyof ModuleMap,
+	Settings extends AbstractRpgmModule.ModuleSettings =
+		AbstractRpgmModule.ModuleSettings
+> = IRpgmModule<ID, Settings> & AbstractRpgmModule<Settings>;
+
+export type RpgmModuleConstructor = AbstractConstructor<RealizedRpgmModule> &
+	Omit<typeof AbstractRpgmModule, 'prototype'>;
+
+export interface IRpgmModule<
+	ID extends keyof ModuleMap = keyof ModuleMap,
+	Settings extends AbstractRpgmModule.ModuleSettings =
+		AbstractRpgmModule.ModuleSettings
+> {
+	readonly id: ID;
+	icon: string;
+	name: string;
+	logger: RpgmLogger;
+	DEFAULT_SETTINGS: Settings;
+}
+
+export abstract class AbstractRpgmModule<
+	Settings extends AbstractRpgmModule.ModuleSettings
+> {
+	abstract readonly settings: SettingsMap<Settings>;
+
+	protected abstract get tools(): AbstractTools;
+
+	abstract save(data: Settings): void;
+	abstract load(): Settings | null;
+}
 
 type VoidPromise = void | Promise<void>;
 type LegacyToolsRuntime = AbstractTools & {
@@ -23,8 +67,6 @@ const LEGACY_NAMESPACE_RESERVED_KEYS = new Set([
 	'host',
 	'signals'
 ]);
-
-type AbstractConstructor<T> = abstract new (...args: any[]) => T;
 export type FoundryRpgmModule = InstanceType<
 	ReturnType<typeof FoundyRpgmModuleMixin>
 >;
