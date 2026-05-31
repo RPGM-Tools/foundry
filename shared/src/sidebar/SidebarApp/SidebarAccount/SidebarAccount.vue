@@ -31,7 +31,7 @@ watch(
 				/>
 				<SignIn v-else />
 			</div>
-			<IHaveMyOwnAI />
+			<IHaveMyOwnAI v-if="!accountBridge.isConnected.value" />
 		</NFlex>
 	</NCard>
 </template>

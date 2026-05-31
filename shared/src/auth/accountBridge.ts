@@ -319,7 +319,7 @@ function createUsageReadinessSummary(
 		return `${remaining} of ${limit} managed runs remain in the current visible allowance.`;
 	}
 
-	return 'No managed Forge usage summary is visible yet.';
+	return 'Managed Forge usage is not visible in this Foundry session yet.';
 }
 
 function readEconomyState(
@@ -1079,19 +1079,32 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		void refresh();
 	};
 
-	const openConnectOrCreateAccount = async () => {
-		if (await trySilentConnectFromActiveBrowserSession()) {
+	const openConnectOrCreateAccount = () => {
+		if (snapshot.value.status === 'available') {
+			notice.value = {
+				kind: 'info',
+				message:
+					'Your RPGM Tools account is already connected in this Foundry session.'
+			};
 			return;
 		}
 
-		if (!openAccountCenter({ focus: 'session' })) {
+		if (openAccountCenter({ focus: 'session' })) {
+			return;
+		}
+
+		void trySilentConnectFromActiveBrowserSession().then(connected => {
+			if (connected) {
+				return;
+			}
+
 			stopWatchingForReturn();
 			notice.value = {
 				kind: 'warning',
 				message:
 					'Foundry could not open the RPGM Tools account sign-in flow just now.'
 			};
-		}
+		});
 	};
 
 	const openAccountSettings = () => {
