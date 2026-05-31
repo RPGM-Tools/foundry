@@ -1,14 +1,21 @@
+<!--
+	File: ForgeSidebarByoAI.vue
+	Purpose: Pick Forge text-model lanes and warn when the current Foundry session is not connected to a managed RPGM Tools account.
+	Dependencies: Uses the legacy Better Auth session and the shared Foundry account bridge so model warnings follow either valid account lane.
+-->
 <script setup lang="ts">
 import type { TextProvider} from '@rpgm/tools';
 import { type TextModel } from '@rpgm/tools';
 import { RPGM_MODELS } from '@rpgm/tools/forge';
 
+import { useFoundryAccountBridge } from '#/auth/accountBridge';
 import RadialCenter from '#/radial-menu/RadialCenter.vue';
 import DiceIcon from '#/style/components/DiceIcon.vue';
 
 import ModeSwitcher from './ModeSwitcher.vue';
 
 const session = rpgm.auth.useSession();
+const accountBridge = useFoundryAccountBridge();
 
 const names = rpgm.forge.settings.ref('namesModel');
 const descriptions = rpgm.forge.settings.ref('descriptionsModel');
@@ -20,12 +27,18 @@ const anyRpgmSelected = computed(() => {
 		|| homebrew.value?.provider === 'rpgm-tools';
 });
 
+const hasManagedForgeConnection = computed(() => {
+	return session.value.data !== null
+		|| accountBridge.isConnected.value
+		|| accountBridge.hasStoredSnapshotToken.value;
+});
+
 const getProvider = (id: string) => {
 	const p = rpgm.settings.get('textProviders').find(p => p.id === id);
 	return p;
 };
 
-const handleRpgmIcon = (icon: 'rpgm' | 'basic' | 'offline') => icon === 'rpgm' && !session.value.data ? 'warning' as const : icon;
+const handleRpgmIcon = (icon: 'rpgm' | 'basic' | 'offline') => icon === 'rpgm' && !hasManagedForgeConnection.value ? 'warning' as const : icon;
 
 function hydrateModelList(TextProviders: TextProvider[], models: ModelOption[]) {
 	return TextProviders.reduce((acc, provider) => {
@@ -126,28 +139,21 @@ const homebrewModel = ref<ModelOption>(homebrew.value ? {
 					Reasoning models will consume more tokens.
 				</NText>
 			</NP>
-			<NCollapseTransition :show="anyRpgmSelected && !session.data">
+			<NCollapseTransition :show="anyRpgmSelected && !hasManagedForgeConnection">
 				<NAlert
 					:show-icon="false"
 					type="warning"
 				>
 					<NFlex vertical>
-						You have selected an RPGM model, but you are not signed in.
-						Please sign in to use RPGM Tools models.
-						<RouterLink
-							to="/account?back=true"
-							custom
-							#="{ navigate }"
+						You have selected an RPGM Tools model, but this Foundry session is not connected to an RPGM Tools account.
+						Connect your RPGM Tools account to use Steward-backed Forge models and managed usage.
+						<NButton
+							type="warning"
+							secondary
+							@click="accountBridge.openConnectOrCreateAccount()"
 						>
-							<NButton
-								type="warning"
-								secondary
-								@click="navigate"
-							>
-								Sign
-								In
-							</NButton>
-						</RouterLink>
+							Connect RPGM Tools Account
+						</NButton>
 					</NFlex>
 				</NAlert>
 			</NCollapseTransition>

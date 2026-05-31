@@ -12,6 +12,10 @@ import ISO639 from 'iso-639-1';
 import { NButton } from 'naive-ui';
 import { h, type Component } from 'vue';
 
+import {
+	loadAccountBackedForgeUsageSnapshot,
+	useFoundryAccountBridge
+} from '#/auth/accountBridge';
 import { ChatWizard } from '#/chat/ChatWizard';
 import { FoundyRpgmModuleMixin } from '#/module';
 import { inputHeuristics, shimmerInput, writeOn } from '#/radial-menu';
@@ -289,20 +293,58 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 
 	useTextLimit = createGlobalState(async () => {
 		const session = rpgm.auth.useSession();
+		const accountBridge = useFoundryAccountBridge();
 		const textLimit = ref(0);
-		if (session.value) {
-			const limit = await this.getApiForgeUsage();
-			if (typeof limit.data === 'number') textLimit.value = limit.data;
-		}
-		const decrement = () =>
-			(textLimit.value = Math.max(0, textLimit.value - 1));
+
+		const hasManagedForgeConnection = computed(() => {
+			return (
+				session.value.data !== null ||
+				accountBridge.isConnected.value ||
+				accountBridge.hasStoredSnapshotToken.value
+			);
+		});
+
 		const update = async () => {
-			const limit = await this.getApiForgeUsage();
-			if (typeof limit.data === 'number') textLimit.value = limit.data;
+			// Prefer the Steward-backed snapshot-token lane first so old Forge can
+			// follow the new account bridge without waiting on the legacy bearer path.
+			const accountBackedUsage =
+				await loadAccountBackedForgeUsageSnapshot();
+
+			if (accountBackedUsage) {
+				textLimit.value = accountBackedUsage.overLimit
+					? 0
+					: Math.max(0, accountBackedUsage.remaining ?? 0);
+				return textLimit.value;
+			}
+
+			if (session.value.data !== null) {
+				const limit = await this.getApiForgeUsage();
+				if (typeof limit.data === 'number') {
+					textLimit.value = limit.data;
+				}
+			}
+
 			return textLimit.value;
 		};
+
+		const decrement = () =>
+			(textLimit.value = Math.max(0, textLimit.value - 1));
+
+		watch(
+			hasManagedForgeConnection,
+			isConnected => {
+				if (!isConnected) {
+					textLimit.value = 0;
+					return;
+				}
+
+				void update();
+			},
+			{ immediate: true }
+		);
+
 		const textLimitValue = computed(() => {
-			if (session.value.data === null) return 0;
+			if (!hasManagedForgeConnection.value) return 0;
 			return textLimit.value;
 		});
 		return { textLimit: textLimitValue, updateTextLimit: update, decrement };

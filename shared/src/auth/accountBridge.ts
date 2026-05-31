@@ -1,3 +1,9 @@
+/**
+ * File: accountBridge.ts
+ * Purpose: Manage Foundry-side RPGM Tools account snapshots and account-backed Forge usage reads.
+ * Notes: Keeps the legacy Foundry bridge on the same snapshot-token lane as the shared account center and Steward-backed Forge usage endpoints.
+ */
+
 import { createGlobalState } from '@vueuse/core';
 
 import { createFoundryAccountCenterUrl } from './accountCenter';
@@ -5,8 +11,9 @@ import { createFoundryAccountCenterUrl } from './accountCenter';
 const DEFAULT_PUBLIC_WEB_BASE_URL = 'https://rpgm.tools';
 const ACCOUNT_PROFILE_PATHNAME = '/api/v1/account/profile';
 const ACCOUNT_SESSION_TOKEN_PATHNAME = '/api/v1/account/profile-snapshot-token';
-const ACCOUNT_SESSION_TOKEN_HEADER_NAME = 'x-rpgm-account-session-token';
-const FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY =
+export const ACCOUNT_SESSION_TOKEN_HEADER_NAME =
+	'x-rpgm-account-session-token';
+export const FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY =
 	'rpgm.foundry.profileSnapshotToken';
 const RETURN_REFRESH_POLL_INTERVAL_MS = 1500;
 const RETURN_REFRESH_POLL_TIMEOUT_MS = 45000;
@@ -41,6 +48,13 @@ export interface FoundryAccountBridgeSnapshot {
 	membershipSummary: string;
 	usageReadinessSummary: string;
 	economySummary: string;
+}
+
+export interface FoundryAccountBackedForgeUsageSnapshot {
+	used: number;
+	limit: number | null;
+	remaining: number | null;
+	overLimit: boolean;
 }
 
 function normalizeOptionalText(value: unknown): string | null {
@@ -87,7 +101,7 @@ function createSignedOutSnapshot(): FoundryAccountBridgeSnapshot {
 	return {
 		status: 'signed-out',
 		sourceSummary:
-			'No RPGM Tools account is connected in this Foundry session yet.',
+			'No RPGM Tools account is connected in this Foundry session.',
 		displayName: 'Open your RPGM Tools account to sign in or create one.',
 		profileSummary: 'Profile changes stay on rpgm.tools.',
 		visibilitySummary:
@@ -309,6 +323,10 @@ function readStoredSnapshotToken(): string | null {
 	}
 }
 
+export function readStoredFoundryAccountSessionToken(): string | null {
+	return readStoredSnapshotToken();
+}
+
 function writeStoredSnapshotToken(token: string | null) {
 	try {
 		if (token) {
@@ -324,6 +342,91 @@ function writeStoredSnapshotToken(token: string | null) {
 		);
 	} catch {
 		return;
+	}
+}
+
+export function clearStoredFoundryAccountSessionToken() {
+	writeStoredSnapshotToken(null);
+}
+
+function normalizeAccountBackedForgeUsageSnapshot(
+	payload: unknown
+): FoundryAccountBackedForgeUsageSnapshot | null {
+	const typedPayload = payload as {
+		used?: unknown;
+		limit?: unknown;
+		remaining?: unknown;
+		overLimit?: unknown;
+	};
+	const used = normalizeFiniteNumber(typedPayload?.used);
+	const overLimit =
+		typeof typedPayload?.overLimit === 'boolean'
+			? typedPayload.overLimit
+			: null;
+
+	if (used === null || overLimit === null) {
+		return null;
+	}
+
+	return {
+		used,
+		limit: normalizeFiniteNumber(typedPayload.limit),
+		remaining: normalizeFiniteNumber(typedPayload.remaining),
+		overLimit
+	};
+}
+
+export async function loadAccountBackedForgeUsageSnapshot(
+	baseUrl: string | URL = DEFAULT_PUBLIC_WEB_BASE_URL
+): Promise<FoundryAccountBackedForgeUsageSnapshot | null> {
+	const fetchImplementation =
+		typeof globalThis.fetch === 'function'
+			? globalThis.fetch.bind(globalThis)
+			: null;
+
+	if (!fetchImplementation) {
+		return null;
+	}
+
+	const accountSessionToken = readStoredSnapshotToken();
+	const requestHeaders = new Headers({
+		accept: 'application/json'
+	});
+
+	if (accountSessionToken) {
+		requestHeaders.set(
+			ACCOUNT_SESSION_TOKEN_HEADER_NAME,
+			accountSessionToken
+		);
+	}
+
+	try {
+		const response = await fetchImplementation(
+			new URL('/api/v1/forge/usage', baseUrl).toString(),
+			{
+				method: 'GET',
+				headers: requestHeaders,
+				credentials: 'include',
+				cache: 'no-store'
+			}
+		);
+		const payload = await response.json().catch(() => null);
+
+		if (response.status === 401) {
+			if (accountSessionToken) {
+				clearStoredFoundryAccountSessionToken();
+			}
+
+			return null;
+		}
+
+		if (!response.ok) {
+			return null;
+		}
+
+		return normalizeAccountBackedForgeUsageSnapshot(payload);
+	} catch {
+		return null;
 	}
 }
 
