@@ -332,14 +332,16 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 			icon: 'fa fa-signature',
 			tooltip: 'RPGM_FORGE.RADIAL_MENU.NAMES',
 			callback: async context => {
-				if (!context.token)
-					return rpgm.forge.logger.visible.log('No token selected');
+				if (!context.token) {
+					rpgm.forge.logger.visible.log('No token selected');
+					return;
+				}
 				if (context.shift)
 					void chatTokenNames(
 						context.token,
 						context.token.actor?.prototypeToken?.name
 					);
-				else return quickNameToken(context.token.document);
+				else await quickNameToken(context.token.document);
 			},
 			logger: this.logger
 		});
@@ -349,7 +351,10 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 			tooltip: 'RPGM_FORGE.RADIAL_MENU.DESCRIPTION',
 			callback: context => {
 				const token = context.token;
-				if (!token) return rpgm.forge.logger.log('No token selected');
+				if (!token) {
+					rpgm.forge.logger.log('No token selected');
+					return;
+				}
 				chatDescription({
 					type: token.actor!.prototypeToken.name,
 					// Don't include name if it's the default actor name

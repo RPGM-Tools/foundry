@@ -109,7 +109,9 @@ export function GlobalSettings() {
 		icon: 'fa-regular fa-circle-info',
 		tooltip: 'RPGM_TOOLS.RADIAL_MENU.INFO',
 		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
-		callback: (context) => rpgm.logger.debug(context.token),
+		callback: (context) => {
+			rpgm.logger.debug(context.token);
+		},
 		logger: rpgm.logger
 	});
 

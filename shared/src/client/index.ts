@@ -18,10 +18,7 @@ type RpgmApiClientConfig = {
 		| string
 		| ((
 				security: RpgmApiSecurity
-		  ) =>
-				| Promise<string | undefined>
-				| string
-				| undefined);
+		  ) => Promise<string | undefined> | string | undefined);
 	baseUrl?: string;
 	fetch?: typeof fetch;
 	headers?: HeadersInit;
@@ -184,9 +181,11 @@ class RpgmApiClient {
 		return this.config;
 	}
 
-	get<TData, TError = unknown, TQuery extends Record<string, unknown> | undefined = undefined>(
-		options: RpgmApiRequestOptions<TQuery>
-	) {
+	get<
+		TData,
+		TError = unknown,
+		TQuery extends Record<string, unknown> | undefined = undefined
+	>(options: RpgmApiRequestOptions<TQuery>) {
 		return this.request<TData, TError, TQuery>('GET', options);
 	}
 
@@ -241,12 +240,17 @@ class RpgmApiClient {
 		method: 'GET',
 		options: RpgmApiRequestOptions<TQuery>
 	): Promise<RpgmApiResponseFields<TData, TError>> {
-		const requestQuery = options.query
-			? { ...options.query }
-			: undefined;
-		const requestHeaders = mergeHeaders(this.config.headers, options.headers);
+		const requestQuery = options.query ? { ...options.query } : undefined;
+		const requestHeaders = mergeHeaders(
+			this.config.headers,
+			options.headers
+		);
 
-		await this.applySecurity(requestHeaders, options.security, requestQuery);
+		await this.applySecurity(
+			requestHeaders,
+			options.security,
+			requestQuery
+		);
 
 		let request = new Request(
 			buildUrl(this.config.baseUrl, options.url, requestQuery).href,
@@ -258,10 +262,13 @@ class RpgmApiClient {
 
 		request = await this.interceptors.request.run(request);
 
-		const requestFetch = this.config.fetch ?? globalThis.fetch?.bind(globalThis);
+		const requestFetch =
+			this.config.fetch ?? globalThis.fetch?.bind(globalThis);
 
 		if (!requestFetch) {
-			throw new Error('Fetch is unavailable for the local RPGM API client.');
+			throw new Error(
+				'Fetch is unavailable for the local RPGM API client.'
+			);
 		}
 
 		const response = await requestFetch(request);
@@ -293,10 +300,7 @@ const BEARER_SECURITY = {
 } as const satisfies RpgmApiSecurity;
 
 export function getApiListProducts(
-	options: Omit<
-		RpgmApiRequestOptions<{ 'skip-cache'?: boolean }>,
-		'url'
-	> = {}
+	options: Omit<RpgmApiRequestOptions<{ 'skip-cache'?: boolean }>, 'url'> = {}
 ) {
 	return client.get<RpgmProduct[], never, { 'skip-cache'?: boolean }>({
 		url: '/api/list-products',

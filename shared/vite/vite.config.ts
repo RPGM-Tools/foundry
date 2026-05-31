@@ -87,25 +87,8 @@ export default function defaultConfig(
 			allowedHosts: true,
 			proxy: foundryUrl
 				? {
-						'/api/forge/chat/completions': {
-							...stewardProxyOptions,
-							rewrite: () => '/api/v1/forge/chat-completions'
-						},
-						'/api/forge/usage': {
-							...stewardProxyOptions,
-							rewrite: () => '/api/v1/forge/usage'
-						},
-						'/api/forge/managed-catalog': {
-							...stewardProxyOptions,
-							rewrite: () => '/api/v1/forge/managed-catalog'
-						},
-						'/api/forge/responses': {
-							...stewardProxyOptions,
-							rewrite: () => '/api/v1/forge/responses'
-						},
-						'/api/forge/images': {
-							...stewardProxyOptions,
-							rewrite: () => '/api/v1/forge/images'
+						'/api/forge': {
+							...stewardProxyOptions
 						},
 						'/api/v1/forge': {
 							...stewardProxyOptions

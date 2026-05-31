@@ -5,7 +5,7 @@
  *          `@rpgm/tools/forge` dependency.
  * Last Updated: 2026-05-31
  */
-import { RpgmLogger } from '#/logger';
+import { createModuleLogger } from '#/logger';
 import {
 	AbstractRpgmModule as AbstractRpgmModuleValue,
 	type AbstractRpgmModule,
@@ -820,7 +820,7 @@ export abstract class LegacyFoundryForgeBase
 	name = 'Rpgm Forge';
 	readonly id = 'rpgm-forge' as const;
 	icon = '🎲';
-	logger = RpgmLogger.fromModule(this);
+	logger = createModuleLogger(this);
 	readonly queue = new LegacyForgeQueue(4);
 
 	testTextModel(provider: TextProvider, model: string) {

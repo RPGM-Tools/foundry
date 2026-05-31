@@ -1,7 +1,11 @@
 /**
  * File: logger.ts
- * Purpose: Wire the legacy Foundry runtime to the already re-homed RPGM
- *          shared logger source instead of carrying a local duplicate.
+ * Purpose: Wire the legacy Foundry runtime to the RPGM substrate logger
+ *          helpers instead of carrying or re-exporting a duplicate Tools-era
+ *          implementation.
  * Last Updated: 2026-05-31
  */
-export { RpgmLogger } from '../../../tools/shared/src/logger';
+export {
+	createModuleLogger,
+	RpgmLogger
+} from '../../../../rpgm-tools/rpgm/src/logging';

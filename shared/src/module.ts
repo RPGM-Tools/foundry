@@ -2,7 +2,7 @@
 import type { ShallowRef } from 'vue';
 import type { AbstractTools } from './tools';
 
-import { RpgmLogger } from './logger';
+import { createModuleLogger, RpgmLogger } from './logger';
 
 import { LocalStorageMap } from './settings';
 import { RpgmTools } from './tools';
@@ -210,7 +210,7 @@ export function FoundyRpgmModuleMixin<
 		}
 
 		private async _init() {
-			this.logger = RpgmLogger.fromModule(this, {
+			this.logger = createModuleLogger(this, {
 				show: FoundryRpgmModule.show
 			});
 			let toolsRuntime = resolveLegacyToolsRuntime();

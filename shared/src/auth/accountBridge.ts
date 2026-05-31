@@ -679,7 +679,7 @@ export async function loadAccountBackedForgeUsageSnapshot(
 
 	try {
 		const response = await fetchImplementation(
-			new URL('/api/v1/forge/usage', baseUrl).toString(),
+			new URL('/api/forge/usage', baseUrl).toString(),
 			{
 				method: 'GET',
 				headers: requestHeaders,

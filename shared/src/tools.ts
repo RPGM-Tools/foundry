@@ -27,7 +27,7 @@ import {
 	type IRpgmModule
 } from './module';
 import { RadialMenuRegister } from './radial-menu';
-import { RpgmLogger } from './logger';
+import { createModuleLogger } from './logger';
 import { GlobalSettings } from './settings';
 import { RpgmSidebarManager } from './sidebar';
 import { api } from './style/theme';
@@ -127,7 +127,7 @@ export abstract class AbstractTools
 	name = 'RPGM Tools';
 	id = 'rpgm-tools' as const;
 	icon = '🛠️';
-	logger = RpgmLogger.fromModule(this);
+	logger = createModuleLogger(this);
 
 	textAiFromModel(model: TextModel) {
 		const { provider, slug } = model;
@@ -170,7 +170,7 @@ export abstract class AbstractTools
 		const { baseURL, apiKey } = this.rpgmTextAiOptions;
 		return createOpenAICompatible({
 			name: 'rpgm',
-			baseURL: new URL('/api/v1/forge', baseURL).href,
+			baseURL: new URL('/api/forge', baseURL).href,
 			apiKey
 		});
 	}
