@@ -4,12 +4,12 @@
  *          radial menu actions, and notifications to RPGM Tools providers.
  * Last Updated: 2025-11-11
  */
-import { AbstractForge } from '@rpgm/tools/forge';
 import { createGlobalState } from '@vueuse/core';
 import { argument, literal, string } from 'brigadier-ts-lite';
 import ISO639 from 'iso-639-1';
 import { NButton } from 'naive-ui';
 import { ResultAsync } from 'neverthrow';
+import type { AbstractRpgmModule, IRpgmModule, ModuleMap } from '@rpgm/tools';
 import { h, type Component } from 'vue';
 
 import {
@@ -52,13 +52,27 @@ import {
 	createLegacyFoundryManagedGenerationBridge,
 	type LegacyFoundryManagedGenerationBridge
 } from './runtime/managedGenerationBridge';
+import {
+	LegacyFoundryForgeBase,
+	type LegacyFoundryForgeSettings
+} from './runtime/legacyFoundryForgeBase';
 
 import ForgeSidebar from './sidebar/ForgeSidebar.vue';
 
+type LegacyFoundryForgeBaseForMixin = abstract new (
+	...args: any[]
+) =>
+	AbstractRpgmModule<LegacyFoundryForgeSettings> &
+	IRpgmModule<keyof ModuleMap, LegacyFoundryForgeSettings> &
+	LegacyFoundryForgeBase;
+
+const LegacyFoundryForgeBaseForMixin =
+	LegacyFoundryForgeBase as unknown as LegacyFoundryForgeBaseForMixin;
+
 export class RpgmForge extends FoundyRpgmModuleMixin<
-	typeof AbstractForge,
-	AbstractForge.Settings
->(AbstractForge) {
+	LegacyFoundryForgeBaseForMixin,
+	LegacyFoundryForgeSettings
+>(LegacyFoundryForgeBaseForMixin) {
 	private _managedGenerationBridge?: LegacyFoundryManagedGenerationBridge;
 
 	/** @returns The current genre setting */
@@ -87,7 +101,7 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 	private get managedGenerationBridge(): LegacyFoundryManagedGenerationBridge {
 		return (this._managedGenerationBridge ??=
 			createLegacyFoundryManagedGenerationBridge({
-					forge: this
+				forge: this
 			}));
 	}
 
@@ -159,9 +173,7 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 
 	protected override async init() {
 		rpgm.forge = this;
-		this.homebrewSchemas = structuredClone(
-			LEGACY_FORGE_HOME_BREW_SCHEMAS
-		);
+		this.homebrewSchemas = structuredClone(LEGACY_FORGE_HOME_BREW_SCHEMAS);
 		const genresUrl = new URL(Genres, import.meta.url);
 		this.genres = (await (
 			await fetch(genresUrl)
