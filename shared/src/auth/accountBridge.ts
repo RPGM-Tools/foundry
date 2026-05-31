@@ -81,9 +81,11 @@ interface FoundryAccountBridgeMembershipState {
 }
 
 interface FoundryAccountBridgeUsageReadinessState {
+	used: number | null;
 	remaining: number | null;
 	limit: number | null;
 	overLimit: boolean | null;
+	managedForgeAccess: boolean | null;
 }
 
 interface FoundryAccountBridgeEconomyState {
@@ -289,27 +291,37 @@ function readUsageReadinessState(
 	const snapshot = (
 		privateExpansions as {
 			usageReadiness?: {
+				managedForgeAccess?: boolean | null;
 				snapshot?: {
+					used?: number | null;
 					remaining?: number | null;
 					limit?: number | null;
 					overLimit?: boolean | null;
 				};
 			};
 		}
-	).usageReadiness?.snapshot;
+	).usageReadiness;
 
 	return {
-		remaining: normalizeFiniteNumber(snapshot?.remaining),
-		limit: normalizeFiniteNumber(snapshot?.limit),
+		used: normalizeFiniteNumber(snapshot?.snapshot?.used),
+		remaining: normalizeFiniteNumber(snapshot?.snapshot?.remaining),
+		limit: normalizeFiniteNumber(snapshot?.snapshot?.limit),
 		overLimit:
-			typeof snapshot?.overLimit === 'boolean' ? snapshot.overLimit : null
+			typeof snapshot?.snapshot?.overLimit === 'boolean'
+				? snapshot.snapshot.overLimit
+				: null,
+		managedForgeAccess:
+			typeof snapshot?.managedForgeAccess === 'boolean'
+				? snapshot.managedForgeAccess
+				: null
 	};
 }
 
 function createUsageReadinessSummary(
 	usageReadinessState: FoundryAccountBridgeUsageReadinessState
 ): string {
-	const { remaining, limit, overLimit } = usageReadinessState;
+	const { used, remaining, limit, overLimit, managedForgeAccess } =
+		usageReadinessState;
 
 	if (overLimit) {
 		return 'Managed Forge usage is currently beyond the visible allowance.';
@@ -317,6 +329,14 @@ function createUsageReadinessSummary(
 
 	if (remaining !== null && limit !== null) {
 		return `${remaining} of ${limit} managed runs remain in the current visible allowance.`;
+	}
+
+	if (managedForgeAccess) {
+		if (used !== null) {
+			return `Managed Forge usage is available for this account. ${used} run${used === 1 ? '' : 's'} used in the current visible window.`;
+		}
+
+		return 'Managed Forge usage is available for this account.';
 	}
 
 	return 'Managed Forge usage is not visible in this Foundry session yet.';
