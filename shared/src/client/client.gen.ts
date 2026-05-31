@@ -1,7 +1,7 @@
 /**
  * File: client/client.gen.ts
- * Purpose: Local shim for the generated shared API client singleton used by
- *          the legacy Foundry runtime during the dependency burndown.
+ * Purpose: Preserve the historical client import path while the shared API
+ *          singleton now lives in the local minimal client surface.
  * Last Updated: 2026-05-31
  */
-export { client } from '../../../node_modules/@rpgm/tools/shared/src/client/client.gen';
+export { client } from './index';

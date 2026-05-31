@@ -90,9 +90,9 @@ _Thank you for using RPGM Forge! Stay tuned for more features and updates and fu
 
 ### RPGM Tools
 
-This project uses [RPGM Tools](https://github.com/RPGM-Tools/tools).
-
-To update the module after changes, run `pnpm update @rpgm/tools`
+This project still targets the RPGM Tools service surface, but the old Forge
+module no longer consumes the legacy `@rpgm/tools` package as a shared runtime
+dependency.
 
 ### Building
 
