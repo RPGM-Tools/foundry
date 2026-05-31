@@ -19,22 +19,24 @@ import slugify from 'slugify';
 import {
 	type Description,
 	type DescriptionsOptions,
-	type Gender,
 	type Homebrew,
 	type HomebrewField,
 	type HomebrewOptions,
+	LEGACY_FORGE_ADJECTIVES_DICTIONARY,
+	LEGACY_FORGE_OFFLINE_NAMES_DICTIONARY,
+	type LegacyForgeOfflineNameRecord,
+	type LegacyForgeOfflineNamesDictionary,
 	type Names,
 	type NamesOptions,
 	RPGM_MODELS,
 	type TextModel
 } from '#/forgeCompat';
 
-export type LegacyFoundryForgeSettings =
-	AbstractRpgmModule.ModuleSettings & {
-		namesModel: TextModel;
-		descriptionsModel: TextModel;
-		homebrewModel: TextModel;
-	};
+export type LegacyFoundryForgeSettings = AbstractRpgmModule.ModuleSettings & {
+	namesModel: TextModel;
+	descriptionsModel: TextModel;
+	homebrewModel: TextModel;
+};
 
 type QueueOptions = Partial<{
 	autoDone: boolean;
@@ -103,29 +105,7 @@ class LegacyForgeQueue {
 	}
 }
 
-type OfflineName = {
-	type: string;
-	text: string;
-	gender: Gender;
-	weight: number;
-	position: 'first' | 'last';
-};
-
-type OfflineNameType = {
-	id: string;
-	text: string;
-};
-
-type NamesData = {
-	types: { id: string; text: string }[];
-	names: {
-		type: string;
-		text: string;
-		gender: Gender;
-		weight: number;
-		position: 'first' | 'last';
-	}[];
-};
+type OfflineName = LegacyForgeOfflineNameRecord;
 
 type HomebrewResponse = {
 	name: string;
@@ -135,7 +115,7 @@ type HomebrewResponse = {
 
 let offlineNamesData: {
 	names: OfflineName[];
-	types: OfflineNameType[];
+	types: LegacyForgeOfflineNamesDictionary['types'];
 };
 
 const offlineNameIndex: Map<
@@ -149,7 +129,7 @@ const globalOfflineNames = {
 };
 
 let adjectiveDictionary: string[] | null = null;
-let namesPromptDictionary: NamesData | null = null;
+let namesPromptDictionary: LegacyForgeOfflineNamesDictionary | null = null;
 const recentAdjectives: string[] = [];
 const RECENT_ADJECTIVE_LIMIT = 100;
 
@@ -189,9 +169,7 @@ async function ensureOfflineNamesLoaded() {
 		return;
 	}
 
-	offlineNamesData = (
-		await import('../../../../node_modules/@rpgm/tools/dist/tools/forge/data/names-list.json')
-	).default as typeof offlineNamesData;
+	offlineNamesData = LEGACY_FORGE_OFFLINE_NAMES_DICTIONARY;
 
 	for (const name of offlineNamesData.names) {
 		const bucket =
@@ -240,9 +218,7 @@ function generateOfflineNames(
 
 async function ensureAdjectivesLoaded() {
 	if (!adjectiveDictionary) {
-		adjectiveDictionary = (
-			await import('../../../../node_modules/@rpgm/tools/dist/tools/forge/data/adjectives-list.json')
-		).default.adjectives as string[];
+		adjectiveDictionary = LEGACY_FORGE_ADJECTIVES_DICTIONARY.adjectives;
 	}
 }
 
@@ -309,9 +285,7 @@ async function ensureNamesPromptDictionariesLoaded() {
 	}
 
 	if (!namesPromptDictionary) {
-		namesPromptDictionary = (
-			await import('../../../../node_modules/@rpgm/tools/dist/tools/forge/data/names-list.json')
-		).default as NamesData;
+		namesPromptDictionary = LEGACY_FORGE_OFFLINE_NAMES_DICTIONARY;
 	}
 }
 

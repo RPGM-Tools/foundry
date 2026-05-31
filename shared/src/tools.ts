@@ -39,10 +39,7 @@ export namespace AbstractTools {
 	}
 }
 
-export type RpgmModels =
-	| 'rpgm-names'
-	| 'rpgm-descriptions'
-	| 'rpgm-homebrew';
+export type RpgmModels = 'rpgm-names' | 'rpgm-descriptions' | 'rpgm-homebrew';
 
 type Options = {
 	name: string;
@@ -62,7 +59,9 @@ interface ProviderDef {
 	name: string;
 	classIcon: string;
 	create(this: AbstractTools, options: Options): ProviderV2;
-	fetchModels?: (options: Pick<Options, 'apiKey' | 'baseURL'>) => Promise<string[]>;
+	fetchModels?: (
+		options: Pick<Options, 'apiKey' | 'baseURL'>
+	) => Promise<string[]>;
 }
 
 export const DIY_PROVIDERS: Record<string, ProviderDef> = {
@@ -74,13 +73,18 @@ export const DIY_PROVIDERS: Record<string, ProviderDef> = {
 		},
 		fetchModels: ({ apiKey, baseURL }) =>
 			fetch(
-				new URL('models', baseURL += baseURL.endsWith('/') ? '' : '/'),
+				new URL(
+					'models',
+					(baseURL += baseURL.endsWith('/') ? '' : '/')
+				),
 				{
 					headers: { Authorization: `Bearer ${apiKey}` }
 				}
 			)
 				.then(response => response.json())
-				.then(result => result.data.map((model: { id: string }) => model.id))
+				.then(result =>
+					result.data.map((model: { id: string }) => model.id)
+				)
 	}
 } as const;
 
@@ -184,7 +188,8 @@ export abstract class AbstractTools
 	}
 }
 
-const originalDoGenerate = OpenAICompatibleChatLanguageModel.prototype.doGenerate;
+const originalDoGenerate =
+	OpenAICompatibleChatLanguageModel.prototype.doGenerate;
 const patchedDoGenerate: typeof originalDoGenerate = async function (
 	this: OpenAICompatibleChatLanguageModel,
 	...args: Parameters<typeof originalDoGenerate>
