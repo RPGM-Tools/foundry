@@ -4,7 +4,6 @@
  *          radial menu actions, and notifications to RPGM Tools providers.
  * Last Updated: 2025-11-11
  */
-import { HomebrewSchemas } from '@rpgm/tools/forge';
 import { AbstractForge } from '@rpgm/tools/forge';
 import { createGlobalState } from '@vueuse/core';
 import { argument, literal, string } from 'brigadier-ts-lite';
@@ -19,6 +18,7 @@ import {
 } from '#/auth/accountBridge';
 import { ChatWizard } from '#/chat/ChatWizard';
 import {
+	LEGACY_FORGE_HOME_BREW_SCHEMAS,
 	shouldUseStewardBackedNamesModel,
 	shouldUseStewardBackedTextModel,
 	type DescriptionsOptions,
@@ -87,8 +87,7 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 	private get managedGenerationBridge(): LegacyFoundryManagedGenerationBridge {
 		return (this._managedGenerationBridge ??=
 			createLegacyFoundryManagedGenerationBridge({
-				forge: this,
-				getLegacyHomebrewSchemas: () => this.homebrewSchemas
+					forge: this
 			}));
 	}
 
@@ -160,7 +159,9 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 
 	protected override async init() {
 		rpgm.forge = this;
-		this.homebrewSchemas = HomebrewSchemas as HomebrewSchema[];
+		this.homebrewSchemas = structuredClone(
+			LEGACY_FORGE_HOME_BREW_SCHEMAS
+		);
 		const genresUrl = new URL(Genres, import.meta.url);
 		this.genres = (await (
 			await fetch(genresUrl)

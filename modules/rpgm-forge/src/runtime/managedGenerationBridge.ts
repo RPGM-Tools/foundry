@@ -56,7 +56,6 @@ export interface LegacyFoundryManagedGenerationBridge {
 
 export interface CreateLegacyFoundryManagedGenerationBridgeInput {
 	forge: RpgmForge;
-	getLegacyHomebrewSchemas: () => HomebrewSchema[];
 }
 
 interface ForgeManagedResponseChoice {
