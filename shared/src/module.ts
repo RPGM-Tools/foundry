@@ -5,7 +5,6 @@ import type { AbstractTools } from './tools';
 import { createModuleLogger, RpgmLogger } from './logger';
 
 import { LocalStorageMap } from './settings';
-import { RpgmTools } from './tools';
 
 export type ModuleMap = FoundryModuleMap;
 
@@ -220,7 +219,7 @@ export function FoundyRpgmModuleMixin<
 				this.logger.debug('first');
 				toolsRuntime = currentModuleIsToolsRuntime
 					? this
-					: (new RpgmTools() as unknown as LegacyToolsRuntime);
+					: ((new (await import('./tools')).RpgmTools() as unknown) as LegacyToolsRuntime);
 				window.rpgmTools = toolsRuntime;
 
 				if (!window.rpgm) {

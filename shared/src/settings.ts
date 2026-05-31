@@ -5,11 +5,13 @@ import type { FoundryRpgmModule } from './module';
 import { hudHeuristics } from './radial-menu';
 import { DeveloperSettings } from './settings/developer';
 import { RadialMenuSettings } from './settings/radialMenu';
-import SidebarAccount from './sidebar/SidebarApp/SidebarAccount';
-import SidebarAccountByoAI from './sidebar/SidebarApp/SidebarAccount/SidebarAccountByoAI.vue';
-import SidebarAppAbout from './sidebar/SidebarApp/SidebarAppAbout.vue';
-import SidebarAppHelp from './sidebar/SidebarApp/SidebarAppHelp.vue';
-import SidebarAppShop from './sidebar/SidebarApp/SidebarAppShop.vue';
+
+const loadSidebarAccount = () => import('./sidebar/SidebarApp/SidebarAccount');
+const loadSidebarAccountByoAI = () =>
+	import('./sidebar/SidebarApp/SidebarAccount/SidebarAccountByoAI.vue');
+const loadSidebarAppAbout = () => import('./sidebar/SidebarApp/SidebarAppAbout.vue');
+const loadSidebarAppHelp = () => import('./sidebar/SidebarApp/SidebarAppHelp.vue');
+const loadSidebarAppShop = () => import('./sidebar/SidebarApp/SidebarAppShop.vue');
 
 export class LocalStorageMap<T extends object> {
 	private holders = new Map<keyof T, ShallowRef<T[keyof T] | null>>();
@@ -135,12 +137,12 @@ export function GlobalSettings() {
 				index: 1
 			}
 		},
-		component: SidebarAccount
+		component: loadSidebarAccount
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
 		path: '/account/bring-your-own-ai',
-		component: SidebarAccountByoAI,
+		component: loadSidebarAccountByoAI,
 		meta: {
 			title: 'Custom AI'
 		}
@@ -151,7 +153,7 @@ export function GlobalSettings() {
 		meta: {
 			title: 'Guild Hall'
 		},
-		component: SidebarAppShop
+		component: loadSidebarAppShop
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
@@ -164,7 +166,7 @@ export function GlobalSettings() {
 				index: -1
 			}
 		},
-		component: SidebarAppHelp
+		component: loadSidebarAppHelp
 	});
 
 	rpgm.sidebar.registerSidebarMenu({
@@ -177,7 +179,7 @@ export function GlobalSettings() {
 				index: -2
 			}
 		},
-		component: SidebarAppAbout
+		component: loadSidebarAppAbout
 	});
 }
 
