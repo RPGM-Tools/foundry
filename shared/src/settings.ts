@@ -14,7 +14,10 @@ import SidebarAppShop from './sidebar/SidebarApp/SidebarAppShop.vue';
 export class LocalStorageMap<T extends object> {
 	private holders = new Map<keyof T, ShallowRef<T[keyof T] | null>>();
 
-	constructor(private prefix: string, private defaults: T) { }
+	constructor(
+		private prefix: string,
+		private defaults: T
+	) {}
 
 	private storageKey(key: keyof T): string {
 		return `${this.prefix}.${String(key)}`;
@@ -43,7 +46,7 @@ export class LocalStorageMap<T extends object> {
 	 * Get typed value (non-reactive).
 	 */
 	get<K extends keyof T>(key: K, defaultValue?: T[K]): T[K] {
-		return this.readValue(key) ?? (defaultValue ?? this.defaults[key]);
+		return this.readValue(key) ?? defaultValue ?? this.defaults[key];
 	}
 
 	/**
@@ -52,7 +55,9 @@ export class LocalStorageMap<T extends object> {
 	ref<K extends keyof T>(key: K, defaultValue?: T[K]): ShallowRef<T[K]> {
 		let holder = this.holders.get(key);
 		if (!holder) {
-			holder = shallowRef<T[K]>(this.readValue(key) ?? (defaultValue ?? this.defaults[key]));
+			holder = shallowRef<T[K]>(
+				this.readValue(key) ?? defaultValue ?? this.defaults[key]
+			);
 			this.holders.set(key, holder as ShallowRef<T[keyof T] | null>);
 		}
 		watchEffect(() => void this.writeValue(key, holder!.value));
@@ -64,7 +69,9 @@ export class LocalStorageMap<T extends object> {
 	 */
 	set<K extends keyof T>(key: K, value: T[K]): this {
 		this.writeValue(key, value);
-		let holder = this.holders.get(key) as ShallowRef<T[K] | null> | undefined;
+		let holder = this.holders.get(key) as
+			| ShallowRef<T[K] | null>
+			| undefined;
 		if (!holder) {
 			holder = shallowRef<T[K] | null>(value);
 			this.holders.set(key, holder as ShallowRef<T[keyof T] | null>);
@@ -103,13 +110,16 @@ export function GlobalSettings() {
 		hint: rpgm.localize('RPGM_TOOLS.CONFIG.RADIAL_MENU_DEBUG_HINT'),
 		default: false
 	});
-	rpgm.radialMenu.registerCategory('rpgm_debug', { color: '60deg', logger: rpgm.logger });
+	rpgm.radialMenu.registerCategory('rpgm_debug', {
+		color: '60deg',
+		logger: rpgm.logger
+	});
 	rpgm.radialMenu.registerTokenHudButton({
 		category: rpgm.radialMenu.categories.rpgm_debug,
 		icon: 'fa-regular fa-circle-info',
 		tooltip: 'RPGM_TOOLS.RADIAL_MENU.INFO',
-		detective: (context) => hudHeuristics(context).isGM().isDebug().result,
-		callback: (context) => {
+		detective: context => hudHeuristics(context).isGM().isDebug().result,
+		callback: context => {
 			rpgm.logger.debug(context.token);
 		},
 		logger: rpgm.logger
