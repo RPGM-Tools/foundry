@@ -132,6 +132,30 @@ _Offline and Adjective Names do not require AI._ Descriptions and Homebrew use a
 
 ## Changelog
 
+### v2.3.0
+
+#### Added
+
+
+- Added a browser-return account bridge so Foundry can hand off to your hosted RPGM Tools account, reconnect from an already-signed-in browser session, and return the session to Old Forge without making you retype credentials inside the VTT.
+- Added a Foundry account summary that shows your connected RPGM Tools account status, visible membership state, managed Forge usage readiness, and Ore balance in one place.
+- Added a session-local disconnect action so you can clear Old Forge's connected RPGM account for the current Foundry lane without signing out of the public web account.
+
+#### Improved
+
+
+- Moved Old Forge account management onto the hosted RPGM Tools account center instead of keeping inline sign-in, sign-up, password reset, and provider-linking UI inside the Foundry sidebar.
+- Routed managed names, descriptions, and homebrew generation through the Steward-backed Forge bridge so Old Forge keeps its core workflows while running on the new backend lane.
+- Updated the account and Custom AI surfaces to use the new shared account bridge, so managed-model guidance now follows the real connected RPGM Tools session instead of the retired legacy auth client.
+- Improved the account summary so managed Forge access still shows up clearly when an account has visible usage access but no fixed numeric allowance is being surfaced.
+
+#### Fixed
+
+
+- Fixed several account-handoff edge cases so Old Forge no longer relies on brittle popup-only behavior and can recover more cleanly when the browser session is already signed in.
+- Fixed sidebar return-path and navigation glitches around the new account bridge so the Membership view and related sidebar flows stop losing their shape after browser round-trips.
+- Fixed release-surface escaping so the public Foundry marketplace body handles special characters more reliably.
+
 ### v2.2.0
 
 #### Added
