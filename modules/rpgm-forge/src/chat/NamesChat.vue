@@ -131,7 +131,9 @@ onMounted(() => {
 					v-for="(name, index) in data.names"
 					:key="`${name}-${index}`"
 					class="rpgm-forge-name"
-					:class="{ 'rpgm-forge-name-original': isOriginalName(name) }"
+					:class="{
+						'rpgm-forge-name-original': isOriginalName(name)
+					}"
 					@click="assign(name)"
 				>
 					{{ name }}
@@ -160,7 +162,10 @@ onMounted(() => {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
-	transition: transform 150ms ease-in-out, color 150ms, scale 150ms !important;
+	transition:
+		transform 150ms ease-in-out,
+		color 150ms,
+		scale 150ms !important;
 	transform-origin: left;
 	cursor: pointer;
 }

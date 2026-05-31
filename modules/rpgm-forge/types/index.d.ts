@@ -1,49 +1,48 @@
-import type {
-	Homebrew,
-	HomebrewOptions
-} from '#/forgeCompat';
+import type { Homebrew, HomebrewOptions } from '#/forgeCompat';
 
 import type { RpgmForge } from '$/forge';
 
-type Optional<T, K extends keyof T> = { [K in keyof T]: T[K] | undefined } & Omit<T, K>;
+type Optional<T, K extends keyof T> = {
+	[K in keyof T]: T[K] | undefined;
+} & Omit<T, K>;
 
 declare global {
 	interface RPGM {
-		forge: RpgmForge
+		forge: RpgmForge;
 	}
 
 	interface FlagConfig {
 		JournalEntry: {
-			'rpgm-forge': unknown
-		}
+			'rpgm-forge': unknown;
+		};
 		JournalEntryPage: {
-			'rpgm-forge': unknown
-		}
+			'rpgm-forge': unknown;
+		};
 	}
 
 	interface RadialMenuCategories {
-		'rpgm_forge': unknown
+		rpgm_forge: unknown;
 	}
 
 	type ForgeChatNames = {
-		prompt: string
-		names: string[]
-		originalNames?: string[]
-		tokenId?: string
+		prompt: string;
+		names: string[];
+		originalNames?: string[];
+		tokenId?: string;
 	};
 
 	type ForgeChatDescription = {
-		type: string
-		name?: string
-		description: string
-		tokenId?: string
+		type: string;
+		name?: string;
+		description: string;
+		tokenId?: string;
 	};
 
 	type ForgeChatHomebrew = {
-		options: Optional<HomebrewOptions, 'schema'>
-		activeGeneration: string
-		generations: Record<string, Homebrew>
+		options: Optional<HomebrewOptions, 'schema'>;
+		activeGeneration: string;
+		generations: Record<string, Homebrew>;
 	};
 }
 
-export { };
+export {};

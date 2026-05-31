@@ -10,7 +10,7 @@ const { i } = defineProps<{ i: -1 | 0 | 1 }>();
 const field = defineModel<HomebrewField>({ required: true });
 
 const emit = defineEmits<{
-	renaming: []
+	renaming: [];
 }>();
 
 const localize = rpgm.localize;
@@ -30,8 +30,10 @@ function validateNewName(n: string) {
 		}
 		for (const f of data.options.schema!.fields) {
 			if (f === field.value) continue;
-			if (f.name.slugify({ strict: true, replacement: '_' })
-				=== n.slugify({ strict: true, replacement: '_' })) {
+			if (
+				f.name.slugify({ strict: true, replacement: '_' }) ===
+				n.slugify({ strict: true, replacement: '_' })
+			) {
 				rpgm.forge.logger.visible.error(`"${f.name}" already exists!`);
 				return false;
 			}
@@ -46,16 +48,22 @@ function validateNewName(n: string) {
 
 /** Deletes this field from the schema. */
 function remove() {
-	data.options.schema!.fields.splice(data.options.schema!.fields.indexOf(field.value), 1);
+	data.options.schema!.fields.splice(
+		data.options.schema!.fields.indexOf(field.value),
+		1
+	);
 }
 
-/** 
+/**
  * Reorders this field in the schema .
  * @param by - How many fields to move forwards or backwards
  */
 function move(by: number) {
 	const idx = data.options.schema!.fields.indexOf(field.value);
-	const clippedIdx = Math.max(0, Math.min(data.options.schema!.fields.length - 1, idx + by));
+	const clippedIdx = Math.max(
+		0,
+		Math.min(data.options.schema!.fields.length - 1, idx + by)
+	);
 	if (clippedIdx === idx) return;
 
 	data.options.schema!.fields.splice(idx, 1);
@@ -87,7 +95,12 @@ function tryBlur(e: FocusEvent) {
  * @param type - The new type
  */
 function changeType(type: HomebrewField['type']) {
-	if (type === 'number' || type === 'boolean' || field.value.type === 'number' || field.value.type === 'boolean')
+	if (
+		type === 'number' ||
+		type === 'boolean' ||
+		field.value.type === 'number' ||
+		field.value.type === 'boolean'
+	)
 		field.value.value = undefined;
 	field.value.type = type;
 }
@@ -104,29 +117,20 @@ function changeType(type: HomebrewField['type']) {
 	>
 		<div class="rpgm-icons">
 			<template v-if="!editing">
-				<a
-					title="Remove"
-					@click="remove"
-				><i class="fa-solid fa-trash" /></a>
-				<a
-					title="Edit"
-					@click="editing = !editing"
-				><i class="fa-solid fa-feather" /></a>
-				<a
-					v-if="i != -1"
-					title="Move Up"
-					@click="move(-1)"
-				><i class="fa-solid fa-circle-up" /></a>
-				<a
-					v-if="i != 1"
-					title="Move Down"
-					@click="move(1)"
-				><i class="fa-solid fa-circle-down" /></a>
+				<a title="Remove" @click="remove"
+					><i class="fa-solid fa-trash"
+				/></a>
+				<a title="Edit" @click="editing = !editing"
+					><i class="fa-solid fa-feather"
+				/></a>
+				<a v-if="i != -1" title="Move Up" @click="move(-1)"
+					><i class="fa-solid fa-circle-up"
+				/></a>
+				<a v-if="i != 1" title="Move Down" @click="move(1)"
+					><i class="fa-solid fa-circle-down"
+				/></a>
 			</template>
-			<a
-				v-if="editing"
-				title="Save"
-			><i class="fa-solid fa-save" /></a>
+			<a v-if="editing" title="Save"><i class="fa-solid fa-save" /></a>
 		</div>
 		<ContentEditable
 			v-slot="{ contenteditable, onBlur, onFocus, onKeydown, ref }"
@@ -139,7 +143,7 @@ function changeType(type: HomebrewField['type']) {
 			<h3
 				:ref
 				class="rpgm-radial-ignore"
-				style="cursor: text;"
+				style="cursor: text"
 				:contenteditable
 				:tabindex="contenteditable ? 0 : -1"
 				@blur="onBlur"
@@ -169,16 +173,29 @@ function changeType(type: HomebrewField['type']) {
 				{{ field.description }}
 			</p>
 		</ContentEditable>
-		<ul
-			v-show="editing"
-			class="rpgm-homebrew-field-types"
-		>
+		<ul v-show="editing" class="rpgm-homebrew-field-types">
 			<li
 				v-for="type in [
-					{ label: 'Short', value: 'short' as const, icon: 'fa-solid fa-grip-lines' },
-					{ label: 'Long', value: 'long' as const, icon: 'fa-solid fa-align-left' },
-					{ label: 'Check', value: 'boolean' as const, icon: 'fa-solid fa-square-check' },
-					{ label: 'Number', value: 'number' as const, icon: 'fa-solid fa-hashtag' },
+					{
+						label: 'Short',
+						value: 'short' as const,
+						icon: 'fa-solid fa-grip-lines'
+					},
+					{
+						label: 'Long',
+						value: 'long' as const,
+						icon: 'fa-solid fa-align-left'
+					},
+					{
+						label: 'Check',
+						value: 'boolean' as const,
+						icon: 'fa-solid fa-square-check'
+					},
+					{
+						label: 'Number',
+						value: 'number' as const,
+						icon: 'fa-solid fa-hashtag'
+					}
 				]"
 				:key="type.value"
 				tabindex="0"
@@ -189,10 +206,7 @@ function changeType(type: HomebrewField['type']) {
 				<i :class="type.icon" />{{ type.label }}
 			</li>
 		</ul>
-		<Transition
-			v-show="!editing"
-			name="rpgm-homebrew-field-container"
-		>
+		<Transition v-show="!editing" name="rpgm-homebrew-field-container">
 			<textarea
 				v-if="field.type === 'long'"
 				v-model="field.value"
@@ -203,7 +217,7 @@ function changeType(type: HomebrewField['type']) {
 				v-model="field.value"
 				class="rpgm-checkbox"
 				type="checkbox"
-			>
+			/>
 			<input
 				v-else-if="field.type === 'number'"
 				v-model="field.value"
@@ -211,14 +225,14 @@ function changeType(type: HomebrewField['type']) {
 				type="number"
 				:placeholder="`# ${localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')}`"
 				@keydown="filterNumbers"
-			>
+			/>
 			<input
 				v-else
 				v-model="field.value"
 				class="rpgm-homebrew-field-value rpgm-input rpgm-radial-ignore"
 				type="text"
 				:placeholder="localize('RPGM_FORGE.HOMEBREW.PLACEHOLDER')"
-			>
+			/>
 		</Transition>
 	</div>
 </template>
@@ -274,10 +288,10 @@ function changeType(type: HomebrewField['type']) {
 	}
 }
 
-.rpgm-homebrew-field-container[editing="true"] {
+.rpgm-homebrew-field-container[editing='true'] {
 	background-color: #00000044;
 
-	[contenteditable="true"] {
+	[contenteditable='true'] {
 		font-style: italic;
 	}
 }
@@ -328,7 +342,8 @@ Hide icons if...
 - Name input is focused
 - Editing field
 */
-.rpgm-homebrew-field-container:hover:not(.rpgm-homebrew-field-container-move) .rpgm-icons {
+.rpgm-homebrew-field-container:hover:not(.rpgm-homebrew-field-container-move)
+	.rpgm-icons {
 	opacity: 1;
 	filter: blur(0px);
 	visibility: visible;

@@ -12,17 +12,18 @@ const schemas = rpgm.forge.homebrewSchemas;
 
 const editing = ref(true);
 const currentTitle = computed<string>(() => {
-	if (editing.value)
-		return data.options.schema?.name ?? '';
-	else
-		return data.generations[data.activeGeneration]?.custom_name ?? '';
+	if (editing.value) return data.options.schema?.name ?? '';
+	else return data.generations[data.activeGeneration]?.custom_name ?? '';
 });
-const homebrew = rpgm.forge.homebrewChats.useChatWizard(), { data, id } = homebrew;
+const homebrew = rpgm.forge.homebrewChats.useChatWizard(),
+	{ data, id } = homebrew;
 const loading = ref(false);
 
 const buttonAnchor = useTemplateRef('buttonAnchor');
 
-watch(buttonAnchor, (r) => { if (r) buttonContext.element = r.closest('.chat-message')!; });
+watch(buttonAnchor, r => {
+	if (r) buttonContext.element = r.closest('.chat-message')!;
+});
 
 const buttonContext = shallowReactive({
 	element: buttonAnchor.value!,
@@ -31,57 +32,102 @@ const buttonContext = shallowReactive({
 });
 
 const buttons = computed<RadialButton[]>(() =>
-	editing.value ? [] :
-		[
-			{
-				category: rpgm.radialMenu.categories.rpgm_forge,
-				icon: 'fa-solid fa-copy',
-				tooltip: 'RPGM_FORGE.RADIAL_MENU.COPY',
-				detective() { return window.isSecureContext; },
-				callback() { copyGeneration(data.activeGeneration); },
-				logger: rpgm.forge.logger
-			},
-			{
-				category: rpgm.radialMenu.categories.rpgm_forge,
-				icon: 'fas fa-book-open',
-				tooltip: 'RPGM_FORGE.RADIAL_MENU.SEND_TO_JOURNAL',
-				detective() {
-					return game.journal.find(j => j.getFlag('rpgm-forge', 'homebrew') === id)
-						?.pages.find(e => e.getFlag('rpgm-forge', 'homebrew') === data.activeGeneration) === undefined;
+	editing.value
+		? []
+		: [
+				{
+					category: rpgm.radialMenu.categories.rpgm_forge,
+					icon: 'fa-solid fa-copy',
+					tooltip: 'RPGM_FORGE.RADIAL_MENU.COPY',
+					detective() {
+						return window.isSecureContext;
+					},
+					callback() {
+						copyGeneration(data.activeGeneration);
+					},
+					logger: rpgm.forge.logger
 				},
-				callback(c) { void sendToJournal(data.activeGeneration, c.shift); },
-				logger: rpgm.forge.logger
-			},
-			{
-				category: rpgm.radialMenu.categories.rpgm_forge,
-				icon: 'fas fa-book-open',
-				tooltip: 'RPGM_FORGE.RADIAL_MENU.OPEN_JOURNAL',
-				detective() {
-					return game.journal.find(j => j.getFlag('rpgm-forge', 'homebrew') === id)
-						?.pages.find(e => e.getFlag('rpgm-forge', 'homebrew') === data.activeGeneration) !== undefined;
+				{
+					category: rpgm.radialMenu.categories.rpgm_forge,
+					icon: 'fas fa-book-open',
+					tooltip: 'RPGM_FORGE.RADIAL_MENU.SEND_TO_JOURNAL',
+					detective() {
+						return (
+							game.journal
+								.find(
+									j =>
+										j.getFlag('rpgm-forge', 'homebrew') ===
+										id
+								)
+								?.pages.find(
+									e =>
+										e.getFlag('rpgm-forge', 'homebrew') ===
+										data.activeGeneration
+								) === undefined
+						);
+					},
+					callback(c) {
+						void sendToJournal(data.activeGeneration, c.shift);
+					},
+					logger: rpgm.forge.logger
 				},
-				callback() {
-					const entry = game.journal.find(j => j.getFlag('rpgm-forge', 'homebrew') === id);
-					void entry?.pages.find(e => e.getFlag('rpgm-forge', 'homebrew') === data.activeGeneration)?.sheet?.render(true);
+				{
+					category: rpgm.radialMenu.categories.rpgm_forge,
+					icon: 'fas fa-book-open',
+					tooltip: 'RPGM_FORGE.RADIAL_MENU.OPEN_JOURNAL',
+					detective() {
+						return (
+							game.journal
+								.find(
+									j =>
+										j.getFlag('rpgm-forge', 'homebrew') ===
+										id
+								)
+								?.pages.find(
+									e =>
+										e.getFlag('rpgm-forge', 'homebrew') ===
+										data.activeGeneration
+								) !== undefined
+						);
+					},
+					callback() {
+						const entry = game.journal.find(
+							j => j.getFlag('rpgm-forge', 'homebrew') === id
+						);
+						void entry?.pages
+							.find(
+								e =>
+									e.getFlag('rpgm-forge', 'homebrew') ===
+									data.activeGeneration
+							)
+							?.sheet?.render(true);
+					},
+					logger: rpgm.forge.logger
 				},
-				logger: rpgm.forge.logger
-			},
-			{
-				category: rpgm.radialMenu.categories.rpgm_forge,
-				icon: 'fa-solid fa-trash',
-				tooltip: 'RPGM_FORGE.RADIAL_MENU.DELETE',
-				callback() { deleteGeneration(data.activeGeneration); },
-				logger: rpgm.forge.logger
-			},
-			{
-				category: rpgm.radialMenu.categories.rpgm_debug,
-				icon: 'fa-regular fa-info-circle',
-				tooltip: 'RPGM_TOOLS.RADIAL_MENU.INFO',
-				detective(c) { return inputHeuristics(c as InputContext).isDebug().result; },
-				callback() { rpgm.forge.logger.debug(toRaw(data), id); },
-				logger: rpgm.forge.logger
-			}
-		]);
+				{
+					category: rpgm.radialMenu.categories.rpgm_forge,
+					icon: 'fa-solid fa-trash',
+					tooltip: 'RPGM_FORGE.RADIAL_MENU.DELETE',
+					callback() {
+						deleteGeneration(data.activeGeneration);
+					},
+					logger: rpgm.forge.logger
+				},
+				{
+					category: rpgm.radialMenu.categories.rpgm_debug,
+					icon: 'fa-regular fa-info-circle',
+					tooltip: 'RPGM_TOOLS.RADIAL_MENU.INFO',
+					detective(c) {
+						return inputHeuristics(c as InputContext).isDebug()
+							.result;
+					},
+					callback() {
+						rpgm.forge.logger.debug(toRaw(data), id);
+					},
+					logger: rpgm.forge.logger
+				}
+			]
+);
 
 provide('data', data);
 
@@ -89,7 +135,9 @@ onMounted(() => {
 	if (data.activeGeneration && data.generations[data.activeGeneration]) {
 		editing.value = false;
 	} else if (!data.options.schema) {
-		data.options.schema = structuredClone(schemas[Math.floor(Math.random() * schemas.length)]);
+		data.options.schema = structuredClone(
+			schemas[Math.floor(Math.random() * schemas.length)]
+		);
 	}
 });
 
@@ -100,32 +148,45 @@ onMounted(() => {
 async function sendToJournal(generation: string, open: boolean = false) {
 	const gen = data.generations[generation];
 
-	let entry = game.journal.find(j => j.getFlag('rpgm-forge', 'homebrew') === id) as JournalEntry;
+	let entry = game.journal.find(
+		j => j.getFlag('rpgm-forge', 'homebrew') === id
+	) as JournalEntry;
 	if (!entry) {
 		entry = (await JournalEntry.create({
 			name: gen.name,
-			flags: { 'rpgm-forge': { 'homebrew': id } }
+			flags: { 'rpgm-forge': { homebrew: id } }
 		}))!;
 	}
 
-	let page = entry.pages.find(e => e.getFlag('rpgm-forge', 'homebrew') === generation) as JournalEntryPage;
+	let page = entry.pages.find(
+		e => e.getFlag('rpgm-forge', 'homebrew') === generation
+	) as JournalEntryPage;
 	if (!page) {
-		page = (await JournalEntryPage.create({
-			name: gen.custom_name,
-			text: {
-				content: `*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`,
-				markdown: `*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`,
-				format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.MARKDOWN
+		page = (await JournalEntryPage.create(
+			{
+				name: gen.custom_name,
+				text: {
+					content: `*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`,
+					markdown: `*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`,
+					format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.MARKDOWN
+				},
+				// Puts the newest entry on top, may change later
+				sort:
+					entry.pages.reduce((m, e) => {
+						return e.sort < m ? (m = e.sort) : m;
+					}, 0) - 1,
+				flags: { 'rpgm-forge': { homebrew: generation } }
 			},
-			// Puts the newest entry on top, may change later
-			sort: entry.pages.reduce((m, e) => { return e.sort < m ? (m = e.sort) : m; }, 0) - 1,
-			flags: { 'rpgm-forge': { 'homebrew': generation } }
-		}, { parent: entry }))!;
-		if (open)
-			void page.sheet?.render(true);
-		rpgm.forge.logger.visible.log(`Journal Entry created for "${gen.custom_name}"`);
+			{ parent: entry }
+		))!;
+		if (open) void page.sheet?.render(true);
+		rpgm.forge.logger.visible.log(
+			`Journal Entry created for "${gen.custom_name}"`
+		);
 	} else {
-		rpgm.forge.logger.visible.error(`Journal Entry for "${gen.custom_name}" already exists!`);
+		rpgm.forge.logger.visible.error(
+			`Journal Entry for "${gen.custom_name}" already exists!`
+		);
 	}
 }
 
@@ -147,7 +208,9 @@ async function generate() {
 	if (!data.options.schema?.fields.length) return;
 	loading.value = true;
 
-	const result = await rpgm.forge.generateHomebrew(data.options as HomebrewOptions);
+	const result = await rpgm.forge.generateHomebrew(
+		data.options as HomebrewOptions
+	);
 
 	if (result.isOk()) {
 		rpgm.chat.updateScroll();
@@ -158,9 +221,7 @@ async function generate() {
 		editing.value = false;
 		if (rpgm.forge.settings.get('homebrewModel').provider === 'rpgm-tools')
 			(await rpgm.forge.useTextLimit()).decrement();
-	}
-	else
-		rpgm.forge.logger.visible.error(result.error.message);
+	} else rpgm.forge.logger.visible.error(result.error.message);
 	loading.value = false;
 }
 
@@ -190,9 +251,13 @@ function gotoGenerations() {
 function copyGeneration(generation: string) {
 	try {
 		const gen = data.generations[generation];
-		void navigator.clipboard.writeText(`# ${gen.custom_name}\n*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`);
+		void navigator.clipboard.writeText(
+			`# ${gen.custom_name}\n*${gen.flavor_text}*\n${gen.fields.map(f => `## ${f.name}\n${f.value}`).join('\n')}`
+		);
 		rpgm.forge.logger.visible.log(`Copied ${gen.name} to clipboard`);
-	} catch { return; }
+	} catch {
+		return;
+	}
 }
 
 /** Switches the wizard to the editing view, creating an empty schema from the active generation. */
@@ -206,7 +271,11 @@ function restoreSchemaFromActiveGeneration() {
 			name: data.generations[data.activeGeneration].name,
 			custom_name: undefined,
 			fields: [
-				...data.generations[data.activeGeneration].fields.map(f => ({ name: f.name, type: f.type, description: f.description }))
+				...data.generations[data.activeGeneration].fields.map(f => ({
+					name: f.name,
+					type: f.type,
+					description: f.description
+				}))
 			]
 		}
 	};
@@ -216,10 +285,7 @@ function restoreSchemaFromActiveGeneration() {
 </script>
 
 <template>
-	<ChatWizardContainer
-		:wizard="homebrew"
-		:buttons
-	>
+	<ChatWizardContainer :wizard="homebrew" :buttons>
 		<HomebrewTitle
 			ref="titleRef"
 			v-model="currentTitle"
@@ -228,10 +294,7 @@ function restoreSchemaFromActiveGeneration() {
 			@goto-generations="gotoGenerations"
 			@click="restoreSchemaFromActiveGeneration"
 		/>
-		<div
-			ref="buttonAnchor"
-			class="rpgm-homebrew-content"
-		>
+		<div ref="buttonAnchor" class="rpgm-homebrew-content">
 			<Transition name="rpgm-homebrew-main">
 				<div v-if="editing">
 					<HomebrewInput

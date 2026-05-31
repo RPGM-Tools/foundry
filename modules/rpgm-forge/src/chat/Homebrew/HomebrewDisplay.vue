@@ -14,7 +14,9 @@ function copy(field: HomebrewField) {
 	try {
 		void navigator.clipboard.writeText(`### ${field.name}\n${field.value}`);
 		rpgm.forge.logger.visible.log(`Copied "${field.name}" to clipboard!`);
-	} catch { return; }
+	} catch {
+		return;
+	}
 }
 </script>
 
@@ -23,10 +25,7 @@ function copy(field: HomebrewField) {
 		<p class="rpgm-homebrew-field-flavor-text">
 			{{ generations[generation]?.flavor_text }}
 		</p>
-		<div
-			v-if="generation"
-			class="rpgm-homebrew-display-fields"
-		>
+		<div v-if="generation" class="rpgm-homebrew-display-fields">
 			<div
 				v-for="field in generations[generation].fields"
 				:key="field.name"
@@ -37,15 +36,16 @@ function copy(field: HomebrewField) {
 						v-if="isSecure"
 						title="Copy to clipboard"
 						@click="copy(field)"
-					><i class="fa-solid fa-copy" /></a>
+						><i class="fa-solid fa-copy"
+					/></a>
 				</div>
 				<h3>{{ field.name }}</h3>
 				<input
 					v-if="field.type === 'boolean'"
 					type="checkbox"
-					style="font-style: normal;"
+					style="font-style: normal"
 					:checked="field.value"
-				>
+				/>
 				<p v-else>
 					{{ field.value }}
 				</p>
@@ -77,7 +77,7 @@ function copy(field: HomebrewField) {
 .rpgm-homebrew-display-fields * {
 	user-select: text;
 
-	input[type="checkbox"] {
+	input[type='checkbox'] {
 		pointer-events: none;
 	}
 }

@@ -74,7 +74,9 @@ interface ForgeManagedResponsesEnvelope {
 	};
 }
 
-function readManagedResponseText(payload: ForgeManagedResponsesEnvelope): string {
+function readManagedResponseText(
+	payload: ForgeManagedResponsesEnvelope
+): string {
 	const content = payload.response?.choices?.[0]?.message?.content;
 
 	if (typeof content !== 'string' || !content.trim()) {
@@ -122,9 +124,9 @@ async function postManagedResponse(input: {
 			}
 		})
 	});
-	const payload = (await response.json().catch(() => null)) as
-		| ForgeManagedResponsesEnvelope
-		| null;
+	const payload = (await response
+		.json()
+		.catch(() => null)) as ForgeManagedResponsesEnvelope | null;
 
 	if (!response.ok) {
 		throw new Error(
@@ -165,13 +167,16 @@ function buildDescriptionPrompt(options: DescriptionsOptions): string {
 
 	switch (options.length) {
 		case 'short':
-			prompt += 'The description should be a short blurb, up to 4 sentences.\n';
+			prompt +=
+				'The description should be a short blurb, up to 4 sentences.\n';
 			break;
 		case 'medium':
-			prompt += 'The description should be short, up to 2 paragraphs of ~4 sentences each.\n';
+			prompt +=
+				'The description should be short, up to 2 paragraphs of ~4 sentences each.\n';
 			break;
 		case 'extensive':
-			prompt += 'The description should be long and detailed, up to 4 paragraphs of ~4 sentences each.\n';
+			prompt +=
+				'The description should be long and detailed, up to 4 paragraphs of ~4 sentences each.\n';
 			break;
 	}
 
@@ -190,7 +195,9 @@ function buildDescriptionPrompt(options: DescriptionsOptions): string {
 	return prompt;
 }
 
-function buildHomebrewResponseSchema(schema: HomebrewSchema): Record<string, unknown> {
+function buildHomebrewResponseSchema(
+	schema: HomebrewSchema
+): Record<string, unknown> {
 	return {
 		type: 'object',
 		additionalProperties: false,
@@ -209,7 +216,9 @@ function buildHomebrewResponseSchema(schema: HomebrewSchema): Record<string, unk
 			fields: {
 				type: 'object',
 				additionalProperties: false,
-				required: schema.fields.map(field => createFieldKey(field.name)),
+				required: schema.fields.map(field =>
+					createFieldKey(field.name)
+				),
 				properties: Object.fromEntries(
 					schema.fields.map(field => [
 						createFieldKey(field.name),
@@ -242,7 +251,9 @@ function mapGeneratedHomebrewFieldValue(input: {
 	switch (input.field.type) {
 		case 'boolean':
 			if (typeof value !== 'boolean') {
-				throw new Error(`Field "${input.field.name}" must be a boolean.`);
+				throw new Error(
+					`Field "${input.field.name}" must be a boolean.`
+				);
 			}
 
 			return {
@@ -251,7 +262,9 @@ function mapGeneratedHomebrewFieldValue(input: {
 			};
 		case 'number':
 			if (typeof value !== 'number') {
-				throw new Error(`Field "${input.field.name}" must be a number.`);
+				throw new Error(
+					`Field "${input.field.name}" must be a number.`
+				);
 			}
 
 			return {
@@ -261,7 +274,9 @@ function mapGeneratedHomebrewFieldValue(input: {
 		case 'short':
 		case 'long':
 			if (typeof value !== 'string') {
-				throw new Error(`Field "${input.field.name}" must be a string.`);
+				throw new Error(
+					`Field "${input.field.name}" must be a string.`
+				);
 			}
 
 			return {
@@ -404,7 +419,9 @@ export function createLegacyFoundryManagedGenerationBridge(
 					options.schema.custom_name ??
 					generatedName ??
 					(() => {
-						throw new Error('Generated homebrew is missing a name.');
+						throw new Error(
+							'Generated homebrew is missing a name.'
+						);
 					})(),
 				flavor_text: generatedFlavorText,
 				fields: options.schema.fields.map(field => {
