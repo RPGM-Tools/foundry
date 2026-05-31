@@ -170,7 +170,7 @@ export abstract class AbstractTools
 		const { baseURL, apiKey } = this.rpgmTextAiOptions;
 		return createOpenAICompatible({
 			name: 'rpgm',
-			baseURL: new URL('/api/forge', baseURL).href,
+			baseURL: new URL('/api/v1/forge', baseURL).href,
 			apiKey
 		});
 	}

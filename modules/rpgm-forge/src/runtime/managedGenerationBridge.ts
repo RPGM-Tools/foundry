@@ -45,7 +45,7 @@ function createFieldKey(name: string): string {
 }
 
 function getManagedResponsesUrl(): string {
-	return new URL('/api/forge/responses', __API_URL__).toString();
+	return new URL('/api/v1/forge/responses', __API_URL__).toString();
 }
 
 export interface LegacyFoundryManagedGenerationBridge {
