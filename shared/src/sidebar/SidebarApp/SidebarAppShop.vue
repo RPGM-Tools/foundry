@@ -1,8 +1,14 @@
 <script setup lang="ts">
+/*
+	SidebarAppShop.vue
+	Purpose: Show the public membership catalog while routing membership changes
+	through the hosted RPGM Tools account center during the Forge 2.x bridge.
+*/
 // import type { Product } from '@polar-sh/sdk/models/components/product';
 import { Converter } from 'showdown';
 import * as z from 'zod/mini';
 
+import { useFoundryAccountBridge } from '#/auth/accountBridge';
 import CustomerPortalButton from '#/components/CustomerPortalButton.vue';
 import SubscriptionInfoAlert from '#/components/SubscriptionInfoAlert.vue';
 import SubscriptionWarningAlert from '#/components/SubscriptionWarningAlert.vue';
@@ -12,6 +18,7 @@ import ProgressiveImage from '#/util/ProgressiveImage.vue';
 import { LoadingBoundry } from '#/util/useLoading';
 
 const onResize = useResize();
+const accountBridge = useFoundryAccountBridge();
 
 // const { update } = rpgm.usePolyhedriumBalance();
 
@@ -21,17 +28,21 @@ type Product = NonNullable<typeof products.value>[number];
 
 const { subscription, update: updateSubscription } = useSubscription();
 
-const subscriptionActive = computed(() => Boolean(subscription.value?.status === 'active'));
-const subscriptionCanceling = computed(() => Boolean(subscription.value?.status === 'active' && subscription.value.canceledAt));
+const subscriptionActive = computed(() => Boolean(subscription.value?.hasActiveMembership));
+const subscriptionCanceling = computed(() => Boolean(subscription.value?.needsAttention));
 
 watch(products, () => {
 	onResize?.(true);
 });
 
-const subscriptionCheck = useFocusCheck(async () => {	
-	const oldS = subscription.value;
-	const newS = await updateSubscription();
-	return Boolean(oldS) !== Boolean(newS) || (oldS?.canceledAt?.getTime() !== newS?.canceledAt?.getTime());
+const subscriptionCheck = useFocusCheck(async () => {
+	const oldStatus = accountBridge.snapshot.value.membershipStatus;
+	const oldTierName = accountBridge.snapshot.value.activeTierName;
+	await updateSubscription();
+	return (
+		accountBridge.snapshot.value.membershipStatus !== oldStatus ||
+		accountBridge.snapshot.value.activeTierName !== oldTierName
+	);
 });
 
 useSignedInRequired();
@@ -89,13 +100,10 @@ function getSmallestMedia(medias: Product['medias']) {
 
 async function checkout(item: Product) {
 	checkingOutLoading.value = true;
-	return rpgm.auth.checkout({ slug: item.slug }).then((r) => {
-		checkingOutLoading.value = false;
-		if (r.error) return;
-		window.open(r.data.url, '_blank');
-		subscriptionCheck();	
-		// updateForABit();
-	});
+	accountBridge.openForgeMembership();
+	checkingOutLoading.value = false;
+	subscriptionCheck();
+	return Promise.resolve(item.slug);
 }
 
 
@@ -111,6 +119,11 @@ function priceText(prices: Product['prices']) {
 const mdConverter = new Converter();
 function formattedDescription(item: Product) {
 	return mdConverter.makeHtml(item.description!);
+}
+
+function hasActiveTier(item: Product) {
+	const activeTierName = subscription.value?.tierName?.trim().toLowerCase();
+	return Boolean(activeTierName && item.name.trim().toLowerCase() === activeTierName);
 }
 </script>
 
@@ -185,13 +198,12 @@ function formattedDescription(item: Product) {
 								<LoadingBoundry #="{ loading, start }">
 									<NFlex vertical>
 										<NButton
-											:type="subscriptionActive && item.id === subscription?.productId ? 'success' : 'primary'"
-											:disabled="subscriptionActive"
-											:ghost="subscriptionActive && item.id === subscription?.productId"
+											:type="hasActiveTier(item) ? 'success' : 'primary'"
+											:ghost="hasActiveTier(item)"
 											:loading="loading.value"
 											@click="start(checkout(item))"
 										>
-											{{ subscriptionActive && item.id === subscription?.productId ? 'Membership Active' : 'Join' }}
+											{{ hasActiveTier(item) ? 'Membership Active' : subscriptionActive ? 'Manage on RPGM Tools' : 'Open on RPGM Tools' }}
 										</NButton>
 									</NFlex>
 								</LoadingBoundry>

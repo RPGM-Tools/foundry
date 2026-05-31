@@ -1,6 +1,10 @@
 import { AbstractTools } from '@rpgm/tools';
 import { createGlobalState, useAsyncState } from '@vueuse/core';
 
+import {
+	ACCOUNT_SESSION_TOKEN_HEADER_NAME,
+	readStoredFoundryAccountSessionToken
+} from './auth/accountBridge';
 import { auth } from './auth';
 import { ChatCommands } from './chat';
 import { Help } from './help';
@@ -14,7 +18,11 @@ import { usePolyhedriumBalance } from './util/usePolyhedriumBalance';
 export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, AbstractTools.Settings>(AbstractTools) {
 	protected override get rpgmTextAiOptions(): { baseURL: string; apiKey: string; } {
 		return {
-			apiKey: this.authToken || '',
+			// Legacy `@rpgm/tools` still expects an auth token string here. During
+			// the bridge release, old Forge feeds the Steward snapshot token through
+			// a request wrapper so the managed text lane no longer depends on the
+			// legacy Better Auth bearer token.
+			apiKey: this.accountSessionToken || '',
 			baseURL: __API_URL__
 		};
 	}
@@ -52,9 +60,45 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 	protected override init(): void | Promise<void> {
 		this.settings.get('textProviders');
 		this.majorGameVersion = game.data.release.generation;
+		this.client.interceptors.request.use(request => {
+			return this.applyManagedAccountSessionHeaders(request);
+		});
 		this.chat = new ChatCommands();
 		this.sidebar = new RpgmSidebarManager();
 		this.radialMenu = new RadialMenuRegister();
+	}
+
+	private get accountSessionToken() {
+		return readStoredFoundryAccountSessionToken();
+	}
+
+	private get managedApiOrigin() {
+		return new URL(__API_URL__).origin;
+	}
+
+	private applyManagedAccountSessionHeaders(request: Request) {
+		const accountSessionToken = this.accountSessionToken;
+
+		if (!accountSessionToken) {
+			return request;
+		}
+
+		const requestUrl = new URL(request.url);
+
+		if (requestUrl.origin !== this.managedApiOrigin) {
+			return request;
+		}
+
+		const requestHeaders = new Headers(request.headers);
+		requestHeaders.delete('authorization');
+		requestHeaders.set(
+			ACCOUNT_SESSION_TOKEN_HEADER_NAME,
+			accountSessionToken
+		);
+
+		return new Request(request, {
+			headers: requestHeaders
+		});
 	}
 
 	protected override registerSettings(): void | Promise<void> {
@@ -70,7 +114,10 @@ export class RpgmTools extends FoundyRpgmModuleMixin<typeof AbstractTools, Abstr
 		return game.i18n.localize(id);
 	}
 
-	authToken = localStorage.getItem('rpgm-token');
+	// Keep this property for legacy compatibility, but source it from the
+	// Steward-backed snapshot token so old Forge no longer depends on the
+	// prior Better Auth token lane for managed requests.
+	authToken = readStoredFoundryAccountSessionToken();
 
 	help = new Help();
 

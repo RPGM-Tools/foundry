@@ -1,7 +1,7 @@
 <!--
 	File: ForgeSidebarByoAI.vue
 	Purpose: Pick Forge text-model lanes and warn when the current Foundry session is not connected to a managed RPGM Tools account.
-	Dependencies: Uses the legacy Better Auth session and the shared Foundry account bridge so model warnings follow either valid account lane.
+	Dependencies: Uses the shared Foundry account bridge so model warnings follow the Steward-backed account lane instead of the legacy Better Auth session.
 -->
 <script setup lang="ts">
 import type { TextProvider } from '@rpgm/tools';
@@ -14,7 +14,6 @@ import DiceIcon from '#/style/components/DiceIcon.vue';
 
 import ModeSwitcher from './ModeSwitcher.vue';
 
-const session = rpgm.auth.useSession();
 const accountBridge = useFoundryAccountBridge();
 
 const names = rpgm.forge.settings.ref('namesModel');
@@ -31,7 +30,6 @@ const anyRpgmSelected = computed(() => {
 
 const hasManagedForgeConnection = computed(() => {
 	return (
-		session.value.data !== null ||
 		accountBridge.isConnected.value ||
 		accountBridge.hasStoredSnapshotToken.value
 	);

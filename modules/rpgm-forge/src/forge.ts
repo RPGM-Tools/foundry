@@ -299,21 +299,21 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 	}
 
 	useTextLimit = createGlobalState(async () => {
-		const session = rpgm.auth.useSession();
 		const accountBridge = useFoundryAccountBridge();
 		const textLimit = ref(0);
 
 		const hasManagedForgeConnection = computed(() => {
 			return (
-				session.value.data !== null ||
 				accountBridge.isConnected.value ||
 				accountBridge.hasStoredSnapshotToken.value
 			);
 		});
 
 		const update = async () => {
-			// Prefer the Steward-backed snapshot-token lane first so old Forge can
-			// follow the new account bridge without waiting on the legacy bearer path.
+			// Old Forge now treats the Steward-backed snapshot-token lane as the
+			// authoritative managed usage source. The legacy bearer-session fallback
+			// stays intentionally cut so bridge-release parity does not depend on
+			// the old Better Auth client remaining alive.
 			const accountBackedUsage =
 				await loadAccountBackedForgeUsageSnapshot();
 
@@ -324,12 +324,7 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 				return textLimit.value;
 			}
 
-			if (session.value.data !== null) {
-				const limit = await this.getApiForgeUsage();
-				if (typeof limit.data === 'number') {
-					textLimit.value = limit.data;
-				}
-			}
+			textLimit.value = 0;
 
 			return textLimit.value;
 		};

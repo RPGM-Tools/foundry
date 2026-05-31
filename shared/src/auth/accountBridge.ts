@@ -57,9 +57,32 @@ export interface FoundryAccountBridgeSnapshot {
 	displayName: string;
 	profileSummary: string;
 	visibilitySummary: string;
+	activeTierName: string | null;
+	membershipStatus: string | null;
 	membershipSummary: string;
+	usageRemaining: number | null;
+	usageLimit: number | null;
+	usageOverLimit: boolean | null;
 	usageReadinessSummary: string;
+	spendableOre: number | null;
+	lifetimeOre: number | null;
 	economySummary: string;
+}
+
+interface FoundryAccountBridgeMembershipState {
+	activeTierName: string | null;
+	membershipStatus: string | null;
+}
+
+interface FoundryAccountBridgeUsageReadinessState {
+	remaining: number | null;
+	limit: number | null;
+	overLimit: boolean | null;
+}
+
+interface FoundryAccountBridgeEconomyState {
+	spendableOre: number | null;
+	lifetimeOre: number | null;
 }
 
 export interface FoundryAccountBackedForgeUsageSnapshot {
@@ -118,8 +141,15 @@ function createSignedOutSnapshot(): FoundryAccountBridgeSnapshot {
 		profileSummary: 'Profile changes stay on rpgm.tools.',
 		visibilitySummary:
 			'Profile visibility will appear after the account loads.',
+		activeTierName: null,
+		membershipStatus: null,
 		membershipSummary: 'No membership is loaded yet.',
+		usageRemaining: null,
+		usageLimit: null,
+		usageOverLimit: null,
 		usageReadinessSummary: 'No managed usage is loaded yet.',
+		spendableOre: null,
+		lifetimeOre: null,
 		economySummary: 'No Ore balance is loaded yet.'
 	};
 }
@@ -137,10 +167,17 @@ function createUnavailableSnapshot(
 		profileSummary: 'Profile changes stay on rpgm.tools.',
 		visibilitySummary:
 			'Profile visibility is unavailable until the next successful refresh.',
+		activeTierName: null,
+		membershipStatus: null,
 		membershipSummary:
 			'Membership is unavailable until the next successful refresh.',
+		usageRemaining: null,
+		usageLimit: null,
+		usageOverLimit: null,
 		usageReadinessSummary:
 			'Managed usage is unavailable until the next successful refresh.',
+		spendableOre: null,
+		lifetimeOre: null,
 		economySummary:
 			'Ore balance is unavailable until the next successful refresh.'
 	};
@@ -195,7 +232,9 @@ function createVisibilitySummary(profile: unknown): string {
 	return `Default visibility is ${defaultVisibility}; ${visibleSectionCount} public section${visibleSectionCount === 1 ? '' : 's'} are currently visible.`;
 }
 
-function createMembershipSummary(privateExpansions: unknown): string {
+function readMembershipState(
+	privateExpansions: unknown
+): FoundryAccountBridgeMembershipState {
 	const typedExpansions = privateExpansions as {
 		membership?: {
 			activeTierName?: string | null;
@@ -212,6 +251,17 @@ function createMembershipSummary(privateExpansions: unknown): string {
 		typedExpansions.membership?.membershipStatus
 	);
 
+	return {
+		activeTierName,
+		membershipStatus
+	};
+}
+
+function createMembershipSummary(
+	membershipState: FoundryAccountBridgeMembershipState
+): string {
+	const { activeTierName, membershipStatus } = membershipState;
+
 	if (activeTierName && membershipStatus) {
 		return `Active tier: ${activeTierName} (${membershipStatus}).`;
 	}
@@ -227,7 +277,9 @@ function createMembershipSummary(privateExpansions: unknown): string {
 	return 'No active membership summary is visible yet.';
 }
 
-function createUsageReadinessSummary(privateExpansions: unknown): string {
+function readUsageReadinessState(
+	privateExpansions: unknown
+): FoundryAccountBridgeUsageReadinessState {
 	const snapshot = (
 		privateExpansions as {
 			usageReadiness?: {
@@ -239,10 +291,21 @@ function createUsageReadinessSummary(privateExpansions: unknown): string {
 			};
 		}
 	).usageReadiness?.snapshot;
-	const remaining = normalizeFiniteNumber(snapshot?.remaining);
-	const limit = normalizeFiniteNumber(snapshot?.limit);
 
-	if (snapshot?.overLimit) {
+	return {
+		remaining: normalizeFiniteNumber(snapshot?.remaining),
+		limit: normalizeFiniteNumber(snapshot?.limit),
+		overLimit:
+			typeof snapshot?.overLimit === 'boolean' ? snapshot.overLimit : null
+	};
+}
+
+function createUsageReadinessSummary(
+	usageReadinessState: FoundryAccountBridgeUsageReadinessState
+): string {
+	const { remaining, limit, overLimit } = usageReadinessState;
+
+	if (overLimit) {
 		return 'Managed Forge usage is currently beyond the visible allowance.';
 	}
 
@@ -253,7 +316,9 @@ function createUsageReadinessSummary(privateExpansions: unknown): string {
 	return 'No managed Forge usage summary is visible yet.';
 }
 
-function createEconomySummary(privateExpansions: unknown): string {
+function readEconomyState(
+	privateExpansions: unknown
+): FoundryAccountBridgeEconomyState {
 	const oreBalance = (
 		privateExpansions as {
 			economy?: {
@@ -264,17 +329,24 @@ function createEconomySummary(privateExpansions: unknown): string {
 			};
 		}
 	).economy?.oreBalance;
-	const spendableBalance = normalizeFiniteNumber(
-		oreBalance?.spendableBalance
-	);
-	const lifetimeBalance = normalizeFiniteNumber(oreBalance?.lifetimeBalance);
 
-	if (spendableBalance !== null) {
-		return `${spendableBalance} Ore is currently spendable from this account.`;
+	return {
+		spendableOre: normalizeFiniteNumber(oreBalance?.spendableBalance),
+		lifetimeOre: normalizeFiniteNumber(oreBalance?.lifetimeBalance)
+	};
+}
+
+function createEconomySummary(
+	economyState: FoundryAccountBridgeEconomyState
+): string {
+	const { spendableOre, lifetimeOre } = economyState;
+
+	if (spendableOre !== null) {
+		return `${spendableOre} Ore is currently spendable from this account.`;
 	}
 
-	if (lifetimeBalance !== null) {
-		return `${lifetimeBalance} lifetime Ore has been recorded for this account.`;
+	if (lifetimeOre !== null) {
+		return `${lifetimeOre} lifetime Ore has been recorded for this account.`;
 	}
 
 	return 'No Ore balance summary is visible yet.';
@@ -289,6 +361,9 @@ function createAvailableSnapshot(
 	};
 	const profile = typedPayload.profile;
 	const privateExpansions = typedPayload.privateExpansions;
+	const membershipState = readMembershipState(privateExpansions);
+	const usageReadinessState = readUsageReadinessState(privateExpansions);
+	const economyState = readEconomyState(privateExpansions);
 	const displayName = normalizeOptionalText(
 		(
 			profile as {
@@ -305,9 +380,17 @@ function createAvailableSnapshot(
 		displayName: displayName ?? 'No display name is visible yet.',
 		profileSummary: createProfileSummary(profile),
 		visibilitySummary: createVisibilitySummary(profile),
-		membershipSummary: createMembershipSummary(privateExpansions),
-		usageReadinessSummary: createUsageReadinessSummary(privateExpansions),
-		economySummary: createEconomySummary(privateExpansions)
+		activeTierName: membershipState.activeTierName,
+		membershipStatus: membershipState.membershipStatus,
+		membershipSummary: createMembershipSummary(membershipState),
+		usageRemaining: usageReadinessState.remaining,
+		usageLimit: usageReadinessState.limit,
+		usageOverLimit: usageReadinessState.overLimit,
+		usageReadinessSummary:
+			createUsageReadinessSummary(usageReadinessState),
+		spendableOre: economyState.spendableOre,
+		lifetimeOre: economyState.lifetimeOre,
+		economySummary: createEconomySummary(economyState)
 	};
 }
 
@@ -809,6 +892,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		createSignedOutSnapshot()
 	);
 	const isLoading = ref(false);
+	const hasLoadedOnce = ref(false);
 	const notice = ref<FoundryAccountBridgeNotice | null>(
 		INITIAL_BRIDGE_RETURN_NOTICE
 	);
@@ -877,6 +961,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 				stopWatchingForReturn();
 			}
 		} finally {
+			hasLoadedOnce.value = true;
 			isLoading.value = false;
 		}
 	};
@@ -986,6 +1071,17 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		}
 	};
 
+	const openForgeMembership = () => {
+		if (!openAccountCenter({ focus: 'forge' })) {
+			stopWatchingForReturn();
+			notice.value = {
+				kind: 'warning',
+				message:
+					'Foundry could not open the RPGM Tools membership view just now.'
+			};
+		}
+	};
+
 	const disconnectFoundrySession = () => {
 		stopWatchingForReturn();
 		writeStoredSnapshotToken(null);
@@ -1015,6 +1111,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 	return {
 		snapshot,
 		isLoading,
+		hasLoadedOnce,
 		notice,
 		isConnected: computed(() => snapshot.value.status === 'available'),
 		hasStoredSnapshotToken: computed(() =>
@@ -1024,6 +1121,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		clearNotice,
 		openConnectOrCreateAccount,
 		openAccountSettings,
+		openForgeMembership,
 		disconnectFoundrySession
 	};
 });

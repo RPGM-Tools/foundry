@@ -1,27 +1,34 @@
 import { createGlobalState, useThrottleFn } from '@vueuse/core';
 
+import { useFoundryAccountBridge } from '#/auth/accountBridge';
+
 export const usePolyhedriumBalance = createGlobalState(() => {
 	const balance = ref<number>();
-	const session = rpgm.auth.useSession();
+	const accountBridge = useFoundryAccountBridge();
 
-	watch(session, (newSession, oldSession) => {
-		// Reset balance when logging out
-		if (newSession.data === null)
-			balance.value = undefined;
-		// Update balance on logging in
-		else if (oldSession.data === null)
-			balance.value = newSession.data.user.polyhedrium;
-	});
+	watch(
+		() => accountBridge.snapshot.value,
+		snapshot => {
+			if (snapshot.status !== 'available') {
+				balance.value = undefined;
+				return;
+			}
+
+			balance.value = snapshot.spendableOre ?? undefined;
+		},
+		{ immediate: true }
+	);
 
 	return {
 		balance,
 		update: useThrottleFn(async () => {
 			const oldBalance = balance.value;
-			if (session.value.data) {
-				const v = await rpgm.getApiPolyhedrium();
-				if (v.data) balance.value = v.data;
-			} else {
+			await accountBridge.refresh();
+			if (accountBridge.snapshot.value.status !== 'available') {
 				balance.value = undefined;
+			} else {
+				balance.value =
+					accountBridge.snapshot.value.spendableOre ?? undefined;
 			}
 			return [balance.value, oldBalance] as const;
 		}, 4000)

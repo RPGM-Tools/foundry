@@ -1,25 +1,14 @@
 <script setup lang="ts">
 import { NButton } from 'naive-ui';
 
-import { useFocusCheck, useSubscription } from '#/util';
+import { useFoundryAccountBridge } from '#/auth/accountBridge';
 import { LoadingBoundry } from '#/util/useLoading';
 
-const { subscription, update } = useSubscription();
-
-const check = useFocusCheck(async () => {	
-	const oldS = subscription.value;
-	const newS = await update();
-	return Boolean(oldS) !== Boolean(newS) 
-		|| (oldS?.canceledAt?.getTime() !== newS?.canceledAt?.getTime()) 
-		|| (oldS?.productId !== newS?.productId);
-});
+const accountBridge = useFoundryAccountBridge();
 
 async function openPortal() {
-	return rpgm.auth.customer.portal().then(portal => {
-		if (portal.error) return;
-		window.open(portal.data.url, '_blank');
-		check();
-	});
+	accountBridge.openForgeMembership();
+	return Promise.resolve();
 }
 </script>
 
@@ -32,7 +21,7 @@ async function openPortal() {
 			v-bind="$attrs"
 			@click="start(openPortal())"
 		>
-			Member Portal
+			Manage on RPGM Tools
 			<template #icon>
 				<i class="fa-solid fa-galaxy" />
 			</template>

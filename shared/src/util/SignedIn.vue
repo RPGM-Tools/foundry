@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { useFoundryAccountBridge } from '#/auth/accountBridge';
 import { useResize } from '#/sidebar';
 
-const signedIn = rpgm.auth.useSession();
+const accountBridge = useFoundryAccountBridge();
 
 const onResize = useResize();
 
-watch(signedIn, () => {
+watch(accountBridge.isConnected, () => {
 	setTimeout(() => onResize(true), 400);
 });
 </script>
@@ -13,7 +14,7 @@ watch(signedIn, () => {
 <template>
 	<Transition name="rpgm-fade">
 		<slot
-			v-if="signedIn.data?.session"
+			v-if="accountBridge.isConnected.value"
 			v-bind="$attrs"
 		/>
 		<slot

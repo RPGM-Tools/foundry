@@ -14,6 +14,7 @@ import {
 	createFoundryAccountCenterUrl,
 	isAbsoluteUrl
 } from '#/auth/accountCenter';
+import { useFoundryAccountBridge } from '#/auth/accountBridge';
 
 /** An object related to various information about a setting */
 type SettingsRef<T> = {
@@ -97,20 +98,33 @@ export function useFocusCheck(
 }
 
 export const useSubscription = createGlobalState(() => {
-	const {
-		isLoading,
-		state: subscription,
-		execute: update
-	} = useAsyncState(
-		() =>
-			rpgm.auth.customer.subscriptions
-				.list()
-				.then(({ data }) => data?.result.items[0] ?? null),
-		null,
-		{ immediate: false, resetOnExecute: false }
-	);
+	const accountBridge = useFoundryAccountBridge();
+	const subscription = computed(() => {
+		const snapshot = accountBridge.snapshot.value;
+
+		if (snapshot.status !== 'available') {
+			return null;
+		}
+
+		const membershipStatus = snapshot.membershipStatus?.trim() ?? null;
+		const normalizedStatus = membershipStatus?.toLowerCase() ?? null;
+		const hasActiveMembership =
+			normalizedStatus === 'active' ||
+			(!normalizedStatus && Boolean(snapshot.activeTierName));
+
+		return {
+			tierName: snapshot.activeTierName,
+			membershipStatus,
+			hasActiveMembership,
+			needsAttention: Boolean(snapshot.activeTierName) && !hasActiveMembership
+		};
+	});
+	const update = async () => {
+		await accountBridge.refresh();
+		return subscription.value;
+	};
 	const state = {
-		isLoading,
+		isLoading: computed(() => accountBridge.isLoading.value),
 		subscription,
 		update,
 		async then() {
@@ -181,19 +195,29 @@ const DEFAULT_SIGNED_IN_REQUIRED_FALLBACK_ROUTE = createFoundryAccountCenterUrl(
 export function useSignedInRequired(
 	fallbackRoute: string = DEFAULT_SIGNED_IN_REQUIRED_FALLBACK_ROUTE
 ) {
-	const session = rpgm.auth.useSession();
+	const accountBridge = useFoundryAccountBridge();
 	const router = useRouter();
 
-	watch(session, newSession => {
-		if (newSession.data === null) {
+	watch(
+		[
+			() => accountBridge.hasLoadedOnce.value,
+			() => accountBridge.isLoading.value,
+			() => accountBridge.snapshot.value.status
+		],
+		([hasLoadedOnce, isLoading, status]) => {
+			if (!hasLoadedOnce || isLoading || status !== 'signed-out') {
+				return;
+			}
+
 			if (isAbsoluteUrl(fallbackRoute)) {
 				globalThis.location.assign(fallbackRoute);
 				return;
 			}
 
 			router.push(fallbackRoute);
-		}
-	});
+		},
+		{ immediate: true }
+	);
 }
 
 const texts = new Map<string, string>();

@@ -16,8 +16,9 @@ const { subscription } = useSubscription();
 	>
 		<NFlex vertical>
 			<p>
-				Welcome, {{ subscription?.product.name || 'Member' }}!
-				You can upgrade or make changes to your membership in the Member Portal.
+				Welcome, {{ subscription?.tierName || 'Member' }}!
+				You can review or change your membership in the hosted RPGM
+				Tools account view.
 			</p>
 			<CustomerPortalButton
 				v-if="showButton"
