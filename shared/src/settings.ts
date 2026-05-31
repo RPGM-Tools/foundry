@@ -9,9 +9,12 @@ import { RadialMenuSettings } from './settings/radialMenu';
 const loadSidebarAccount = () => import('./sidebar/SidebarApp/SidebarAccount');
 const loadSidebarAccountByoAI = () =>
 	import('./sidebar/SidebarApp/SidebarAccount/SidebarAccountByoAI.vue');
-const loadSidebarAppAbout = () => import('./sidebar/SidebarApp/SidebarAppAbout.vue');
-const loadSidebarAppHelp = () => import('./sidebar/SidebarApp/SidebarAppHelp.vue');
-const loadSidebarAppShop = () => import('./sidebar/SidebarApp/SidebarAppShop.vue');
+const loadSidebarAppAbout = () =>
+	import('./sidebar/SidebarApp/SidebarAppAbout.vue');
+const loadSidebarAppHelp = () =>
+	import('./sidebar/SidebarApp/SidebarAppHelp.vue');
+const loadSidebarAppShop = () =>
+	import('./sidebar/SidebarApp/SidebarAppShop.vue');
 
 export class LocalStorageMap<T extends object> {
 	private holders = new Map<keyof T, ShallowRef<T[keyof T] | null>>();

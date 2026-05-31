@@ -219,7 +219,9 @@ export function FoundyRpgmModuleMixin<
 				this.logger.debug('first');
 				toolsRuntime = currentModuleIsToolsRuntime
 					? this
-					: ((new (await import('./tools')).RpgmTools() as unknown) as LegacyToolsRuntime);
+					: (new (
+							await import('./tools')
+						).RpgmTools() as unknown as LegacyToolsRuntime);
 				window.rpgmTools = toolsRuntime;
 
 				if (!window.rpgm) {
