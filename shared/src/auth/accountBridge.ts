@@ -9,11 +9,16 @@ import { createGlobalState } from '@vueuse/core';
 import { createFoundryAccountCenterUrl } from './accountCenter';
 
 const DEFAULT_PUBLIC_WEB_BASE_URL = 'https://rpgm.tools';
+const PUBLIC_WEB_BASE_URL_ORIGIN = new URL(DEFAULT_PUBLIC_WEB_BASE_URL).origin;
 const ACCOUNT_PROFILE_PATHNAME = '/api/v1/account/profile';
 const ACCOUNT_SESSION_TOKEN_PATHNAME = '/api/v1/account/profile-snapshot-token';
 export const ACCOUNT_SESSION_TOKEN_HEADER_NAME = 'x-rpgm-account-session-token';
 export const FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY =
 	'rpgm.foundry.profileSnapshotToken';
+const ACCOUNT_SESSION_LAUNCH_MESSAGE_TYPE =
+	'rpgm-account-session-launch-result';
+const ACCOUNT_SESSION_LAUNCH_ACK_MESSAGE_TYPE =
+	'rpgm-account-session-launch-ack';
 const RETURN_REFRESH_POLL_INTERVAL_MS = 1500;
 const RETURN_REFRESH_POLL_TIMEOUT_MS = 45000;
 const ACCOUNT_PROFILE_QUERY_PARAMS = {
@@ -36,6 +41,14 @@ const ACCOUNT_PROFILE_EXPANSIONS = [
 interface FoundryAccountBridgeNotice {
 	kind: 'info' | 'warning';
 	message: string;
+}
+
+interface FoundryAccountSessionLaunchMessage {
+	type: typeof ACCOUNT_SESSION_LAUNCH_MESSAGE_TYPE;
+	accountSessionToken: string | null;
+	accountSessionError: string | null;
+	accountSessionErrorDescription: string | null;
+	redirectUrl: string | null;
 }
 
 export interface FoundryAccountBridgeSnapshot {
@@ -430,6 +443,87 @@ function writeStoredSnapshotToken(token: string | null) {
 	}
 }
 
+function createAccountSessionResultNotice(input: {
+	accountSessionToken: string | null;
+	accountSessionError: string | null;
+	accountSessionErrorDescription: string | null;
+}): FoundryAccountBridgeNotice | null {
+	if (!input.accountSessionToken && !input.accountSessionError) {
+		return null;
+	}
+
+	if (input.accountSessionToken) {
+		writeStoredSnapshotToken(input.accountSessionToken);
+		return {
+			kind: 'info',
+			message:
+				'Foundry received a signed-in Steward account snapshot. Refreshing the legacy bridge lane now.'
+		};
+	}
+
+	return {
+		kind: 'warning',
+		message:
+			input.accountSessionErrorDescription ??
+			`Steward account sync returned ${input.accountSessionError}.`
+	};
+}
+
+function normalizeAccountSessionLaunchMessage(
+	value: unknown
+): FoundryAccountSessionLaunchMessage | null {
+	if (!value || typeof value !== 'object') {
+		return null;
+	}
+
+	const typedValue = value as {
+		type?: unknown;
+		accountSessionToken?: unknown;
+		accountSessionError?: unknown;
+		accountSessionErrorDescription?: unknown;
+		redirectUrl?: unknown;
+	};
+
+	if (typedValue.type !== ACCOUNT_SESSION_LAUNCH_MESSAGE_TYPE) {
+		return null;
+	}
+
+	return {
+		type: ACCOUNT_SESSION_LAUNCH_MESSAGE_TYPE,
+		accountSessionToken: normalizeOptionalText(
+			typedValue.accountSessionToken
+		),
+		accountSessionError: normalizeOptionalText(
+			typedValue.accountSessionError
+		),
+		accountSessionErrorDescription: normalizeOptionalText(
+			typedValue.accountSessionErrorDescription
+		),
+		redirectUrl: normalizeOptionalText(typedValue.redirectUrl)
+	};
+}
+
+function postAccountSessionLaunchAcknowledgement(event: MessageEvent) {
+	const source = event.source;
+
+	if (!source || typeof source !== 'object' || !('postMessage' in source)) {
+		return;
+	}
+
+	try {
+		(
+			source as {
+				postMessage: (message: unknown, targetOrigin: string) => void;
+			}
+		).postMessage(
+			{ type: ACCOUNT_SESSION_LAUNCH_ACK_MESSAGE_TYPE },
+			event.origin
+		);
+	} catch {
+		return;
+	}
+}
+
 export function clearStoredFoundryAccountSessionToken() {
 	writeStoredSnapshotToken(null);
 }
@@ -540,12 +634,14 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription
 	);
 
-	if (!accountSessionToken && !accountSessionError) {
-		return null;
-	}
+	const returnNotice = createAccountSessionResultNotice({
+		accountSessionToken,
+		accountSessionError,
+		accountSessionErrorDescription
+	});
 
-	if (accountSessionToken) {
-		writeStoredSnapshotToken(accountSessionToken);
+	if (!returnNotice) {
+		return null;
 	}
 
 	clearLocationReturnParams(currentUrl, [
@@ -561,20 +657,7 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 	);
 	repairFoundryRouteClass(currentUrl);
 
-	if (accountSessionToken) {
-		return {
-			kind: 'info',
-			message:
-				'Foundry received a signed-in Steward account snapshot. Refreshing the legacy bridge lane now.'
-		};
-	}
-
-	return {
-		kind: 'warning',
-		message:
-			accountSessionErrorDescription ??
-			`Steward account sync returned ${accountSessionError}.`
-	};
+	return returnNotice;
 }
 
 const INITIAL_BRIDGE_RETURN_NOTICE = consumeBridgeReturnFromUrl();
@@ -676,7 +759,12 @@ async function loadAccountSnapshot(): Promise<FoundryAccountBridgeSnapshot> {
 	}
 }
 
-function openExternalUrl(url: string | null) {
+function openExternalUrl(
+	url: string | null,
+	options: {
+		preserveOpener?: boolean;
+	} = {}
+) {
 	if (!url) {
 		return false;
 	}
@@ -684,10 +772,12 @@ function openExternalUrl(url: string | null) {
 	const openedWindow = globalThis.open?.(url, '_blank');
 
 	if (openedWindow) {
-		try {
-			openedWindow.opener = null;
-		} catch {
-			// Ignore cross-origin opener assignment failures.
+		if (!options.preserveOpener) {
+			try {
+				openedWindow.opener = null;
+			} catch {
+				// Ignore cross-origin opener assignment failures.
+			}
 		}
 
 		return true;
@@ -830,7 +920,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		const currentLocationUrl = readCurrentLocationUrl();
 		const shouldReturnToFoundry = options.focus === 'session';
 		const redirectUrl = shouldReturnToFoundry
-			? currentLocationUrl?.toString() ?? null
+			? (currentLocationUrl?.toString() ?? null)
 			: null;
 
 		return openExternalUrl(
@@ -838,8 +928,36 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 				baseUrl: DEFAULT_PUBLIC_WEB_BASE_URL,
 				focus: options.focus,
 				redirectUrl
-			})
+			}),
+			{ preserveOpener: shouldReturnToFoundry }
 		);
+	};
+
+	const handleAccountSessionLaunchMessage = (event: MessageEvent) => {
+		if (event.origin !== PUBLIC_WEB_BASE_URL_ORIGIN) {
+			return;
+		}
+
+		const launchMessage = normalizeAccountSessionLaunchMessage(event.data);
+
+		if (!launchMessage) {
+			return;
+		}
+
+		const messageNotice = createAccountSessionResultNotice({
+			accountSessionToken: launchMessage.accountSessionToken,
+			accountSessionError: launchMessage.accountSessionError,
+			accountSessionErrorDescription:
+				launchMessage.accountSessionErrorDescription
+		});
+
+		if (!messageNotice) {
+			return;
+		}
+
+		postAccountSessionLaunchAcknowledgement(event);
+		notice.value = messageNotice;
+		void refresh();
 	};
 
 	const openConnectOrCreateAccount = async () => {
@@ -885,6 +1003,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 	};
 
 	globalThis.addEventListener?.('focus', refreshIfReturnDetected);
+	globalThis.addEventListener?.('message', handleAccountSessionLaunchMessage);
 	globalThis.addEventListener?.('visibilitychange', () => {
 		if (globalThis.document?.visibilityState === 'visible') {
 			refreshIfReturnDetected();
