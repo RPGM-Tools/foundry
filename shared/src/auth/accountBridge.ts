@@ -827,10 +827,17 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		focus: 'session' | 'connections' | 'passkeys' | 'password' | 'forge';
 	}) => {
 		startWatchingForReturn();
+		const currentLocationUrl = readCurrentLocationUrl();
+		const shouldReturnToFoundry = options.focus === 'session';
+		const redirectUrl = shouldReturnToFoundry
+			? currentLocationUrl?.toString() ?? null
+			: null;
+
 		return openExternalUrl(
 			createFoundryAccountCenterUrl({
 				baseUrl: DEFAULT_PUBLIC_WEB_BASE_URL,
-				focus: options.focus
+				focus: options.focus,
+				redirectUrl
 			})
 		);
 	};
@@ -840,16 +847,12 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 			return;
 		}
 
-		if (navigateCurrentPage(createFoundryAccountSessionSyncUrl())) {
-			return;
-		}
-
 		if (!openAccountCenter({ focus: 'session' })) {
 			stopWatchingForReturn();
 			notice.value = {
 				kind: 'warning',
 				message:
-					'Foundry could not open the RPGM Tools account handoff or account center just now.'
+					'Foundry could not open the RPGM Tools account sign-in flow just now.'
 			};
 		}
 	};

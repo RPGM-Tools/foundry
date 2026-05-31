@@ -27,6 +27,7 @@ export type FoundryAccountCenterProviderMode = 'link' | 'sign-in';
 export function createFoundryAccountCenterUrl(input: {
 	baseUrl: string | URL;
 	focus?: FoundryAccountCenterFocus | null;
+	redirectUrl?: string | null;
 	provider?: FoundryAccountCenterProviderId | null;
 	mode?: FoundryAccountCenterProviderMode | null;
 }): string {
@@ -40,6 +41,10 @@ export function createFoundryAccountCenterUrl(input: {
 
 	if (input.focus) {
 		accountCenterUrl.searchParams.set('focus', input.focus);
+	}
+
+	if (input.redirectUrl && isAbsoluteUrl(input.redirectUrl)) {
+		accountCenterUrl.searchParams.set('redirectUrl', input.redirectUrl);
 	}
 
 	if (input.provider) {
