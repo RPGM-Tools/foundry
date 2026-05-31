@@ -6,9 +6,12 @@
  * Last Updated: 2026-05-31
  */
 import { RpgmLogger } from '#/logger';
-import type { AbstractRpgmModule, IRpgmModule } from '#/module';
+import {
+	AbstractRpgmModule as AbstractRpgmModuleValue,
+	type AbstractRpgmModule,
+	type IRpgmModule
+} from '#/module';
 import type { TextProvider } from '#/tools';
-import { AbstractRpgmModule as AbstractRpgmModuleValue } from '../../../../node_modules/@rpgm/tools/dist/shared/src/module.js';
 import { generateObject, generateText, jsonSchema, type JSONSchema7 } from 'ai';
 import { err, errAsync, ok, ResultAsync, type Result } from 'neverthrow';
 import slugify from 'slugify';
