@@ -310,6 +310,61 @@ function readCurrentLocationUrl(): URL | null {
 	}
 }
 
+function readLocationHashQueryParams(currentUrl: URL): {
+	hashPath: string;
+	hashParams: URLSearchParams;
+} {
+	const normalizedHash = currentUrl.hash.startsWith('#')
+		? currentUrl.hash.slice(1)
+		: currentUrl.hash;
+	const hashQuerySeparatorIndex = normalizedHash.indexOf('?');
+	const hashPath =
+		hashQuerySeparatorIndex === -1
+			? normalizedHash.includes('=') || normalizedHash.includes('&')
+				? ''
+				: normalizedHash
+			: normalizedHash.slice(0, hashQuerySeparatorIndex);
+	const hashQuery =
+		hashQuerySeparatorIndex === -1
+			? hashPath
+				? ''
+				: normalizedHash
+			: normalizedHash.slice(hashQuerySeparatorIndex + 1);
+
+	return {
+		hashPath,
+		hashParams: new URLSearchParams(hashQuery)
+	};
+}
+
+function readLocationReturnParam(currentUrl: URL, paramName: string): string | null {
+	return (
+		normalizeOptionalText(currentUrl.searchParams.get(paramName)) ??
+		normalizeOptionalText(
+			readLocationHashQueryParams(currentUrl).hashParams.get(paramName)
+		)
+	);
+}
+
+function clearLocationReturnParams(currentUrl: URL, paramNames: string[]) {
+	for (const paramName of paramNames) {
+		currentUrl.searchParams.delete(paramName);
+	}
+
+	const { hashPath, hashParams } = readLocationHashQueryParams(currentUrl);
+
+	for (const paramName of paramNames) {
+		hashParams.delete(paramName);
+	}
+
+	const nextHashQuery = hashParams.toString();
+	currentUrl.hash = hashPath
+		? nextHashQuery
+			? `${hashPath}?${nextHashQuery}`
+			: hashPath
+		: nextHashQuery;
+}
+
 function readStoredSnapshotToken(): string | null {
 	try {
 		return normalizeOptionalText(
@@ -437,25 +492,21 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 	}
 
 	const accountSessionToken =
-		normalizeOptionalText(
-			currentUrl.searchParams.get(
-				ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionToken
-			)
+		readLocationReturnParam(
+			currentUrl,
+			ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionToken
 		) ??
-		normalizeOptionalText(
-			currentUrl.searchParams.get(
-				ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.foundryProfileSnapshotToken
-			)
+		readLocationReturnParam(
+			currentUrl,
+			ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.foundryProfileSnapshotToken
 		);
-	const accountSessionError = normalizeOptionalText(
-		currentUrl.searchParams.get(
-			ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionError
-		)
+	const accountSessionError = readLocationReturnParam(
+		currentUrl,
+		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionError
 	);
-	const accountSessionErrorDescription = normalizeOptionalText(
-		currentUrl.searchParams.get(
-			ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription
-		)
+	const accountSessionErrorDescription = readLocationReturnParam(
+		currentUrl,
+		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription
 	);
 
 	if (!accountSessionToken && !accountSessionError) {
@@ -466,18 +517,12 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 		writeStoredSnapshotToken(accountSessionToken);
 	}
 
-	currentUrl.searchParams.delete(
-		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionToken
-	);
-	currentUrl.searchParams.delete(
-		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.foundryProfileSnapshotToken
-	);
-	currentUrl.searchParams.delete(
-		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionError
-	);
-	currentUrl.searchParams.delete(
+	clearLocationReturnParams(currentUrl, [
+		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionToken,
+		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.foundryProfileSnapshotToken,
+		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionError,
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription
-	);
+	]);
 	globalThis.history?.replaceState?.(
 		globalThis.history.state ?? null,
 		'',
@@ -499,6 +544,8 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 			`Steward account sync returned ${accountSessionError}.`
 	};
 }
+
+const INITIAL_BRIDGE_RETURN_NOTICE = consumeBridgeReturnFromUrl();
 
 function createAccountProfileRequestUrl(): string {
 	const profileRequestUrl = new URL(
@@ -636,7 +683,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 	);
 	const isLoading = ref(false);
 	const notice = ref<FoundryAccountBridgeNotice | null>(
-		consumeBridgeReturnFromUrl()
+		INITIAL_BRIDGE_RETURN_NOTICE
 	);
 	let lastSeenSnapshotToken = readStoredSnapshotToken();
 	let expectsRefreshOnReturn = false;
