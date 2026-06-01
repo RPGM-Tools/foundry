@@ -138,7 +138,7 @@ _Offline and Adjective Names do not require AI._ Descriptions and Homebrew use a
 
 
 - Added a browser-return account bridge so Foundry can hand off to your hosted RPGM Tools account, reconnect from an already-signed-in browser session, and return the session to Old Forge without making you retype credentials inside the VTT.
-- Added a Foundry account summary that shows your connected RPGM Tools account status, visible membership state, managed Forge usage readiness, and Ore balance in one place.
+- Added a Foundry account summary that shows your connected RPGM Tools account status, visible membership state, and managed Forge usage readiness in one place.
 - Added a session-local disconnect action so you can clear Old Forge's connected RPGM account for the current Foundry lane without signing out of the public web account.
 
 #### Improved

@@ -433,7 +433,27 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 				return textLimit.value;
 			}
 
-			textLimit.value = 0;
+			if (accountBridge.snapshot.value.status === 'available') {
+				if (accountBridge.snapshot.value.usageOverLimit) {
+					textLimit.value = 0;
+					return textLimit.value;
+				}
+
+				if (accountBridge.snapshot.value.usageRemaining !== null) {
+					textLimit.value = Math.max(
+						0,
+						accountBridge.snapshot.value.usageRemaining
+					);
+					return textLimit.value;
+				}
+
+				if (accountBridge.snapshot.value.managedForgeAccess) {
+					textLimit.value = null;
+					return textLimit.value;
+				}
+			}
+
+			textLimit.value = null;
 
 			return textLimit.value;
 		};
@@ -448,23 +468,14 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 
 		watch(
 			hasManagedForgeConnection,
-			isConnected => {
-				if (!isConnected) {
-					textLimit.value = 0;
-					return;
-				}
-
+			() => {
 				void update();
 			},
 			{ immediate: true }
 		);
 
-		const textLimitValue = computed(() => {
-			if (!hasManagedForgeConnection.value) return 0;
-			return textLimit.value;
-		});
 		return {
-			textLimit: textLimitValue,
+			textLimit: computed(() => textLimit.value),
 			updateTextLimit: update,
 			decrement
 		};

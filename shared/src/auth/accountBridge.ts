@@ -24,6 +24,10 @@ const ACCOUNT_SESSION_LAUNCH_MESSAGE_TYPE =
 	'rpgm-account-session-launch-result';
 const ACCOUNT_SESSION_LAUNCH_ACK_MESSAGE_TYPE =
 	'rpgm-account-session-launch-ack';
+const ACCOUNT_BACKED_FORGE_USAGE_PATHNAMES = [
+	'/api/v1/forge/usage',
+	'/api/forge/usage'
+] as const;
 const RETURN_REFRESH_POLL_INTERVAL_MS = 1500;
 const RETURN_REFRESH_POLL_TIMEOUT_MS = 45000;
 const ACCOUNT_PROFILE_QUERY_PARAMS = {
@@ -66,6 +70,7 @@ export interface FoundryAccountBridgeSnapshot {
 	activeTierName: string | null;
 	membershipStatus: string | null;
 	membershipSummary: string;
+	managedForgeAccess: boolean | null;
 	usageRemaining: number | null;
 	usageLimit: number | null;
 	usageOverLimit: boolean | null;
@@ -152,6 +157,7 @@ function createSignedOutSnapshot(): FoundryAccountBridgeSnapshot {
 		activeTierName: null,
 		membershipStatus: null,
 		membershipSummary: 'No membership is loaded yet.',
+		managedForgeAccess: null,
 		usageRemaining: null,
 		usageLimit: null,
 		usageOverLimit: null,
@@ -179,6 +185,7 @@ function createUnavailableSnapshot(
 		membershipStatus: null,
 		membershipSummary:
 			'Membership is unavailable until the next successful refresh.',
+		managedForgeAccess: null,
 		usageRemaining: null,
 		usageLimit: null,
 		usageOverLimit: null,
@@ -409,6 +416,7 @@ function createAvailableSnapshot(
 		activeTierName: membershipState.activeTierName,
 		membershipStatus: membershipState.membershipStatus,
 		membershipSummary: createMembershipSummary(membershipState),
+		managedForgeAccess: usageReadinessState.managedForgeAccess,
 		usageRemaining: usageReadinessState.remaining,
 		usageLimit: usageReadinessState.limit,
 		usageOverLimit: usageReadinessState.overLimit,
@@ -565,7 +573,7 @@ function createAccountSessionResultNotice(input: {
 		return {
 			kind: 'info',
 			message:
-				'Foundry received a signed-in Steward account snapshot. Refreshing the legacy bridge lane now.'
+				'Signed in successfully. Refreshing your RPGM Tools connection in Foundry now.'
 		};
 	}
 
@@ -697,34 +705,43 @@ export async function loadAccountBackedForgeUsageSnapshot(
 		);
 	}
 
-	try {
-		const response = await fetchImplementation(
-			new URL('/api/forge/usage', baseUrl).toString(),
-			{
-				method: 'GET',
-				headers: requestHeaders,
-				credentials: 'include',
-				cache: 'no-store'
+	for (const usagePathname of ACCOUNT_BACKED_FORGE_USAGE_PATHNAMES) {
+		try {
+			const response = await fetchImplementation(
+				new URL(usagePathname, baseUrl).toString(),
+				{
+					method: 'GET',
+					headers: requestHeaders,
+					credentials: 'include',
+					cache: 'no-store'
+				}
+			);
+			const payload = await response.json().catch(() => null);
+
+			if (response.status === 401) {
+				if (accountSessionToken) {
+					clearStoredFoundryAccountSessionToken();
+				}
+
+				return null;
 			}
-		);
-		const payload = await response.json().catch(() => null);
 
-		if (response.status === 401) {
-			if (accountSessionToken) {
-				clearStoredFoundryAccountSessionToken();
+			if (!response.ok) {
+				continue;
 			}
 
-			return null;
-		}
+			const normalizedSnapshot =
+				normalizeAccountBackedForgeUsageSnapshot(payload);
 
-		if (!response.ok) {
-			return null;
+			if (normalizedSnapshot) {
+				return normalizedSnapshot;
+			}
+		} catch {
+			continue;
 		}
-
-		return normalizeAccountBackedForgeUsageSnapshot(payload);
-	} catch {
-		return null;
 	}
+
+	return null;
 }
 
 function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
@@ -1157,7 +1174,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		notice.value = {
 			kind: 'info',
 			message:
-				'Cleared the local Steward snapshot token for this Foundry lane. Your public web account session is unchanged.'
+				'Disconnected this Foundry session. Your RPGM Tools web session is unchanged.'
 		};
 	};
 

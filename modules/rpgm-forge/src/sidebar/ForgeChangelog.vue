@@ -14,7 +14,9 @@ import C5 from '$$/assets/changelog/v2.1.2.md?url';
 import C6 from '$$/assets/changelog/v2.1.3.md?url';
 import C7 from '$$/assets/changelog/v2.1.4.md?url';
 import C8 from '$$/assets/changelog/v2.2.0.md?url';
+import C9 from '$$/assets/changelog/v2.3.0.md?url';
 
+const c9text = useMarkdown(C9);
 const c8text = useMarkdown(C8);
 const c7text = useMarkdown(C7);
 const c6text = useMarkdown(C6);
@@ -33,28 +35,31 @@ const resize = useResize(250);
 		display-directive="show"
 		@update:expanded-names="resize"
 	>
-		<NCollapseItem name="1" title="v2.2.0 - 2026-04-04">
+		<NCollapseItem name="1" title="v2.3.0 - 2026-05-31">
+			<p v-html="c9text" />
+		</NCollapseItem>
+		<NCollapseItem name="2" title="v2.2.0 - 2026-04-04">
 			<p v-html="c8text" />
 		</NCollapseItem>
-		<NCollapseItem name="2" title="v2.1.4 - 2025-11-22">
+		<NCollapseItem name="3" title="v2.1.4 - 2025-11-22">
 			<p v-html="c7text" />
 		</NCollapseItem>
-		<NCollapseItem name="3" title="v2.1.3 - 2025-11-13">
+		<NCollapseItem name="4" title="v2.1.3 - 2025-11-13">
 			<p v-html="c6text" />
 		</NCollapseItem>
-		<NCollapseItem name="4" title="v2.1.2 - 2025-11-11">
+		<NCollapseItem name="5" title="v2.1.2 - 2025-11-11">
 			<p v-html="c5text" />
 		</NCollapseItem>
-		<NCollapseItem name="5" title="v2.1.1 - 2025-10-04">
+		<NCollapseItem name="6" title="v2.1.1 - 2025-10-04">
 			<p v-html="c4text" />
 		</NCollapseItem>
-		<NCollapseItem name="6" title="v2.1.0 - 2025-09-27">
+		<NCollapseItem name="7" title="v2.1.0 - 2025-09-27">
 			<p v-html="c3text" />
 		</NCollapseItem>
-		<NCollapseItem name="7" title="v2.0.1 - 2025-09-16">
+		<NCollapseItem name="8" title="v2.0.1 - 2025-09-16">
 			<p v-html="c2text" />
 		</NCollapseItem>
-		<NCollapseItem name="8" title="v2.0.0 - 2025-09-15">
+		<NCollapseItem name="9" title="v2.0.0 - 2025-09-15">
 			<p v-html="c1text" />
 		</NCollapseItem>
 		<template #arrow>

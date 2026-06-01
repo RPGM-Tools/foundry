@@ -45,12 +45,6 @@ const accountBridge = useFoundryAccountBridge();
 						accountBridge.snapshot.value.usageReadinessSummary
 					}}</span>
 				</div>
-				<div class="account-summary-item">
-					<span class="account-summary-label">Ore</span>
-					<span class="account-summary-value">{{
-						accountBridge.snapshot.value.economySummary
-					}}</span>
-				</div>
 			</div>
 			<NButton
 				type="primary"
@@ -74,9 +68,10 @@ const accountBridge = useFoundryAccountBridge();
 			<NButton
 				block
 				ghost
+				class="account-secondary-button"
 				@click="accountBridge.disconnectFoundrySession()"
 			>
-				Disconnect RPGM account for this session
+				Disconnect this Foundry session
 			</NButton>
 		</NFlex>
 	</div>
@@ -130,5 +125,10 @@ const accountBridge = useFoundryAccountBridge();
 	text-align: center;
 	white-space: normal;
 	line-height: 1.25;
+}
+
+.account-secondary-button {
+	white-space: normal;
+	line-height: 1.2;
 }
 </style>

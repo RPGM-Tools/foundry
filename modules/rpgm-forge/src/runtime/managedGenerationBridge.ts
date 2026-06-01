@@ -16,8 +16,11 @@ import {
 
 import type { RpgmForge } from '$/forge';
 
-function createManagedRequestHeaders(): HeadersInit {
-	const headers = new Headers();
+function createManagedRequestHeaders(): Headers {
+	const headers = new Headers({
+		accept: 'application/json',
+		'content-type': 'application/json; charset=utf-8'
+	});
 	const snapshotToken = readStoredFoundryAccountSessionToken();
 
 	if (snapshotToken) {
@@ -44,8 +47,10 @@ function createFieldKey(name: string): string {
 	return normalizedName || 'field';
 }
 
-function getManagedResponsesUrl(): string {
-	return new URL('/api/forge/responses', __API_URL__).toString();
+function getManagedResponsesUrls(): string[] {
+	return ['/api/v1/forge/responses', '/api/forge/responses'].map(pathname =>
+		new URL(pathname, __API_URL__).toString()
+	);
 }
 
 export interface LegacyFoundryManagedGenerationBridge {
@@ -100,45 +105,68 @@ async function postManagedResponse(input: {
 	presencePenalty?: number;
 	frequencyPenalty?: number;
 }): Promise<ForgeManagedResponsesEnvelope> {
-	const response = await globalThis.fetch(getManagedResponsesUrl(), {
-		method: 'POST',
-		cache: 'no-store',
-		credentials: 'include',
-		headers: {
-			accept: 'application/json',
-			'content-type': 'application/json; charset=utf-8',
-			...createManagedRequestHeaders()
-		},
-		body: JSON.stringify({
-			lane: input.lane,
-			requestedModel: input.requestedModel,
-			messages: input.messages,
-			responseFormat: input.responseFormat,
-			temperature: input.temperature,
-			topP: input.topP,
-			presencePenalty: input.presencePenalty,
-			frequencyPenalty: input.frequencyPenalty,
-			metadata: {
-				surface: 'old-foundry-managed-bridge'
+	let lastError: Error | null = null;
+
+	for (const requestUrl of getManagedResponsesUrls()) {
+		try {
+			const response = await globalThis.fetch(requestUrl, {
+				method: 'POST',
+				cache: 'no-store',
+				credentials: 'include',
+				headers: createManagedRequestHeaders(),
+				body: JSON.stringify({
+					lane: input.lane,
+					requestedModel: input.requestedModel,
+					messages: input.messages,
+					responseFormat: input.responseFormat,
+					temperature: input.temperature,
+					topP: input.topP,
+					presencePenalty: input.presencePenalty,
+					frequencyPenalty: input.frequencyPenalty,
+					metadata: {
+						surface: 'old-foundry-managed-bridge'
+					}
+				})
+			});
+			const payload = (await response
+				.json()
+				.catch(() => null)) as ForgeManagedResponsesEnvelope | null;
+
+			if (!response.ok) {
+				lastError = new Error(
+					payload?.error?.message ??
+						`Forge managed response failed with HTTP ${response.status}.`
+				);
+
+				if (response.status === 404) {
+					continue;
+				}
+
+				throw lastError;
 			}
-		})
-	});
-	const payload = (await response
-		.json()
-		.catch(() => null)) as ForgeManagedResponsesEnvelope | null;
 
-	if (!response.ok) {
-		throw new Error(
-			payload?.error?.message ??
-				`Forge managed response failed with HTTP ${response.status}.`
-		);
+			if (!payload) {
+				lastError = new Error(
+					'Forge managed response returned no JSON payload.'
+				);
+				continue;
+			}
+
+			return payload;
+		} catch (error) {
+			lastError =
+				error instanceof Error
+					? error
+					: new Error(
+							'Failed to reach the managed Forge response lane.'
+						);
+		}
 	}
 
-	if (!payload) {
-		throw new Error('Forge managed response returned no JSON payload.');
-	}
-
-	return payload;
+	throw (
+		lastError ??
+		new Error('Failed to reach the managed Forge response lane.')
+	);
 }
 
 function buildNamesUserMessage(options: NamesOptions): string {

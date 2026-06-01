@@ -30,6 +30,7 @@ const typedChatValue = ref('');
 const parseResult = ref<ParseResults>();
 const completionIndex = ref(-1);
 const completionCursor = ref(-1);
+const pendingInputRefreshFrame = ref<number | null>(null);
 
 const Statuses = {
 	okay: '#00ffae',
@@ -43,10 +44,34 @@ const suggestions = computed<Suggestions>(() => {
 	return completions;
 });
 
+const suggestionList = computed(() => {
+	const rawSuggestions = suggestions.value.suggestions;
+	const commandBounds = getCommandBounds(typedChatValue.value);
+
+	if (!commandBounds) {
+		return rawSuggestions;
+	}
+
+	const typedCommand = commandBounds.commandText.trimEnd();
+
+	if (!typedCommand || /\s/u.test(typedCommand)) {
+		return rawSuggestions;
+	}
+
+	const filteredSuggestions = rawSuggestions.filter(completion => {
+		const completedCommand =
+			getExecutableCommand(suggestionValue(completion, false)) ?? '';
+
+		return completedCommand.startsWith(typedCommand);
+	});
+
+	return filteredSuggestions.length ? filteredSuggestions : rawSuggestions;
+});
+
 const status = computed(() => {
 	if (
 		completionIndex.value >= 0 &&
-		completionIndex.value < suggestions.value.suggestions.length
+		completionIndex.value < suggestionList.value.length
 	)
 		return Statuses.okay;
 	const errors = parseResult.value?.errors;
@@ -60,9 +85,7 @@ const statusStyle = computed<StyleValue>(() => {
 	};
 });
 
-const hasSuggestions = computed(
-	() => suggestions.value.suggestions.length > 0
-);
+const hasSuggestions = computed(() => suggestionList.value.length > 0);
 
 const onKeyDownEvent: EventListener = event => {
 	if (!(event instanceof KeyboardEvent)) return;
@@ -117,7 +140,9 @@ function getChatInputPlugin() {
 											message: string,
 											meta?: { noHistory: true }
 										) => void;
-										sendMessage?: (view: { state: object }) => void | Promise<void>;
+										sendMessage?: (view: {
+											state: object;
+										}) => void | Promise<void>;
 									};
 								};
 							};
@@ -126,9 +151,7 @@ function getChatInputPlugin() {
 				};
 			};
 		}
-	).plugins.chat.ChatInputPlugin.key.get(
-		view.state
-	)?.spec?.instance;
+	).plugins.chat.ChatInputPlugin.key.get(view.state)?.spec?.instance;
 }
 
 function getChatInputValue() {
@@ -186,11 +209,37 @@ function addChatListeners(input: ChatInputElement | null) {
 	}
 }
 
+function scheduleInputRefresh() {
+	if (
+		pendingInputRefreshFrame.value !== null &&
+		typeof globalThis.cancelAnimationFrame === 'function'
+	) {
+		globalThis.cancelAnimationFrame(pendingInputRefreshFrame.value);
+	}
+
+	if (typeof globalThis.requestAnimationFrame === 'function') {
+		pendingInputRefreshFrame.value = globalThis.requestAnimationFrame(
+			() => {
+				pendingInputRefreshFrame.value = null;
+				onInput();
+			}
+		);
+		return;
+	}
+
+	queueMicrotask(() => {
+		onInput();
+	});
+}
+
 function bindChatInput(input = document.querySelector(CHAT_MESSAGE)) {
 	addChatListeners(input as ChatInputElement | null);
 }
 
-function claimKeyEvent(event: KeyboardEvent, recordPending?: { recordPending: boolean }) {
+function claimKeyEvent(
+	event: KeyboardEvent,
+	recordPending?: { recordPending: boolean }
+) {
 	event.preventDefault();
 	event.stopPropagation();
 	event.stopImmediatePropagation();
@@ -212,7 +261,11 @@ function updateParse(value: string) {
 
 function setChatInputValue(
 	value: string,
-	options: { focus?: boolean; notify?: boolean; suppressHistory?: boolean } = {}
+	options: {
+		focus?: boolean;
+		notify?: boolean;
+		suppressHistory?: boolean;
+	} = {}
 ) {
 	if (!chatInput.value) return;
 	const view = getChatEditorView();
@@ -290,8 +343,7 @@ function suggestionValue(
 
 	const replacementStart =
 		commandBounds.commandStart + completion.range.start;
-	const replacementEnd =
-		commandBounds.commandStart + completion.range.end;
+	const replacementEnd = commandBounds.commandStart + completion.range.end;
 
 	const nextValue = [
 		typedChatValue.value.slice(0, replacementStart),
@@ -337,19 +389,23 @@ function previewSuggestion(by: number) {
 	}
 	moveSuggestionCursor(by);
 	setChatInputValue(
-		suggestionValue(suggestions.value.suggestions[completionIndex.value], false),
+		suggestionValue(suggestionList.value[completionIndex.value], false),
 		{ suppressHistory: true }
 	);
 }
 
-function chooseSuggestion(completion?: (typeof suggestions.value.suggestions)['0']) {
+function chooseSuggestion(
+	completion?: (typeof suggestions.value.suggestions)['0']
+) {
 	const value = suggestionValue(completion, true);
 	setChatInputValue(value, { notify: true });
 	syncTypedValue(value);
 	resetCompletionState();
 }
 
-function suggestionLabel(completion: (typeof suggestions.value.suggestions)['0']) {
+function suggestionLabel(
+	completion: (typeof suggestions.value.suggestions)['0']
+) {
 	return completion.tooltip || completion.text;
 }
 
@@ -366,9 +422,7 @@ function handleSuggestionKeydown(
 			if (!typedChatValue.value.trimStart().startsWith('*')) return false;
 			claimKeyEvent(e, recordPending);
 			if (hasSuggestions.value && completionIndex.value >= 0) {
-				chooseSuggestion(
-					suggestions.value.suggestions[completionIndex.value]
-				);
+				chooseSuggestion(suggestionList.value[completionIndex.value]);
 			}
 			return sendCurrentMessage();
 		}
@@ -388,11 +442,12 @@ function handleSuggestionKeydown(
 			if (!hasSuggestions.value) return false;
 			claimKeyEvent(e, recordPending);
 			previewSuggestion(e.shiftKey ? -1 : 1);
-			chooseSuggestion(suggestions.value.suggestions[completionIndex.value]);
+			chooseSuggestion(suggestionList.value[completionIndex.value]);
 			return true;
 		}
 		case 'Escape': {
-			if (!hasSuggestions.value && completionIndex.value === -1) return false;
+			if (!hasSuggestions.value && completionIndex.value === -1)
+				return false;
 			claimKeyEvent(e, recordPending);
 			resetCompletionState();
 			setChatInputValue(typedChatValue.value, { suppressHistory: true });
@@ -404,16 +459,22 @@ function handleSuggestionKeydown(
 	}
 }
 
+function shouldRefreshInputFromKeydown(e: KeyboardEvent) {
+	return e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete';
+}
+
 function onKeyDown(e: KeyboardEvent) {
 	if (handleSuggestionKeydown(e)) return;
-	if (e.key.length > 1) onInput();
+	if (shouldRefreshInputFromKeydown(e)) {
+		scheduleInputRefresh();
+	}
 }
 
 /**
  * @param by - How many to increment the suggestion cursor by
  */
 function moveSuggestionCursor(by: number) {
-	const suggestionsLength = suggestions.value.suggestions.length;
+	const suggestionsLength = suggestionList.value.length;
 	// Wraparound so that allowed values are [-1, suggestionsLength)
 	completionIndex.value =
 		(completionIndex.value + suggestionsLength + 1 + by) %
@@ -504,16 +565,22 @@ onUnmounted(() => {
 	Hooks.off('renderChatInput' as never, renderChatInputHook.value);
 	chatInput.value?.removeEventListener('input', onInput, true);
 	chatInput.value?.removeEventListener('keydown', onKeyDownEvent, true);
+	if (
+		pendingInputRefreshFrame.value !== null &&
+		typeof globalThis.cancelAnimationFrame === 'function'
+	) {
+		globalThis.cancelAnimationFrame(pendingInputRefreshFrame.value);
+	}
 });
 
 const commandStyles = computed<StyleValue[]>(() => {
-	return suggestions.value.suggestions.map<StyleValue>((_, i) => {
+	return suggestionList.value.map<StyleValue>((_, i) => {
 		return {
 			...(i == completionIndex.value
 				? {
-					color: '#00ffae',
-					backgroundColor: 'rgb(255 255 255 / 0.08)'
-				}
+						color: '#00ffae',
+						backgroundColor: 'rgb(255 255 255 / 0.08)'
+					}
 				: {})
 		};
 	});
@@ -535,7 +602,7 @@ const commandStyles = computed<StyleValue[]>(() => {
 				class="rpgm-chat-commands"
 			>
 				<li
-					v-for="(completion, i) in suggestions.suggestions"
+					v-for="(completion, i) in suggestionList"
 					:key="`${completion.text}`"
 					:style="commandStyles[i]"
 					class="rpgm-chat-command"
