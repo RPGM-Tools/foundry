@@ -17,10 +17,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          path: rpgm/foundry
           fetch-depth: 0 # Fetch depth is required for tag operations
+
+      - name: Checkout shared RPGM repo
+        uses: actions/checkout@v4
+        with:
+          repository: RPGM-Tools/rpgm
+          path: rpgm-tools/rpgm
+
+      - name: Checkout RPGM Tools Forge repo
+        uses: actions/checkout@v4
+        with:
+          repository: RPGM-Tools/rpgm-tools-forge
+          path: rpgm-tools/rpgm-tools-forge
 
       - name: Extract Module Info from Tag
         id: module_info
+        working-directory: rpgm/foundry
         run: |
           TAG_NAME=${{ github.ref_name }}
           MODULE_ID=$(echo "$TAG_NAME" | cut -d'-' -f1)  # Extract 'forge', 'vault', or 'tome'
@@ -38,6 +52,7 @@ jobs:
 
       - name: Get Version from package.json
         id: version_info
+        working-directory: rpgm/foundry
         run: | 
           VERSION=$(jq -r '.version' < ./modules/rpgm-${{ steps.module_info.outputs.module_id }}/package.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -48,6 +63,7 @@ jobs:
 
       - name: Verify release notes exist
         id: release_notes
+        working-directory: rpgm/foundry
         run: |
           RELEASE_NOTES_PATH="./modules/rpgm-${{ steps.module_info.outputs.module_id }}/assets/changelog/v${{ steps.module_info.outputs.tag_version }}.md"
           if ! test -f "$RELEASE_NOTES_PATH"; then
@@ -67,17 +83,22 @@ jobs:
         with:
           node-version: 23
           cache: 'pnpm'
+          cache-dependency-path: rpgm/foundry/pnpm-lock.yaml
 
       - name: Install Dependencies
+        working-directory: rpgm/foundry
         run: pnpm install
 
       - name: Build Project
+        working-directory: rpgm/foundry
         run: pnpm build
 
       - name: Zip .dist/ folder
+        working-directory: rpgm/foundry
         run: (cd modules; for i in *; do VERSION=$(jq -r '.version' < ${i%}/.dist/module.json); (cd ${i%}/.dist; zip -r "../../../${i%}-v$VERSION.zip" *); done)
 
       - name: Copy module.json 
+        working-directory: rpgm/foundry
         run: (cd modules; for i in *; do cp "${i%}/.dist/module.json" "../$i.json"; done)
 
       - name: Create GitHub Release
@@ -85,9 +106,9 @@ jobs:
         with:
           tag_name: "${{ steps.module_info.outputs.module_id }}-v${{ steps.module_info.outputs.tag_version }}"
           name: "${{ steps.module_info.outputs.module_name }} v${{ steps.module_info.outputs.tag_version }}"
-          body_path: "${{ steps.release_notes.outputs.path }}"
+          body_path: "rpgm/foundry/${{ steps.release_notes.outputs.path }}"
           draft: true
           fail_on_unmatched_files: true
           files: |
-            rpgm*.zip
-            rpgm*.json
+            rpgm/foundry/rpgm*.zip
+            rpgm/foundry/rpgm*.json

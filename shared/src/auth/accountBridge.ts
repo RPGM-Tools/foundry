@@ -714,11 +714,50 @@ async function requestFreshAccountSessionToken(
 	}
 }
 
+function collectAccountSessionRefreshBaseUrls(
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+): string[] {
+	const candidateBaseUrls = [
+		baseUrl,
+		DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL,
+		globalThis.location?.origin
+	].filter(Boolean);
+	const distinctBaseUrls: string[] = [];
+
+	for (const candidateBaseUrl of candidateBaseUrls) {
+		try {
+			const normalizedBaseUrl = new URL(candidateBaseUrl).toString();
+
+			if (!distinctBaseUrls.includes(normalizedBaseUrl)) {
+				distinctBaseUrls.push(normalizedBaseUrl);
+			}
+		} catch {
+			continue;
+		}
+	}
+
+	return distinctBaseUrls;
+}
+
+async function requestFreshAccountSessionTokenFromKnownBases(
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+): Promise<string | null> {
+	for (const candidateBaseUrl of collectAccountSessionRefreshBaseUrls(baseUrl)) {
+		const refreshedToken = await requestFreshAccountSessionToken(candidateBaseUrl);
+
+		if (refreshedToken) {
+			return refreshedToken;
+		}
+	}
+
+	return null;
+}
+
 export async function refreshFoundryAccountSessionToken(
 	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
 ): Promise<string | null> {
 	if (!accountSessionTokenRefreshInFlight) {
-		accountSessionTokenRefreshInFlight = requestFreshAccountSessionToken(
+		accountSessionTokenRefreshInFlight = requestFreshAccountSessionTokenFromKnownBases(
 			baseUrl
 		).finally(() => {
 			accountSessionTokenRefreshInFlight = null;
@@ -821,10 +860,6 @@ export async function loadAccountBackedForgeUsageSnapshot(
 							);
 							continue;
 						}
-					}
-
-					if (accountSessionToken) {
-						clearStoredFoundryAccountSessionToken();
 					}
 
 					return null;
@@ -1025,11 +1060,11 @@ async function loadAccountSnapshot(): Promise<FoundryAccountBridgeSnapshot> {
 					}
 				}
 
-				if (snapshotToken) {
-					writeStoredSnapshotToken(null);
-				}
-
-				return createSignedOutSnapshot();
+				return snapshotToken
+					? createUnavailableSnapshot(
+							'Foundry could not silently refresh the current RPGM Tools browser session.'
+						)
+					: createSignedOutSnapshot();
 			}
 
 			if (!response.ok) {
