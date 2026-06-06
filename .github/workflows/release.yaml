@@ -25,12 +25,14 @@ jobs:
         with:
           repository: RPGM-Tools/rpgm
           path: rpgm-tools/rpgm
+          token: ${{ secrets.RPGM_CROSS_REPO_READ_TOKEN }}
 
       - name: Checkout RPGM Tools Forge repo
         uses: actions/checkout@v4
         with:
           repository: RPGM-Tools/rpgm-tools-forge
           path: rpgm-tools/rpgm-tools-forge
+          token: ${{ secrets.RPGM_CROSS_REPO_READ_TOKEN }}
 
       - name: Extract Module Info from Tag
         id: module_info
