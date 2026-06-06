@@ -132,6 +132,20 @@ _Offline and Adjective Names do not require AI._ Descriptions and Homebrew use a
 
 ## Changelog
 
+### v2.3.1
+
+#### Fixed
+
+
+- Fixed chat wizard persistence so description, names, and homebrew cards reload with their existing contents for the user who created them instead of coming back empty after a refresh or world reload.
+- Fixed description regeneration so the existing card text stays visible while a new result is in flight instead of blanking the card during the request.
+- Fixed the Foundry managed-generation bridge to silently refresh an expired RPGM Tools account-session snapshot when your browser session is still valid, reducing repeated sign-in prompts and clearing the stale-token failure that blocked some official `2.3.0` generations.
+
+#### Improved
+
+
+- Tightened the account-session recovery path so Forge usage and account summary refreshes recover more gracefully from an outdated snapshot token before treating the Foundry session as signed out.
+
 ### v2.3.0
 
 #### Added

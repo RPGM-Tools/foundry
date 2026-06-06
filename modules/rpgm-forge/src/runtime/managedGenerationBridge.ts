@@ -1,5 +1,6 @@
 import {
 	applyFoundryAccountSessionHeaders,
+	refreshFoundryAccountSessionToken,
 	readStoredFoundryAccountSessionToken
 } from '#/auth/accountBridge';
 import {
@@ -108,51 +109,67 @@ async function postManagedResponse(input: {
 	let lastError: Error | null = null;
 
 	for (const requestUrl of getManagedResponsesUrls()) {
+		let retriedAfterTokenRefresh = false;
+
 		try {
-			const response = await globalThis.fetch(requestUrl, {
-				method: 'POST',
-				cache: 'no-store',
-				credentials: 'include',
-				headers: createManagedRequestHeaders(),
-				body: JSON.stringify({
-					lane: input.lane,
-					requestedModel: input.requestedModel,
-					messages: input.messages,
-					responseFormat: input.responseFormat,
-					temperature: input.temperature,
-					topP: input.topP,
-					presencePenalty: input.presencePenalty,
-					frequencyPenalty: input.frequencyPenalty,
-					metadata: {
-						surface: 'old-foundry-managed-bridge'
+			while (true) {
+				const response = await globalThis.fetch(requestUrl, {
+					method: 'POST',
+					cache: 'no-store',
+					credentials: 'include',
+					headers: createManagedRequestHeaders(),
+					body: JSON.stringify({
+						lane: input.lane,
+						requestedModel: input.requestedModel,
+						messages: input.messages,
+						responseFormat: input.responseFormat,
+						temperature: input.temperature,
+						topP: input.topP,
+						presencePenalty: input.presencePenalty,
+						frequencyPenalty: input.frequencyPenalty,
+						metadata: {
+							surface: 'old-foundry-managed-bridge'
+						}
+					})
+				});
+				const payload = (await response
+					.json()
+					.catch(() => null)) as ForgeManagedResponsesEnvelope | null;
+
+				if (!response.ok) {
+					if (response.status === 401 && !retriedAfterTokenRefresh) {
+						retriedAfterTokenRefresh = true;
+						const refreshedToken =
+							await refreshFoundryAccountSessionToken(
+								__API_URL__
+							);
+
+						if (refreshedToken) {
+							continue;
+						}
 					}
-				})
-			});
-			const payload = (await response
-				.json()
-				.catch(() => null)) as ForgeManagedResponsesEnvelope | null;
 
-			if (!response.ok) {
-				lastError = new Error(
-					payload?.error?.message ??
-						`Forge managed response failed with HTTP ${response.status}.`
-				);
+					lastError = new Error(
+						payload?.error?.message ??
+							`Forge managed response failed with HTTP ${response.status}.`
+					);
 
-				if (response.status === 404) {
-					continue;
+					if (response.status === 404) {
+						break;
+					}
+
+					throw lastError;
 				}
 
-				throw lastError;
-			}
+				if (!payload) {
+					lastError = new Error(
+						'Forge managed response returned no JSON payload.'
+					);
+					break;
+				}
 
-			if (!payload) {
-				lastError = new Error(
-					'Forge managed response returned no JSON payload.'
-				);
-				continue;
+				return payload;
 			}
-
-			return payload;
 		} catch (error) {
 			lastError =
 				error instanceof Error

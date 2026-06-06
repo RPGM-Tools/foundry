@@ -50,6 +50,7 @@ const ACCOUNT_PROFILE_EXPANSIONS = [
 	'economy'
 ] as const;
 const ACCOUNT_CENTER_HOST_LABEL = createFoundryAccountCenterHostLabel();
+let accountSessionTokenRefreshInFlight: Promise<string | null> | null = null;
 
 interface FoundryAccountBridgeNotice {
 	kind: 'info' | 'warning';
@@ -670,6 +671,63 @@ export function applyFoundryAccountSessionHeaders(
 	return headers;
 }
 
+async function requestFreshAccountSessionToken(
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+): Promise<string | null> {
+	if (typeof globalThis.fetch !== 'function') {
+		return null;
+	}
+
+	try {
+		const response = await globalThis.fetch(
+			new URL(ACCOUNT_SESSION_TOKEN_PATHNAME, baseUrl).toString(),
+			{
+				method: 'GET',
+				credentials: 'include',
+				cache: 'no-store',
+				headers: new Headers({
+					accept: 'application/json'
+				})
+			}
+		);
+		const payload = (await response.json().catch(() => null)) as {
+			accountSessionToken?: unknown;
+			profileSnapshotToken?: unknown;
+		} | null;
+
+		if (!response.ok) {
+			return null;
+		}
+
+		const accountSessionToken =
+			normalizeOptionalText(payload?.accountSessionToken) ??
+			normalizeOptionalText(payload?.profileSnapshotToken);
+
+		if (!accountSessionToken) {
+			return null;
+		}
+
+		writeStoredSnapshotToken(accountSessionToken);
+		return accountSessionToken;
+	} catch {
+		return null;
+	}
+}
+
+export async function refreshFoundryAccountSessionToken(
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+): Promise<string | null> {
+	if (!accountSessionTokenRefreshInFlight) {
+		accountSessionTokenRefreshInFlight = requestFreshAccountSessionToken(
+			baseUrl
+		).finally(() => {
+			accountSessionTokenRefreshInFlight = null;
+		});
+	}
+
+	return accountSessionTokenRefreshInFlight;
+}
+
 function normalizeAccountBackedForgeUsageSnapshot(
 	payload: unknown
 ): FoundryAccountBackedForgeUsageSnapshot | null {
@@ -729,35 +787,61 @@ export async function loadAccountBackedForgeUsageSnapshot(
 	}
 
 	for (const usagePathname of ACCOUNT_BACKED_FORGE_USAGE_PATHNAMES) {
+		let retriedAfterTokenRefresh = false;
+
 		try {
-			const response = await fetchImplementation(
-				new URL(usagePathname, baseUrl).toString(),
-				{
-					method: 'GET',
-					headers: requestHeaders,
-					credentials: 'include',
-					cache: 'no-store'
+			while (true) {
+				const response = await fetchImplementation(
+					new URL(usagePathname, baseUrl).toString(),
+					{
+						method: 'GET',
+						headers: requestHeaders,
+						credentials: 'include',
+						cache: 'no-store'
+					}
+				);
+				const payload = await response.json().catch(() => null);
+
+				if (response.status === 401) {
+					if (!retriedAfterTokenRefresh) {
+						retriedAfterTokenRefresh = true;
+						const refreshedToken =
+							await refreshFoundryAccountSessionToken(baseUrl);
+
+						if (refreshedToken) {
+							requestHeaders.delete(
+								ACCOUNT_SESSION_TOKEN_HEADER_NAME
+							);
+							requestHeaders.delete(
+								ACCOUNT_PROFILE_SNAPSHOT_TOKEN_HEADER_NAME
+							);
+							applyFoundryAccountSessionHeaders(
+								requestHeaders,
+								refreshedToken
+							);
+							continue;
+						}
+					}
+
+					if (accountSessionToken) {
+						clearStoredFoundryAccountSessionToken();
+					}
+
+					return null;
 				}
-			);
-			const payload = await response.json().catch(() => null);
 
-			if (response.status === 401) {
-				if (accountSessionToken) {
-					clearStoredFoundryAccountSessionToken();
+				if (!response.ok) {
+					break;
 				}
 
-				return null;
-			}
+				const normalizedSnapshot =
+					normalizeAccountBackedForgeUsageSnapshot(payload);
 
-			if (!response.ok) {
-				continue;
-			}
+				if (normalizedSnapshot) {
+					return normalizedSnapshot;
+				}
 
-			const normalizedSnapshot =
-				normalizeAccountBackedForgeUsageSnapshot(payload);
-
-			if (normalizedSnapshot) {
-				return normalizedSnapshot;
+				break;
 			}
 		} catch {
 			continue;
@@ -898,49 +982,73 @@ async function loadAccountSnapshot(): Promise<FoundryAccountBridgeSnapshot> {
 		);
 	}
 
-	const requestHeaders = new Headers({
+	let requestHeaders = new Headers({
 		accept: 'application/json'
 	});
-	const snapshotToken = readStoredSnapshotToken();
+	let snapshotToken = readStoredSnapshotToken();
 
 	if (snapshotToken) {
 		applyFoundryAccountSessionHeaders(requestHeaders, snapshotToken);
 	}
 
+	let retriedAfterTokenRefresh = false;
+
 	try {
-		const response = await globalThis.fetch(
-			createAccountProfileRequestUrl(),
-			{
-				method: 'GET',
-				credentials: 'include',
-				cache: 'no-store',
-				headers: requestHeaders
-			}
-		);
-		const payload = await response.json().catch(() => null);
-
-		if (response.status === 401) {
-			if (snapshotToken) {
-				writeStoredSnapshotToken(null);
-			}
-
-			return createSignedOutSnapshot();
-		}
-
-		if (!response.ok) {
-			const payloadError = (payload as { error?: unknown } | null)?.error;
-			const errorMessage = normalizeOptionalText(
-				typeof payloadError === 'string'
-					? payloadError
-					: (payloadError as { message?: unknown } | null)?.message
+		while (true) {
+			const response = await globalThis.fetch(
+				createAccountProfileRequestUrl(),
+				{
+					method: 'GET',
+					credentials: 'include',
+					cache: 'no-store',
+					headers: requestHeaders
+				}
 			);
+			const payload = await response.json().catch(() => null);
 
-			return createUnavailableSnapshot(
-				errorMessage ?? `HTTP ${response.status}`
-			);
+			if (response.status === 401) {
+				if (!retriedAfterTokenRefresh) {
+					retriedAfterTokenRefresh = true;
+					const refreshedToken =
+						await refreshFoundryAccountSessionToken();
+
+					if (refreshedToken) {
+						snapshotToken = refreshedToken;
+						requestHeaders = new Headers({
+							accept: 'application/json'
+						});
+						applyFoundryAccountSessionHeaders(
+							requestHeaders,
+							refreshedToken
+						);
+						continue;
+					}
+				}
+
+				if (snapshotToken) {
+					writeStoredSnapshotToken(null);
+				}
+
+				return createSignedOutSnapshot();
+			}
+
+			if (!response.ok) {
+				const payloadError = (payload as { error?: unknown } | null)
+					?.error;
+				const errorMessage = normalizeOptionalText(
+					typeof payloadError === 'string'
+						? payloadError
+						: (payloadError as { message?: unknown } | null)
+								?.message
+				);
+
+				return createUnavailableSnapshot(
+					errorMessage ?? `HTTP ${response.status}`
+				);
+			}
+
+			return createAvailableSnapshot(payload);
 		}
-
-		return createAvailableSnapshot(payload);
 	} catch (error) {
 		return createUnavailableSnapshot(
 			error instanceof Error ? error.message : null

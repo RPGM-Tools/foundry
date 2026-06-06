@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import ChatWizardContainer from '#/chat/ChatWizardContainer.vue';
 
-const description = rpgm.forge.descriptionsChats.useChatWizard(), { data } = description;
+const description = rpgm.forge.descriptionsChats.useChatWizard(),
+	{ data } = description;
 const loading = ref(false);
 
 /**
@@ -9,9 +10,12 @@ const loading = ref(false);
  * @todo Less hardcoding
  */
 async function generate() {
+	if (loading.value) {
+		return;
+	}
+
 	loading.value = true;
 	const oldDesc = data.description;
-	data.description = '';
 
 	const result = await rpgm.forge.generateDescriptions({
 		name: data.name ?? '',
@@ -29,7 +33,10 @@ async function generate() {
 	rpgm.chat.updateScroll();
 	loading.value = false;
 	if (result.isOk()) {
-		if (rpgm.forge.settings.get('descriptionsModel').provider === 'rpgm-tools')
+		if (
+			rpgm.forge.settings.get('descriptionsModel').provider ===
+			'rpgm-tools'
+		)
 			(await rpgm.forge.useTextLimit()).decrement();
 	}
 }
@@ -57,24 +64,27 @@ const buttons: RadialButton<ButtonContext>[] = [
  */
 function copy() {
 	try {
-		void navigator.clipboard.writeText(`# ${data.name ? `${data.name} – ` : ''}${data.type}\n${data.description}`);
+		void navigator.clipboard.writeText(
+			`# ${data.name ? `${data.name} – ` : ''}${data.type}\n${data.description}`
+		);
 		rpgm.forge.logger.visible.log('Copied description to clipboard!');
-	} catch { return; }
+	} catch {
+		return;
+	}
 }
 
 onMounted(() => {
-	if (!data.description && !loading.value) void generate();
+	if (!data.description && !loading.value) {
+		void generate();
+	}
 });
 
 const secure = window.isSecureContext;
 </script>
 
 <template>
-	<ChatWizardContainer
-		:wizard="description"
-		:buttons
-	>
-		<h2>{{ data.name ? `${data.name} – ` : "" }}{{ data.type }}</h2>
+	<ChatWizardContainer :wizard="description" :buttons>
+		<h2>{{ data.name ? `${data.name} – ` : '' }}{{ data.type }}</h2>
 		<Transition name="forge-description">
 			<p
 				v-if="data.description"
