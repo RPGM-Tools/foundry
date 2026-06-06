@@ -132,10 +132,21 @@ _Offline and Adjective Names do not require AI._ Descriptions and Homebrew use a
 
 ## Changelog
 
-### v2.3.1
+### v2.3.2
 
 #### Fixed
 
+- Restored the Foundry build and release lane to source the shared logger surface from `RPGM-Tools/rpgm` and the legacy Forge compatibility seam from `RPGM-Tools/rpgm-tools-forge` instead of relying on an accidental local shim.
+- Updated the release workflow to check out the target-state sibling repos before building so tagged releases can succeed on GitHub Actions without depending on a lucky local workspace layout.
+
+#### Improved
+
+- Made Foundry account-session refresh more resilient by retrying known account-center bases before giving up, which helps official generations and account summaries recover when the browser session is still valid but the stored snapshot token has gone stale.
+- When silent refresh still cannot recover an expired snapshot token, Forge now keeps the session in an unavailable state instead of immediately pretending you are fully signed out.
+
+### v2.3.1
+
+#### Fixed
 
 - Fixed chat wizard persistence so description, names, and homebrew cards reload with their existing contents for the user who created them instead of coming back empty after a refresh or world reload.
 - Fixed description regeneration so the existing card text stays visible while a new result is in flight instead of blanking the card during the request.
@@ -143,20 +154,17 @@ _Offline and Adjective Names do not require AI._ Descriptions and Homebrew use a
 
 #### Improved
 
-
 - Tightened the account-session recovery path so Forge usage and account summary refreshes recover more gracefully from an outdated snapshot token before treating the Foundry session as signed out.
 
 ### v2.3.0
 
 #### Added
 
-
 - Added a browser-return account bridge so Foundry can hand off to your hosted RPGM Tools account, reconnect from an already-signed-in browser session, and return to the VTT without making you retype credentials inside Foundry.
 - Added a Foundry account summary that shows your connected RPGM Tools account status, visible membership state, and managed Forge usage readiness in one place.
 - Added a session-local disconnect action so you can clear Foundry's connected RPGM account for the current world session without signing out of the public web account.
 
 #### Improved
-
 
 - Moved Forge account management onto the hosted `rpgm.tools` account center instead of keeping inline sign-in, sign-up, password reset, and provider-linking UI inside the Foundry sidebar.
 - Kept password-based sign-in available through the hosted account flow, while making password resets the recommended path for returning users who last signed in through older module-only account handling.
@@ -168,18 +176,15 @@ _Offline and Adjective Names do not require AI._ Descriptions and Homebrew use a
 
 #### Added
 
-
 - Added official Foundry V14 support and updated the package metadata to advertise `Verified 14`.
 
 #### Improved
-
 
 - Reworked chat command autocomplete and command execution to behave correctly across Foundry 12, 13, and 14.
 - Updated the V14 chat path to use Foundry's supported ProseMirror APIs and native send flow instead of unsupported internals.
 - Refreshed low-risk same-major dependencies used by the Foundry workspace to current compatible releases.
 
 #### Fixed
-
 
 - Corrected command suggestion selection so the leading `*` stays in place and autocomplete does not append stray keystrokes.
 - Fixed V14 chat command submission so pressing `Enter` executes commands cleanly without leaving blank lines behind in the chat input.
@@ -189,11 +194,9 @@ _Offline and Adjective Names do not require AI._ Descriptions and Homebrew use a
 
 #### Fixed
 
-
 - Resolved a regression that caused Foundry to throw `DataCloneError` when other modules injected custom sidebar tabs. The RPGM tab now adjusts the registry in-place so third-party tabs remain intact.
 
 #### Improved
-
 
 - Ensured the RPGM sidebar button always anchors immediately before the Settings tab while preserving every other tab’s original order.
 - Allow Archivist Sync and similar modules to toggle their own tabs without losing spacing or visibility during setup wizards.
@@ -202,11 +205,9 @@ _Offline and Adjective Names do not require AI._ Descriptions and Homebrew use a
 
 #### Fixed
 
-
 - Addressed the packaging regression that made v2.1.2 installs unreliable for some Foundry instances.
 
 #### Changed
-
 
 - Kept the prompt variety improvements introduced in v2.1.2 while restamping the release as v2.1.3.
 
@@ -214,13 +215,11 @@ _Offline and Adjective Names do not require AI._ Descriptions and Homebrew use a
 
 #### Changed
 
-
 - Updated prompts to provide more variation on generated names.
 
 ### v2.1.1
 
 #### Changed
-
 
 - Forgot password option added.
 
