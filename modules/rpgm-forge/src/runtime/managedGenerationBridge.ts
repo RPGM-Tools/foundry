@@ -1,5 +1,5 @@
 import {
-	ACCOUNT_SESSION_TOKEN_HEADER_NAME,
+	applyFoundryAccountSessionHeaders,
 	readStoredFoundryAccountSessionToken
 } from '#/auth/accountBridge';
 import {
@@ -24,7 +24,7 @@ function createManagedRequestHeaders(): Headers {
 	const snapshotToken = readStoredFoundryAccountSessionToken();
 
 	if (snapshotToken) {
-		headers.set(ACCOUNT_SESSION_TOKEN_HEADER_NAME, snapshotToken);
+		applyFoundryAccountSessionHeaders(headers, snapshotToken);
 	}
 
 	return headers;

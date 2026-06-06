@@ -18,6 +18,8 @@ const ACCOUNT_SESSION_TOKEN_PATHNAME = '/api/v1/account/profile-snapshot-token';
 const ACCOUNT_SESSION_RETURN_PAGE_PATHNAME =
 	'/modules/rpgm-forge/account-session-return.html';
 export const ACCOUNT_SESSION_TOKEN_HEADER_NAME = 'x-rpgm-account-session-token';
+export const ACCOUNT_PROFILE_SNAPSHOT_TOKEN_HEADER_NAME =
+	'x-rpgm-profile-snapshot-token';
 export const FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY =
 	'rpgm.foundry.profileSnapshotToken';
 const ACCOUNT_SESSION_LAUNCH_MESSAGE_TYPE =
@@ -36,6 +38,7 @@ const ACCOUNT_PROFILE_QUERY_PARAMS = {
 const ACCOUNT_SESSION_TOKEN_QUERY_PARAMS = {
 	accountSessionToken: 'accountSessionToken',
 	foundryProfileSnapshotToken: 'foundryProfileSnapshotToken',
+	profileSnapshotToken: 'profileSnapshotToken',
 	redirectUrl: 'redirectUrl',
 	accountSessionError: 'accountSessionError',
 	accountSessionErrorDescription: 'accountSessionErrorDescription'
@@ -439,6 +442,16 @@ function readCurrentLocationUrl(): URL | null {
 	}
 }
 
+function isAllowedAccountSessionLaunchOrigin(origin: string): boolean {
+	if (origin === DEFAULT_FOUNDRY_ACCOUNT_CENTER_ORIGIN) {
+		return true;
+	}
+
+	const currentUrl = readCurrentLocationUrl();
+
+	return Boolean(currentUrl && origin === currentUrl.origin);
+}
+
 function readLocationHashQueryParams(currentUrl: URL): {
 	hashPath: string;
 	hashParams: URLSearchParams;
@@ -644,6 +657,19 @@ export function clearStoredFoundryAccountSessionToken() {
 	writeStoredSnapshotToken(null);
 }
 
+export function applyFoundryAccountSessionHeaders(
+	headers: Headers,
+	accountSessionToken: string
+): Headers {
+	headers.set(ACCOUNT_SESSION_TOKEN_HEADER_NAME, accountSessionToken);
+	headers.set(
+		ACCOUNT_PROFILE_SNAPSHOT_TOKEN_HEADER_NAME,
+		accountSessionToken
+	);
+
+	return headers;
+}
+
 function normalizeAccountBackedForgeUsageSnapshot(
 	payload: unknown
 ): FoundryAccountBackedForgeUsageSnapshot | null {
@@ -699,10 +725,7 @@ export async function loadAccountBackedForgeUsageSnapshot(
 	});
 
 	if (accountSessionToken) {
-		requestHeaders.set(
-			ACCOUNT_SESSION_TOKEN_HEADER_NAME,
-			accountSessionToken
-		);
+		applyFoundryAccountSessionHeaders(requestHeaders, accountSessionToken);
 	}
 
 	for (const usagePathname of ACCOUNT_BACKED_FORGE_USAGE_PATHNAMES) {
@@ -759,6 +782,10 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 		readLocationReturnParam(
 			currentUrl,
 			ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.foundryProfileSnapshotToken
+		) ??
+		readLocationReturnParam(
+			currentUrl,
+			ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.profileSnapshotToken
 		);
 	const accountSessionError = readLocationReturnParam(
 		currentUrl,
@@ -782,6 +809,7 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 	clearLocationReturnParams(currentUrl, [
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionToken,
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.foundryProfileSnapshotToken,
+		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.profileSnapshotToken,
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionError,
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription
 	]);
@@ -798,6 +826,14 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 export function consumeFoundryAccountSessionReturnFromUrl(): FoundryAccountBridgeNotice | null {
 	return consumeBridgeReturnFromUrl();
 }
+
+export const FOUNDRY_ACCOUNT_SESSION_RETURN_QUERY_KEYS = Object.freeze([
+	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionToken,
+	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.foundryProfileSnapshotToken,
+	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.profileSnapshotToken,
+	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionError,
+	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription
+] as const);
 
 const INITIAL_BRIDGE_RETURN_NOTICE = consumeBridgeReturnFromUrl();
 const INITIAL_LOCATION_URL = readCurrentLocationUrl();
@@ -868,7 +904,7 @@ async function loadAccountSnapshot(): Promise<FoundryAccountBridgeSnapshot> {
 	const snapshotToken = readStoredSnapshotToken();
 
 	if (snapshotToken) {
-		requestHeaders.set(ACCOUNT_SESSION_TOKEN_HEADER_NAME, snapshotToken);
+		applyFoundryAccountSessionHeaders(requestHeaders, snapshotToken);
 	}
 
 	try {
@@ -922,7 +958,18 @@ function openExternalUrl(
 		return false;
 	}
 
-	const openedWindow = globalThis.open?.(url, '_blank');
+	let openedWindow: Window | null = null;
+
+	try {
+		openedWindow =
+			globalThis.open?.(
+				url,
+				'_blank',
+				options.preserveOpener ? undefined : 'noopener'
+			) ?? null;
+	} catch {
+		openedWindow = null;
+	}
 
 	if (openedWindow) {
 		if (!options.preserveOpener) {
@@ -931,6 +978,28 @@ function openExternalUrl(
 			} catch {
 				// Ignore cross-origin opener assignment failures.
 			}
+		}
+
+		return true;
+	}
+
+	try {
+		openedWindow = globalThis.open?.('', '_blank') ?? null;
+	} catch {
+		openedWindow = null;
+	}
+
+	if (openedWindow) {
+		try {
+			openedWindow.location.assign(url);
+		} catch {
+			try {
+				openedWindow.close();
+			} catch {
+				// Ignore close failures for browser-controlled popups.
+			}
+
+			return navigateCurrentPage(url);
 		}
 
 		return true;
@@ -1090,7 +1159,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 	};
 
 	const handleAccountSessionLaunchMessage = (event: MessageEvent) => {
-		if (event.origin !== DEFAULT_FOUNDRY_ACCOUNT_CENTER_ORIGIN) {
+		if (!isAllowedAccountSessionLaunchOrigin(event.origin)) {
 			return;
 		}
 
@@ -1184,6 +1253,16 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 
 	globalThis.addEventListener?.('focus', refreshIfReturnDetected);
 	globalThis.addEventListener?.('message', handleAccountSessionLaunchMessage);
+	globalThis.addEventListener?.('storage', event => {
+		if (
+			event.key !== FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY ||
+			event.storageArea !== globalThis.localStorage
+		) {
+			return;
+		}
+
+		void refreshIfReturnDetected();
+	});
 	globalThis.addEventListener?.('visibilitychange', () => {
 		if (globalThis.document?.visibilityState === 'visible') {
 			refreshIfReturnDetected();

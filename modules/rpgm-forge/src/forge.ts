@@ -460,10 +460,14 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 
 		const decrement = () => {
 			if (textLimit.value === null) {
+				void accountBridge.refresh();
 				return null;
 			}
 
-			return (textLimit.value = Math.max(0, textLimit.value - 1));
+			textLimit.value = Math.max(0, textLimit.value - 1);
+			void accountBridge.refresh();
+
+			return textLimit.value;
 		};
 
 		watch(

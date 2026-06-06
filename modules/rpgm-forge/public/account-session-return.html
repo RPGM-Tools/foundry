@@ -11,14 +11,21 @@
 				const storageKey = 'rpgm.foundry.profileSnapshotToken';
 				const launchMessageType = 'rpgm-account-session-launch-result';
 				const launchAckMessageType = 'rpgm-account-session-launch-ack';
+				const launchAckTimeoutMs = 1200;
 				const currentUrl = new URL(window.location.href);
 				const hash = currentUrl.hash.startsWith('#')
 					? currentUrl.hash.slice(1)
 					: currentUrl.hash;
 				const hashParams = new URLSearchParams(hash);
 				const accountSessionToken =
+					currentUrl.searchParams.get('accountSessionToken') ||
 					hashParams.get('accountSessionToken') ||
-					hashParams.get('foundryProfileSnapshotToken');
+					currentUrl.searchParams.get(
+						'foundryProfileSnapshotToken'
+					) ||
+					hashParams.get('foundryProfileSnapshotToken') ||
+					currentUrl.searchParams.get('profileSnapshotToken') ||
+					hashParams.get('profileSnapshotToken');
 				const accountSessionError =
 					currentUrl.searchParams.get('accountSessionError') ||
 					hashParams.get('accountSessionError');
@@ -73,9 +80,22 @@
 
 				if (window.opener && !window.opener.closed) {
 					try {
+						let hasAcknowledgedLaunch = false;
+						const finishWithNavigationFallback = () => {
+							if (hasAcknowledgedLaunch) {
+								return;
+							}
+
+							window.location.replace(nextUrl.toString());
+						};
+
 						window.opener.postMessage(
 							launchMessage,
 							currentUrl.origin
+						);
+						window.setTimeout(
+							finishWithNavigationFallback,
+							launchAckTimeoutMs
 						);
 						window.addEventListener('message', event => {
 							if (event.origin !== currentUrl.origin) {
@@ -85,6 +105,8 @@
 							if (event.data?.type !== launchAckMessageType) {
 								return;
 							}
+
+							hasAcknowledgedLaunch = true;
 
 							try {
 								window.opener.focus();

@@ -19,6 +19,14 @@ type LegacyChatLogPrototype = ChatLog & {
 	_getEntryContextOptions?: () => ChatContextOption[];
 };
 
+type PatchedTextEditorImplementation = {
+	create?: (
+		options?: Record<string, unknown>,
+		...args: unknown[]
+	) => Promise<unknown>;
+	__rpgmChatEditorTrackingPatched?: boolean;
+};
+
 /**
  * ChatCommands stores all chat commands and provides utility functions related to chat
  *
@@ -81,14 +89,14 @@ export class ChatCommands {
 	}
 
 	private patchChatEditorTracking() {
-		const textEditorImplementation =
-			foundry.applications.ux.TextEditor.implementation as unknown as {
-				create?: (
-					options?: Record<string, unknown>,
-					...args: unknown[]
-				) => Promise<unknown>;
-				__rpgmChatEditorTrackingPatched?: boolean;
-			};
+		const textEditorImplementation = foundry.applications?.ux?.TextEditor
+			?.implementation as unknown as
+			| PatchedTextEditorImplementation
+			| undefined;
+
+		if (!textEditorImplementation) {
+			return;
+		}
 
 		if (textEditorImplementation.__rpgmChatEditorTrackingPatched) return;
 		const originalCreate = textEditorImplementation.create?.bind(
