@@ -742,8 +742,11 @@ function collectAccountSessionRefreshBaseUrls(
 async function requestFreshAccountSessionTokenFromKnownBases(
 	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
 ): Promise<string | null> {
-	for (const candidateBaseUrl of collectAccountSessionRefreshBaseUrls(baseUrl)) {
-		const refreshedToken = await requestFreshAccountSessionToken(candidateBaseUrl);
+	for (const candidateBaseUrl of collectAccountSessionRefreshBaseUrls(
+		baseUrl
+	)) {
+		const refreshedToken =
+			await requestFreshAccountSessionToken(candidateBaseUrl);
 
 		if (refreshedToken) {
 			return refreshedToken;
@@ -757,11 +760,12 @@ export async function refreshFoundryAccountSessionToken(
 	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
 ): Promise<string | null> {
 	if (!accountSessionTokenRefreshInFlight) {
-		accountSessionTokenRefreshInFlight = requestFreshAccountSessionTokenFromKnownBases(
-			baseUrl
-		).finally(() => {
-			accountSessionTokenRefreshInFlight = null;
-		});
+		accountSessionTokenRefreshInFlight =
+			requestFreshAccountSessionTokenFromKnownBases(baseUrl).finally(
+				() => {
+					accountSessionTokenRefreshInFlight = null;
+				}
+			);
 	}
 
 	return accountSessionTokenRefreshInFlight;

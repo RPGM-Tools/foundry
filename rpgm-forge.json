@@ -1,0 +1,53 @@
+{
+	"id": "rpgm-forge",
+	"title": "RPGM Forge",
+	"description": "Enhance your Foundry VTT experience with an AI-assisted toolkit designed for GMs and players. Generate immersive names, descriptions, and homebrew creations.",
+	"version": "2.3.2",
+	"url": "https://rpgm.tools",
+	"readme": "https://github.com/RPGM-Tools/foundry/blob/main/README.md",
+	"manifest": "https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge.json",
+	"download": "https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge-v2.3.2.zip",
+	"bugs": "https://github.com/RPGM-Tools/foundry/issues",
+	"compatibility": {
+		"minimum": "12",
+		"verified": "14"
+	},
+	"esmodules": ["init.js"],
+	"authors": [
+		{
+			"name": "dallenb4",
+			"email": "dallenb4@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		},
+		{
+			"name": "Aragorn",
+			"email": "aragorn@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		},
+		{
+			"name": "jack_indaboks",
+			"email": "jack_indaboks@rpgm.tools",
+			"url": "https://rpgm.tools",
+			"flags": {}
+		}
+	],
+	"styles": ["assets/init.css"],
+	"persistentStorage": true,
+	"media": [
+		{
+			"type": "setup",
+			"url": "modules/rpgm-forge/assets/d20-512x512.webp",
+			"thumbnail": "modules/rpgm-forge/assets/d20-512x512.webp",
+			"caption": "RPGM Forge"
+		}
+	],
+	"languages": [
+		{
+			"lang": "en",
+			"name": "English",
+			"path": "lang/en.json"
+		}
+	]
+}
