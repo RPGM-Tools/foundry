@@ -3,6 +3,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "pnpm -r build",
+		"build:forge:beta": "node ./scripts/build-foundry-beta-module.mjs --module rpgm-forge",
 		"build:foundry-marketplace": "node ./scripts/build-foundry-marketplace-body.mjs --module forge",
 		"dev:v13": "node ./scripts/run-foundry-dev.mjs --target v13-dev --module rpgm-forge",
 		"dev:v13:beta": "node ./scripts/run-foundry-dev.mjs --target v13-beta --module rpgm-forge",

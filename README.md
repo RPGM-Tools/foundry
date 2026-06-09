@@ -97,7 +97,8 @@ _Thank you for using RPGM Forge! Stay tuned for more features and updates and fu
 ### Manual beta smoke with built module archives
 
 - The default beta validation flow is still the local injected dev proxy path above, because it exercises the live beta service origin without changing production packaging.
-- When you need to hand a tester a built module instead of a live dev proxy, run `pnpm build` first. The installable Forge payload lands in `modules/rpgm-forge/.dist/`, and that folder is the source of truth for manual archive smoke.
+- When you need to hand a tester a built module instead of a live dev proxy, run `pnpm build:forge:beta` first. That helper keeps the ordinary production-oriented build untouched, but injects the beta service and account-center origins into the packaged Forge module.
+- The installable beta Forge payload lands in `modules/rpgm-forge/.dist/`, and that folder is the source of truth for manual archive smoke.
 - For a local manual install, copy the contents of `modules/rpgm-forge/.dist/` into a test Foundry world's `Data/modules/rpgm-forge/` folder, then launch the same non-production Foundry lane you would use for beta proxy testing.
 - For a shareable archive, package the contents of `modules/rpgm-forge/.dist/` as `rpgm-forge-v<version>.zip` and pair it with a manifest copied from `modules/rpgm-forge/.dist/module.json` as `rpgm-forge.json`. That matches the release workflow's artifact shape, so manual beta archive tests exercise the same files that later become published release assets.
 - Use that built-archive path only for beta or local smoke worlds. Do not repoint the production manifest or release channel just to rehearse beta behavior.
