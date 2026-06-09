@@ -94,6 +94,14 @@ _Thank you for using RPGM Forge! Stay tuned for more features and updates and fu
 - Use the version-specific loopback proxy URLs rather than plain `localhost` so browser cookies stay isolated between the V13 and V14 test lanes without relying on hosts-file DNS aliases.
 - The beta variants keep production defaults unchanged but swap the shared account-center and Steward-backed Forge usage surface over to `https://beta.rpgm.tools`, which is the preferred local smoke path before any separate beta manifest or release channel exists.
 
+### Manual beta smoke with built module archives
+
+- The default beta validation flow is still the local injected dev proxy path above, because it exercises the live beta service origin without changing production packaging.
+- When you need to hand a tester a built module instead of a live dev proxy, run `pnpm build` first. The installable Forge payload lands in `modules/rpgm-forge/.dist/`, and that folder is the source of truth for manual archive smoke.
+- For a local manual install, copy the contents of `modules/rpgm-forge/.dist/` into a test Foundry world's `Data/modules/rpgm-forge/` folder, then launch the same non-production Foundry lane you would use for beta proxy testing.
+- For a shareable archive, package the contents of `modules/rpgm-forge/.dist/` as `rpgm-forge-v<version>.zip` and pair it with a manifest copied from `modules/rpgm-forge/.dist/module.json` as `rpgm-forge.json`. That matches the release workflow's artifact shape, so manual beta archive tests exercise the same files that later become published release assets.
+- Use that built-archive path only for beta or local smoke worlds. Do not repoint the production manifest or release channel just to rehearse beta behavior.
+
 ### RPGM Tools
 
 This project still targets the RPGM Tools service surface, but the old Forge
