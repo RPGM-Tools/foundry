@@ -15,12 +15,18 @@ const stewardEnvPath = path.resolve(
 	'.env'
 );
 
+const DEFAULT_PUBLIC_RPGM_BASE_URL = 'https://rpgm.tools';
+const DEFAULT_BETA_RPGM_BASE_URL = 'https://beta.rpgm.tools';
+
+// Keep explicit dev targets here so local Foundry smoke runs can switch
+// between the production-facing service surface and the public beta lane
+// without hand-editing repo-local env files.
 const targets = {
 	'v13-dev': {
 		foundryUrl: '127.0.0.1:30013',
 		proxyUrl: 'http://127.0.0.13:32013',
-		accountWebBaseUrl: 'https://rpgm.tools',
-		stewardUrl: 'https://rpgm.tools',
+		accountWebBaseUrl: DEFAULT_PUBLIC_RPGM_BASE_URL,
+		stewardUrl: DEFAULT_PUBLIC_RPGM_BASE_URL,
 		viteHost: '127.0.0.13',
 		vitePort: 32013,
 		label: 'Foundry 13 dev lane'
@@ -28,11 +34,29 @@ const targets = {
 	'v14-dev': {
 		foundryUrl: '127.0.0.1:30014',
 		proxyUrl: 'http://127.0.0.14:32014',
-		accountWebBaseUrl: 'https://rpgm.tools',
-		stewardUrl: 'https://rpgm.tools',
+		accountWebBaseUrl: DEFAULT_PUBLIC_RPGM_BASE_URL,
+		stewardUrl: DEFAULT_PUBLIC_RPGM_BASE_URL,
 		viteHost: '127.0.0.14',
 		vitePort: 32014,
 		label: 'Foundry 14 dev lane'
+	},
+	'v13-beta': {
+		foundryUrl: '127.0.0.1:30013',
+		proxyUrl: 'http://127.0.1.13:32113',
+		accountWebBaseUrl: DEFAULT_BETA_RPGM_BASE_URL,
+		stewardUrl: DEFAULT_BETA_RPGM_BASE_URL,
+		viteHost: '127.0.1.13',
+		vitePort: 32113,
+		label: 'Foundry 13 beta lane'
+	},
+	'v14-beta': {
+		foundryUrl: '127.0.0.1:30014',
+		proxyUrl: 'http://127.0.1.14:32114',
+		accountWebBaseUrl: DEFAULT_BETA_RPGM_BASE_URL,
+		stewardUrl: DEFAULT_BETA_RPGM_BASE_URL,
+		viteHost: '127.0.1.14',
+		vitePort: 32114,
+		label: 'Foundry 14 beta lane'
 	}
 };
 
@@ -64,7 +88,7 @@ function parseArguments(argv) {
 
 function printHelp() {
 	console.log(
-		`Usage: node ./scripts/run-foundry-dev.mjs [--module <name>] [--target <v13-dev|v14-dev>]\n\nDefaults:\n  --module rpgm-forge\n  --target v14-dev`
+		`Usage: node ./scripts/run-foundry-dev.mjs [--module <name>] [--target <v13-dev|v14-dev|v13-beta|v14-beta>]\n\nDefaults:\n  --module rpgm-forge\n  --target v14-dev`
 	);
 }
 

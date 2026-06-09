@@ -80,13 +80,19 @@ _Thank you for using RPGM Forge! Stay tuned for more features and updates and fu
 
 - `pnpm test:v13` runs the `rpgm-forge` Vite dev proxy against the Foundry 13 dev lane at `fvtt-v13-dev.localhost:30013`
 - `pnpm test:v14` runs the `rpgm-forge` Vite dev proxy against the Foundry 14 dev lane at `fvtt-v14-dev.localhost:30014`
+- `pnpm test:v13:beta` runs the same Foundry 13 lane against the public beta RPGM service surface at `https://beta.rpgm.tools`
+- `pnpm test:v14:beta` runs the same Foundry 14 lane against the public beta RPGM service surface at `https://beta.rpgm.tools`
 - Equivalent aliases: `pnpm dev:v13` and `pnpm dev:v14`
+- Beta aliases: `pnpm dev:v13:beta` and `pnpm dev:v14:beta`
 - The proxy URLs you open in the browser are:
     - V13 dev test proxy: `http://127.0.0.13:32013`
     - V14 dev test proxy: `http://127.0.0.14:32014`
+    - V13 beta test proxy: `http://127.0.1.13:32113`
+    - V14 beta test proxy: `http://127.0.1.14:32114`
 - These commands expect the corresponding Foundry lane to already be running through the workspace Foundry runtime wrappers.
 - The versioned scripts set the target Foundry URL, proxy hostname, and proxy port for you, so you do not need to edit `modules/rpgm-forge/.env` when switching between V13 and V14 testing.
 - Use the version-specific loopback proxy URLs rather than plain `localhost` so browser cookies stay isolated between the V13 and V14 test lanes without relying on hosts-file DNS aliases.
+- The beta variants keep production defaults unchanged but swap the shared account-center and Steward-backed Forge usage surface over to `https://beta.rpgm.tools`, which is the preferred local smoke path before any separate beta manifest or release channel exists.
 
 ### RPGM Tools
 
