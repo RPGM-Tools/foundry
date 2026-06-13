@@ -5,7 +5,10 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 const DEFAULT_BETA_BASE_URL = 'https://beta.rpgm.tools';
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = path.resolve(
+	path.dirname(fileURLToPath(import.meta.url)),
+	'..'
+);
 
 function parseArguments(argv) {
 	const options = {
