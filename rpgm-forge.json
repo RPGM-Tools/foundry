@@ -2,11 +2,11 @@
 	"id": "rpgm-forge",
 	"title": "RPGM Forge",
 	"description": "Enhance your Foundry VTT experience with an AI-assisted toolkit designed for GMs and players. Generate immersive names, descriptions, and homebrew creations.",
-	"version": "2.3.2",
+	"version": "2.3.3",
 	"url": "https://rpgm.tools",
 	"readme": "https://github.com/RPGM-Tools/foundry/blob/main/README.md",
 	"manifest": "https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge.json",
-	"download": "https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge-v2.3.2.zip",
+	"download": "https://github.com/RPGM-Tools/foundry/releases/latest/download/rpgm-forge-v2.3.3.zip",
 	"bugs": "https://github.com/RPGM-Tools/foundry/issues",
 	"compatibility": {
 		"minimum": "12",

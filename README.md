@@ -76,23 +76,38 @@ _Thank you for using RPGM Forge! Stay tuned for more features and updates and fu
     - VITE_FOUNDRY_URL: The foundry instance url to proxy
     - VITE_RPGM_URL (optional): The rpgm.tools server to use (https://rpgm.tools is the default)
 
+### Foundry host workflow
+
+Keep the live production lanes running at `foundryv13.rpgm.tools` and `foundryv14.rpgm.tools` with `-Profile live`.
+
+Create `foundryv13dev.rpgm.tools` and `foundryv14dev.rpgm.tools` only when you need a module overlay. The dev lane seeds from the matching live lane once, then becomes its own sandbox.
+
+Mount the built module into the dev lane with `_tools/foundry-runtime/Mount-FoundryModule.ps1`.
+
+The reproducible startup sequence lives in `docs/foundry-host-model.md`.
+
 ### Versioned local testing against Foundry dev lanes
 
-- `pnpm test:v13` runs the `rpgm-forge` Vite dev proxy against the Foundry 13 dev lane at `fvtt-v13-dev.localhost:30013`
-- `pnpm test:v14` runs the `rpgm-forge` Vite dev proxy against the Foundry 14 dev lane at `fvtt-v14-dev.localhost:30014`
-- `pnpm test:v13:beta` runs the same Foundry 13 lane against the public beta RPGM service surface at `https://beta.rpgm.tools`
-- `pnpm test:v14:beta` runs the same Foundry 14 lane against the public beta RPGM service surface at `https://beta.rpgm.tools`
-- Equivalent aliases: `pnpm dev:v13` and `pnpm dev:v14`
-- Beta aliases: `pnpm dev:v13:beta` and `pnpm dev:v14:beta`
+- The matching live lane stays available separately from the dev overlay lane.
+- `pnpm test:v13` builds `rpgm-forge`, syncs the built `.dist/` payload into the public Foundry 13 dev lane, starts that lane if needed, and verifies the public assets at `https://foundryv13dev.rpgm.tools`
+- `pnpm test:v14` builds `rpgm-forge`, syncs the built `.dist/` payload into the public Foundry 14 dev lane, starts that lane if needed, and verifies the public assets at `https://foundryv14dev.rpgm.tools`
+- `pnpm test:v13:beta` does the same sync-and-verify flow, but builds against the public beta RPGM surface at `https://beta.rpgm.tools`
+- `pnpm test:v14:beta` does the same sync-and-verify flow for the Foundry 14 lane against the public beta RPGM surface at `https://beta.rpgm.tools`
+- `pnpm dev:v13` and `pnpm dev:v14` remain the local Vite proxy commands when you want live HMR against the matching public dev lane
+- `pnpm dev:v13:beta` and `pnpm dev:v14:beta` remain the local Vite proxy commands for the beta RPGM surface
 - The proxy URLs you open in the browser are:
     - V13 dev test proxy: `http://127.0.0.13:32013`
     - V14 dev test proxy: `http://127.0.0.14:32014`
     - V13 beta test proxy: `http://127.0.1.13:32113`
     - V14 beta test proxy: `http://127.0.1.14:32114`
-- These commands expect the corresponding Foundry lane to already be running through the workspace Foundry runtime wrappers.
+- The `test:*` commands now handle the real public dev-lane payload update. They no longer stop at a local proxy smoke and they verify the public `module.json`, `account-session-return.html`, and `account-session-return.js` assets after sync.
+- The `dev:*` proxy commands still expect the corresponding Foundry lane to be available.
+- When the public dev hosts are reverse-proxied through a shared server, they must point at dedicated dev backend ports instead of the always-on live backends. Otherwise the hostname will look healthy while still serving the live module payload.
 - The versioned scripts set the target Foundry URL, proxy hostname, and proxy port for you, so you do not need to edit `modules/rpgm-forge/.env` when switching between V13 and V14 testing.
-- Use the version-specific loopback proxy URLs rather than plain `localhost` so browser cookies stay isolated between the V13 and V14 test lanes without relying on hosts-file DNS aliases.
+- The Foundry lane target is now host-based instead of depending on fixed `:30013` or `:30014` browser origins, so the account handoff path matches the same host-safe flow used on arbitrary Foundry deployments.
+- Use the version-specific proxy URLs rather than plain `localhost` so browser cookies stay isolated between the Foundry 13 compatibility lane and the Foundry 14 testing lane. Steward now accepts the Foundry browser origin you configure for that deployment, so the same dev workflow also works against user-hosted Foundry instances outside the RPGM-owned lanes.
 - The beta variants keep production defaults unchanged but swap the shared account-center and Steward-backed Forge usage surface over to `https://beta.rpgm.tools`, which is the preferred local smoke path before any separate beta manifest or release channel exists.
+- The public dev-lane sync helper reads `RPGM_FOUNDRY_TEST_SSH_KEY_PATH` when you want to override the SSH key path explicitly. In this workspace it also falls back to the newest private `.pem` in the workspace-root `.temp/` folder.
 
 ### Manual beta smoke with built module archives
 

@@ -1,7 +1,6 @@
 import {
-	applyFoundryAccountSessionHeaders,
-	refreshFoundryAccountSessionToken,
-	readStoredFoundryAccountSessionToken
+	createFoundryDelegatedAuthorizationHeaders,
+	refreshFoundryDelegatedAuthorizationHeaders
 } from '#/auth/accountBridge';
 import {
 	toRequestedModel,
@@ -17,18 +16,23 @@ import {
 
 import type { RpgmForge } from '$/forge';
 
-function createManagedRequestHeaders(): Headers {
-	const headers = new Headers({
-		accept: 'application/json',
-		'content-type': 'application/json; charset=utf-8'
+const MANAGED_GENERATION_REQUEST_HEADERS = Object.freeze({
+	accept: 'application/json',
+	'content-type': 'application/json; charset=utf-8'
+});
+
+async function createManagedRequestHeaders(): Promise<Headers | null> {
+	return createFoundryDelegatedAuthorizationHeaders({
+		baseUrl: __API_URL__,
+		headers: MANAGED_GENERATION_REQUEST_HEADERS
 	});
-	const snapshotToken = readStoredFoundryAccountSessionToken();
+}
 
-	if (snapshotToken) {
-		applyFoundryAccountSessionHeaders(headers, snapshotToken);
-	}
-
-	return headers;
+async function refreshManagedRequestHeaders(): Promise<Headers | null> {
+	return refreshFoundryDelegatedAuthorizationHeaders({
+		baseUrl: __API_URL__,
+		headers: MANAGED_GENERATION_REQUEST_HEADERS
+	});
 }
 
 function normalizeOptionalText(value?: string | null): string | undefined {
@@ -109,15 +113,24 @@ async function postManagedResponse(input: {
 	let lastError: Error | null = null;
 
 	for (const requestUrl of getManagedResponsesUrls()) {
-		let retriedAfterTokenRefresh = false;
+		let retriedAfterDelegatedRefresh = false;
 
 		try {
+			let requestHeaders = await createManagedRequestHeaders();
+
+			if (!requestHeaders) {
+				lastError = new Error(
+					'Sign in to RPGM Tools from Foundry before using managed generation.'
+				);
+				break;
+			}
+
 			while (true) {
 				const response = await globalThis.fetch(requestUrl, {
 					method: 'POST',
 					cache: 'no-store',
-					credentials: 'include',
-					headers: createManagedRequestHeaders(),
+					credentials: 'omit',
+					headers: requestHeaders,
 					body: JSON.stringify({
 						lane: input.lane,
 						requestedModel: input.requestedModel,
@@ -137,14 +150,14 @@ async function postManagedResponse(input: {
 					.catch(() => null)) as ForgeManagedResponsesEnvelope | null;
 
 				if (!response.ok) {
-					if (response.status === 401 && !retriedAfterTokenRefresh) {
-						retriedAfterTokenRefresh = true;
-						const refreshedToken =
-							await refreshFoundryAccountSessionToken(
-								__API_URL__
-							);
+					if (
+						response.status === 401 &&
+						!retriedAfterDelegatedRefresh
+					) {
+						retriedAfterDelegatedRefresh = true;
+						requestHeaders = await refreshManagedRequestHeaders();
 
-						if (refreshedToken) {
+						if (requestHeaders) {
 							continue;
 						}
 					}

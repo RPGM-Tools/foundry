@@ -5,6 +5,10 @@
 		"build": "pnpm -r build",
 		"build:forge:beta": "node ./scripts/build-foundry-beta-module.mjs --module rpgm-forge",
 		"build:foundry-marketplace": "node ./scripts/build-foundry-marketplace-body.mjs --module forge",
+		"deploy:test:v13": "node ./scripts/deploy-foundry-test-lane.mjs --target v13-dev --module rpgm-forge",
+		"deploy:test:v13:beta": "node ./scripts/deploy-foundry-test-lane.mjs --target v13-beta --module rpgm-forge",
+		"deploy:test:v14": "node ./scripts/deploy-foundry-test-lane.mjs --target v14-dev --module rpgm-forge",
+		"deploy:test:v14:beta": "node ./scripts/deploy-foundry-test-lane.mjs --target v14-beta --module rpgm-forge",
 		"dev:v13": "node ./scripts/run-foundry-dev.mjs --target v13-dev --module rpgm-forge",
 		"dev:v13:beta": "node ./scripts/run-foundry-dev.mjs --target v13-beta --module rpgm-forge",
 		"dev:v14": "node ./scripts/run-foundry-dev.mjs --target v14-dev --module rpgm-forge",
@@ -17,10 +21,10 @@
 		"publish:foundry:dry-run": "node ./scripts/publish-foundry-package.mjs --dry-run",
 		"release:forge:prepare": "pnpm build && pnpm build:foundry-marketplace",
 		"setup:playwright": "playwright install chromium",
-		"test:v13": "pnpm dev:v13",
-		"test:v13:beta": "pnpm dev:v13:beta",
-		"test:v14": "pnpm dev:v14",
-		"test:v14:beta": "pnpm dev:v14:beta"
+		"test:v13": "pnpm deploy:test:v13",
+		"test:v13:beta": "pnpm deploy:test:v13:beta",
+		"test:v14": "pnpm deploy:test:v14",
+		"test:v14:beta": "pnpm deploy:test:v14:beta"
 	},
 	"devDependencies": {
 		"@types/node": "^22.13.10",

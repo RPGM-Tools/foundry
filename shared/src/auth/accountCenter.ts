@@ -39,6 +39,7 @@ export function createFoundryAccountCenterUrl(input: {
 	baseUrl: string | URL;
 	focus?: FoundryAccountCenterFocus | null;
 	redirectUrl?: string | null;
+	hostOrigin?: string | null;
 	provider?: FoundryAccountCenterProviderId | null;
 	mode?: FoundryAccountCenterProviderMode | null;
 }): string {
@@ -56,6 +57,13 @@ export function createFoundryAccountCenterUrl(input: {
 
 	if (input.redirectUrl && isAbsoluteUrl(input.redirectUrl)) {
 		accountCenterUrl.searchParams.set('redirectUrl', input.redirectUrl);
+	}
+
+	if (input.hostOrigin && isAbsoluteUrl(input.hostOrigin)) {
+		accountCenterUrl.searchParams.set(
+			'hostOrigin',
+			new URL(input.hostOrigin).origin
+		);
 	}
 
 	if (input.provider) {

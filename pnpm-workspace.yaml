@@ -1,5 +1,5 @@
 packages:
-  - modules/*
+    - modules/*
 
 onlyBuiltDependencies:
-  - "@league-of-foundry-developers/foundry-vtt-types"
+    - '@league-of-foundry-developers/foundry-vtt-types'

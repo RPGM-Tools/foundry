@@ -417,10 +417,10 @@ export class RpgmForge extends FoundyRpgmModuleMixin<
 		});
 
 		const update = async () => {
-			// Old Forge now treats the Steward-backed snapshot-token lane as the
-			// authoritative managed usage source. The legacy bearer-session fallback
-			// stays intentionally cut so bridge-release parity does not depend on
-			// the old Better Auth client remaining alive.
+			// Old Forge now treats the delegated Steward-backed account bridge as the
+			// authoritative managed usage source. Legacy snapshot-token fallback is
+			// intentionally cut so bridge-release parity does not depend on retired
+			// auth handoff paths remaining alive.
 			const accountBackedUsage =
 				await loadAccountBackedForgeUsageSnapshot(__API_URL__);
 

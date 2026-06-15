@@ -1,7 +1,7 @@
 /**
  * File: accountBridge.ts
- * Purpose: Manage Foundry-side RPGM Tools account snapshots and account-backed Forge usage reads.
- * Notes: Keeps the legacy Foundry bridge on the same snapshot-token lane as the shared account center and Steward-backed Forge usage endpoints.
+ * Purpose: Manage Foundry-side RPGM Tools delegated account connections and account-backed Forge usage reads.
+ * Notes: The active Foundry <-> web auth flow uses delegated PKCE authorization, bearer profile reads, and delegated refresh only.
  */
 
 import { createGlobalState } from '@vueuse/core';
@@ -15,6 +15,8 @@ import {
 
 const ACCOUNT_PROFILE_PATHNAME = '/api/v1/account/profile';
 const ACCOUNT_SESSION_TOKEN_PATHNAME = '/api/v1/account/profile-snapshot-token';
+const ACCOUNT_DELEGATED_TOKEN_PATHNAME = '/api/v1/account/token';
+const ACCOUNT_DELEGATED_REVOKE_PATHNAME = '/api/v1/account/revoke';
 const ACCOUNT_SESSION_RETURN_PAGE_PATHNAME =
 	'/modules/rpgm-forge/account-session-return.html';
 export const ACCOUNT_SESSION_TOKEN_HEADER_NAME = 'x-rpgm-account-session-token';
@@ -22,6 +24,12 @@ export const ACCOUNT_PROFILE_SNAPSHOT_TOKEN_HEADER_NAME =
 	'x-rpgm-profile-snapshot-token';
 export const FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY =
 	'rpgm.foundry.profileSnapshotToken';
+const FOUNDRY_DELEGATED_AUTH_REQUEST_STORAGE_KEY =
+	'rpgm.foundry.accountDelegatedAuthRequest';
+const FOUNDRY_DELEGATED_CONNECTION_STORAGE_KEY =
+	'rpgm.foundry.accountDelegatedConnection';
+const FOUNDRY_DELEGATED_AUTH_RETURN_STORAGE_KEY =
+	'rpgm.foundry.accountDelegatedAuthorizationReturn';
 const ACCOUNT_SESSION_LAUNCH_MESSAGE_TYPE =
 	'rpgm-account-session-launch-result';
 const ACCOUNT_SESSION_LAUNCH_ACK_MESSAGE_TYPE =
@@ -32,6 +40,7 @@ const ACCOUNT_BACKED_FORGE_USAGE_PATHNAMES = [
 ] as const;
 const RETURN_REFRESH_POLL_INTERVAL_MS = 1500;
 const RETURN_REFRESH_POLL_TIMEOUT_MS = 45000;
+const ACCOUNT_CENTER_CURRENT_TAB_FALLBACK_DELAY_MS = 1250;
 const ACCOUNT_PROFILE_QUERY_PARAMS = {
 	expand: 'expand'
 } as const;
@@ -40,9 +49,21 @@ const ACCOUNT_SESSION_TOKEN_QUERY_PARAMS = {
 	foundryProfileSnapshotToken: 'foundryProfileSnapshotToken',
 	profileSnapshotToken: 'profileSnapshotToken',
 	redirectUrl: 'redirectUrl',
+	hostOrigin: 'hostOrigin',
 	accountSessionError: 'accountSessionError',
 	accountSessionErrorDescription: 'accountSessionErrorDescription'
 } as const;
+const ACCOUNT_DELEGATED_AUTH_QUERY_PARAMS = {
+	accountAuthorizationCode: 'accountAuthorizationCode',
+	accountAuthorizationState: 'accountAuthorizationState'
+} as const;
+const ACCOUNT_DELEGATED_AUTH_LAUNCH_QUERY_PARAMS = {
+	challenge: 'delegatedAuthChallenge',
+	challengeMethod: 'delegatedAuthChallengeMethod',
+	state: 'delegatedAuthState'
+} as const;
+const DELEGATED_PKCE_CHALLENGE_METHOD = 'S256';
+const DELEGATED_ACCESS_TOKEN_FRESHNESS_WINDOW_MS = 60_000;
 const ACCOUNT_PROFILE_EXPANSIONS = [
 	'membership',
 	'entitlements',
@@ -60,8 +81,34 @@ interface FoundryAccountBridgeNotice {
 interface FoundryAccountSessionLaunchMessage {
 	type: typeof ACCOUNT_SESSION_LAUNCH_MESSAGE_TYPE;
 	accountSessionToken: string | null;
+	accountAuthorizationCode: string | null;
+	accountAuthorizationState: string | null;
 	accountSessionError: string | null;
 	accountSessionErrorDescription: string | null;
+	redirectUrl: string | null;
+}
+
+interface FoundryDelegatedAuthRequest {
+	verifier: string;
+	challenge: string;
+	challengeMethod: typeof DELEGATED_PKCE_CHALLENGE_METHOD;
+	state: string;
+	hostOrigin: string;
+	createdAt: number;
+}
+
+interface FoundryDelegatedConnection {
+	accessToken: string;
+	accessTokenExpiresAt: number;
+	connectionGrant: string;
+	connectionGrantExpiresAt: number;
+	accountAuthorizationState: string | null;
+	obtainedAt: number;
+}
+
+interface FoundryDelegatedAuthorizationReturn {
+	accountAuthorizationCode: string;
+	accountAuthorizationState: string | null;
 	redirectUrl: string | null;
 }
 
@@ -125,6 +172,85 @@ function normalizeFiniteNumber(value: unknown): number | null {
 	}
 
 	return value;
+}
+
+function normalizePkceCodeChallenge(value: unknown): string | null {
+	if (typeof value !== 'string') {
+		return null;
+	}
+
+	const normalizedValue = value.trim();
+
+	return /^[A-Za-z0-9_-]{43,128}$/u.test(normalizedValue)
+		? normalizedValue
+		: null;
+}
+
+function normalizePkceCodeVerifier(value: unknown): string | null {
+	if (typeof value !== 'string') {
+		return null;
+	}
+
+	const normalizedValue = value.trim();
+
+	return /^[A-Za-z0-9\-._~]{43,128}$/u.test(normalizedValue)
+		? normalizedValue
+		: null;
+}
+
+function normalizeDelegatedAuthorizationState(value: unknown): string | null {
+	if (typeof value !== 'string') {
+		return null;
+	}
+
+	const normalizedValue = value.trim();
+
+	return normalizedValue.length > 0 && normalizedValue.length <= 256
+		? normalizedValue
+		: null;
+}
+
+function encodeBase64Url(bytes: Uint8Array): string {
+	let binary = '';
+
+	for (const byte of bytes) {
+		binary += String.fromCharCode(byte);
+	}
+
+	return btoa(binary)
+		.replace(/\+/gu, '-')
+		.replace(/\//gu, '_')
+		.replace(/=+$/u, '');
+}
+
+function createRandomBase64Url(byteLength: number): string | null {
+	const cryptoImplementation = globalThis.crypto;
+
+	if (!cryptoImplementation?.getRandomValues) {
+		return null;
+	}
+
+	const bytes = new Uint8Array(byteLength);
+	cryptoImplementation.getRandomValues(bytes);
+
+	return encodeBase64Url(bytes);
+}
+
+async function createPkceCodeChallenge(
+	codeVerifier: string
+): Promise<string | null> {
+	const cryptoImplementation = globalThis.crypto;
+
+	if (!cryptoImplementation?.subtle) {
+		return null;
+	}
+
+	const digest = await cryptoImplementation.subtle.digest(
+		'SHA-256',
+		new TextEncoder().encode(codeVerifier)
+	);
+
+	return encodeBase64Url(new Uint8Array(digest));
 }
 
 function summarizePreviewText(value: unknown, fallback: string): string {
@@ -555,6 +681,197 @@ export function readStoredFoundryAccountSessionToken(): string | null {
 	return readStoredSnapshotToken();
 }
 
+function readStoredDelegatedAuthRequest(): FoundryDelegatedAuthRequest | null {
+	try {
+		const rawValue = globalThis.localStorage?.getItem(
+			FOUNDRY_DELEGATED_AUTH_REQUEST_STORAGE_KEY
+		);
+
+		if (!rawValue) {
+			return null;
+		}
+
+		const parsedValue = JSON.parse(
+			rawValue
+		) as Partial<FoundryDelegatedAuthRequest>;
+		const verifier = normalizePkceCodeVerifier(parsedValue.verifier);
+		const challenge = normalizePkceCodeChallenge(parsedValue.challenge);
+		const state = normalizeDelegatedAuthorizationState(parsedValue.state);
+		const hostOrigin = normalizeOptionalText(parsedValue.hostOrigin);
+		const createdAt = normalizeFiniteNumber(parsedValue.createdAt);
+
+		if (
+			!verifier ||
+			!challenge ||
+			!state ||
+			!hostOrigin ||
+			createdAt === null
+		) {
+			return null;
+		}
+
+		return {
+			verifier,
+			challenge,
+			challengeMethod: DELEGATED_PKCE_CHALLENGE_METHOD,
+			state,
+			hostOrigin,
+			createdAt
+		};
+	} catch {
+		return null;
+	}
+}
+
+function writeStoredDelegatedAuthRequest(
+	request: FoundryDelegatedAuthRequest | null
+) {
+	try {
+		if (request) {
+			globalThis.localStorage?.setItem(
+				FOUNDRY_DELEGATED_AUTH_REQUEST_STORAGE_KEY,
+				JSON.stringify(request)
+			);
+			return;
+		}
+
+		globalThis.localStorage?.removeItem(
+			FOUNDRY_DELEGATED_AUTH_REQUEST_STORAGE_KEY
+		);
+	} catch {
+		return;
+	}
+}
+
+function readStoredDelegatedConnection(): FoundryDelegatedConnection | null {
+	try {
+		const rawValue = globalThis.localStorage?.getItem(
+			FOUNDRY_DELEGATED_CONNECTION_STORAGE_KEY
+		);
+
+		if (!rawValue) {
+			return null;
+		}
+
+		const parsedValue = JSON.parse(
+			rawValue
+		) as Partial<FoundryDelegatedConnection>;
+		const accessToken = normalizeOptionalText(parsedValue.accessToken);
+		const connectionGrant = normalizeOptionalText(
+			parsedValue.connectionGrant
+		);
+		const accessTokenExpiresAt = normalizeFiniteNumber(
+			parsedValue.accessTokenExpiresAt
+		);
+		const connectionGrantExpiresAt = normalizeFiniteNumber(
+			parsedValue.connectionGrantExpiresAt
+		);
+		const obtainedAt =
+			normalizeFiniteNumber(parsedValue.obtainedAt) ?? Date.now();
+
+		if (
+			!accessToken ||
+			!connectionGrant ||
+			accessTokenExpiresAt === null ||
+			connectionGrantExpiresAt === null
+		) {
+			return null;
+		}
+
+		return {
+			accessToken,
+			accessTokenExpiresAt,
+			connectionGrant,
+			connectionGrantExpiresAt,
+			accountAuthorizationState: normalizeDelegatedAuthorizationState(
+				parsedValue.accountAuthorizationState
+			),
+			obtainedAt
+		};
+	} catch {
+		return null;
+	}
+}
+
+function writeStoredDelegatedConnection(
+	connection: FoundryDelegatedConnection | null
+) {
+	try {
+		if (connection) {
+			globalThis.localStorage?.setItem(
+				FOUNDRY_DELEGATED_CONNECTION_STORAGE_KEY,
+				JSON.stringify(connection)
+			);
+			return;
+		}
+
+		globalThis.localStorage?.removeItem(
+			FOUNDRY_DELEGATED_CONNECTION_STORAGE_KEY
+		);
+	} catch {
+		return;
+	}
+}
+
+function readStoredDelegatedAuthorizationReturn(): FoundryDelegatedAuthorizationReturn | null {
+	try {
+		const rawValue = globalThis.localStorage?.getItem(
+			FOUNDRY_DELEGATED_AUTH_RETURN_STORAGE_KEY
+		);
+
+		if (!rawValue) {
+			return null;
+		}
+
+		const parsedValue = JSON.parse(
+			rawValue
+		) as Partial<FoundryDelegatedAuthorizationReturn>;
+		const accountAuthorizationCode = normalizeOptionalText(
+			parsedValue.accountAuthorizationCode
+		);
+
+		if (!accountAuthorizationCode) {
+			return null;
+		}
+
+		return {
+			accountAuthorizationCode,
+			accountAuthorizationState: normalizeDelegatedAuthorizationState(
+				parsedValue.accountAuthorizationState
+			),
+			redirectUrl: normalizeOptionalText(parsedValue.redirectUrl)
+		};
+	} catch {
+		return null;
+	}
+}
+
+function writeStoredDelegatedAuthorizationReturn(
+	value: FoundryDelegatedAuthorizationReturn | null
+) {
+	try {
+		if (value) {
+			globalThis.localStorage?.setItem(
+				FOUNDRY_DELEGATED_AUTH_RETURN_STORAGE_KEY,
+				JSON.stringify(value)
+			);
+			return;
+		}
+
+		globalThis.localStorage?.removeItem(
+			FOUNDRY_DELEGATED_AUTH_RETURN_STORAGE_KEY
+		);
+	} catch {
+		return;
+	}
+}
+
+function consumeStoredDelegatedAuthorizationReturn(): FoundryDelegatedAuthorizationReturn | null {
+	const payload = readStoredDelegatedAuthorizationReturn();
+	writeStoredDelegatedAuthorizationReturn(null);
+	return payload;
+}
+
 function writeStoredSnapshotToken(token: string | null) {
 	try {
 		if (token) {
@@ -575,19 +892,42 @@ function writeStoredSnapshotToken(token: string | null) {
 
 function createAccountSessionResultNotice(input: {
 	accountSessionToken: string | null;
+	accountAuthorizationCode?: string | null;
+	accountAuthorizationState?: string | null;
+	redirectUrl?: string | null;
 	accountSessionError: string | null;
 	accountSessionErrorDescription: string | null;
 }): FoundryAccountBridgeNotice | null {
-	if (!input.accountSessionToken && !input.accountSessionError) {
+	if (
+		!input.accountSessionToken &&
+		!input.accountAuthorizationCode &&
+		!input.accountSessionError
+	) {
 		return null;
 	}
 
-	if (input.accountSessionToken) {
-		writeStoredSnapshotToken(input.accountSessionToken);
+	if (input.accountAuthorizationCode) {
+		writeStoredDelegatedAuthorizationReturn({
+			accountAuthorizationCode: input.accountAuthorizationCode,
+			accountAuthorizationState: input.accountAuthorizationState ?? null,
+			redirectUrl: input.redirectUrl ?? null
+		});
+	}
+
+	if (input.accountAuthorizationCode) {
 		return {
 			kind: 'info',
 			message:
 				'Signed in successfully. Refreshing your RPGM Tools connection in Foundry now.'
+		};
+	}
+
+	if (input.accountSessionToken) {
+		writeStoredSnapshotToken(null);
+		return {
+			kind: 'warning',
+			message:
+				'Foundry received a legacy snapshot-token account handoff that is no longer supported. Start the RPGM Tools sign-in flow again from Foundry.'
 		};
 	}
 
@@ -609,6 +949,8 @@ function normalizeAccountSessionLaunchMessage(
 	const typedValue = value as {
 		type?: unknown;
 		accountSessionToken?: unknown;
+		accountAuthorizationCode?: unknown;
+		accountAuthorizationState?: unknown;
 		accountSessionError?: unknown;
 		accountSessionErrorDescription?: unknown;
 		redirectUrl?: unknown;
@@ -622,6 +964,12 @@ function normalizeAccountSessionLaunchMessage(
 		type: ACCOUNT_SESSION_LAUNCH_MESSAGE_TYPE,
 		accountSessionToken: normalizeOptionalText(
 			typedValue.accountSessionToken
+		),
+		accountAuthorizationCode: normalizeOptionalText(
+			typedValue.accountAuthorizationCode
+		),
+		accountAuthorizationState: normalizeDelegatedAuthorizationState(
+			typedValue.accountAuthorizationState
 		),
 		accountSessionError: normalizeOptionalText(
 			typedValue.accountSessionError
@@ -656,6 +1004,9 @@ function postAccountSessionLaunchAcknowledgement(event: MessageEvent) {
 
 export function clearStoredFoundryAccountSessionToken() {
 	writeStoredSnapshotToken(null);
+	writeStoredDelegatedAuthRequest(null);
+	writeStoredDelegatedConnection(null);
+	writeStoredDelegatedAuthorizationReturn(null);
 }
 
 export function applyFoundryAccountSessionHeaders(
@@ -679,15 +1030,37 @@ async function requestFreshAccountSessionToken(
 	}
 
 	try {
+		const accountSessionTokenUrl = new URL(
+			ACCOUNT_SESSION_TOKEN_PATHNAME,
+			baseUrl
+		);
+		const currentLocationUrl = readCurrentLocationUrl();
+		const storedSnapshotToken = readStoredSnapshotToken();
+		const requestHeaders = new Headers({
+			accept: 'application/json'
+		});
+
+		if (currentLocationUrl) {
+			accountSessionTokenUrl.searchParams.set(
+				ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.hostOrigin,
+				currentLocationUrl.origin
+			);
+		}
+
+		if (storedSnapshotToken) {
+			applyFoundryAccountSessionHeaders(
+				requestHeaders,
+				storedSnapshotToken
+			);
+		}
+
 		const response = await globalThis.fetch(
-			new URL(ACCOUNT_SESSION_TOKEN_PATHNAME, baseUrl).toString(),
+			accountSessionTokenUrl.toString(),
 			{
 				method: 'GET',
 				credentials: 'include',
 				cache: 'no-store',
-				headers: new Headers({
-					accept: 'application/json'
-				})
+				headers: requestHeaders
 			}
 		);
 		const payload = (await response.json().catch(() => null)) as {
@@ -771,6 +1144,331 @@ export async function refreshFoundryAccountSessionToken(
 	return accountSessionTokenRefreshInFlight;
 }
 
+function applyDelegatedAccessTokenHeaders(
+	headers: Headers,
+	accessToken: string
+): Headers {
+	headers.set('authorization', `Bearer ${accessToken}`);
+	return headers;
+}
+
+export async function createFoundryDelegatedAuthorizationHeaders(
+	input: {
+		baseUrl?: string | URL;
+		headers?: HeadersInit;
+	} = {}
+): Promise<Headers | null> {
+	const delegatedConnection = await ensureFoundryDelegatedConnection(
+		input.baseUrl
+	);
+	const accessToken = delegatedConnection?.accessToken;
+
+	if (!accessToken) {
+		return null;
+	}
+
+	return applyDelegatedAccessTokenHeaders(
+		new Headers(input.headers),
+		accessToken
+	);
+}
+
+export async function refreshFoundryDelegatedAuthorizationHeaders(
+	input: {
+		baseUrl?: string | URL;
+		headers?: HeadersInit;
+	} = {}
+): Promise<Headers | null> {
+	const delegatedConnection = await refreshStoredDelegatedConnection(
+		input.baseUrl
+	);
+	const accessToken = delegatedConnection?.accessToken;
+
+	if (!accessToken) {
+		return null;
+	}
+
+	return applyDelegatedAccessTokenHeaders(
+		new Headers(input.headers),
+		accessToken
+	);
+}
+
+function isFreshDelegatedConnection(
+	connection: FoundryDelegatedConnection | null,
+	now: number = Date.now()
+): boolean {
+	return Boolean(
+		connection &&
+		connection.accessTokenExpiresAt >
+			now + DELEGATED_ACCESS_TOKEN_FRESHNESS_WINDOW_MS
+	);
+}
+
+function normalizeDelegatedTokenExchangePayload(
+	payload: unknown
+): FoundryDelegatedConnection | null {
+	const typedPayload = payload as {
+		accessToken?: unknown;
+		accessTokenExpiresAt?: unknown;
+		connectionGrant?: unknown;
+		connectionGrantExpiresAt?: unknown;
+		accountAuthorizationState?: unknown;
+	};
+	const accessToken = normalizeOptionalText(typedPayload.accessToken);
+	const connectionGrant = normalizeOptionalText(typedPayload.connectionGrant);
+	const accessTokenExpiresAt = normalizeFiniteNumber(
+		typedPayload.accessTokenExpiresAt
+	);
+	const connectionGrantExpiresAt = normalizeFiniteNumber(
+		typedPayload.connectionGrantExpiresAt
+	);
+
+	if (
+		!accessToken ||
+		!connectionGrant ||
+		accessTokenExpiresAt === null ||
+		connectionGrantExpiresAt === null
+	) {
+		return null;
+	}
+
+	return {
+		accessToken,
+		accessTokenExpiresAt,
+		connectionGrant,
+		connectionGrantExpiresAt,
+		accountAuthorizationState: normalizeDelegatedAuthorizationState(
+			typedPayload.accountAuthorizationState
+		),
+		obtainedAt: Date.now()
+	};
+}
+
+async function createDelegatedAuthRequest(
+	hostOrigin: string
+): Promise<FoundryDelegatedAuthRequest | null> {
+	const verifier = createRandomBase64Url(32);
+
+	if (!verifier) {
+		return null;
+	}
+
+	const challenge = await createPkceCodeChallenge(verifier);
+
+	if (!challenge) {
+		return null;
+	}
+
+	const state = createRandomBase64Url(16);
+
+	if (!state) {
+		return null;
+	}
+
+	const request = {
+		verifier,
+		challenge,
+		challengeMethod: DELEGATED_PKCE_CHALLENGE_METHOD,
+		state,
+		hostOrigin,
+		createdAt: Date.now()
+	} satisfies FoundryDelegatedAuthRequest;
+
+	writeStoredDelegatedAuthRequest(request);
+	return request;
+}
+
+async function requestDelegatedTokenExchange(
+	baseUrl: string | URL,
+	body: Record<string, unknown>
+): Promise<FoundryDelegatedConnection | null> {
+	if (typeof globalThis.fetch !== 'function') {
+		return null;
+	}
+
+	try {
+		const response = await globalThis.fetch(
+			new URL(ACCOUNT_DELEGATED_TOKEN_PATHNAME, baseUrl).toString(),
+			{
+				method: 'POST',
+				cache: 'no-store',
+				credentials: 'omit',
+				headers: {
+					accept: 'application/json',
+					'content-type': 'application/json'
+				},
+				body: JSON.stringify(body)
+			}
+		);
+		const payload = await response.json().catch(() => null);
+
+		if (!response.ok) {
+			return null;
+		}
+
+		return normalizeDelegatedTokenExchangePayload(payload);
+	} catch {
+		return null;
+	}
+}
+
+async function requestDelegatedTokenExchangeFromKnownBases(
+	baseUrl: string | URL,
+	body: Record<string, unknown>
+): Promise<FoundryDelegatedConnection | null> {
+	for (const candidateBaseUrl of collectAccountSessionRefreshBaseUrls(
+		baseUrl
+	)) {
+		const connection = await requestDelegatedTokenExchange(
+			candidateBaseUrl,
+			body
+		);
+
+		if (connection) {
+			return connection;
+		}
+	}
+
+	return null;
+}
+
+async function exchangeStoredDelegatedAuthorizationReturn(
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+): Promise<FoundryDelegatedConnection | null> {
+	const authorizationReturn = consumeStoredDelegatedAuthorizationReturn();
+
+	if (!authorizationReturn) {
+		return null;
+	}
+
+	const authRequest = readStoredDelegatedAuthRequest();
+
+	if (!authRequest) {
+		return null;
+	}
+
+	if (
+		authorizationReturn.accountAuthorizationState &&
+		authorizationReturn.accountAuthorizationState !== authRequest.state
+	) {
+		writeStoredDelegatedAuthRequest(null);
+		return null;
+	}
+
+	const connection = await requestDelegatedTokenExchangeFromKnownBases(
+		baseUrl,
+		{
+			grantType: 'authorization_code',
+			code: authorizationReturn.accountAuthorizationCode,
+			codeVerifier: authRequest.verifier
+		}
+	);
+
+	if (!connection) {
+		return null;
+	}
+
+	writeStoredSnapshotToken(null);
+	writeStoredDelegatedConnection(connection);
+	writeStoredDelegatedAuthRequest(null);
+	return connection;
+}
+
+async function refreshStoredDelegatedConnection(
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+): Promise<FoundryDelegatedConnection | null> {
+	const connection = readStoredDelegatedConnection();
+
+	if (!connection) {
+		return null;
+	}
+
+	if (connection.connectionGrantExpiresAt <= Date.now()) {
+		writeStoredDelegatedConnection(null);
+		return null;
+	}
+
+	const refreshedConnection =
+		await requestDelegatedTokenExchangeFromKnownBases(baseUrl, {
+			grantType: 'refresh_token',
+			connectionGrant: connection.connectionGrant
+		});
+
+	if (!refreshedConnection) {
+		return null;
+	}
+
+	writeStoredDelegatedConnection(refreshedConnection);
+	return refreshedConnection;
+}
+
+async function ensureFoundryDelegatedConnection(
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+): Promise<FoundryDelegatedConnection | null> {
+	const exchangedConnection =
+		await exchangeStoredDelegatedAuthorizationReturn(baseUrl);
+
+	if (isFreshDelegatedConnection(exchangedConnection)) {
+		return exchangedConnection;
+	}
+
+	const storedConnection = readStoredDelegatedConnection();
+
+	if (isFreshDelegatedConnection(storedConnection)) {
+		return storedConnection;
+	}
+
+	if (!storedConnection) {
+		return null;
+	}
+
+	if (storedConnection.connectionGrantExpiresAt <= Date.now()) {
+		writeStoredDelegatedConnection(null);
+		return null;
+	}
+
+	return refreshStoredDelegatedConnection(baseUrl);
+}
+
+async function revokeStoredDelegatedConnection(
+	baseUrl: string | URL = DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
+): Promise<void> {
+	const connection = readStoredDelegatedConnection();
+
+	if (!connection || typeof globalThis.fetch !== 'function') {
+		return;
+	}
+
+	for (const candidateBaseUrl of collectAccountSessionRefreshBaseUrls(
+		baseUrl
+	)) {
+		try {
+			await globalThis.fetch(
+				new URL(
+					ACCOUNT_DELEGATED_REVOKE_PATHNAME,
+					candidateBaseUrl
+				).toString(),
+				{
+					method: 'POST',
+					cache: 'no-store',
+					credentials: 'omit',
+					headers: {
+						accept: 'application/json',
+						'content-type': 'application/json'
+					},
+					body: JSON.stringify({
+						connectionGrant: connection.connectionGrant
+					})
+				}
+			);
+			return;
+		} catch {
+			continue;
+		}
+	}
+}
+
 function normalizeAccountBackedForgeUsageSnapshot(
 	payload: unknown
 ): FoundryAccountBackedForgeUsageSnapshot | null {
@@ -820,70 +1518,62 @@ export async function loadAccountBackedForgeUsageSnapshot(
 		return null;
 	}
 
-	const accountSessionToken = readStoredSnapshotToken();
-	const requestHeaders = new Headers({
-		accept: 'application/json'
-	});
+	let delegatedConnection = await ensureFoundryDelegatedConnection(baseUrl);
 
-	if (accountSessionToken) {
-		applyFoundryAccountSessionHeaders(requestHeaders, accountSessionToken);
-	}
+	if (delegatedConnection?.accessToken) {
+		for (const usagePathname of ACCOUNT_BACKED_FORGE_USAGE_PATHNAMES) {
+			let retriedAfterGrantRefresh = false;
 
-	for (const usagePathname of ACCOUNT_BACKED_FORGE_USAGE_PATHNAMES) {
-		let retriedAfterTokenRefresh = false;
+			try {
+				while (true) {
+					const accessToken = delegatedConnection?.accessToken;
 
-		try {
-			while (true) {
-				const response = await fetchImplementation(
-					new URL(usagePathname, baseUrl).toString(),
-					{
-						method: 'GET',
-						headers: requestHeaders,
-						credentials: 'include',
-						cache: 'no-store'
+					if (!accessToken) {
+						break;
 					}
-				);
-				const payload = await response.json().catch(() => null);
 
-				if (response.status === 401) {
-					if (!retriedAfterTokenRefresh) {
-						retriedAfterTokenRefresh = true;
-						const refreshedToken =
-							await refreshFoundryAccountSessionToken(baseUrl);
+					const response = await fetchImplementation(
+						new URL(usagePathname, baseUrl).toString(),
+						{
+							method: 'GET',
+							headers: applyDelegatedAccessTokenHeaders(
+								new Headers({
+									accept: 'application/json'
+								}),
+								accessToken
+							),
+							credentials: 'omit',
+							cache: 'no-store'
+						}
+					);
+					const payload = await response.json().catch(() => null);
 
-						if (refreshedToken) {
-							requestHeaders.delete(
-								ACCOUNT_SESSION_TOKEN_HEADER_NAME
-							);
-							requestHeaders.delete(
-								ACCOUNT_PROFILE_SNAPSHOT_TOKEN_HEADER_NAME
-							);
-							applyFoundryAccountSessionHeaders(
-								requestHeaders,
-								refreshedToken
-							);
+					if (response.status === 401 && !retriedAfterGrantRefresh) {
+						retriedAfterGrantRefresh = true;
+						delegatedConnection =
+							await refreshStoredDelegatedConnection(baseUrl);
+
+						if (delegatedConnection?.accessToken) {
 							continue;
 						}
 					}
 
-					return null;
-				}
+					if (!response.ok) {
+						break;
+					}
 
-				if (!response.ok) {
+					const normalizedSnapshot =
+						normalizeAccountBackedForgeUsageSnapshot(payload);
+
+					if (normalizedSnapshot) {
+						return normalizedSnapshot;
+					}
+
 					break;
 				}
-
-				const normalizedSnapshot =
-					normalizeAccountBackedForgeUsageSnapshot(payload);
-
-				if (normalizedSnapshot) {
-					return normalizedSnapshot;
-				}
-
-				break;
+			} catch {
+				continue;
 			}
-		} catch {
-			continue;
 		}
 	}
 
@@ -918,9 +1608,23 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 		currentUrl,
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription
 	);
+	const accountAuthorizationCode = readLocationReturnParam(
+		currentUrl,
+		ACCOUNT_DELEGATED_AUTH_QUERY_PARAMS.accountAuthorizationCode
+	);
+	const accountAuthorizationState = readLocationReturnParam(
+		currentUrl,
+		ACCOUNT_DELEGATED_AUTH_QUERY_PARAMS.accountAuthorizationState
+	);
 
 	const returnNotice = createAccountSessionResultNotice({
 		accountSessionToken,
+		accountAuthorizationCode,
+		accountAuthorizationState,
+		redirectUrl: readLocationReturnParam(
+			currentUrl,
+			ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.redirectUrl
+		),
 		accountSessionError,
 		accountSessionErrorDescription
 	});
@@ -934,7 +1638,9 @@ function consumeBridgeReturnFromUrl(): FoundryAccountBridgeNotice | null {
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.foundryProfileSnapshotToken,
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.profileSnapshotToken,
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionError,
-		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription
+		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription,
+		ACCOUNT_DELEGATED_AUTH_QUERY_PARAMS.accountAuthorizationCode,
+		ACCOUNT_DELEGATED_AUTH_QUERY_PARAMS.accountAuthorizationState
 	]);
 	globalThis.history?.replaceState?.(
 		globalThis.history.state ?? null,
@@ -955,7 +1661,9 @@ export const FOUNDRY_ACCOUNT_SESSION_RETURN_QUERY_KEYS = Object.freeze([
 	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.foundryProfileSnapshotToken,
 	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.profileSnapshotToken,
 	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionError,
-	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription
+	ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.accountSessionErrorDescription,
+	ACCOUNT_DELEGATED_AUTH_QUERY_PARAMS.accountAuthorizationCode,
+	ACCOUNT_DELEGATED_AUTH_QUERY_PARAMS.accountAuthorizationState
 ] as const);
 
 const INITIAL_BRIDGE_RETURN_NOTICE = consumeBridgeReturnFromUrl();
@@ -966,10 +1674,7 @@ if (INITIAL_LOCATION_URL) {
 }
 
 function createAccountProfileRequestUrl(): string {
-	const profileRequestUrl = new URL(
-		ACCOUNT_PROFILE_PATHNAME,
-		DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
-	);
+	const profileRequestUrl = new URL(ACCOUNT_PROFILE_PATHNAME, __API_URL__);
 
 	for (const expansion of ACCOUNT_PROFILE_EXPANSIONS) {
 		profileRequestUrl.searchParams.append(
@@ -983,18 +1688,39 @@ function createAccountProfileRequestUrl(): string {
 
 export function createFoundryAccountSessionSyncUrl(): string | null {
 	const currentUrl = readCurrentLocationUrl();
+	const delegatedAuthRequest = readStoredDelegatedAuthRequest();
 
-	if (!currentUrl) {
+	if (
+		!currentUrl ||
+		!delegatedAuthRequest ||
+		delegatedAuthRequest.hostOrigin !== currentUrl.origin
+	) {
 		return null;
 	}
 
 	const accountSessionSyncUrl = new URL(
-		ACCOUNT_SESSION_TOKEN_PATHNAME,
+		'/api/v1/account/authorize',
 		DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL
 	);
 	accountSessionSyncUrl.searchParams.set(
 		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.redirectUrl,
-		currentUrl.toString()
+		createFoundryAccountSessionReturnUrl(currentUrl)
+	);
+	accountSessionSyncUrl.searchParams.set(
+		ACCOUNT_SESSION_TOKEN_QUERY_PARAMS.hostOrigin,
+		currentUrl.origin
+	);
+	accountSessionSyncUrl.searchParams.set(
+		ACCOUNT_DELEGATED_AUTH_LAUNCH_QUERY_PARAMS.challenge,
+		delegatedAuthRequest.challenge
+	);
+	accountSessionSyncUrl.searchParams.set(
+		ACCOUNT_DELEGATED_AUTH_LAUNCH_QUERY_PARAMS.challengeMethod,
+		delegatedAuthRequest.challengeMethod
+	);
+	accountSessionSyncUrl.searchParams.set(
+		ACCOUNT_DELEGATED_AUTH_LAUNCH_QUERY_PARAMS.state,
+		delegatedAuthRequest.state
 	);
 
 	return accountSessionSyncUrl.toString();
@@ -1021,54 +1747,52 @@ async function loadAccountSnapshot(): Promise<FoundryAccountBridgeSnapshot> {
 		);
 	}
 
-	let requestHeaders = new Headers({
-		accept: 'application/json'
-	});
-	let snapshotToken = readStoredSnapshotToken();
+	let delegatedConnection =
+		await ensureFoundryDelegatedConnection(__API_URL__);
+	const hadDelegatedConnection = Boolean(delegatedConnection?.accessToken);
 
-	if (snapshotToken) {
-		applyFoundryAccountSessionHeaders(requestHeaders, snapshotToken);
+	if (!delegatedConnection?.accessToken) {
+		return createSignedOutSnapshot();
 	}
 
-	let retriedAfterTokenRefresh = false;
+	let retriedAfterGrantRefresh = false;
 
 	try {
 		while (true) {
+			const accessToken = delegatedConnection?.accessToken;
+
+			if (!accessToken) {
+				return createSignedOutSnapshot();
+			}
+
 			const response = await globalThis.fetch(
 				createAccountProfileRequestUrl(),
 				{
 					method: 'GET',
-					credentials: 'include',
+					credentials: 'omit',
 					cache: 'no-store',
-					headers: requestHeaders
+					headers: applyDelegatedAccessTokenHeaders(
+						new Headers({
+							accept: 'application/json'
+						}),
+						accessToken
+					)
 				}
 			);
 			const payload = await response.json().catch(() => null);
 
 			if (response.status === 401) {
-				if (!retriedAfterTokenRefresh) {
-					retriedAfterTokenRefresh = true;
-					const refreshedToken =
-						await refreshFoundryAccountSessionToken();
+				if (!retriedAfterGrantRefresh) {
+					retriedAfterGrantRefresh = true;
+					delegatedConnection =
+						await refreshStoredDelegatedConnection(__API_URL__);
 
-					if (refreshedToken) {
-						snapshotToken = refreshedToken;
-						requestHeaders = new Headers({
-							accept: 'application/json'
-						});
-						applyFoundryAccountSessionHeaders(
-							requestHeaders,
-							refreshedToken
-						);
+					if (delegatedConnection?.accessToken) {
 						continue;
 					}
 				}
 
-				return snapshotToken
-					? createUnavailableSnapshot(
-							'Foundry could not silently refresh the current RPGM Tools browser session.'
-						)
-					: createSignedOutSnapshot();
+				return createSignedOutSnapshot();
 			}
 
 			if (!response.ok) {
@@ -1089,9 +1813,11 @@ async function loadAccountSnapshot(): Promise<FoundryAccountBridgeSnapshot> {
 			return createAvailableSnapshot(payload);
 		}
 	} catch (error) {
-		return createUnavailableSnapshot(
-			error instanceof Error ? error.message : null
-		);
+		return hadDelegatedConnection
+			? createUnavailableSnapshot(
+					error instanceof Error ? error.message : null
+				)
+			: createSignedOutSnapshot();
 	}
 }
 
@@ -1171,6 +1897,85 @@ function navigateCurrentPage(url: string | null) {
 	}
 
 	return false;
+}
+
+interface AccountCenterLaunchOptions {
+	focus: 'session' | 'connections' | 'passkeys' | 'password' | 'forge';
+}
+
+interface AccountCenterLaunchResult {
+	launchUrl: string | null;
+	opened: boolean;
+	shouldReturnToFoundry: boolean;
+}
+
+async function createAccountCenterLaunchUrl(
+	options: AccountCenterLaunchOptions
+): Promise<{ launchUrl: string | null; shouldReturnToFoundry: boolean }> {
+	const currentLocationUrl = readCurrentLocationUrl();
+	const shouldReturnToFoundry = options.focus === 'session';
+	const redirectUrl = shouldReturnToFoundry
+		? currentLocationUrl
+			? createFoundryAccountSessionReturnUrl(currentLocationUrl)
+			: null
+		: null;
+	const accountCenterUrl = new URL(
+		createFoundryAccountCenterUrl({
+			baseUrl: DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL,
+			focus: options.focus,
+			redirectUrl,
+			hostOrigin: currentLocationUrl?.origin ?? null
+		})
+	);
+
+	if (shouldReturnToFoundry && currentLocationUrl?.origin) {
+		const delegatedAuthRequest = await createDelegatedAuthRequest(
+			currentLocationUrl.origin
+		);
+
+		if (delegatedAuthRequest) {
+			accountCenterUrl.searchParams.set(
+				ACCOUNT_DELEGATED_AUTH_LAUNCH_QUERY_PARAMS.challenge,
+				delegatedAuthRequest.challenge
+			);
+			accountCenterUrl.searchParams.set(
+				ACCOUNT_DELEGATED_AUTH_LAUNCH_QUERY_PARAMS.challengeMethod,
+				delegatedAuthRequest.challengeMethod
+			);
+			accountCenterUrl.searchParams.set(
+				ACCOUNT_DELEGATED_AUTH_LAUNCH_QUERY_PARAMS.state,
+				delegatedAuthRequest.state
+			);
+		} else {
+			writeStoredDelegatedAuthRequest(null);
+		}
+	}
+
+	return {
+		launchUrl: accountCenterUrl.toString(),
+		shouldReturnToFoundry
+	};
+}
+
+async function openAccountCenter(
+	options: AccountCenterLaunchOptions
+): Promise<AccountCenterLaunchResult> {
+	const { launchUrl, shouldReturnToFoundry } =
+		await createAccountCenterLaunchUrl(options);
+
+	return {
+		launchUrl,
+		opened: openExternalUrl(launchUrl, {
+			preserveOpener: shouldReturnToFoundry
+		}),
+		shouldReturnToFoundry
+	};
+}
+
+function openAccountSessionSync() {
+	return openExternalUrl(createFoundryAccountSessionSyncUrl(), {
+		preserveOpener: true
+	});
 }
 
 export const useFoundryAccountBridge = createGlobalState(() => {
@@ -1283,26 +2088,51 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		return true;
 	};
 
-	const openAccountCenter = (options: {
-		focus: 'session' | 'connections' | 'passkeys' | 'password' | 'forge';
-	}) => {
-		startWatchingForReturn();
-		const currentLocationUrl = readCurrentLocationUrl();
-		const shouldReturnToFoundry = options.focus === 'session';
-		const redirectUrl = shouldReturnToFoundry
-			? currentLocationUrl
-				? createFoundryAccountSessionReturnUrl(currentLocationUrl)
-				: null
-			: null;
+	const scheduleCurrentTabAccountCenterFallback = (
+		launchUrl: string | null
+	) => {
+		if (!launchUrl || typeof globalThis.setTimeout !== 'function') {
+			return;
+		}
 
-		return openExternalUrl(
-			createFoundryAccountCenterUrl({
-				baseUrl: DEFAULT_FOUNDRY_ACCOUNT_CENTER_BASE_URL,
-				focus: options.focus,
-				redirectUrl
-			}),
-			{ preserveOpener: shouldReturnToFoundry }
-		);
+		const expectedDelegatedAuthState =
+			readStoredDelegatedAuthRequest()?.state ?? null;
+
+		globalThis.setTimeout(() => {
+			const currentLocationUrl = readCurrentLocationUrl();
+
+			if (
+				!expectsRefreshOnReturn ||
+				isLoading.value ||
+				snapshot.value.status === 'available' ||
+				!currentLocationUrl ||
+				currentLocationUrl.origin ===
+					DEFAULT_FOUNDRY_ACCOUNT_CENTER_ORIGIN ||
+				globalThis.document?.visibilityState === 'hidden' ||
+				(typeof globalThis.document?.hasFocus === 'function' &&
+					!globalThis.document.hasFocus()) ||
+				Boolean(
+					readStoredSnapshotToken() ||
+					readStoredDelegatedConnection() ||
+					readStoredDelegatedAuthorizationReturn()
+				)
+			) {
+				return;
+			}
+
+			const currentDelegatedAuthState =
+				readStoredDelegatedAuthRequest()?.state ?? null;
+
+			if (
+				expectedDelegatedAuthState &&
+				currentDelegatedAuthState &&
+				expectedDelegatedAuthState !== currentDelegatedAuthState
+			) {
+				return;
+			}
+
+			navigateCurrentPage(launchUrl);
+		}, ACCOUNT_CENTER_CURRENT_TAB_FALLBACK_DELAY_MS);
 	};
 
 	const handleAccountSessionLaunchMessage = (event: MessageEvent) => {
@@ -1318,6 +2148,9 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 
 		const messageNotice = createAccountSessionResultNotice({
 			accountSessionToken: launchMessage.accountSessionToken,
+			accountAuthorizationCode: launchMessage.accountAuthorizationCode,
+			accountAuthorizationState: launchMessage.accountAuthorizationState,
+			redirectUrl: launchMessage.redirectUrl,
 			accountSessionError: launchMessage.accountSessionError,
 			accountSessionErrorDescription:
 				launchMessage.accountSessionErrorDescription
@@ -1342,12 +2175,39 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 			return;
 		}
 
-		if (openAccountCenter({ focus: 'session' })) {
-			return;
-		}
+		startWatchingForReturn();
+		void openAccountCenter({ focus: 'session' }).then(result => {
+			if (result.opened) {
+				if (result.shouldReturnToFoundry) {
+					scheduleCurrentTabAccountCenterFallback(result.launchUrl);
+				}
 
-		void trySilentConnectFromActiveBrowserSession().then(connected => {
-			if (connected) {
+				return;
+			}
+
+			if (openAccountSessionSync()) {
+				return;
+			}
+
+			void trySilentConnectFromActiveBrowserSession().then(connected => {
+				if (connected) {
+					return;
+				}
+
+				stopWatchingForReturn();
+				notice.value = {
+					kind: 'warning',
+					message:
+						'Foundry could not open the RPGM Tools account sign-in flow just now.'
+				};
+			});
+		});
+	};
+
+	const openAccountSettings = () => {
+		startWatchingForReturn();
+		void openAccountCenter({ focus: 'connections' }).then(result => {
+			if (result.opened) {
 				return;
 			}
 
@@ -1355,36 +2215,34 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 			notice.value = {
 				kind: 'warning',
 				message:
-					'Foundry could not open the RPGM Tools account sign-in flow just now.'
+					'Foundry could not open the RPGM Tools account view just now.'
 			};
 		});
 	};
 
-	const openAccountSettings = () => {
-		if (!openAccountCenter({ focus: 'connections' })) {
-			stopWatchingForReturn();
-			notice.value = {
-				kind: 'warning',
-				message:
-					'Foundry could not open the RPGM Tools account view just now.'
-			};
-		}
-	};
-
 	const openForgeMembership = () => {
-		if (!openAccountCenter({ focus: 'forge' })) {
+		startWatchingForReturn();
+		void openAccountCenter({ focus: 'forge' }).then(result => {
+			if (result.opened) {
+				return;
+			}
+
 			stopWatchingForReturn();
 			notice.value = {
 				kind: 'warning',
 				message:
 					'Foundry could not open the RPGM Tools membership view just now.'
 			};
-		}
+		});
 	};
 
 	const disconnectFoundrySession = () => {
 		stopWatchingForReturn();
+		void revokeStoredDelegatedConnection(__API_URL__);
 		writeStoredSnapshotToken(null);
+		writeStoredDelegatedAuthRequest(null);
+		writeStoredDelegatedConnection(null);
+		writeStoredDelegatedAuthorizationReturn(null);
 		lastSeenSnapshotToken = null;
 		snapshot.value = createSignedOutSnapshot();
 		notice.value = {
@@ -1402,7 +2260,11 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 	globalThis.addEventListener?.('message', handleAccountSessionLaunchMessage);
 	globalThis.addEventListener?.('storage', event => {
 		if (
-			event.key !== FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY ||
+			![
+				FOUNDRY_PROFILE_SNAPSHOT_TOKEN_STORAGE_KEY,
+				FOUNDRY_DELEGATED_CONNECTION_STORAGE_KEY,
+				FOUNDRY_DELEGATED_AUTH_RETURN_STORAGE_KEY
+			].includes(event.key ?? '') ||
 			event.storageArea !== globalThis.localStorage
 		) {
 			return;
@@ -1425,7 +2287,7 @@ export const useFoundryAccountBridge = createGlobalState(() => {
 		notice,
 		isConnected: computed(() => snapshot.value.status === 'available'),
 		hasStoredSnapshotToken: computed(() =>
-			Boolean(readStoredSnapshotToken())
+			Boolean(readStoredDelegatedConnection())
 		),
 		refresh,
 		clearNotice,

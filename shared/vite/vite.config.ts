@@ -7,6 +7,21 @@ import { loadEnv, type UserConfig } from 'vite';
 import { GenerateI18n } from './localize';
 import { Versioning } from './versioning';
 
+function normalizeProxyTargetUrl(
+	value: string,
+	defaultProtocol: 'http:' | 'https:'
+): string {
+	return new URL(
+		value.includes('://') ? value : `${defaultProtocol}//${value}`
+	).toString();
+}
+
+function createSocketProxyTargetUrl(targetUrl: string): string {
+	const socketUrl = new URL(targetUrl);
+	socketUrl.protocol = socketUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+	return socketUrl.toString();
+}
+
 /**
  * @param id - The module id
  * @param mode - The build mode
@@ -39,6 +54,16 @@ export default function defaultConfig(
 		process.env.STEWARD_DEV_ACCESS_KEY ??
 		env.RPGM_STEWARD_DEV_ACCESS_KEY ??
 		env.STEWARD_DEV_ACCESS_KEY;
+	const foundryTargetUrl = foundryUrl
+		? normalizeProxyTargetUrl(foundryUrl, 'http:')
+		: undefined;
+	const foundrySocketTargetUrl = foundryTargetUrl
+		? createSocketProxyTargetUrl(foundryTargetUrl)
+		: undefined;
+	const accountWebTargetUrl = normalizeProxyTargetUrl(
+		accountWebBaseUrl,
+		'https:'
+	);
 	const stewardProxyHeaders = stewardDevAccessKey
 		? {
 				'x-steward-dev-access-key': stewardDevAccessKey
@@ -85,18 +110,43 @@ export default function defaultConfig(
 			port: devPort,
 			strictPort: true,
 			allowedHosts: true,
-			proxy: foundryUrl
+			proxy: foundryTargetUrl
 				? {
+						'/api/v1/account/profile': {
+							target: accountWebTargetUrl,
+							changeOrigin: true
+						},
+						'/api/v1/account/authorize': {
+							target: accountWebTargetUrl,
+							changeOrigin: true
+						},
+						'/api/v1/account/profile-snapshot-token': {
+							target: accountWebTargetUrl,
+							changeOrigin: true
+						},
+						'/api/v1/account/revoke': {
+							target: accountWebTargetUrl,
+							changeOrigin: true
+						},
+						'/api/v1/account/token': {
+							target: accountWebTargetUrl,
+							changeOrigin: true
+						},
 						'/api/forge': {
 							...stewardProxyOptions
 						},
 						'/api/v1/forge': {
 							...stewardProxyOptions
 						},
-						[`^(?!/modules/${id})`]: `http://${foundryUrl}`,
+						[`^(?!/modules/${id})`]: {
+							target: foundryTargetUrl,
+							changeOrigin: true
+						},
 						// [`^(/modules/${id}/lang)`]: `http://${foundryUrl}`,
 						'/socket.io': {
-							target: `ws://${foundryUrl}`,
+							target: foundrySocketTargetUrl,
+							changeOrigin: true,
+							rewriteWsOrigin: true,
 							ws: true
 						}
 					}

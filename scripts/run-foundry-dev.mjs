@@ -3,6 +3,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+	DEFAULT_PUBLIC_RPGM_BASE_URL,
+	listFoundryDevTargetNames,
+	resolveFoundryDevTarget
+} from './lib/foundry-dev-targets.mjs';
+
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDirectory, '..');
 const foundryEnvPath = path.resolve(repoRoot, '.env');
@@ -15,50 +21,7 @@ const stewardEnvPath = path.resolve(
 	'.env'
 );
 
-const DEFAULT_PUBLIC_RPGM_BASE_URL = 'https://rpgm.tools';
 const DEFAULT_BETA_RPGM_BASE_URL = 'https://beta.rpgm.tools';
-
-// Keep explicit dev targets here so local Foundry smoke runs can switch
-// between the production-facing service surface and the public beta lane
-// without hand-editing repo-local env files.
-const targets = {
-	'v13-dev': {
-		foundryUrl: '127.0.0.1:30013',
-		proxyUrl: 'http://127.0.0.13:32013',
-		accountWebBaseUrl: DEFAULT_PUBLIC_RPGM_BASE_URL,
-		stewardUrl: DEFAULT_PUBLIC_RPGM_BASE_URL,
-		viteHost: '127.0.0.13',
-		vitePort: 32013,
-		label: 'Foundry 13 dev lane'
-	},
-	'v14-dev': {
-		foundryUrl: '127.0.0.1:30014',
-		proxyUrl: 'http://127.0.0.14:32014',
-		accountWebBaseUrl: DEFAULT_PUBLIC_RPGM_BASE_URL,
-		stewardUrl: DEFAULT_PUBLIC_RPGM_BASE_URL,
-		viteHost: '127.0.0.14',
-		vitePort: 32014,
-		label: 'Foundry 14 dev lane'
-	},
-	'v13-beta': {
-		foundryUrl: '127.0.0.1:30013',
-		proxyUrl: 'http://127.0.1.13:32113',
-		accountWebBaseUrl: DEFAULT_BETA_RPGM_BASE_URL,
-		stewardUrl: DEFAULT_BETA_RPGM_BASE_URL,
-		viteHost: '127.0.1.13',
-		vitePort: 32113,
-		label: 'Foundry 13 beta lane'
-	},
-	'v14-beta': {
-		foundryUrl: '127.0.0.1:30014',
-		proxyUrl: 'http://127.0.1.14:32114',
-		accountWebBaseUrl: DEFAULT_BETA_RPGM_BASE_URL,
-		stewardUrl: DEFAULT_BETA_RPGM_BASE_URL,
-		viteHost: '127.0.1.14',
-		vitePort: 32114,
-		label: 'Foundry 14 beta lane'
-	}
-};
 
 function parseArguments(argv) {
 	const options = {
@@ -88,7 +51,7 @@ function parseArguments(argv) {
 
 function printHelp() {
 	console.log(
-		`Usage: node ./scripts/run-foundry-dev.mjs [--module <name>] [--target <v13-dev|v14-dev|v13-beta|v14-beta>]\n\nDefaults:\n  --module rpgm-forge\n  --target v14-dev`
+		`Usage: node ./scripts/run-foundry-dev.mjs [--module <name>] [--target <${listFoundryDevTargetNames().join('|')}>]\n\nDefaults:\n  --module rpgm-forge\n  --target v14-dev (Foundry 14 testing lane)`
 	);
 }
 
@@ -159,18 +122,25 @@ function resolveStewardUrl(target) {
 	);
 }
 
+function normalizeFetchUrl(value) {
+	return value.includes('://') ? value : `http://${value}`;
+}
+
 async function assertTargetIsReachable(target) {
 	try {
-		const response = await fetch(`http://${target.foundryUrl}`, {
-			method: 'GET',
-			redirect: 'manual',
-			signal: AbortSignal.timeout(4000)
-		});
+		const response = await fetch(
+			normalizeFetchUrl(target.probeUrl ?? target.foundryUrl),
+			{
+				method: 'GET',
+				redirect: 'manual',
+				signal: AbortSignal.timeout(4000)
+			}
+		);
 		return response.status;
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			`Cannot reach ${target.label} at http://${target.foundryUrl}. Start that Foundry dev lane first, then rerun this command. Details: ${reason}`
+			`Cannot reach ${target.label} at ${target.foundryUrl}. Start that Foundry dev lane first, then rerun this command. Details: ${reason}`
 		);
 	}
 }
@@ -182,16 +152,16 @@ async function main() {
 		return;
 	}
 
-	const target = targets[options.targetName];
+	const target = resolveFoundryDevTarget(options.targetName);
 	if (!target) {
 		throw new Error(
-			`Unknown target \"${options.targetName}\". Expected one of: ${Object.keys(targets).join(', ')}`
+			`Unknown target \"${options.targetName}\". Expected one of: ${listFoundryDevTargetNames().join(', ')}`
 		);
 	}
 
 	const status = await assertTargetIsReachable(target);
 	console.log(
-		`Launching ${options.moduleName} against ${target.label} (Foundry http://${target.foundryUrl}, proxy ${target.proxyUrl}, probe status ${status}).`
+		`Launching ${options.moduleName} against ${target.label} (Foundry ${target.foundryUrl}, proxy ${target.proxyUrl}, probe status ${status}).`
 	);
 
 	const packageManager = resolvePackageManagerCommand();
