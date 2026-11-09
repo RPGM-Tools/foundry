@@ -104,7 +104,7 @@ jobs:
               run: (cd modules; for i in *; do cp "${i%}/.dist/module.json" "../$i.json"; done)
 
             - name: Create GitHub Release
-              uses: softprops/action-gh-release@v2
+              uses: softprops/action-gh-release@v3
               with:
                   tag_name: '${{ steps.module_info.outputs.module_id }}-v${{ steps.module_info.outputs.tag_version }}'
                   name: '${{ steps.module_info.outputs.module_name }} v${{ steps.module_info.outputs.tag_version }}'
