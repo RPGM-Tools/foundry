@@ -1,0 +1,39 @@
+name: Dependabot auto-merge
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  merge:
+    name: merge when green
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_branch, 'dependabot/') &&
+      !startsWith(github.event.workflow_run.head_branch, 'dependabot/docker')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge when every check has passed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          pr=$(gh pr list --repo "$REPO" --head "$BRANCH" --state open --json number,author --jq '[.[] | select(.author.login == "app/dependabot")][0].number // empty')
+          if [ -z "$pr" ]; then echo "No open Dependabot pull request for $BRANCH."; exit 0; fi
+          runs=$(gh api "repos/$REPO/commits/$SHA/check-runs?per_page=100" --jq '[.check_runs[] | select(.name != "merge when green")]')
+          total=$(jq 'length' <<<"$runs")
+          pending=$(jq '[.[] | select(.status != "completed")] | length' <<<"$runs")
+          bad=$(jq '[.[] | select(.status == "completed" and (.conclusion | IN("success","neutral","skipped") | not))] | length' <<<"$runs")
+          echo "checks: $total, pending: $pending, not passing: $bad"
+          if [ "$total" -eq 0 ] || [ "$pending" -ne 0 ] || [ "$bad" -ne 0 ]; then echo "Not merging yet."; exit 0; fi
+          gh pr merge "$pr" --repo "$REPO" --squash || gh pr merge "$pr" --repo "$REPO" --merge || gh pr merge "$pr" --repo "$REPO" --rebase
