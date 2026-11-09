@@ -15,20 +15,20 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   path: rpgm/foundry
                   fetch-depth: 0 # Fetch depth is required for tag operations
 
             - name: Checkout shared RPGM repo
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   repository: RPGM-Tools/rpgm
                   path: rpgm-tools/rpgm
                   token: ${{ secrets.RPGM_CROSS_REPO_READ_TOKEN }}
 
             - name: Checkout RPGM Tools Forge repo
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   repository: RPGM-Tools/rpgm-tools-forge
                   path: rpgm-tools/rpgm-tools-forge
