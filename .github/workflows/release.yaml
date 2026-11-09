@@ -74,7 +74,7 @@ jobs:
                   fi
                   echo "path=$RELEASE_NOTES_PATH" >> $GITHUB_OUTPUT
 
-            - uses: pnpm/action-setup@v4
+            - uses: pnpm/action-setup@v6
               name: Install pnpm
               with:
                   version: 10
